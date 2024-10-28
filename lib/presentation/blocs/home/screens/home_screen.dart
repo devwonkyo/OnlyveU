@@ -16,6 +16,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   int _currentBanner = 0;
   Timer? _bannerTimer;
 
+  // 클래스 상단에 상품 이미지 리스트 추가
+  final List<String> _productImages = [
+    'assets/image/banner3.png', // 원하는 이미지로 변경
+    'assets/image/skin2.webp',
+    'assets/image/skin3.webp',
+    'assets/image/skin4.webp',
+  ];
+
   final List<BannerItem> _bannerItems = [
     BannerItem(
       title: '럭키 럭스에디트\n최대 2만원 혜택',
@@ -299,15 +307,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 16),
-            itemBuilder: (context, index) => _buildProductCard(),
-            itemCount: 5,
+            itemBuilder: (context, index) =>
+                _buildProductCard(index), // index 전달
+            itemCount: 4,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildProductCard() {
+// _buildProductCard 메서드 수정
+  Widget _buildProductCard(int index) {
+    // index 매개변수 추가
     return Container(
       width: 150,
       margin: EdgeInsets.only(right: 12),
@@ -316,12 +327,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         children: [
           Container(
             height: 150,
-            child: Center(
-              child: Icon(Icons.image, size: 50, color: Colors.grey[400]),
-            ),
-            decoration: BoxDecoration(
+            child: ClipRRect(
+              // 이미지에 borderRadius 적용을 위해 ClipRRect 사용
               borderRadius: BorderRadius.circular(8),
-              color: Colors.grey[200],
+
+              child: Image.asset(
+                'assets/image/banner3.png', // 여기에 원하는 이미지 경로
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  print('Error loading image: $error');
+                  return Container(
+                    color: Colors.grey[200],
+                    child:
+                        Icon(Icons.image, size: 120, color: Colors.grey[400]),
+                  );
+                },
+              ),
             ),
           ),
           SizedBox(height: 8),
