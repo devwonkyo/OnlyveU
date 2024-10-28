@@ -1,5 +1,12 @@
 import 'dart:async';
 
+//홈화면이 라우터 설정 애니메이션 효과
+//바텀 네비게이션바 기능 살리기
+//스크린 유틸
+//위젯 분리
+//블록에 맞춰서 하기
+//코드 다듬기
+
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -332,7 +339,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               borderRadius: BorderRadius.circular(8),
 
               child: Image.asset(
-                'assets/image/banner3.png', // 여기에 원하는 이미지 경로
+                _productImages[index % _productImages.length], // 여기에 원하는 이미지 경로
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   print('Error loading image: $error');
