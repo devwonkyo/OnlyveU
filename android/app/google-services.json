@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "733176085534",
+    "project_id": "onlyveyou-c8f73",
+    "storage_bucket": "onlyveyou-c8f73.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733176085534:android:059c2c0b6fb90feb0a420f",
+        "android_client_info": {
+          "package_name": "com.example.onlyveyou"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALbfpkhJUN9BjLse4j5OjZlff_TkRsAXc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
