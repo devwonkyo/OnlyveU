@@ -1,26 +1,70 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-class OliveYoungHome extends StatefulWidget {
-  //^ StatefulWidget으로 변경
+class Home extends StatefulWidget {
   @override
-  _OliveYoungHomeState createState() => _OliveYoungHomeState();
+  _HomeState createState() => _HomeState();
 }
 
-class _OliveYoungHomeState extends State<OliveYoungHome>
-    with SingleTickerProviderStateMixin {
-  //^ TabController 추가
+class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final Color mainColor = Color(0xFFC9C138);
+
+  // 배너 관련 변수 추가
+  final PageController _pageController = PageController();
+  int _currentBanner = 0;
+  Timer? _bannerTimer;
+
+  final List<BannerItem> _bannerItems = [
+    BannerItem(
+      title: '럭키 럭스에디트\n최대 2만원 혜택',
+      subtitle: '쿠폰부터 100% 리워드까지',
+      backgroundColor: Colors.black,
+    ),
+    BannerItem(
+      title: '가을 준비하기\n최대 50% 할인',
+      subtitle: '시즌 프리뷰 특가전',
+      backgroundColor: Color(0xFF8B4513),
+    ),
+    BannerItem(
+      title: '이달의 브랜드\n특별 기획전',
+      subtitle: '인기 브랜드 혜택 모음',
+      backgroundColor: Color(0xFF4A90E2),
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
+    _startBannerTimer();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _pageController.dispose();
+    _bannerTimer?.cancel();
     super.dispose();
+  }
+
+  void _startBannerTimer() {
+    _bannerTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      if (_currentBanner < _bannerItems.length - 1) {
+        _currentBanner++;
+      } else {
+        _currentBanner = 0;
+      }
+
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentBanner,
+          duration: Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
@@ -33,7 +77,7 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
         elevation: 0,
         title: Row(
           children: [
-            Icon(Icons.spa, color: Color(0xFF9BCA48)), // 올리브영 로고 대신 아이콘 사용
+            Icon(Icons.spa, color: mainColor),
             const SizedBox(width: 8),
             const Text(
               '온니브유',
@@ -45,7 +89,7 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
             ),
             const SizedBox(width: 4),
             const Text(
-              'Health',
+              'Onlyveyou',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 16,
@@ -65,10 +109,8 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
         ],
       ),
 
-      // 메인 컨텐츠
       body: Column(
         children: [
-          // 상단 탭바
           Container(
             decoration: BoxDecoration(
               border: Border(
@@ -77,7 +119,6 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
             ),
             child: TabBar(
               controller: _tabController,
-              //^ Controller 연결
               isScrollable: true,
               tabs: [
                 Tab(text: '홈'),
@@ -87,47 +128,80 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
                 Tab(text: '매거진'),
                 Tab(text: 'LUXE EDIT'),
               ],
-              labelColor: Colors.black,
+              labelColor: mainColor,
               unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.black,
+              indicatorColor: mainColor,
               indicatorSize: TabBarIndicatorSize.label,
             ),
           ),
-
-          // 스크롤 가능한 메인 컨텐츠
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // 프로모션 배너
                   Container(
                     height: 200,
-                    color: Colors.black,
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Stack(
                       children: [
-                        Text(
-                          '럭키 럭스에디트\n최대 2만원 혜택',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        PageView.builder(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentBanner = index;
+                            });
+                          },
+                          itemCount: _bannerItems.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              color: _bannerItems[index].backgroundColor,
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _bannerItems[index].title,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    _bannerItems[index].subtitle,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          '쿠폰부터 100% 리워드까지',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
+                        Positioned(
+                          bottom: 16,
+                          right: 16,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(
+                              _bannerItems.length,
+                              (index) => Container(
+                                width: 8,
+                                height: 8,
+                                margin: EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _currentBanner == index
+                                      ? Colors.white
+                                      : Colors.white.withOpacity(0.5),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  // 퀵메뉴 그리드
                   GridView.count(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -141,11 +215,7 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
                       _buildQuickMenuItem('세일', Icons.local_offer),
                     ],
                   ),
-
-                  // 인기상품 섹션
                   _buildProductSection('국한님을 위한 인기상품'),
-
-                  // 최근 본 연관 추천 상품 섹션
                   _buildProductSection('최근 본 연관 추천 상품'),
                 ],
               ),
@@ -154,10 +224,9 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
         ],
       ),
 
-      // 하단 네비게이션 바
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.black,
+        selectedItemColor: mainColor,
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
@@ -185,12 +254,11 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
     );
   }
 
-  // 퀵메뉴 아이템 위젯
   Widget _buildQuickMenuItem(String label, IconData icon) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 32),
+        Icon(icon, size: 32, color: mainColor),
         SizedBox(height: 4),
         Text(
           label,
@@ -200,7 +268,6 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
     );
   }
 
-  // 상품 섹션 위젯
   Widget _buildProductSection(String title) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +307,6 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
     );
   }
 
-  // 상품 카드 위젯
   Widget _buildProductCard() {
     return Container(
       width: 150,
@@ -248,11 +314,9 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 상품 이미지
           Container(
             height: 150,
             child: Center(
-              // Center widget 추가
               child: Icon(Icons.image, size: 50, color: Colors.grey[400]),
             ),
             decoration: BoxDecoration(
@@ -261,7 +325,6 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
             ),
           ),
           SizedBox(height: 8),
-          // 상품명
           Text(
             '[트러블/민감] 아크네스 모공 클리어 젤 클렌저...',
             maxLines: 2,
@@ -269,13 +332,12 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
             style: TextStyle(fontSize: 13),
           ),
           SizedBox(height: 4),
-          // 가격 정보
           Row(
             children: [
               Text(
                 '30%',
                 style: TextStyle(
-                  color: Colors.red,
+                  color: mainColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -289,10 +351,9 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
             ],
           ),
           SizedBox(height: 4),
-          // 리뷰 정보
           Row(
             children: [
-              Icon(Icons.star, size: 14, color: Colors.amber),
+              Icon(Icons.star, size: 14, color: mainColor),
               Text(
                 '4.8 (1,234)',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -303,4 +364,16 @@ class _OliveYoungHomeState extends State<OliveYoungHome>
       ),
     );
   }
+}
+
+class BannerItem {
+  final String title;
+  final String subtitle;
+  final Color backgroundColor;
+
+  BannerItem({
+    required this.title,
+    required this.subtitle,
+    required this.backgroundColor,
+  });
 }
