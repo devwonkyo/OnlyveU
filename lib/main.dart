@@ -6,45 +6,14 @@ import 'package:onlyveyou/presentation/blocs/auth/screens/login_screen.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 
-Future<void> main() async {
+main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase 연결 체크
-  await checkFirebaseConnection();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
-Future<void> checkFirebaseConnection() async {
-  try {
-    // Firebase 초기화 테스트
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    print('Firebase 초기화 성공!');
-
-    // 데이터 쓰기 테스트
-    await FirebaseFirestore.instance
-        .collection('test')
-        .doc('test_doc')
-        .set({
-      'timestamp': FieldValue.serverTimestamp(),
-      'test_value': 'test'
-    });
-
-    print('Firestore 쓰기 테스트 성공!');
-
-
-    // Firestore 연결 테스트
-    final testDoc = await FirebaseFirestore.instance
-        .collection('test')
-        .doc('test_doc')
-        .get();
-
-    print('Firestore 연결 성공! ${testDoc.metadata}');
-
-  } catch (e) {
-    print('Firebase 연결 오류: $e');
-  }
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -53,6 +22,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      theme: ThemeData(
+        fontFamily: "Pretendard",
+      ),
       routerConfig: router,
     );
   }
