@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:onlyveyou/presentation/blocs/auth/screens/login_screen.dart';
 
 import 'core/router.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
@@ -17,7 +18,7 @@ Future<void> main() async {
 Future<void> checkFirebaseConnection() async {
   try {
     // Firebase 초기화 테스트
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     print('Firebase 초기화 성공!');
 
     // 데이터 쓰기 테스트
