@@ -1,13 +1,13 @@
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/presentation/blocs/auth/screens/login_screen.dart';
+import 'package:onlyveyou/presentation/blocs/home/screens/home_screen.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/home',
   routes: [
     // Auth 관련 Route
     GoRoute(
-      path: '/login',
-      builder: (context, state) => LoginScreen(),
+      path: '/home',
+      builder: (context, state) => OliveYoungHome(),
     ),
   ],
 );
