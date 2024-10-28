@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/presentation/blocs/auth/screens/login_screen.dart';
+import 'package:onlyveyou/screens/auth/login_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/login',

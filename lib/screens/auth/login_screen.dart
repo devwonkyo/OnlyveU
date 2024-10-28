@@ -11,7 +11,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: const Text("onlve you!!"),)
+        body: Center(child: const Text("onlve you!!"),)
     );
   }
 }
