@@ -7,7 +7,7 @@ final GoRouter router = GoRouter(
     // Auth 관련 Route
     GoRoute(
       path: '/home',
-      builder: (context, state) => OliveYoungHome(),
+      builder: (context, state) => Home(),
     ),
   ],
 );
