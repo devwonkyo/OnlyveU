@@ -18,21 +18,25 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0), // 검색창의 높이 설정
-          child: Padding(
-            padding: const EdgeInsets.only(right: 20, left: 20, bottom: 10),
-            child: Expanded(
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon:
+                  const Icon(Icons.shopping_bag_outlined, color: Colors.black),
+              onPressed: () {},
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0), // 검색창의 높이 설정
+            child: Padding(
+              padding: const EdgeInsets.only(right: 20, left: 20, bottom: 10),
               child: SearchTextField(
                 controller: _messageController,
                 onPressed: () => _sendMessage(),
@@ -40,6 +44,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
         ),
+        body: Placeholder(),
       ),
     );
   }
