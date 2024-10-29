@@ -10,8 +10,10 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/device_preview_widget.dart';
 import '../../utils/screen_util.dart';
 import '../../utils/styles.dart';
 import '../../widgets/default_appbar.dart';
@@ -93,133 +95,173 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, orientation) {
-        // 가로/세로 모드에 따른 값 조정
         final isPortrait = orientation == Orientation.portrait;
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: DefaultAppBar(mainColor: mainColor),
-          body: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey[300]!, width: 1.w),
-                  ),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  tabs: [
-                    Tab(text: '홈'),
-                    Tab(text: '딘토'),
-                    Tab(text: '오톡'),
-                    Tab(text: '랭킹'),
-                    Tab(text: '매거진'),
-                    Tab(text: 'LUXE EDIT'),
-                  ],
-                  labelColor: mainColor,
-                  unselectedLabelColor: AppStyles.greyColor,
-                  indicatorColor: mainColor,
-                  indicatorSize: TabBarIndicatorSize.label,
-                  labelStyle: AppStyles.subHeadingStyle,
-                  unselectedLabelStyle: AppStyles.bodyTextStyle,
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // 배너 섹션
-                      Container(
-                        height: 200.h,
-                        child: Stack(
-                          children: [
-                            PageView.builder(
-                              controller: _pageController,
-                              onPageChanged: (index) {
-                                setState(() {
-                                  _currentBanner = index;
-                                });
-                              },
-                              itemCount: _bannerItems.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  color: _bannerItems[index].backgroundColor,
-                                  padding: AppStyles.defaultPadding,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom:
+                              BorderSide(color: Colors.grey[300]!, width: 1.w),
+                        ),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        tabs: [
+                          Tab(text: '홈'),
+                          Tab(text: '딘토'),
+                          Tab(text: '오톡'),
+                          Tab(text: '랭킹'),
+                          Tab(text: '매거진'),
+                          Tab(text: 'LUXE EDIT'),
+                        ],
+                        labelColor: mainColor,
+                        unselectedLabelColor: AppStyles.greyColor,
+                        indicatorColor: mainColor,
+                        indicatorSize: TabBarIndicatorSize.label,
+                        labelStyle: AppStyles.subHeadingStyle,
+                        unselectedLabelStyle: AppStyles.bodyTextStyle,
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Column(
+                              children: [
+                                // 배너 섹션
+                                Container(
+                                  height: isPortrait ? 200.h : 150.h,
+                                  child: Stack(
+                                    fit: StackFit.loose,
                                     children: [
-                                      Text(
-                                        _bannerItems[index].title,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 24.sp,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      PageView.builder(
+                                        controller: _pageController,
+                                        onPageChanged: (index) {
+                                          setState(() {
+                                            _currentBanner = index;
+                                          });
+                                        },
+                                        itemCount: _bannerItems.length,
+                                        itemBuilder: (context, index) {
+                                          return Container(
+                                            color: _bannerItems[index]
+                                                .backgroundColor,
+                                            padding: AppStyles.defaultPadding,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    _bannerItems[index].title,
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: isPortrait
+                                                          ? 24.sp
+                                                          : 18.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                    height:
+                                                        isPortrait ? 8.h : 4.h),
+                                                Flexible(
+                                                  child: Text(
+                                                    _bannerItems[index]
+                                                        .subtitle,
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: isPortrait
+                                                          ? 16.sp
+                                                          : 14.sp,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
                                       ),
-                                      SizedBox(height: 8.h),
-                                      Text(
-                                        _bannerItems[index].subtitle,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16.sp,
+                                      Positioned(
+                                        bottom: 16.h,
+                                        right: 16.w,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: List.generate(
+                                            _bannerItems.length,
+                                            (index) => Container(
+                                              width: 8.w,
+                                              height: 8.w,
+                                              margin: EdgeInsets.symmetric(
+                                                  horizontal: 4.w),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: _currentBanner == index
+                                                    ? Colors.white
+                                                    : Colors.white
+                                                        .withOpacity(0.5),
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                );
-                              },
-                            ),
-                            Positioned(
-                              bottom: 16.h,
-                              right: 16.w,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: List.generate(
-                                  _bannerItems.length,
-                                  (index) => Container(
-                                    width: 8.w,
-                                    height: 8.w,
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 4.w),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _currentBanner == index
-                                          ? Colors.white
-                                          : Colors.white.withOpacity(0.5),
-                                    ),
-                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
+
+                                // 퀵 메뉴 섹션
+                                GridView.count(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  crossAxisCount: isPortrait ? 5 : 8,
+                                  mainAxisSpacing: 8.h,
+                                  crossAxisSpacing: 8.w,
+                                  childAspectRatio: isPortrait ? 1 : 1.2,
+                                  padding: AppStyles.defaultPadding,
+                                  children: [
+                                    _buildQuickMenuItem('W케어', Icons.favorite),
+                                    _buildQuickMenuItem(
+                                        '건강템찾기', Icons.medication),
+                                    _buildQuickMenuItem('라이브', Icons.live_tv),
+                                    _buildQuickMenuItem(
+                                        '선물하기', Icons.card_giftcard),
+                                    _buildQuickMenuItem(
+                                        '세일', Icons.local_offer),
+                                  ],
+                                ),
+
+                                // 상품 섹션
+                                _buildProductSection(
+                                    '국한님을 위한 추천상품', isPortrait),
+                                _buildProductSection(
+                                    '최근 본 연관 인기 상품', isPortrait),
+                              ],
+                            );
+                          },
                         ),
                       ),
-
-                      // 퀵 메뉴 섹션
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        crossAxisCount: 5,
-                        padding: AppStyles.defaultPadding,
-                        children: [
-                          _buildQuickMenuItem('W케어', Icons.favorite),
-                          _buildQuickMenuItem('건강템찾기', Icons.medication),
-                          _buildQuickMenuItem('라이브', Icons.live_tv),
-                          _buildQuickMenuItem('선물하기', Icons.card_giftcard),
-                          _buildQuickMenuItem('세일', Icons.local_offer),
-                        ],
-                      ),
-
-                      // 상품 섹션
-                      _buildProductSection('국한님을 위한 추천상품'),
-                      _buildProductSection('최근 본 연관 인기 상품'),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                if (kDebugMode)
+                  Positioned(
+                    top: ScreenUtil.safeAreaTop + 60.h,
+                    right: 16.w,
+                    child: DevicePreviewWidget(),
+                  ),
+              ],
+            ),
           ),
         );
       },
@@ -237,7 +279,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildProductSection(String title) {
+  Widget _buildProductSection(String title, bool isPortrait) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -246,7 +288,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: AppStyles.headingStyle),
+              Flexible(
+                child: Text(title, style: AppStyles.headingStyle),
+              ),
               Text('더보기 >',
                   style: AppStyles.bodyTextStyle
                       .copyWith(color: AppStyles.greyColor)),
@@ -254,11 +298,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ),
         ),
         SizedBox(
-          height: 320.h,
+          height: isPortrait ? 320.h : 240.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: AppStyles.horizontalPadding,
-            itemBuilder: (context, index) => _buildProductCard(index),
+            itemBuilder: (context, index) =>
+                _buildProductCard(index, isPortrait),
             itemCount: 4,
           ),
         ),
@@ -266,15 +311,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildProductCard(int index) {
+  Widget _buildProductCard(int index, bool isPortrait) {
     return Container(
-      width: AppStyles.productCardWidth,
+      width: isPortrait
+          ? AppStyles.productCardWidth
+          : AppStyles.productCardWidth * 0.8,
       margin: EdgeInsets.only(right: AppStyles.productCardSpacing),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: AppStyles.productCardHeight,
+          AspectRatio(
+            aspectRatio: 1,
             child: ClipRRect(
               borderRadius: AppStyles.defaultRadius,
               child: Image.asset(
@@ -284,21 +332,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   print('Error loading image: $error');
                   return Container(
                     color: Colors.grey[200],
-                    child:
-                        Icon(Icons.image, size: 120.w, color: Colors.grey[400]),
+                    child: Icon(Icons.image,
+                        size: isPortrait ? 120.w : 80.w,
+                        color: Colors.grey[400]),
                   );
                 },
               ),
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: isPortrait ? 8.h : 4.h),
           Text(
             '[트러블/민감] 아크네스 모공 클리어 젤 클렌저...',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: AppStyles.bodyTextStyle,
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: isPortrait ? 4.h : 2.h),
           Row(
             children: [
               Text('30%', style: AppStyles.discountTextStyle),
@@ -306,10 +355,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               Text('12,600원', style: AppStyles.priceTextStyle),
             ],
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: isPortrait ? 4.h : 2.h),
           Row(
             children: [
-              Icon(Icons.star, size: 14.w, color: mainColor),
+              Icon(Icons.star,
+                  size: isPortrait ? 14.w : 12.w, color: mainColor),
               Text('4.8 (1,234)', style: AppStyles.smallTextStyle),
             ],
           ),
