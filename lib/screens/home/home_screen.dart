@@ -1,15 +1,3 @@
-//홈화면이 라우터 설정 애니메이션 효과
-//바텀 네비게이션바 기능 살리기
-
-//스크린 유틸
-//위젯 분리
-//블록에 맞춰서 하기
-//코드 다듬기
-//이제 스크린 유틸 하기
-
-//데이터를 리스트로 가져와서 리스트 뷰로 스크롤되도록
-// 하나하나 띄어올수 있게 바꾸기
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +10,6 @@ import 'package:onlyveyou/utils/screen_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 
-// 홈 화면 위젯 정의
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -49,88 +36,85 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
-      builder: (context, state) {
-        return OrientationBuilder(
-          builder: (context, orientation) {
-            final isPortrait =
-                orientation == Orientation.portrait; // 세로 모드 여부 확인
-
-            if (state is HomeLoading) {
-              // 데이터 로딩 중일 때 로딩 표시
-              return Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (state is HomeError) {
-              // 데이터 로드 오류 시 에러 메시지 표시
-              return Scaffold(
-                body: Center(child: Text(state.message)),
-              );
-            }
-
-            if (state is HomeLoaded) {
-              // 데이터 로드 성공 시 홈 화면 구성
-              return Scaffold(
-                backgroundColor: Colors.white,
-                appBar:
-                    DefaultAppBar(mainColor: AppStyles.mainColor), // 커스텀 앱바 사용
-                body: SafeArea(
-                  child: Stack(
-                    children: [
-                      Column(
-                        children: [
-                          _buildTabBar(), // 탭 바 생성
-                          Expanded(
-                            child: RefreshIndicator(
-                              // 새로고침 기능 추가
-                              onRefresh: () async {
-                                context
-                                    .read<HomeBloc>()
-                                    .add(RefreshHomeData()); // 새로고침 이벤트 발생
-                              },
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    BannerWidget(
-                                      pageController: _pageController,
-                                      bannerItems:
-                                          state.bannerItems, // 배너 데이터 전달
-                                    ),
-                                    _buildQuickMenu(isPortrait), // 퀵 메뉴 생성
-                                    RecommendedProductsWidget(
-                                      recommendedProducts:
-                                          state.recommendedProducts,
-                                      isPortrait: isPortrait,
-                                    ), // 추천 상품 위젯
-                                    PopularProductsWidget(
-                                      popularProducts: state.popularProducts,
-                                      isPortrait: isPortrait,
-                                    ), // 인기 상품 위젯
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (kDebugMode) // 디버그 모드에서만 스크린 유틸 확인용 위젯 표시
-                        Positioned(
-                          top: ScreenUtil.safeAreaTop + 60.h,
-                          right: 16.w,
-                          child: DevicePreviewWidget(),
-                        ),
-                    ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: DefaultAppBar(mainColor: AppStyles.mainColor), // 커스텀 앱바 사용
+      body: SafeArea(
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _buildTabBar(), // 상단에 고정되는 탭 바
+                ),
+                SliverToBoxAdapter(
+                  child: BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (previous, current) =>
+                        current is HomeLoaded || current is HomeLoading,
+                    builder: (context, state) {
+                      if (state is HomeLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (state is HomeLoaded) {
+                        return BannerWidget(
+                          pageController: _pageController,
+                          bannerItems: state.bannerItems,
+                        );
+                      }
+                      return SizedBox.shrink();
+                    },
                   ),
                 ),
-              );
-            }
-
-            return Container(); // 기본 상태 시 빈 화면 반환
-          },
-        );
-      },
+                SliverToBoxAdapter(
+                  child: _buildQuickMenu(MediaQuery.of(context).orientation ==
+                      Orientation.portrait),
+                ),
+                SliverToBoxAdapter(
+                  child: BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (previous, current) =>
+                        current is HomeLoaded || current is HomeLoading,
+                    builder: (context, state) {
+                      if (state is HomeLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (state is HomeLoaded) {
+                        return RecommendedProductsWidget(
+                          recommendedProducts: state.recommendedProducts,
+                          isPortrait: MediaQuery.of(context).orientation ==
+                              Orientation.portrait,
+                        );
+                      }
+                      return SizedBox.shrink();
+                    },
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (previous, current) =>
+                        current is HomeLoaded || current is HomeLoading,
+                    builder: (context, state) {
+                      if (state is HomeLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (state is HomeLoaded) {
+                        return PopularProductsWidget(
+                          popularProducts: state.popularProducts,
+                          isPortrait: MediaQuery.of(context).orientation ==
+                              Orientation.portrait,
+                        );
+                      }
+                      return SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
+            ),
+            if (kDebugMode) // 디버그 모드에서만 스크린 유틸 확인용 위젯 표시
+              Positioned(
+                top: ScreenUtil.safeAreaTop + 60.h,
+                right: 16.w,
+                child: DevicePreviewWidget(),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
