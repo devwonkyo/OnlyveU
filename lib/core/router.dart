@@ -7,6 +7,8 @@ import 'package:onlyveyou/presentation/screens/category_screen.dart';
 import 'package:onlyveyou/presentation/screens/histoy_screen.dart';
 import 'package:onlyveyou/presentation/screens/my_screen.dart';
 
+import '../screens/search/search_screen.dart';
+
 final GoRouter router = GoRouter(
   initialLocation: '/home',
   routes: [
@@ -30,6 +32,10 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/my',
           builder: (context, state) => MyScreen(),
+        ),
+        GoRoute(
+          path: '/search',
+          builder: (context, state) => SearchScreen(),
         ),
       ],
     ),

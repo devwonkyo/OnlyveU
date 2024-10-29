@@ -9,6 +9,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -119,7 +120,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              context.push('/search');
+            },
           ),
           IconButton(
             icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
