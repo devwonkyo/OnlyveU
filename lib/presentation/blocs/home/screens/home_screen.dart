@@ -1,11 +1,12 @@
-import 'dart:async';
-
 //홈화면이 라우터 설정 애니메이션 효과
 //바텀 네비게이션바 기능 살리기
 //스크린 유틸
 //위젯 분리
+
 //블록에 맞춰서 하기
 //코드 다듬기
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentBanner = 0;
   Timer? _bannerTimer;
+
+  // 바텀 네비게이션 인덱스 관리 변수 추가
+  int _currentIndex = 0;
 
   // 클래스 상단에 상품 이미지 리스트 추가
   final List<String> _productImages = [
@@ -230,8 +234,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       _buildQuickMenuItem('세일', Icons.local_offer),
                     ],
                   ),
-                  _buildProductSection('국한님을 위한 인기상품'),
-                  _buildProductSection('최근 본 연관 추천 상품'),
+                  _buildProductSection('국한님을 위한 추천상품'),
+                  _buildProductSection('최근 본 연관 인기 상품'),
                 ],
               ),
             ),
@@ -239,33 +243,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ],
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: mainColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: '카테고리',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt_outlined),
-            label: '서티',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: '히스토리',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: '마이',
-          ),
-        ],
-      ),
+      //^ 분리한 위젯 사용
     );
   }
 
