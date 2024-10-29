@@ -1,11 +1,12 @@
 // lib/config/routes/app_router.dart
+import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/presentation/blocs/home/screens/home_screen.dart';
-import 'package:onlyveyou/presentation/screens/category_screen.dart';
-import 'package:onlyveyou/presentation/screens/histoy_screen.dart';
-import 'package:onlyveyou/presentation/screens/my_screen.dart';
+import 'package:onlyveyou/screens/category/category_screen.dart';
+import 'package:onlyveyou/screens/history/histoy_screen.dart';
+import 'package:onlyveyou/screens/home/home_screen.dart';
+import 'package:onlyveyou/screens/my/my_screen.dart';
 
-import '../presentation/blocs/home/screens/bottom_navbar.dart';
+import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/home',
@@ -17,21 +18,47 @@ final GoRouter router = GoRouter(
       routes: [
         GoRoute(
           path: '/category',
-          builder: (context, state) => CategoryScreen(),
+          pageBuilder: (context, state) => _buildPageWithTransition(
+              state, CategoryScreen()), //^ builder를 pageBuilder로 변경
         ),
         GoRoute(
           path: '/home',
-          builder: (context, state) => Home(),
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, Home()),
         ),
         GoRoute(
           path: '/history',
-          builder: (context, state) => HistoryScreen(),
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, HistoryScreen()),
         ),
         GoRoute(
           path: '/my',
-          builder: (context, state) => MyScreen(),
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, MyScreen()),
         ),
       ],
     ),
   ],
 );
+
+CustomTransitionPage<void> _buildPageWithTransition(
+    GoRouterState state, Widget child) {
+  return CustomTransitionPage(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+  );
+}
