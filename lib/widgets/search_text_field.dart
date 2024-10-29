@@ -26,7 +26,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
         // 입력창
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.grey[200],
+          fillColor: Colors.grey[100],
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           hintText: '상품, 브랜드, 성분 검색',
