@@ -2,7 +2,6 @@
 //바텀 네비게이션바 기능 살리기
 //스크린 유틸
 //위젯 분리
-
 //블록에 맞춰서 하기
 //코드 다듬기
 
@@ -23,9 +22,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentBanner = 0;
   Timer? _bannerTimer;
-
-  // 바텀 네비게이션 인덱스 관리 변수 추가
-  int _currentIndex = 0;
 
   // 클래스 상단에 상품 이미지 리스트 추가
   final List<String> _productImages = [

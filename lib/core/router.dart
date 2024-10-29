@@ -1,10 +1,11 @@
 // lib/config/routes/app_router.dart
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/presentation/blocs/home/screens/bottom_navbar.dart';
 import 'package:onlyveyou/presentation/blocs/home/screens/home_screen.dart';
 import 'package:onlyveyou/presentation/screens/category_screen.dart';
 import 'package:onlyveyou/presentation/screens/histoy_screen.dart';
 import 'package:onlyveyou/presentation/screens/my_screen.dart';
+
+import '../presentation/blocs/home/screens/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/home',
