@@ -1,387 +1,175 @@
-//홈화면이 라우터 설정 애니메이션 효과
-//바텀 네비게이션바 기능 살리기
-//스크린 유틸
-//위젯 분리
-//블록에 맞춰서 하기
-//코드 다듬기
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/screens/home/widgets/banner_widget.dart';
+import 'package:onlyveyou/screens/home/widgets/popular_products_widget.dart';
+import 'package:onlyveyou/screens/home/widgets/recommended_products_widget.dart';
+import 'package:onlyveyou/utils/styles.dart';
+import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
-
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final Color mainColor = const Color(0xFFC9C138);
-
-  // 배너 관련 변수 추가
-  final PageController _pageController = PageController();
-  int _currentBanner = 0;
-  Timer? _bannerTimer;
-
-  // 클래스 상단에 상품 이미지 리스트 추가
-  final List<String> _productImages = [
-    'assets/image/banner3.png', // 원하는 이미지로 변경
-    'assets/image/skin2.webp',
-    'assets/image/skin3.webp',
-    'assets/image/skin4.webp',
-  ];
-
-  final List<BannerItem> _bannerItems = [
-    BannerItem(
-      title: '럭키 럭스에디트\n최대 2만원 혜택',
-      subtitle: '쿠폰부터 100% 리워드까지',
-      backgroundColor: Colors.black,
-    ),
-    BannerItem(
-      title: '가을 준비하기\n최대 50% 할인',
-      subtitle: '시즌 프리뷰 특가전',
-      backgroundColor: const Color(0xFF8B4513),
-    ),
-    BannerItem(
-      title: '이달의 브랜드\n특별 기획전',
-      subtitle: '인기 브랜드 혜택 모음',
-      backgroundColor: const Color(0xFF4A90E2),
-    ),
-  ];
+  late TabController _tabController; // 탭 컨트롤러 초기화
+  final PageController _pageController = PageController(); // 배너 페이지 전환용 컨트롤러
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
-    _startBannerTimer();
+    _tabController =
+        TabController(length: 6, vsync: this); // 6개의 탭을 컨트롤하는 탭 컨트롤러 생성
+    context.read<HomeBloc>().add(LoadHomeData()); // 홈 데이터 로드 이벤트 전송
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     _pageController.dispose();
-    _bannerTimer?.cancel();
     super.dispose();
-  }
-
-  void _startBannerTimer() {
-    _bannerTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_currentBanner < _bannerItems.length - 1) {
-        _currentBanner++;
-      } else {
-        _currentBanner = 0;
-      }
-
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentBanner,
-          duration: const Duration(milliseconds: 350),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // 앱바
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
+      appBar: DefaultAppBar(mainColor: AppStyles.mainColor), // 커스텀 앱바 사용
+      body: SafeArea(
+        child: Stack(
           children: [
-            Icon(Icons.spa, color: mainColor),
-            const SizedBox(width: 8),
-            const Text(
-              '온니브유',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(width: 4),
-            const Text(
-              'Onlyveyou',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
+            CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  //배너
+                  child: _buildTabBar(), // 상단에 고정되는 탭 바
+                ),
+                SliverToBoxAdapter(
+                  child: BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (previous, current) =>
+                        current is HomeLoaded || current is HomeLoading,
+                    builder: (context, state) {
+                      if (state is HomeLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (state is HomeLoaded) {
+                        return BannerWidget(
+                          pageController: _pageController,
+                          bannerItems: state.bannerItems,
+                        );
+                      }
+                      return SizedBox.shrink();
+                    },
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: _buildQuickMenu(MediaQuery.of(context).orientation ==
+                      Orientation.portrait),
+                ),
+                SliverToBoxAdapter(
+                  child: BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (previous, current) =>
+                        current is HomeLoaded || current is HomeLoading,
+                    builder: (context, state) {
+                      if (state is HomeLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (state is HomeLoaded) {
+                        return RecommendedProductsWidget(
+                          recommendedProducts: state.recommendedProducts,
+                          isPortrait: MediaQuery.of(context).orientation ==
+                              Orientation.portrait,
+                        );
+                      }
+                      return SizedBox.shrink();
+                    },
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (previous, current) =>
+                        current is HomeLoaded || current is HomeLoading,
+                    builder: (context, state) {
+                      if (state is HomeLoading) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (state is HomeLoaded) {
+                        return PopularProductsWidget(
+                          popularProducts: state.popularProducts,
+                          isPortrait: MediaQuery.of(context).orientation ==
+                              Orientation.portrait,
+                        );
+                      }
+                      return SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {
-              context.push('/search');
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
-
-      body: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey[300]!, width: 1),
-              ),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabs: const [
-                Tab(text: '홈'),
-                Tab(text: '딘토'),
-                Tab(text: '오톡'),
-                Tab(text: '랭킹'),
-                Tab(text: '매거진'),
-                Tab(text: 'LUXE EDIT'),
-              ],
-              labelColor: mainColor,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: mainColor,
-              indicatorSize: TabBarIndicatorSize.label,
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 200,
-                    child: Stack(
-                      children: [
-                        PageView.builder(
-                          controller: _pageController,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _currentBanner = index;
-                            });
-                          },
-                          itemCount: _bannerItems.length,
-                          itemBuilder: (context, index) {
-                            return Container(
-                              color: _bannerItems[index].backgroundColor,
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _bannerItems[index].title,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    _bannerItems[index].subtitle,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                        Positioned(
-                          bottom: 16,
-                          right: 16,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(
-                              _bannerItems.length,
-                              (index) => Container(
-                                width: 8,
-                                height: 8,
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _currentBanner == index
-                                      ? Colors.white
-                                      : Colors.white.withOpacity(0.5),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 5,
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildQuickMenuItem('W케어', Icons.favorite),
-                      _buildQuickMenuItem('건강템찾기', Icons.medication),
-                      _buildQuickMenuItem('라이브', Icons.live_tv),
-                      _buildQuickMenuItem('선물하기', Icons.card_giftcard),
-                      _buildQuickMenuItem('세일', Icons.local_offer),
-                    ],
-                  ),
-                  _buildProductSection('국한님을 위한 추천상품'),
-                  _buildProductSection('최근 본 연관 인기 상품'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      //^ 분리한 위젯 사용
     );
   }
 
+  // 탭 바 위젯
+  Widget _buildTabBar() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom:
+              BorderSide(color: Colors.grey[300]!, width: 1.w), // 탭 바 하단의 구분선
+        ),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true, // 탭을 스크롤 가능하게 설정
+        tabs: [
+          Tab(text: '홈'),
+          Tab(text: '딘토'),
+          Tab(text: '오톡'),
+          Tab(text: '랭킹'),
+          Tab(text: '매거진'),
+          Tab(text: 'LUXE EDIT'),
+        ],
+        labelColor: AppStyles.mainColor, // 선택된 탭의 텍스트 색상
+        unselectedLabelColor: AppStyles.greyColor, // 선택되지 않은 탭의 텍스트 색상
+        indicatorColor: AppStyles.mainColor, // 선택된 탭 하단 인디케이터 색상
+        indicatorSize: TabBarIndicatorSize.label, // 인디케이터 크기를 탭 레이블 크기에 맞춤
+        labelStyle: AppStyles.subHeadingStyle, // 선택된 탭의 텍스트 스타일
+        unselectedLabelStyle: AppStyles.bodyTextStyle, // 선택되지 않은 탭의 텍스트 스타일
+      ),
+    );
+  }
+
+  // 퀵 메뉴 위젯
+  Widget _buildQuickMenu(bool isPortrait) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(), // 스크롤 금지
+      crossAxisCount: isPortrait ? 5 : 8, // 세로 모드에서는 5열, 가로 모드에서는 8열
+      mainAxisSpacing: 8.h,
+      crossAxisSpacing: 8.w,
+      childAspectRatio: isPortrait ? 1 : 1.2, // 세로/가로 모드에 따른 아이템 비율 조정
+      padding: AppStyles.defaultPadding,
+      children: [
+        _buildQuickMenuItem('W케어', Icons.favorite),
+        _buildQuickMenuItem('건강템찾기', Icons.medication),
+        _buildQuickMenuItem('라이브', Icons.live_tv),
+        _buildQuickMenuItem('선물하기', Icons.card_giftcard),
+        _buildQuickMenuItem('세일', Icons.local_offer),
+      ],
+    );
+  }
+
+  // 퀵 메뉴 아이템 위젯 (아이콘과 레이블로 구성)
   Widget _buildQuickMenuItem(String label, IconData icon) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 32, color: mainColor),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12),
-        ),
+        Icon(icon, size: 32.w, color: AppStyles.mainColor), // 아이콘
+        SizedBox(height: 4.h),
+        Text(label, style: AppStyles.smallTextStyle), // 레이블 텍스트
       ],
     );
   }
-
-  Widget _buildProductSection(String title) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Text(
-                '더보기 >',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 320,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemBuilder: (context, index) =>
-                _buildProductCard(index), // index 전달
-            itemCount: 4,
-          ),
-        ),
-      ],
-    );
-  }
-
-// _buildProductCard 메서드 수정
-  Widget _buildProductCard(int index) {
-    // index 매개변수 추가
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 150,
-            child: ClipRRect(
-              // 이미지에 borderRadius 적용을 위해 ClipRRect 사용
-              borderRadius: BorderRadius.circular(8),
-
-              child: Image.asset(
-                _productImages[index % _productImages.length], // 여기에 원하는 이미지 경로
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  print('Error loading image: $error');
-                  return Container(
-                    color: Colors.grey[200],
-                    child:
-                        Icon(Icons.image, size: 120, color: Colors.grey[400]),
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '[트러블/민감] 아크네스 모공 클리어 젤 클렌저...',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 13),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
-                '30%',
-                style: TextStyle(
-                  color: mainColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Text(
-                '12,600원',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(Icons.star, size: 14, color: mainColor),
-              const Text(
-                '4.8 (1,234)',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class BannerItem {
-  final String title;
-  final String subtitle;
-  final Color backgroundColor;
-
-  BannerItem({
-    required this.title,
-    required this.subtitle,
-    required this.backgroundColor,
-  });
 }
