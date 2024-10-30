@@ -23,7 +23,7 @@ class PopularProductsWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('최근 본 연관 인기 상품', style: AppStyles.headingStyle), // 섹션 제목
+              Text('연관 인기 상품', style: AppStyles.headingStyle), // 섹션 제목
               Text(
                 '더보기 >',
                 style: AppStyles.bodyTextStyle
@@ -34,7 +34,7 @@ class PopularProductsWidget extends StatelessWidget {
         ),
         // 인기 상품 리스트뷰
         SizedBox(
-          height: isPortrait ? 320 : 240, // 세로/가로 모드에 따라 높이 설정
+          height: isPortrait ? 400 : 240, // 세로/가로 모드에 따라 높이 설정
           child: ListView.builder(
             scrollDirection: Axis.horizontal, // 가로 스크롤
             itemCount: popularProducts.length, // 아이템 수
@@ -49,45 +49,145 @@ class PopularProductsWidget extends StatelessWidget {
   // 각 상품 카드를 생성하는 위젯
   Widget _buildProductCard(int index) {
     return Container(
-      width: AppStyles.productCardWidth, // 카드 너비
-      margin: EdgeInsets.only(right: AppStyles.productCardSpacing), // 카드 간격
+      width: AppStyles.productCardWidth,
+      margin: EdgeInsets.only(right: AppStyles.productCardSpacing),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 상품 이미지
-          AspectRatio(
-            aspectRatio: 1, // 정사각형 비율 유지
+          // 1. 상품 이미지 - 수정된 부분
+          Container(
+            width: double.infinity,
+            height: 200, // 고정된 높이 설정
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white, // 배경색 지정
+            ),
             child: ClipRRect(
-              borderRadius: AppStyles.defaultRadius, // 이미지 모서리 둥글게 처리
+              borderRadius: BorderRadius.circular(8),
               child: Image.asset(
-                popularProducts[index % popularProducts.length], // 이미지 불러오기
-                fit: BoxFit.cover, // 이미지 크기 조정 (빈 공간 없이 채우기)
+                popularProducts[index % popularProducts.length],
+                fit: BoxFit.contain, // cover에서 contain으로 변경
               ),
             ),
           ),
-          SizedBox(height: 8), // 이미지와 텍스트 간격
-          // 상품 설명 텍스트
+          SizedBox(height: 8),
+
+          // 나머지 위젯들은 동일...
           Text(
-            '[트러블/민감] 아크네스 모공 클리어 젤 클렌저...', // 상품 이름
-            maxLines: 2, // 최대 2줄로 표시, 초과 시 생략(...)
-            overflow: TextOverflow.ellipsis, // 텍스트가 넘칠 경우 생략 표시
-            style: AppStyles.bodyTextStyle, // 텍스트 스타일
+            '[트러블/민감] 아크네스 모공 클리어 젤 클렌저...',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppStyles.bodyTextStyle,
           ),
           SizedBox(height: 4),
-          // 할인율과 가격 표시
+
           Row(
             children: [
-              Text('30%', style: AppStyles.discountTextStyle), // 할인율
+              Text(
+                '30%',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
               SizedBox(width: 4),
-              Text('12,600원', style: AppStyles.priceTextStyle), // 가격
+              Text(
+                '12,600원',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
             ],
           ),
-          SizedBox(height: 4),
-          // 별점과 리뷰 수
+          SizedBox(height: 8),
+
           Row(
             children: [
-              Icon(Icons.star, size: 14, color: AppStyles.mainColor), // 별 아이콘
-              Text('4.8 (1,234)', style: AppStyles.smallTextStyle), // 별점 및 리뷰 수
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '오늘드림',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'BEST',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+
+          Row(
+            children: [
+              Icon(
+                Icons.star,
+                size: 14,
+                color: AppStyles.mainColor,
+              ),
+              SizedBox(width: 4),
+              Text(
+                '4.8',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(width: 4),
+              Text(
+                '(1,234)',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.favorite_border,
+                  size: 20,
+                  color: Colors.grey,
+                ),
+                onPressed: () {},
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(),
+              ),
+              SizedBox(width: 1),
+              IconButton(
+                icon: Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 18,
+                  color: Colors.grey,
+                ),
+                onPressed: () {},
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(),
+              ),
             ],
           ),
         ],
