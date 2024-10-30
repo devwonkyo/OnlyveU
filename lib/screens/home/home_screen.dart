@@ -8,15 +8,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final Color mainColor = Color(0xFFC9C138);
+  final Color mainColor = const Color(0xFFC9C138);
 
   // 배너 관련 변수 추가
   final PageController _pageController = PageController();
@@ -40,12 +43,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     BannerItem(
       title: '가을 준비하기\n최대 50% 할인',
       subtitle: '시즌 프리뷰 특가전',
-      backgroundColor: Color(0xFF8B4513),
+      backgroundColor: const Color(0xFF8B4513),
     ),
     BannerItem(
       title: '이달의 브랜드\n특별 기획전',
       subtitle: '인기 브랜드 혜택 모음',
-      backgroundColor: Color(0xFF4A90E2),
+      backgroundColor: const Color(0xFF4A90E2),
     ),
   ];
 
@@ -65,7 +68,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   void _startBannerTimer() {
-    _bannerTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    _bannerTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
       if (_currentBanner < _bannerItems.length - 1) {
         _currentBanner++;
       } else {
@@ -75,7 +78,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       if (_pageController.hasClients) {
         _pageController.animateToPage(
           _currentBanner,
-          duration: Duration(milliseconds: 350),
+          duration: const Duration(milliseconds: 350),
           curve: Curves.easeInOut,
         );
       }
@@ -115,7 +118,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              context.push('/search');
+            },
           ),
           IconButton(
             icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
@@ -135,7 +140,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
-              tabs: [
+              tabs: const [
                 Tab(text: '홈'),
                 Tab(text: '딘토'),
                 Tab(text: '오톡'),
@@ -153,7 +158,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Container(
+                  SizedBox(
                     height: 200,
                     child: Stack(
                       children: [
@@ -168,22 +173,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           itemBuilder: (context, index) {
                             return Container(
                               color: _bannerItems[index].backgroundColor,
-                              padding: EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     _bannerItems[index].title,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(height: 8),
+                                  const SizedBox(height: 8),
                                   Text(
                                     _bannerItems[index].subtitle,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -203,7 +208,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               (index) => Container(
                                 width: 8,
                                 height: 8,
-                                margin: EdgeInsets.symmetric(horizontal: 4),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 4),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: _currentBanner == index
@@ -219,9 +225,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ),
                   GridView.count(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 5,
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     children: [
                       _buildQuickMenuItem('W케어', Icons.favorite),
                       _buildQuickMenuItem('건강템찾기', Icons.medication),
@@ -248,10 +254,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 32, color: mainColor),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(fontSize: 12),
+          style: const TextStyle(fontSize: 12),
         ),
       ],
     );
@@ -262,18 +268,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(
+              const Text(
                 '더보기 >',
                 style: TextStyle(
                   color: Colors.grey,
@@ -287,7 +293,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           height: 320,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) =>
                 _buildProductCard(index), // index 전달
             itemCount: 4,
@@ -302,11 +308,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     // index 매개변수 추가
     return Container(
       width: 150,
-      margin: EdgeInsets.only(right: 12),
+      margin: const EdgeInsets.only(right: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          SizedBox(
             height: 150,
             child: ClipRRect(
               // 이미지에 borderRadius 적용을 위해 ClipRRect 사용
@@ -326,14 +332,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ),
             ),
           ),
-          SizedBox(height: 8),
-          Text(
+          const SizedBox(height: 8),
+          const Text(
             '[트러블/민감] 아크네스 모공 클리어 젤 클렌저...',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 13),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Row(
             children: [
               Text(
@@ -343,8 +349,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(width: 4),
-              Text(
+              const SizedBox(width: 4),
+              const Text(
                 '12,600원',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -352,11 +358,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ),
             ],
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Row(
             children: [
               Icon(Icons.star, size: 14, color: mainColor),
-              Text(
+              const Text(
                 '4.8 (1,234)',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
