@@ -1,35 +1,27 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/cubit/category/category_cubit.dart';
+
+
+import 'blocs/history/history_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-
-void _signIn() async {
-  try {
-    // 이메일과 비밀번호로 로그인 시도
-    await _auth.signInWithEmailAndPassword(
-      email: 'your-email@example.com', // 사용자의 이메일 입력값
-      password: 'your-password', // 사용자의 비밀번호 입력값
-    );
-  } catch (e) {
-    print("Error signing in: $e");
-  }
-}
-
-void _signOut() async {
-  await _auth.signOut();
-}
 
 main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -38,86 +30,37 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      theme: ThemeData(
-        fontFamily: "Pretendard",
-      ),
-      routerConfig: router,
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+    return ScreenUtilInit(
+      designSize: Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, child) {
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<HomeBloc>(
+              create: (context) => HomeBloc(),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            BlocProvider<HistoryBloc>(
+              create: (context) => HistoryBloc(
+                  // FirebaseFirestore.instance, // Firebase를 사용하는 경우
+                  ),
+            ),
+            BlocProvider(
+              create: (context) => ProfileEditBloc(),
+            ),
+            BlocProvider<CategoryCubit>(
+              create: (context) => CategoryCubit()..loadCategories(),
             ),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+                scaffoldBackgroundColor: Colors.white,
+                fontFamily: 'Pretendard'),
+            routerConfig: router,
+          ),
+        );
+      },
     );
   }
 }
