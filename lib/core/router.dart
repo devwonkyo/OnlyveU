@@ -26,7 +26,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) =>
-              _buildPageWithTransition(state, const Home()),
+              _buildPageWithTransition(state, Home()),
         ),
         GoRoute(
           path: '/history',
