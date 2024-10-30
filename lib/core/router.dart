@@ -43,7 +43,8 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          builder: (context, state) => SearchScreen(),
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, const SearchScreen()),
         ),
       ],
     ),
@@ -56,6 +57,7 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const ProfileEditScreen(),
+      ),
     ),
     GoRoute(
       path: '/signup', // 회원가입 화면
