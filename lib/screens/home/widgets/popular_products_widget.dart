@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 // 인기 상품 목록을 보여주는 위젯
 class PopularProductsWidget extends StatelessWidget {
-  final List<String> popularProducts; // 인기 상품 이미지 경로 리스트
+  final List<HistoryItem> popularProducts; // 인기 상품 리스트
   final bool isPortrait; // 세로 모드 여부
 
   PopularProductsWidget({
@@ -38,7 +39,7 @@ class PopularProductsWidget extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal, // 가로 스크롤
             itemCount: popularProducts.length, // 아이템 수
-            padding: AppStyles.horizontalPadding,
+            padding: EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) => _buildProductCard(index),
           ),
         ),
@@ -48,65 +49,72 @@ class PopularProductsWidget extends StatelessWidget {
 
   // 각 상품 카드를 생성하는 위젯
   Widget _buildProductCard(int index) {
+    final item = popularProducts[index];
     return Container(
-      width: AppStyles.productCardWidth,
-      margin: EdgeInsets.only(right: AppStyles.productCardSpacing),
+      width: 150, // 카드 너비 고정
+      margin: EdgeInsets.only(right: 12), // 카드 간격
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 상품 이미지 - 수정된 부분
+          // 1. 상품 이미지
           Container(
-            width: double.infinity,
-            height: 200, // 고정된 높이 설정
+            width: 150, // 이미지 너비
+            height: 150, // 이미지 높이
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: Colors.white, // 배경색 지정
+              color: Colors.white,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.asset(
-                popularProducts[index % popularProducts.length],
-                fit: BoxFit.contain, // cover에서 contain으로 변경
+                item.imageUrl, // HistoryItem의 이미지 URL 사용
+                fit: BoxFit.contain,
               ),
             ),
           ),
           SizedBox(height: 8),
 
-          // 나머지 위젯들은 동일...
+          // 2. 상품명
           Text(
-            '[트러블/민감] 아크네스 모공 클리어 젤 클렌저...',
+            item.title, // HistoryItem의 제목 사용
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: AppStyles.bodyTextStyle,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+            ),
           ),
           SizedBox(height: 4),
 
+          // 3. 가격 정보
           Row(
             children: [
-              Text(
-                '30%',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+              if (item.discountRate != null)
+                Text(
+                  '${item.discountRate}%', // HistoryItem의 할인율 사용
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
-              ),
               SizedBox(width: 4),
               Text(
-                '12,600원',
+                '${item.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원', // HistoryItem의 가격 사용
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 14,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6),
 
+          // 4. 태그들
           Row(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(4),
@@ -114,70 +122,77 @@ class PopularProductsWidget extends StatelessWidget {
                 child: Text(
                   '오늘드림',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.black87,
                   ),
                 ),
               ),
-              SizedBox(width: 8),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'BEST',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black87,
+              SizedBox(width: 4),
+              if (item.isBest) // isBest가 true일 때만 BEST 태그 표시
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'BEST',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6),
 
+          // 5. 별점과 리뷰 수
           Row(
             children: [
               Icon(
                 Icons.star,
-                size: 14,
+                size: 12,
                 color: AppStyles.mainColor,
               ),
-              SizedBox(width: 4),
+              SizedBox(width: 2),
               Text(
-                '4.8',
+                item.rating.toStringAsFixed(1),
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(width: 4),
+              SizedBox(width: 2),
               Text(
-                '(1,234)',
+                '(${item.reviewCount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')})',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: Colors.grey,
                 ),
               ),
             ],
           ),
+          SizedBox(height: 6),
 
+          // 6. 좋아요와 장바구니 버튼
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               IconButton(
                 icon: Icon(
-                  Icons.favorite_border,
-                  size: 20,
-                  color: Colors.grey,
+                  item.isFavorite
+                      ? Icons.favorite
+                      : Icons.favorite_border, // 좋아요 상태에 따라 아이콘 변경
+                  size: 18,
+                  color: item.isFavorite
+                      ? Colors.red
+                      : Colors.grey, // 좋아요 상태에 따라 색상 변경
                 ),
                 onPressed: () {},
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
               ),
-              SizedBox(width: 1),
+              SizedBox(width: 12),
               IconButton(
                 icon: Icon(
                   Icons.shopping_bag_outlined,
