@@ -45,6 +45,9 @@ class MyApp extends StatelessWidget {
             BlocProvider(
               create: (context) => ProfileEditBloc(),
             ),
+            BlocProvider<CategoryCubit>(
+              create: (context) => CategoryCubit()..loadCategories(),
+            ),
           ],
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
