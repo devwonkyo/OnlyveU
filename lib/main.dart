@@ -1,10 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 
+import 'blocs/history/history_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 
@@ -17,6 +18,9 @@ main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -26,6 +30,14 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return MultiBlocProvider(
           providers: [
+            BlocProvider<HomeBloc>(
+              create: (context) => HomeBloc(),
+            ),
+            BlocProvider<HistoryBloc>(
+              create: (context) => HistoryBloc(
+                  // FirebaseFirestore.instance, // Firebase를 사용하는 경우
+                  ),
+            ),
             BlocProvider(
               create: (context) => ProfileEditBloc(),
             ),
