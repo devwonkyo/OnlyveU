@@ -34,25 +34,40 @@ class _SearchTextFieldState extends State<SearchTextField> {
               const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
           enabledBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: Colors.transparent, // 테두리 색상을 투명하게 설정
+              color: Colors.transparent,
             ),
             borderRadius: BorderRadius.circular(25),
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: Colors.transparent, // 테두리 색상을 투명하게 설정
+              color: Colors.transparent,
             ),
             borderRadius: BorderRadius.circular(25),
           ),
           // 보내기 버튼
-          suffixIcon: Visibility(
-            visible: widget.controller.text.isNotEmpty,
-            child: IconButton(
-              onPressed: widget.onPressed,
-              icon: const Icon(
-                Icons.search_sharp,
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Visibility(
+                visible: widget.controller.text.isNotEmpty,
+                child: IconButton(
+                  onPressed: () {
+                    widget.controller.clear();
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    Icons.cancel,
+                    color: Colors.grey[400],
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                onPressed: widget.onPressed,
+                icon: const Icon(
+                  Icons.search,
+                ),
+              ),
+            ],
           ),
         ),
       ),
