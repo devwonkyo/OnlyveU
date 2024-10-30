@@ -46,9 +46,12 @@ class ScreenUtil {
   static double get safeAreaBottom => _mediaQueryData.padding.bottom;
 }
 
-// 확장 메서드 추가
-extension SizeExtension on num {
-  double get w => ScreenUtil.getProportionateScreenWidth(toDouble());
-  double get h => ScreenUtil.getProportionateScreenHeight(toDouble());
-  double get sp => ScreenUtil.getAdaptiveFontSize(toDouble());
-}
+// // 확장 메서드 추가
+// extension SizeExtension on num {
+//   double get w => ScreenUtil.getProportionateScreenWidth(toDouble());
+//   double get h => ScreenUtil.getProportionateScreenHeight(toDouble());
+//   double get sp => ScreenUtil.getAdaptiveFontSize(toDouble());
+// }
+
+// 스크린 다트 클래스를 임포트 했는데
+// 지금은 라이브러리를 임포트 한것

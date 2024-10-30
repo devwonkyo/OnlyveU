@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'screen_util.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppStyles {
   // 색상
