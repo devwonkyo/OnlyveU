@@ -87,3 +87,14 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
     return 1; // 기본값은 홈
   }
 }
+
+//블록의 equitable
+//다른데서는 같은 state1=10 , state2=10 일때
+//똑같은 10이라 다른객체로 인식되서 다시 렌더링함
+//
+//이쿼터블을 쓰면 상태가 같더라고 다른 객체로 인식함
+//값으로 인식해서 같은 값이면 렌더링을 안한다.
+//
+//다른 렌더링 해서 성능적인 부분에서 이득이 있다
+//
+//prox 에서 값을 저장해서 비교한다.
