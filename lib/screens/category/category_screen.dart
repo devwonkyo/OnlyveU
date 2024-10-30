@@ -1,9 +1,248 @@
-// lib/presentation/screens/category_screen.dart
-import 'package:flutter/material.dart';
+import 'dart:math';
 
-class CategoryScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/cubit/category/category_cubit.dart';
+import 'package:onlyveyou/screens/category/category_skeletion_screen.dart';
+import 'package:onlyveyou/screens/category/widgets/main_category_item.dart';
+import 'package:onlyveyou/screens/category/widgets/sub_category_header.dart';
+import 'package:onlyveyou/screens/category/widgets/sub_category_item.dart';
+
+class CategoryScreen extends StatefulWidget {
+  @override
+  State<CategoryScreen> createState() => _CategoryScreenState();
+}
+
+class _CategoryScreenState extends State<CategoryScreen> {
+  final ScrollController _rightScrollController = ScrollController();
+  @override
+  void initState() {
+    super.initState();
+    // 스크롤 리스너 추가
+    _rightScrollController.addListener(_onScroll);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('카테고리 화면'));
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Row(
+          children: [
+            Icon(
+              Icons.spa,
+              color: AppsColor.pastelGreen,
+              size: 20.sp, // ScreenUtil을 사용하여 아이콘 크기 조정
+            ),
+            SizedBox(width: 8.w), // ScreenUtil을 사용하여 여백 조정
+            Text(
+              '온니브유',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16.sp, // ScreenUtil을 사용하여 텍스트 크기 조정
+              ),
+            ),
+            SizedBox(width: 4.w), // 여백
+            Text(
+              'Onlyveyou',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14.sp, // ScreenUtil을 사용하여 텍스트 크기 조정
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.search,
+              color: Colors.black,
+              size: 24.sp, // 아이콘 크기 조정
+            ),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.shopping_bag_outlined,
+              color: Colors.black,
+              size: 24.sp, // 아이콘 크기 조정
+            ),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: BlocBuilder<CategoryCubit, CategoryState>(
+        builder: (context, state) {
+          if (state is CategoryLoading) {
+            return CategorySkeletonScreen();
+          }
+
+          if (state is CategoryLoaded) {
+            print('reload');
+            return Row(
+              children: [
+                //필요하면 카테고리 추가
+
+                // 왼쪽 메인 카테고리 리스트
+                Container(
+                  width: 100.w,
+                  color: Colors.grey[50],
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: state.categories.length,
+                    itemBuilder: (context, index) {
+                      final category = state.categories[index];
+                      final isSelected =
+                          context.read<CategoryCubit>().selectedIndex == index;
+
+                      return MainCategoryItem(
+                        category: category,
+                        isSelected: isSelected,
+                        onTap: () {
+                          context.read<CategoryCubit>().selectCategory(index);
+                          _scrollToCategory(index);  // 여기서 스크롤 호출
+                          print(index);
+                        },
+                      );
+                    },
+                  ),
+                ),
+
+                // 오른쪽 서브카테고리 리스트
+                Expanded(
+                  child:ListView.builder(
+                    controller: _rightScrollController,  // 컨트롤러 연결
+                    itemCount: state.categories.length,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    itemBuilder: (context, index) {
+                      final category = state.categories[index];
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              // 클릭 시 실행할 코드
+                              print("카테고리 헤더 클릭 : ${category.name}");
+                            },
+                            child: // 카테고리 헤더
+                            SubCategoryHeader(
+                              icon : category.icon ?? "",  // 아이콘은 적절히 변경
+                              title: category.name,
+                              hasArrow: true,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // 서브카테고리 목록
+                          ...category.subcategories.map((subcategory) =>
+                              GestureDetector(
+                                onTap: () {
+                                  // 클릭 시 실행할 코드
+                                  print('click ${subcategory.name}');
+                                },
+                                child: SubCategoryItem(title: subcategory.name),
+                              )
+                          ).toList(),
+                          // 구분선
+                          Divider(
+                            color: AppsColor.lightGray,
+                            thickness: 1.0,
+                            height: 10,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return SizedBox();
+        },
+      ),
+    );
+  }
+
+  // 스크롤 위치에 따른 카테고리 선택
+  void _onScroll() {
+    if (!mounted) return;
+
+    final state = context.read<CategoryCubit>().state;
+    if (state is! CategoryLoaded) return;
+
+    double scrollOffset = _rightScrollController.offset;
+    double totalHeight = 0;
+    int currentIndex = 0;
+
+    for (int i = 0; i < state.categories.length; i++) {
+      // SubCategoryHeader 정확한 높이 계산
+      double headerHeight = 32.h + // vertical padding (16.h * 2)
+          max(36.r, // 아이콘 컨테이너 (20.sp + 16.r for padding)
+              15.sp); // 텍스트 높이
+
+      // SubCategoryItem 정확한 높이 계산
+      double itemHeight = 24.h + // vertical padding (12.h * 2)
+          14.sp; // 텍스트 높이
+
+      // 현재 카테고리의 전체 높이 계산
+      double categoryHeight = headerHeight + // 헤더
+          (state.categories[i].subcategories.length * itemHeight) + // 아이템들
+          8.h + // SizedBox
+          1.h; // Divider (실제 높이)
+
+      if (scrollOffset >= totalHeight && scrollOffset < (totalHeight + categoryHeight)) {
+        currentIndex = i;
+        break;
+      }
+
+      totalHeight += categoryHeight;
+    }
+
+    if (context.read<CategoryCubit>().selectedIndex != currentIndex) {
+      context.read<CategoryCubit>().selectCategory(currentIndex);
+    }
+  }
+
+// 카테고리 클릭 시 스크롤 처리도 동일하게 수정
+  void _scrollToCategory(int index) {
+    final state = context.read<CategoryCubit>().state as CategoryLoaded;
+    double totalHeight = 0;
+
+    for (int i = 0; i < index; i++) {
+      // SubCategoryHeader 정확한 높이 계산
+      double headerHeight = 32.h + // vertical padding (16.h * 2)
+          max(36.r, // 아이콘 컨테이너 (20.sp + 16.r for padding)
+              15.sp); // 텍스트 높이
+
+      // SubCategoryItem 정확한 높이 계산
+      double itemHeight = 24.h + // vertical padding (12.h * 2)
+          14.sp; // 텍스트 높이
+
+      totalHeight += headerHeight + // 헤더
+          (state.categories[i].subcategories.length * itemHeight) + // 아이템들
+          8.h + // SizedBox
+          1.h; // Divider (실제 높이)
+    }
+
+    // 스크롤 위치에 패딩 고려
+    final padding = 16.w; // ListView의 수평 패딩 값
+
+    _rightScrollController.animateTo(
+      totalHeight,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _rightScrollController.removeListener(_onScroll);
+    _rightScrollController.dispose();
+    super.dispose();
   }
 }
