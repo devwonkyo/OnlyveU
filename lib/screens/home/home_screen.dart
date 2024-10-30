@@ -87,6 +87,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     },
                   ),
                 ),
+                SliverToBoxAdapter(
+                  child: InkWell(
+                    onTap: () => print("쿠폰 눌림"),
+                    child: Image.asset(
+                      'assets/image/banner4.png',
+                      width: MediaQuery.of(context).size.width * 0.95,
+                    ),
+                  ),
+                ),
 
                 SliverToBoxAdapter(
                   child: BlocBuilder<HomeBloc, HomeState>(
