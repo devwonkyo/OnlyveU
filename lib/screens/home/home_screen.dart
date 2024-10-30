@@ -45,7 +45,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   //배너
                   child: _buildTabBar(), // 상단에 고정되는 탭 바
                 ),
-                //배너 돌다보면 앱 느려짐 평소엔 주석해둘것
+                // 배너 돌다보면 앱 느려짐 평소엔 주석해둘것
                 // SliverToBoxAdapter(
                 //   child: BlocBuilder<HomeBloc, HomeState>(
                 //     buildWhen: (previous, current) =>
