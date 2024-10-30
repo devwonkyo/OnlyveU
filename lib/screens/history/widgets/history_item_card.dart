@@ -1,4 +1,3 @@
-// widgets/history_item_card.dart
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/models/history_item.dart';
 
@@ -57,9 +56,11 @@ class HistoryItemCard extends StatelessWidget {
                   Text(
                     '${item.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
                     style: TextStyle(
-                      decoration: TextDecoration.lineThrough,
                       color: Colors.grey,
                       fontSize: 14,
+                      decoration: TextDecoration.lineThrough, // 가운데 줄 추가
+                      decorationColor: Colors.grey, // 줄의 색상을 회색으로 설정
+                      decorationThickness: 1.5, // 줄의 두께 설정
                     ),
                   ),
                 SizedBox(height: 2),
