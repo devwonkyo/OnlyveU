@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 
 import 'core/router.dart';
 import 'firebase_options.dart';
@@ -23,11 +24,19 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-              scaffoldBackgroundColor: Colors.white, fontFamily: 'Pretendard'),
-          routerConfig: router,
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => ProfileEditBloc(),
+            ),
+          ],
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+                scaffoldBackgroundColor: Colors.white,
+                fontFamily: 'Pretendard'),
+            routerConfig: router,
+          ),
         );
       },
     );

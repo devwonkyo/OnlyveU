@@ -7,10 +7,10 @@ class CustomBottomNavBar extends StatelessWidget {
   final Color mainColor;
 
   const CustomBottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.mainColor,
-  }) : super(key: key);
+  });
 
   void _onTap(BuildContext context, int index) {
     switch (index) {
@@ -62,8 +62,7 @@ class CustomBottomNavBar extends StatelessWidget {
 class ScaffoldWithBottomNavBar extends StatelessWidget {
   final Widget child;
 
-  const ScaffoldWithBottomNavBar({Key? key, required this.child})
-      : super(key: key);
+  const ScaffoldWithBottomNavBar({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +83,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
     if (currentPath.startsWith('/home')) return 1;
     if (currentPath.startsWith('/history')) return 2;
     if (currentPath.startsWith('/my')) return 3;
+    if (currentPath.startsWith('/profile_edit')) return 3;
     return 1; // 기본값은 홈
   }
 }
