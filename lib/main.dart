@@ -1,21 +1,26 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; //^
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 
 import 'blocs/history/history_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 
-void main() async {
+main() async {
+  // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -33,6 +38,9 @@ class MyApp extends StatelessWidget {
                   // FirebaseFirestore.instance, // Firebase를 사용하는 경우
                   ),
             ),
+            BlocProvider(
+              create: (context) => ProfileEditBloc(),
+            ),
           ],
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
@@ -46,31 +54,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MultiBlocProvider(
-//       providers: [
-//         BlocProvider<HomeBloc>(
-//           create: (context) => HomeBloc(),
-//         ),
-//       ],
-//       child: MaterialApp.router(
-//         builder: (context, child) {
-//           ScreenUtil().init(context);
-//           return MediaQuery(
-//             data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-//             child: child!,
-//           );
-//         },
-//         theme: ThemeData(
-//           fontFamily: "Pretendard",
-//         ),
-//         routerConfig: router,
-//       ),
-//     );
-//   }
-// }
