@@ -26,12 +26,12 @@ class _SearchTextFieldState extends State<SearchTextField> {
         // 입력창
         decoration: InputDecoration(
           filled: true,
-          fillColor: Colors.grey[100],
+          fillColor: Colors.grey[200],
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           hintText: '상품, 브랜드, 성분 검색',
           hintStyle:
-              const TextStyle(color: Colors.grey, fontWeight: FontWeight.w200),
+              const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
           enabledBorder: OutlineInputBorder(
             borderSide: const BorderSide(
               color: Colors.transparent, // 테두리 색상을 투명하게 설정
