@@ -38,7 +38,7 @@ class RecommendedProductsWidget extends StatelessWidget {
         ),
         // 추천 상품 리스트뷰
         SizedBox(
-          height: isPortrait ? 400 : 240, // 세로/가로 모드에 따라 높이 설정
+          height: isPortrait ? 340 : 240, // 세로/가로 모드에 따라 높이 설정
           child: ListView.builder(
             scrollDirection: Axis.horizontal, // 가로 스크롤 설정
             itemCount: recommendedProducts.length, // 아이템 수
@@ -175,8 +175,7 @@ class RecommendedProductsWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 6),
-
+          SizedBox(height: 0),
           // 6. 좋아요와 장바구니 버튼
           Row(
             children: [

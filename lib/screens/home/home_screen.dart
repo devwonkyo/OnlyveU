@@ -87,6 +87,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     },
                   ),
                 ),
+
                 SliverToBoxAdapter(
                   child: BlocBuilder<HomeBloc, HomeState>(
                     buildWhen: (previous, current) =>
