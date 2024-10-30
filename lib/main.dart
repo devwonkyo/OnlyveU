@@ -4,6 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/cubit/category/category_cubit.dart';
+
 
 import 'blocs/history/history_bloc.dart';
 import 'core/router.dart';
@@ -40,6 +44,9 @@ class MyApp extends StatelessWidget {
             ),
             BlocProvider(
               create: (context) => ProfileEditBloc(),
+            ),
+            BlocProvider<CategoryCubit>(
+              create: (context) => CategoryCubit()..loadCategories(),
             ),
           ],
           child: MaterialApp.router(
