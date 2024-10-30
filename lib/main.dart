@@ -1,10 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'core/router.dart';
 import 'firebase_options.dart';
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
+
+void _signIn() async {
+  try {
+    // 이메일과 비밀번호로 로그인 시도
+    await _auth.signInWithEmailAndPassword(
+      email: 'your-email@example.com', // 사용자의 이메일 입력값
+      password: 'your-password', // 사용자의 비밀번호 입력값
+    );
+  } catch (e) {
+    print("Error signing in: $e");
+  }
+}
+
+void _signOut() async {
+  await _auth.signOut();
+}
 
 main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
@@ -13,7 +31,6 @@ main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -84,19 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
