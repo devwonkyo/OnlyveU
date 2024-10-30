@@ -62,3 +62,9 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
+
+/*
+언젠가 할일
+- search_text_field의 x와 돋보기 아이콘 간격 줄이기 (뭘해도안됌);
+
+ */
