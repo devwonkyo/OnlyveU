@@ -16,6 +16,12 @@ class RefreshHomeData extends HomeEvent {}
 // 더 많은 상품 데이터를 로드할 때 발생하는 이벤트
 class LoadMoreProducts extends HomeEvent {}
 
+// 좋아요 토글 이벤트
+class ToggleProductFavorite extends HomeEvent {
+  final HistoryItem item;
+  ToggleProductFavorite(this.item);
+}
+
 // 상태 정의 - HomeState는 홈 화면의 상태를 나타내는 기본 클래스 역할
 abstract class HomeState {}
 
@@ -102,6 +108,54 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         ));
       } catch (e) {
         emit(HomeError('데이터를 불러오는데 실패했습니다.'));
+      }
+    });
+
+    on<ToggleProductFavorite>((event, emit) {
+      if (state is HomeLoaded) {
+        final currentState = state as HomeLoaded;
+
+        final updatedRecommended = currentState.recommendedProducts.map((item) {
+          if (item.id == event.item.id) {
+            return HistoryItem(
+              id: item.id,
+              title: item.title,
+              imageUrl: item.imageUrl,
+              price: item.price,
+              originalPrice: item.originalPrice,
+              discountRate: item.discountRate,
+              isBest: item.isBest,
+              isFavorite: !item.isFavorite,
+              rating: item.rating,
+              reviewCount: item.reviewCount,
+            );
+          }
+          return item;
+        }).toList();
+
+        final updatedPopular = currentState.popularProducts.map((item) {
+          if (item.id == event.item.id) {
+            return HistoryItem(
+              id: item.id,
+              title: item.title,
+              imageUrl: item.imageUrl,
+              price: item.price,
+              originalPrice: item.originalPrice,
+              discountRate: item.discountRate,
+              isBest: item.isBest,
+              isFavorite: !item.isFavorite,
+              rating: item.rating,
+              reviewCount: item.reviewCount,
+            );
+          }
+          return item;
+        }).toList();
+
+        emit(HomeLoaded(
+          bannerItems: currentState.bannerItems,
+          recommendedProducts: updatedRecommended,
+          popularProducts: updatedPopular,
+        ));
       }
     });
 

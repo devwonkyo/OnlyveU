@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -41,14 +43,14 @@ class RecommendedProductsWidget extends StatelessWidget {
             scrollDirection: Axis.horizontal, // 가로 스크롤 설정
             itemCount: recommendedProducts.length, // 아이템 수
             padding: EdgeInsets.symmetric(horizontal: 16), // 가로 패딩
-            itemBuilder: (context, index) => _buildProductCard(index),
+            itemBuilder: (context, index) => _buildProductCard(index, context),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildProductCard(int index) {
+  Widget _buildProductCard(int index, BuildContext context) {
     final item = recommendedProducts[index];
     return Container(
       width: 150, // 카드 너비 고정
@@ -180,13 +182,13 @@ class RecommendedProductsWidget extends StatelessWidget {
             children: [
               IconButton(
                 icon: Icon(
-                  item.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border, // 좋아요 상태에 따라 아이콘 변경
+                  item.isFavorite ? Icons.favorite : Icons.favorite_border,
                   size: 18,
                   color: item.isFavorite ? Colors.red : Colors.grey,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  context.read<HomeBloc>().add(ToggleProductFavorite(item));
+                },
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
               ),
