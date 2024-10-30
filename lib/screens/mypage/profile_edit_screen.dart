@@ -21,7 +21,7 @@ class ProfileEditScreen extends StatelessWidget {
         ),
         leading: IconButton(
           onPressed: () {
-            // context.pop();
+            context.pop();
           },
           icon: const Icon(
             Icons.arrow_back_ios,
