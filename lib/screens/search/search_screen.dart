@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/search_text_field.dart';
+import 'widgets/before_search_widgets.dart';
+import 'widgets/search_text_field.dart';
 
 class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
+
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -36,7 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(50.0), // 검색창의 높이 설정
             child: Padding(
-              padding: const EdgeInsets.only(right: 20, left: 20, bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SearchTextField(
                 controller: _messageController,
                 onPressed: () => _sendMessage(),
@@ -44,7 +47,17 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
         ),
-        body: Placeholder(),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(top: 10, left: 20),
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                BeforeSearchWidgets(),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
