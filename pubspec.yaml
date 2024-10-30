@@ -44,6 +44,8 @@ dependencies:
   flutter_bloc: ^8.1.6
   bloc: ^8.1.2
   meta: ^1.9.1
+  flutter_screenutil: ^5.9.3
+  shimmer: ^3.0.0
 
 
 dev_dependencies:
