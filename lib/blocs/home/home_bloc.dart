@@ -65,8 +65,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitial()) {
     // 이벤트 발생 시 실행될 핸들러를 등록
     on<LoadHomeData>(_onLoadHomeData); // LoadHomeData 이벤트 처리
-    on<RefreshHomeData>(_onRefreshHomeData); // RefreshHomeData 이벤트 처리
-    on<LoadMoreProducts>(_onLoadMoreProducts); // LoadMoreProducts 이벤트 처리
+    //on<RefreshHomeData>(_onRefreshHomeData); // RefreshHomeData 이벤트 처리
+    //on<LoadMoreProducts>(_onLoadMoreProducts); // LoadMoreProducts 이벤트 처리
   }
 
   // LoadHomeData 이벤트 핸들러
@@ -118,39 +118,38 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(HomeError('데이터를 불러오는데 실패했습니다.'));
     }
   }
-
   // RefreshHomeData 이벤트 핸들러
-  Future<void> _onRefreshHomeData(
-      RefreshHomeData event, Emitter<HomeState> emit) async {
-    // 현재 상태가 HomeLoaded인 경우만 새로고침
-    if (state is HomeLoaded) {
-      final currentState = state as HomeLoaded;
-      emit(currentState.copyWith(isLoading: true)); // 새로고침 로딩 상태로 전환
-      try {
-        // 새로운 데이터를 불러오는 로직 (시뮬레이션으로 딜레이 추가)
-        await Future.delayed(Duration(seconds: 1));
-        emit(currentState.copyWith(isLoading: false)); // 로딩 완료 상태로 전환
-      } catch (e) {
-        emit(HomeError('새로고침에 실패했습니다.')); // 에러 상태로 전환
-      }
-    }
-  }
+  // Future<void> _onRefreshHomeData(
+  //     RefreshHomeData event, Emitter<HomeState> emit) async {
+  //   // 현재 상태가 HomeLoaded인 경우만 새로고침
+  //   if (state is HomeLoaded) {
+  //     final currentState = state as HomeLoaded;
+  //     emit(currentState.copyWith(isLoading: true)); // 새로고침 로딩 상태로 전환
+  //     try {
+  //       // 새로운 데이터를 불러오는 로직 (시뮬레이션으로 딜레이 추가)
+  //       await Future.delayed(Duration(seconds: 1));
+  //       emit(currentState.copyWith(isLoading: false)); // 로딩 완료 상태로 전환
+  //     } catch (e) {
+  //       emit(HomeError('새로고침에 실패했습니다.')); // 에러 상태로 전환
+  //     }
+  //   }
+  // }
 
-  // LoadMoreProducts 이벤트 핸들러
-  Future<void> _onLoadMoreProducts(
-      LoadMoreProducts event, Emitter<HomeState> emit) async {
-    // 현재 상태가 HomeLoaded인 경우만 추가 로드
-    if (state is HomeLoaded) {
-      final currentState = state as HomeLoaded;
-      emit(currentState.copyWith(isLoading: true)); // 로딩 상태 전환
-      try {
-        // 추가 상품을 불러오는 로직 (시뮬레이션으로 딜레이 추가)
-        await Future.delayed(Duration(seconds: 1));
-        // 여기에 추가 상품 로드 로직 구현 (현재는 로직 없음)
-        emit(currentState.copyWith(isLoading: false)); // 로딩 완료 상태 전환
-      } catch (e) {
-        emit(HomeError('추가 상품을 불러오는데 실패했습니다.')); // 에러 상태로 전환
-      }
-    }
-  }
+  // // LoadMoreProducts 이벤트 핸들러
+  // Future<void> _onLoadMoreProducts(
+  //     LoadMoreProducts event, Emitter<HomeState> emit) async {
+  //   // 현재 상태가 HomeLoaded인 경우만 추가 로드
+  //   if (state is HomeLoaded) {
+  //     final currentState = state as HomeLoaded;
+  //     emit(currentState.copyWith(isLoading: true)); // 로딩 상태 전환
+  //     try {
+  //       // 추가 상품을 불러오는 로직 (시뮬레이션으로 딜레이 추가)
+  //       await Future.delayed(Duration(seconds: 1));
+  //       // 여기에 추가 상품 로드 로직 구현 (현재는 로직 없음)
+  //       emit(currentState.copyWith(isLoading: false)); // 로딩 완료 상태 전환
+  //     } catch (e) {
+  //       emit(HomeError('추가 상품을 불러오는데 실패했습니다.')); // 에러 상태로 전환
+  //     }
+  //   }
+  // }
 }
