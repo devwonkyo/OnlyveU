@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../models/home_model.dart';
+import 'package:onlyveyou/models/history_item.dart';
+import 'package:onlyveyou/models/home_model.dart';
+import 'package:onlyveyou/screens/history/widgets/dummy_history.dart';
 
 // 이벤트 정의 - HomeEvent는 홈 화면에서 발생하는 이벤트의 기본 클래스 역할
 abstract class HomeEvent {}
@@ -27,22 +28,22 @@ class HomeLoading extends HomeState {}
 // 로드 완료 상태 - 데이터가 로드된 상태를 나타냄
 class HomeLoaded extends HomeState {
   final List<BannerItem> bannerItems; // 배너 아이템 목록
-  final List<String> recommendedProducts; // 추천 상품 목록
-  final List<String> popularProducts; // 인기 상품 목록
+  final List<HistoryItem> recommendedProducts; // 추천 상품 목록
+  final List<HistoryItem> popularProducts; // 인기 상품 목록
   final bool isLoading; // 로딩 상태 여부
 
   HomeLoaded({
     required this.bannerItems,
     required this.recommendedProducts,
     required this.popularProducts,
-    this.isLoading = false, // 기본값 false로 로딩 상태 초기화
+    this.isLoading = false,
   });
 
   // 상태를 복사하면서 일부 속성을 변경할 수 있는 메서드 (Immutable한 상태 유지)
   HomeLoaded copyWith({
     List<BannerItem>? bannerItems,
-    List<String>? recommendedProducts,
-    List<String>? popularProducts,
+    List<HistoryItem>? recommendedProducts,
+    List<HistoryItem>? popularProducts,
     bool? isLoading,
   }) {
     return HomeLoaded(
@@ -56,100 +57,80 @@ class HomeLoaded extends HomeState {
 
 // 에러 상태 - 데이터 로드 실패 시 사용
 class HomeError extends HomeState {
-  final String message; // 오류 메시지
-  HomeError(this.message); // 메시지를 필수로 받음
+  final String message;
+  HomeError(this.message);
 }
 
 // 홈 화면에 대한 BLoC 클래스
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(HomeInitial()) {
-    // 이벤트 발생 시 실행될 핸들러를 등록
-    on<LoadHomeData>(_onLoadHomeData); // LoadHomeData 이벤트 처리
-    //on<RefreshHomeData>(_onRefreshHomeData); // RefreshHomeData 이벤트 처리
-    //on<LoadMoreProducts>(_onLoadMoreProducts); // LoadMoreProducts 이벤트 처리
+    on<LoadHomeData>((event, emit) async {
+      emit(HomeLoading());
+      try {
+        // 배너 데이터는 그대로 유지
+        final bannerItems = [
+          BannerItem(
+            title: '럭키 럭스에디트\n최대 2만원 혜택',
+            subtitle: '쿠폰부터 100% 리워드까지',
+            backgroundColor: Colors.black,
+          ),
+          BannerItem(
+            title: '가을 준비하기\n최대 50% 할인',
+            subtitle: '시즌 프리뷰 특가전',
+            backgroundColor: Color(0xFF8B4513),
+          ),
+          BannerItem(
+            title: '이달의 브랜드\n특별 기획전',
+            subtitle: '인기 브랜드 혜택 모음',
+            backgroundColor: Color(0xFF4A90E2),
+          ),
+        ];
+
+        // dummyHistoryItems에서 데이터 가져오기
+        final allItems = List<HistoryItem>.from(dummyHistoryItems);
+
+        // 추천 상품: 전체 아이템을 추천 상품으로 사용
+        final recommendedProducts = allItems;
+
+        // 인기 상품: isBest가 true인 아이템만 필터링
+        final popularProducts = allItems.where((item) => item.isBest).toList();
+
+        emit(HomeLoaded(
+          bannerItems: bannerItems,
+          recommendedProducts: recommendedProducts,
+          popularProducts: popularProducts,
+        ));
+      } catch (e) {
+        emit(HomeError('데이터를 불러오는데 실패했습니다.'));
+      }
+    });
+
+    // 새로고침 이벤트 핸들러
+    on<RefreshHomeData>((event, emit) async {
+      if (state is HomeLoaded) {
+        final currentState = state as HomeLoaded;
+        emit(currentState.copyWith(isLoading: true));
+        try {
+          await Future.delayed(Duration(seconds: 1)); // 새로고침 시뮬레이션
+          emit(currentState.copyWith(isLoading: false));
+        } catch (e) {
+          emit(HomeError('새로고침에 실패했습니다.'));
+        }
+      }
+    });
+
+    // 더 많은 상품 로드 이벤트 핸들러
+    on<LoadMoreProducts>((event, emit) async {
+      if (state is HomeLoaded) {
+        final currentState = state as HomeLoaded;
+        emit(currentState.copyWith(isLoading: true));
+        try {
+          await Future.delayed(Duration(seconds: 1)); // 로딩 시뮬레이션
+          emit(currentState.copyWith(isLoading: false));
+        } catch (e) {
+          emit(HomeError('추가 상품을 불러오는데 실패했습니다.'));
+        }
+      }
+    });
   }
-
-  // LoadHomeData 이벤트 핸들러
-  Future<void> _onLoadHomeData(
-      LoadHomeData event, Emitter<HomeState> emit) async {
-    emit(HomeLoading()); // 로딩 상태로 전환
-    try {
-      // 실제 데이터 로드 로직 (이 예제에서는 가상의 데이터를 사용)
-      final bannerItems = [
-        BannerItem(
-          title: '럭키 럭스에디트\n최대 2만원 혜택',
-          subtitle: '쿠폰부터 100% 리워드까지',
-          backgroundColor: Colors.black,
-        ),
-        BannerItem(
-          title: '가을 준비하기\n최대 50% 할인',
-          subtitle: '시즌 프리뷰 특가전',
-          backgroundColor: Color(0xFF8B4513),
-        ),
-        BannerItem(
-          title: '이달의 브랜드\n특별 기획전',
-          subtitle: '인기 브랜드 혜택 모음',
-          backgroundColor: Color(0xFF4A90E2),
-        ),
-      ];
-
-      final recommendedProducts = [
-        'assets/image/skin2.webp',
-        'assets/image/skin3.webp',
-        'assets/image/skin4.webp',
-        'assets/image/banner3.png',
-      ];
-
-      final popularProducts = [
-        'assets/image/banner3.png',
-        'assets/image/skin2.webp',
-        'assets/image/skin3.webp',
-        'assets/image/skin4.webp',
-      ];
-
-      // 데이터 로드 완료 상태로 전환
-      emit(HomeLoaded(
-        bannerItems: bannerItems,
-        recommendedProducts: recommendedProducts,
-        popularProducts: popularProducts,
-      ));
-    } catch (e) {
-      // 데이터 로드 실패 시 에러 상태로 전환
-      emit(HomeError('데이터를 불러오는데 실패했습니다.'));
-    }
-  }
-  // RefreshHomeData 이벤트 핸들러
-  // Future<void> _onRefreshHomeData(
-  //     RefreshHomeData event, Emitter<HomeState> emit) async {
-  //   // 현재 상태가 HomeLoaded인 경우만 새로고침
-  //   if (state is HomeLoaded) {
-  //     final currentState = state as HomeLoaded;
-  //     emit(currentState.copyWith(isLoading: true)); // 새로고침 로딩 상태로 전환
-  //     try {
-  //       // 새로운 데이터를 불러오는 로직 (시뮬레이션으로 딜레이 추가)
-  //       await Future.delayed(Duration(seconds: 1));
-  //       emit(currentState.copyWith(isLoading: false)); // 로딩 완료 상태로 전환
-  //     } catch (e) {
-  //       emit(HomeError('새로고침에 실패했습니다.')); // 에러 상태로 전환
-  //     }
-  //   }
-  // }
-
-  // // LoadMoreProducts 이벤트 핸들러
-  // Future<void> _onLoadMoreProducts(
-  //     LoadMoreProducts event, Emitter<HomeState> emit) async {
-  //   // 현재 상태가 HomeLoaded인 경우만 추가 로드
-  //   if (state is HomeLoaded) {
-  //     final currentState = state as HomeLoaded;
-  //     emit(currentState.copyWith(isLoading: true)); // 로딩 상태 전환
-  //     try {
-  //       // 추가 상품을 불러오는 로직 (시뮬레이션으로 딜레이 추가)
-  //       await Future.delayed(Duration(seconds: 1));
-  //       // 여기에 추가 상품 로드 로직 구현 (현재는 로직 없음)
-  //       emit(currentState.copyWith(isLoading: false)); // 로딩 완료 상태 전환
-  //     } catch (e) {
-  //       emit(HomeError('추가 상품을 불러오는데 실패했습니다.')); // 에러 상태로 전환
-  //     }
-  //   }
-  // }
 }
