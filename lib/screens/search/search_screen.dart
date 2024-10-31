@@ -63,8 +63,8 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             children: [
               context.watch<TagSearchCubit>().state.searchTerm.isEmpty
-                  ? SearchMain()
-                  : ShowTags(),
+                  ? const SearchMain()
+                  : const ShowTags(),
             ],
           ),
         ),
