@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
+
+import '../../../utils/debounce.dart';
 
 class SearchTextField extends StatefulWidget {
   const SearchTextField({
@@ -14,6 +18,8 @@ class SearchTextField extends StatefulWidget {
 }
 
 class _SearchTextFieldState extends State<SearchTextField> {
+  final debounce = Debounce(milliseconds: 500);
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -22,7 +28,15 @@ class _SearchTextFieldState extends State<SearchTextField> {
       child: TextField(
         maxLines: 1,
         controller: widget.controller,
-        onChanged: (value) => setState(() {}),
+        onChanged: (String? newSearchTerm) {
+          if (newSearchTerm != null) {
+            setState(() {
+              debounce.run(() {
+                context.read<TagSearchCubit>().setSearchTerm(newSearchTerm);
+              });
+            });
+          }
+        },
         // 입력창
         decoration: InputDecoration(
           filled: true,
@@ -34,25 +48,41 @@ class _SearchTextFieldState extends State<SearchTextField> {
               const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
           enabledBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: Colors.transparent, // 테두리 색상을 투명하게 설정
+              color: Colors.transparent,
             ),
             borderRadius: BorderRadius.circular(25),
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: Colors.transparent, // 테두리 색상을 투명하게 설정
+              color: Colors.transparent,
             ),
             borderRadius: BorderRadius.circular(25),
           ),
           // 보내기 버튼
-          suffixIcon: Visibility(
-            visible: widget.controller.text.isNotEmpty,
-            child: IconButton(
-              onPressed: widget.onPressed,
-              icon: const Icon(
-                Icons.search_sharp,
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Visibility(
+                visible: widget.controller.text.isNotEmpty,
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      widget.controller.clear();
+                    });
+                  },
+                  icon: Icon(
+                    Icons.cancel,
+                    color: Colors.grey[400],
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                onPressed: widget.onPressed,
+                icon: const Icon(
+                  Icons.search,
+                ),
+              ),
+            ],
           ),
         ),
       ),

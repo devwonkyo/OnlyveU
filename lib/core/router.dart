@@ -8,6 +8,8 @@ import 'package:onlyveyou/screens/category/category_product_list_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home_screen.dart';
+import 'package:onlyveyou/screens/home/more_popular_screen.dart';
+import 'package:onlyveyou/screens/home/more_recommended_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/profile_edit_screen.dart';
 
@@ -44,7 +46,8 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          builder: (context, state) => SearchScreen(),
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, const SearchScreen()),
         ),
       ],
     ),
@@ -68,8 +71,19 @@ final GoRouter router = GoRouter(
       builder: (context, state) => FindIdScreen(),
     ),
     GoRoute(
-      path: '/categroy/productlist',
-      builder: (context, state) => CategoryProductListScreen(),
+      path: '/more-recommended',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        MoreRecommendedScreen(),
+      ),
+    ),
+    GoRoute(
+      //장바구니, 파이어베이스에 프로덕트 5개 연동해보기
+      path: '/more-popular',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        MorePopularScreen(),
+      ),
     ),
   ],
 );
