@@ -9,6 +9,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
+      scrolledUnderElevation: 0,
       elevation: 0,
       title: Row(
         children: [
