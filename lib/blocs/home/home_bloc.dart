@@ -1,42 +1,36 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/models/home_model.dart';
-import 'package:onlyveyou/screens/history/widgets/dummy_history.dart';
+import 'package:onlyveyou/models/product_model.dart';
 
-// 이벤트 정의 - HomeEvent는 홈 화면에서 발생하는 이벤트의 기본 클래스 역할
+// 이벤트 정의
 abstract class HomeEvent {}
 
-// 홈 데이터를 처음 로드할 때 발생하는 이벤트
 class LoadHomeData extends HomeEvent {}
 
-// 홈 데이터를 새로고침할 때 발생하는 이벤트
 class RefreshHomeData extends HomeEvent {}
 
-// 더 많은 상품 데이터를 로드할 때 발생하는 이벤트
 class LoadMoreProducts extends HomeEvent {}
 
-// 좋아요 토글 이벤트
 class ToggleProductFavorite extends HomeEvent {
-  final HistoryItem item;
-  ToggleProductFavorite(this.item);
+  final ProductModel product;
+  final String userId;
+  ToggleProductFavorite(this.product, this.userId);
 }
 
-// 상태 정의 - HomeState는 홈 화면의 상태를 나타내는 기본 클래스 역할
+// 상태 정의
 abstract class HomeState {}
 
-// 초기 상태 - 화면에 아무것도 로드되지 않았을 때 사용
 class HomeInitial extends HomeState {}
 
-// 로딩 상태 - 데이터 로딩 중을 나타냄
 class HomeLoading extends HomeState {}
 
-// 로드 완료 상태 - 데이터가 로드된 상태를 나타냄
 class HomeLoaded extends HomeState {
-  final List<BannerItem> bannerItems; // 배너 아이템 목록
-  final List<HistoryItem> recommendedProducts; // 추천 상품 목록
-  final List<HistoryItem> popularProducts; // 인기 상품 목록
-  final bool isLoading; // 로딩 상태 여부
+  final List<BannerItem> bannerItems;
+  final List<ProductModel> recommendedProducts;
+  final List<ProductModel> popularProducts;
+  final bool isLoading;
 
   HomeLoaded({
     required this.bannerItems,
@@ -45,11 +39,10 @@ class HomeLoaded extends HomeState {
     this.isLoading = false,
   });
 
-  // 상태를 복사하면서 일부 속성을 변경할 수 있는 메서드 (Immutable한 상태 유지)
   HomeLoaded copyWith({
     List<BannerItem>? bannerItems,
-    List<HistoryItem>? recommendedProducts,
-    List<HistoryItem>? popularProducts,
+    List<ProductModel>? recommendedProducts,
+    List<ProductModel>? popularProducts,
     bool? isLoading,
   }) {
     return HomeLoaded(
@@ -61,19 +54,24 @@ class HomeLoaded extends HomeState {
   }
 }
 
-// 에러 상태 - 데이터 로드 실패 시 사용
 class HomeError extends HomeState {
   final String message;
   HomeError(this.message);
 }
 
-// 홈 화면에 대한 BLoC 클래스
+// HomeBloc 구현
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc() : super(HomeInitial()) {
+  final FirebaseFirestore _firestore;
+
+  HomeBloc({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        super(HomeInitial()) {
+    // LoadHomeData 이벤트 핸들러
+    // LoadHomeData 이벤트 핸들러
     on<LoadHomeData>((event, emit) async {
       emit(HomeLoading());
       try {
-        // 배너 데이터는 그대로 유지
+        // 배너 데이터
         final bannerItems = [
           BannerItem(
             title: '럭키 럭스에디트\n최대 2만원 혜택',
@@ -92,14 +90,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ),
         ];
 
-        // dummyHistoryItems에서 데이터 가져오기
-        final allItems = List<HistoryItem>.from(dummyHistoryItems);
+        // Firestore에서 상품 데이터 가져오기
+        final QuerySnapshot recommendedSnapshot =
+            await _firestore.collection('products').limit(5).get(); //^
 
-        // 추천 상품: 전체 아이템을 추천 상품으로 사용
-        final recommendedProducts = allItems;
+        // 인기 상품을 상위 5개로 가져오도록 설정
+        final QuerySnapshot popularSnapshot =
+            await _firestore.collection('products').limit(5).get(); //^
 
-        // 인기 상품: isBest가 true인 아이템만 필터링
-        final popularProducts = allItems.where((item) => item.isBest).toList();
+        print(
+            "Recommended products fetched: ${recommendedSnapshot.docs.length}"); //^
+        print("Popular products fetched: ${popularSnapshot.docs.length}"); //^
+
+        // 추천 상품 변환
+        final recommendedProducts = recommendedSnapshot.docs
+            .map((doc) => ProductModel.fromFirestore(doc))
+            .toList();
+
+        // 인기 상품 변환
+        final popularProducts = popularSnapshot.docs
+            .map((doc) => ProductModel.fromFirestore(doc))
+            .toList();
 
         emit(HomeLoaded(
           bannerItems: bannerItems,
@@ -107,82 +118,110 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           popularProducts: popularProducts,
         ));
       } catch (e) {
+        print('Error loading home data: $e'); //^
         emit(HomeError('데이터를 불러오는데 실패했습니다.'));
       }
     });
 
-    on<ToggleProductFavorite>((event, emit) {
+    // ToggleProductFavorite 이벤트 핸들러
+    on<ToggleProductFavorite>((event, emit) async {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
+        try {
+          // 현재 favoriteList 가져오기
+          List<String> updatedFavoriteList =
+              List<String>.from(event.product.favoriteList);
 
-        final updatedRecommended = currentState.recommendedProducts.map((item) {
-          if (item.id == event.item.id) {
-            return HistoryItem(
-              id: item.id,
-              title: item.title,
-              imageUrl: item.imageUrl,
-              price: item.price,
-              originalPrice: item.originalPrice,
-              discountRate: item.discountRate,
-              isBest: item.isBest,
-              isFavorite: !item.isFavorite,
-              rating: item.rating,
-              reviewCount: item.reviewCount,
-            );
+          // userId가 이미 있으면 제거, 없으면 추가
+          if (updatedFavoriteList.contains(event.userId)) {
+            updatedFavoriteList.remove(event.userId);
+          } else {
+            updatedFavoriteList.add(event.userId);
           }
-          return item;
-        }).toList();
 
-        final updatedPopular = currentState.popularProducts.map((item) {
-          if (item.id == event.item.id) {
-            return HistoryItem(
-              id: item.id,
-              title: item.title,
-              imageUrl: item.imageUrl,
-              price: item.price,
-              originalPrice: item.originalPrice,
-              discountRate: item.discountRate,
-              isBest: item.isBest,
-              isFavorite: !item.isFavorite,
-              rating: item.rating,
-              reviewCount: item.reviewCount,
-            );
-          }
-          return item;
-        }).toList();
+          // Firestore 업데이트
+          await _firestore
+              .collection('products')
+              .doc(event.product.productId)
+              .update({'favoriteList': updatedFavoriteList});
 
-        emit(HomeLoaded(
-          bannerItems: currentState.bannerItems,
-          recommendedProducts: updatedRecommended,
-          popularProducts: updatedPopular,
-        ));
+          // 로컬 상태 업데이트
+          final updatedRecommended =
+              currentState.recommendedProducts.map((product) {
+            if (product.productId == event.product.productId) {
+              return event.product.copyWith(
+                favoriteList: updatedFavoriteList,
+              );
+            }
+            return product;
+          }).toList();
+
+          final updatedPopular = currentState.popularProducts.map((product) {
+            if (product.productId == event.product.productId) {
+              return event.product.copyWith(
+                favoriteList: updatedFavoriteList,
+              );
+            }
+            return product;
+          }).toList();
+
+          emit(HomeLoaded(
+            bannerItems: currentState.bannerItems,
+            recommendedProducts: updatedRecommended,
+            popularProducts: updatedPopular,
+          ));
+        } catch (e) {
+          print('Error toggling favorite: $e');
+        }
       }
     });
 
-    // 새로고침 이벤트 핸들러
+    // RefreshHomeData 이벤트 핸들러
     on<RefreshHomeData>((event, emit) async {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
         emit(currentState.copyWith(isLoading: true));
+
         try {
-          await Future.delayed(Duration(seconds: 1)); // 새로고침 시뮬레이션
-          emit(currentState.copyWith(isLoading: false));
+          // 데이터 새로 로드
+          add(LoadHomeData());
         } catch (e) {
+          print('Error refreshing data: $e');
           emit(HomeError('새로고침에 실패했습니다.'));
         }
       }
     });
 
-    // 더 많은 상품 로드 이벤트 핸들러
+    // LoadMoreProducts 이벤트 핸들러
     on<LoadMoreProducts>((event, emit) async {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
         emit(currentState.copyWith(isLoading: true));
+
         try {
-          await Future.delayed(Duration(seconds: 1)); // 로딩 시뮬레이션
-          emit(currentState.copyWith(isLoading: false));
+          // 추가 상품 로드 로직
+          final lastProduct = currentState.recommendedProducts.last;
+
+          final QuerySnapshot moreProducts = await _firestore
+              .collection('products')
+              .startAfter([lastProduct.productId])
+              .limit(5)
+              .get();
+
+          final newProducts = moreProducts.docs
+              .map((doc) => ProductModel.fromFirestore(doc))
+              .toList();
+
+          emit(currentState.copyWith(
+            recommendedProducts: [
+              ...currentState.recommendedProducts,
+              ...newProducts
+            ],
+            isLoading: false,
+          ));
         } catch (e) {
-          emit(HomeError('추가 상품을 불러오는데 실패했습니다.'));
+          print('Error loading more products: $e');
+          emit(currentState.copyWith(isLoading: false));
         }
       }
     });

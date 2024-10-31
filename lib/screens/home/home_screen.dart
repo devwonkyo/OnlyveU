@@ -2,32 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/widgets/recommended_products_widget.dart';
 import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final PageController _pageController = PageController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
+    _scrollController.addListener(_onScroll);
     context.read<HomeBloc>().add(LoadHomeData());
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _pageController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<HomeBloc>().add(LoadMoreProducts());
+    }
   }
 
   @override
@@ -40,60 +51,36 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           children: [
             _buildTabBar(),
             Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: _buildQuickMenu(
-                      MediaQuery.of(context).orientation ==
-                          Orientation.portrait,
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: BlocBuilder<HomeBloc, HomeState>(
-                      buildWhen: (previous, current) =>
-                          current is HomeLoaded || current is HomeLoading,
-                      builder: (context, state) {
-                        if (state is HomeLoading) {
-                          return Center(child: CircularProgressIndicator());
-                        } else if (state is HomeLoaded) {
-                          return RecommendedProductsWidget(
-                            recommendedProducts: state.recommendedProducts,
-                            isPortrait: MediaQuery.of(context).orientation ==
-                                Orientation.portrait,
-                          );
-                        }
-                        return SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: InkWell(
-                      onTap: () => print("쿠폰 눌림"),
-                      child: Image.asset(
-                        'assets/image/banner4.png',
-                        width: MediaQuery.of(context).size.width * 0.95,
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  context.read<HomeBloc>().add(RefreshHomeData());
+                },
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _buildQuickMenu(
+                        MediaQuery.of(context).orientation ==
+                            Orientation.portrait,
                       ),
                     ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: BlocBuilder<HomeBloc, HomeState>(
-                      buildWhen: (previous, current) =>
-                          current is HomeLoaded || current is HomeLoading,
-                      builder: (context, state) {
-                        if (state is HomeLoading) {
-                          return Center(child: CircularProgressIndicator());
-                        } else if (state is HomeLoaded) {
-                          return PopularProductsWidget(
-                            popularProducts: state.popularProducts,
-                            isPortrait: MediaQuery.of(context).orientation ==
-                                Orientation.portrait,
-                          );
-                        }
-                        return SizedBox.shrink();
-                      },
+                    _buildRecommendedProducts(),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        child: InkWell(
+                          onTap: () => print("쿠폰 눌림"),
+                          child: Image.asset(
+                            'assets/image/banner4.png',
+                            width: MediaQuery.of(context).size.width * 0.95,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    _buildPopularProducts(),
+                    _buildLoadingIndicator(),
+                  ],
+                ),
               ),
             ),
           ],
@@ -162,6 +149,63 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         SizedBox(height: 4.h),
         Text(label, style: AppStyles.smallTextStyle),
       ],
+    );
+  }
+
+  Widget _buildRecommendedProducts() {
+    return SliverToBoxAdapter(
+      child: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          if (state is HomeLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (state is HomeLoaded) {
+            return RecommendedProductsWidget(
+              recommendedProducts:
+                  state.recommendedProducts, // ProductModel로 수정
+              isPortrait:
+                  MediaQuery.of(context).orientation == Orientation.portrait,
+              userId: "userId_here", // userId 전달, 실제 로그인 구현 시 사용자 ID로 대체
+            );
+          }
+          return SizedBox.shrink();
+        },
+      ),
+    );
+  }
+
+  Widget _buildPopularProducts() {
+    return SliverToBoxAdapter(
+      child: BlocSelector<HomeBloc, HomeState, List<ProductModel>>(
+        selector: (state) => state is HomeLoaded ? state.popularProducts : [],
+        builder: (context, products) {
+          return products.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : PopularProductsWidget(
+                  popularProducts: products,
+                  isPortrait: MediaQuery.of(context).orientation ==
+                      Orientation.portrait,
+                );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return BlocSelector<HomeBloc, HomeState, bool>(
+      selector: (state) => state is HomeLoaded && state.isLoading,
+      builder: (context, isLoading) {
+        return SliverToBoxAdapter(
+          child: isLoading
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.h),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : SizedBox.shrink(),
+        );
+      },
     );
   }
 }
