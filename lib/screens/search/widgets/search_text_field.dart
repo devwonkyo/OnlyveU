@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 
 class SearchTextField extends StatefulWidget {
-  SearchTextField({
+  const SearchTextField({
     super.key,
     required this.controller,
     required this.onPressed,
@@ -19,8 +17,6 @@ class SearchTextField extends StatefulWidget {
 }
 
 class _SearchTextFieldState extends State<SearchTextField> {
-  final debounce = Debounce(milliseconds: 500);
-
   @override
   void dispose() {
     widget.controller.clear();
@@ -32,17 +28,13 @@ class _SearchTextFieldState extends State<SearchTextField> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity, // 원하는 너비 설정
-      height: 38.h, // 원하는 높이 설정
+      height: 40.h, // 원하는 높이 설정
       child: TextField(
         minLines: 1,
         maxLines: 1,
         controller: widget.controller,
-        onChanged: (String? newSearchTerm) {
-          if (newSearchTerm != null) {
-            debounce.run(() {
-              context.read<TagSearchCubit>().setSearchTerm(newSearchTerm);
-            });
-          }
+        onChanged: (newSearchTerm) {
+          context.read<TagSearchCubit>().setSearchTerm(newSearchTerm);
         },
         // 입력창
         decoration: InputDecoration(
@@ -93,22 +85,5 @@ class _SearchTextFieldState extends State<SearchTextField> {
         ),
       ),
     );
-  }
-}
-
-class Debounce {
-  final int milliseconds;
-  Debounce({
-    required this.milliseconds,
-  });
-
-  Timer? _timer;
-
-  void run(VoidCallback action) {
-    if (_timer != null) {
-      _timer!.cancel();
-    }
-
-    _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }

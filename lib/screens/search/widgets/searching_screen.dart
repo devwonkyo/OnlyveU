@@ -10,19 +10,24 @@ class SearchingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final tags = context.watch<FilteredTagsCubit>().state.filteredTags;
 
-    return ListView.builder(
-      primary: false,
-      shrinkWrap: true,
-      itemCount: tags.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(tags[index].name),
-          onTap: () {
-            context.read<TagSearchCubit>().setSearchTerm(tags[index].name);
-            FocusScope.of(context).unfocus();
-          },
-        );
+    return BlocListener<TagSearchCubit, TagSearchState>(
+      listener: (context, state) {
+        context.read<FilteredTagsCubit>().setFilteredTodos(state.searchTerm);
       },
+      child: ListView.builder(
+        primary: false,
+        shrinkWrap: true,
+        itemCount: tags.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(tags[index].name),
+            onTap: () {
+              context.read<TagSearchCubit>().setSearchTerm(tags[index].name);
+              FocusScope.of(context).unfocus();
+            },
+          );
+        },
+      ),
     );
   }
 }
