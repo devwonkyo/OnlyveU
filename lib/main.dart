@@ -13,6 +13,7 @@ import 'package:onlyveyou/blocs/search/tag_list/tag_list_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
+import 'package:onlyveyou/repositories/history_repository.dart';
 
 import 'blocs/history/history_bloc.dart';
 import 'core/router.dart';
@@ -51,8 +52,9 @@ class MyApp extends StatelessWidget {
             ),
             BlocProvider<HistoryBloc>(
               create: (context) => HistoryBloc(
-                  // FirebaseFirestore.instance, // Firebase를 사용하는 경우
-                  ),
+                repository:
+                    HistoryRepository(), // HistoryRepository 인스턴스 전달// FirebaseFirestore.instance, // Firebase를 사용하는 경우
+              ),
             ),
             BlocProvider<ProfileEditBloc>(
               create: (context) => ProfileEditBloc(),
