@@ -67,7 +67,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       : _firestore = firestore ?? FirebaseFirestore.instance,
         super(HomeInitial()) {
     // LoadHomeData 이벤트 핸들러
-    // LoadHomeData 이벤트 핸들러
     on<LoadHomeData>((event, emit) async {
       emit(HomeLoading());
       try {
@@ -90,24 +89,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ),
         ];
 
-        // Firestore에서 상품 데이터 가져오기
+        // Firestore에서 추천 및 인기 상품 데이터 가져오기
         final QuerySnapshot recommendedSnapshot =
-            await _firestore.collection('products').limit(5).get(); //^
+            await _firestore.collection('products').limit(5).get();
 
-        // 인기 상품을 상위 5개로 가져오도록 설정
         final QuerySnapshot popularSnapshot =
-            await _firestore.collection('products').limit(5).get(); //^
+            await _firestore.collection('products').limit(5).get();
 
         print(
-            "Recommended products fetched: ${recommendedSnapshot.docs.length}"); //^
-        print("Popular products fetched: ${popularSnapshot.docs.length}"); //^
+            "Recommended products fetched: ${recommendedSnapshot.docs.length}");
+        print("Popular products fetched: ${popularSnapshot.docs.length}");
 
-        // 추천 상품 변환
+        // 추천 및 인기 상품 변환
         final recommendedProducts = recommendedSnapshot.docs
             .map((doc) => ProductModel.fromFirestore(doc))
             .toList();
 
-        // 인기 상품 변환
         final popularProducts = popularSnapshot.docs
             .map((doc) => ProductModel.fromFirestore(doc))
             .toList();
@@ -118,7 +115,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           popularProducts: popularProducts,
         ));
       } catch (e) {
-        print('Error loading home data: $e'); //^
+        print('Error loading home data: $e');
         emit(HomeError('데이터를 불러오는데 실패했습니다.'));
       }
     });
@@ -128,11 +125,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
         try {
-          // 현재 favoriteList 가져오기
+          // 좋아요 리스트 업데이트
           List<String> updatedFavoriteList =
               List<String>.from(event.product.favoriteList);
-
-          // userId가 이미 있으면 제거, 없으면 추가
           if (updatedFavoriteList.contains(event.userId)) {
             updatedFavoriteList.remove(event.userId);
           } else {
@@ -143,24 +138,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           await _firestore
               .collection('products')
               .doc(event.product.productId)
-              .update({'favoriteList': updatedFavoriteList});
+              .update({
+            'favoriteList': updatedFavoriteList,
+          });
 
           // 로컬 상태 업데이트
           final updatedRecommended =
               currentState.recommendedProducts.map((product) {
             if (product.productId == event.product.productId) {
-              return event.product.copyWith(
-                favoriteList: updatedFavoriteList,
-              );
+              return event.product.copyWith(favoriteList: updatedFavoriteList);
             }
             return product;
           }).toList();
 
           final updatedPopular = currentState.popularProducts.map((product) {
             if (product.productId == event.product.productId) {
-              return event.product.copyWith(
-                favoriteList: updatedFavoriteList,
-              );
+              return event.product.copyWith(favoriteList: updatedFavoriteList);
             }
             return product;
           }).toList();
@@ -204,6 +197,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
           final QuerySnapshot moreProducts = await _firestore
               .collection('products')
+              .orderBy('productId') // 추가된 부분: orderBy
               .startAfter([lastProduct.productId])
               .limit(5)
               .get();

@@ -66,6 +66,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 //   }
 // }
 
+// 데이터 넣을 공간
+// product 모델2 로 해서 시험해봐도 된다.
 class ProductModel {
   final String productId;
   final String name;
@@ -98,6 +100,7 @@ class ProductModel {
     this.isBest = false, // 기본값 설정
     this.rating = 0.0, // 기본값 설정
   });
+  // 할인된 가격 계산 getter
 
   factory ProductModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
