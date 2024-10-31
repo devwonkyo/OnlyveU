@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color mainColor;
@@ -25,7 +26,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           const SizedBox(width: 4),
           const Text(
-            'Onlyveyou',
+            "Only'veU",
             style: TextStyle(
               color: Colors.grey,
               fontSize: 16,
@@ -36,7 +37,9 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.search, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            context.push('/search');
+          },
         ),
         IconButton(
           icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
