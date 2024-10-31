@@ -1,11 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
+import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
+import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
@@ -16,6 +19,8 @@ import 'package:onlyveyou/repositories/category_repository.dart';
 
 
 import 'blocs/history/history_bloc.dart';
+import 'blocs/search/filtered_tags/filtered_tags_cubit.dart';
+import 'blocs/search/tag_list/tag_list_cubit.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 
@@ -24,22 +29,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(MyApp());
+
+  KakaoSdk.init(
+    nativeAppKey: '0236522723df3e1aa869fe36e25e6297',
+    javaScriptAppKey: 'Ye8ebc7de132c8c4f0b6881be99e20f5e',
+  );
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: Size(375, 812),
+      designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
         return MultiBlocProvider(
           providers: [
+            BlocProvider<AuthBloc>(
+              create: (context) => AuthBloc(),
+            ),
             BlocProvider<HomeBloc>(
               create: (context) => HomeBloc(),
             ),
@@ -48,7 +60,7 @@ class MyApp extends StatelessWidget {
                   // FirebaseFirestore.instance, // Firebase를 사용하는 경우
                   ),
             ),
-            BlocProvider(
+            BlocProvider<ProfileEditBloc>(
               create: (context) => ProfileEditBloc(),
             ),
             BlocProvider<CategoryCubit>(
@@ -65,6 +77,14 @@ class MyApp extends StatelessWidget {
                 initialTags: context.read<TagListCubit>().state.tags,
                 tagSearchCubit: context.read<TagSearchCubit>(),
               ),
+            ),
+            BlocProvider<PasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => PasswordBloc(),
+            ),
+            BlocProvider<SetNewPasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => SetNewPasswordBloc(),
             ),
           ],
           child: MaterialApp.router(
