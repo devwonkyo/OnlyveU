@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
-import 'package:onlyveyou/screens/search/widgets/searched_screen.dart';
+import 'package:onlyveyou/screens/search/widgets/search_complete_screen.dart';
 import 'package:onlyveyou/screens/search/widgets/searching_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -59,16 +59,10 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              context.watch<TagSearchCubit>().state.searchTerm.isEmpty
-                  ? const SearchInitialScreen()
-                  : const SearchingScreen(),
-              // SearchedScreen(),
-            ],
-          ),
-        ),
+        body: context.watch<TagSearchCubit>().state.searchTerm.isEmpty
+            ? const SearchInitialScreen()
+            : const SearchingScreen(),
+        // SearchCompleteScreen(),
       ),
     );
   }
