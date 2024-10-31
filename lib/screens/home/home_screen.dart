@@ -2,122 +2,86 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/widgets/recommended_products_widget.dart';
 import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-  late TabController _tabController; // 탭 컨트롤러 초기화
-  final PageController _pageController = PageController(); // 배너 페이지 전환용 컨트롤러
+  late TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _tabController =
-        TabController(length: 6, vsync: this); // 6개의 탭을 컨트롤하는 탭 컨트롤러 생성
-    context.read<HomeBloc>().add(LoadHomeData()); // 홈 데이터 로드 이벤트 전송
+    _tabController = TabController(length: 6, vsync: this);
+    _scrollController.addListener(_onScroll);
+    context.read<HomeBloc>().add(LoadHomeData());
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _pageController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<HomeBloc>().add(LoadMoreProducts());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: DefaultAppBar(mainColor: AppStyles.mainColor), // 커스텀 앱바 사용
+      appBar: DefaultAppBar(mainColor: AppStyles.mainColor),
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  //배너
-                  child: _buildTabBar(), // 상단에 고정되는 탭 바
-                ),
-                //배너 돌다보면 앱 느려짐 평소엔 주석해둘것
-                // SliverToBoxAdapter(
-                //   child: BlocBuilder<HomeBloc, HomeState>(
-                //     buildWhen: (previous, current) =>
-                //         current is HomeLoaded || current is HomeLoading,
-                //     builder: (context, state) {
-                //       if (state is HomeLoading) {
-                //         return Center(child: CircularProgressIndicator());
-                //       } else if (state is HomeLoaded) {
-                //         return BannerWidget(
-                //           pageController: _pageController,
-                //           bannerItems: state.bannerItems,
-                //         );
-                //       }
-                //       return SizedBox.shrink();
-                //     },
-                //   ),
-                // ),
-                SliverToBoxAdapter(
-                  child: _buildQuickMenu(MediaQuery.of(context).orientation ==
-                      Orientation.portrait),
-                ),
-                SliverToBoxAdapter(
-                  child: BlocBuilder<HomeBloc, HomeState>(
-                    buildWhen: (previous, current) =>
-                        current is HomeLoaded || current is HomeLoading,
-                    builder: (context, state) {
-                      if (state is HomeLoading) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (state is HomeLoaded) {
-                        // RecommendedProductsWidget이 이제 List<HistoryItem>을 받도록 변경됨
-                        return RecommendedProductsWidget(
-                          recommendedProducts:
-                              state.recommendedProducts, // List<HistoryItem> 타입
-                          isPortrait: MediaQuery.of(context).orientation ==
-                              Orientation.portrait,
-                        );
-                      }
-                      return SizedBox.shrink();
-                    },
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: InkWell(
-                    onTap: () => print("쿠폰 눌림"),
-                    child: Image.asset(
-                      'assets/image/banner4.png',
-                      width: MediaQuery.of(context).size.width * 0.95,
+            _buildTabBar(),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  context.read<HomeBloc>().add(RefreshHomeData());
+                },
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _buildQuickMenu(
+                        MediaQuery.of(context).orientation ==
+                            Orientation.portrait,
+                      ),
                     ),
-                  ),
+                    _buildRecommendedProducts(),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        child: InkWell(
+                          onTap: () => print("쿠폰 눌림"),
+                          child: Image.asset(
+                            'assets/image/banner4.png',
+                            width: MediaQuery.of(context).size.width * 0.95,
+                          ),
+                        ),
+                      ),
+                    ),
+                    _buildPopularProducts(),
+                    _buildLoadingIndicator(),
+                  ],
                 ),
-
-                SliverToBoxAdapter(
-                  child: BlocBuilder<HomeBloc, HomeState>(
-                    buildWhen: (previous, current) =>
-                        current is HomeLoaded || current is HomeLoading,
-                    builder: (context, state) {
-                      if (state is HomeLoading) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (state is HomeLoaded) {
-                        // PopularProductsWidget도 List<HistoryItem>을 받도록 변경됨
-                        return PopularProductsWidget(
-                          popularProducts:
-                              state.popularProducts, // List<HistoryItem> 타입
-                          isPortrait: MediaQuery.of(context).orientation ==
-                              Orientation.portrait,
-                        );
-                      }
-                      return SizedBox.shrink();
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),
@@ -125,18 +89,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  // 탭 바 위젯
   Widget _buildTabBar() {
     return Container(
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.only(left: 16.w),
       decoration: BoxDecoration(
         border: Border(
-          bottom:
-              BorderSide(color: Colors.grey[300]!, width: 1.w), // 탭 바 하단의 구분선
+          bottom: BorderSide(color: Colors.grey[300]!, width: 1.w),
         ),
       ),
       child: TabBar(
         controller: _tabController,
-        isScrollable: true, // 탭을 스크롤 가능하게 설정
+        isScrollable: true,
+        padding: EdgeInsets.zero,
+        indicatorPadding: EdgeInsets.zero,
+        labelPadding: EdgeInsets.symmetric(horizontal: 16.w),
         tabs: [
           Tab(text: '홈'),
           Tab(text: '딘토'),
@@ -145,25 +112,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           Tab(text: '매거진'),
           Tab(text: 'LUXE EDIT'),
         ],
-        labelColor: AppStyles.mainColor, // 선택된 탭의 텍스트 색상
-        unselectedLabelColor: AppStyles.greyColor, // 선택되지 않은 탭의 텍스트 색상
-        indicatorColor: AppStyles.mainColor, // 선택된 탭 하단 인디케이터 색상
-        indicatorSize: TabBarIndicatorSize.label, // 인디케이터 크기를 탭 레이블 크기에 맞춤
-        labelStyle: AppStyles.subHeadingStyle, // 선택된 탭의 텍스트 스타일
-        unselectedLabelStyle: AppStyles.bodyTextStyle, // 선택되지 않은 탭의 텍스트 스타일
+        labelColor: AppStyles.mainColor,
+        unselectedLabelColor: AppStyles.greyColor,
+        indicatorColor: AppStyles.mainColor,
+        indicatorSize: TabBarIndicatorSize.label,
+        labelStyle: AppStyles.subHeadingStyle,
+        unselectedLabelStyle: AppStyles.bodyTextStyle,
       ),
     );
   }
 
-  // 퀵 메뉴 위젯
   Widget _buildQuickMenu(bool isPortrait) {
     return GridView.count(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(), // 스크롤 금지
-      crossAxisCount: isPortrait ? 5 : 8, // 세로 모드에서는 5열, 가로 모드에서는 8열
+      physics: NeverScrollableScrollPhysics(),
+      crossAxisCount: isPortrait ? 5 : 8,
       mainAxisSpacing: 8.h,
       crossAxisSpacing: 8.w,
-      childAspectRatio: isPortrait ? 1 : 1.2, // 세로/가로 모드에 따른 아이템 비율 조정
+      childAspectRatio: isPortrait ? 1 : 1.2,
       padding: AppStyles.defaultPadding,
       children: [
         _buildQuickMenuItem('W케어', Icons.favorite),
@@ -175,39 +141,71 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  // 퀵 메뉴 아이템 위젯 (아이콘과 레이블로 구성)
   Widget _buildQuickMenuItem(String label, IconData icon) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 32.w, color: AppStyles.mainColor), // 아이콘
+        Icon(icon, size: 32.w, color: AppStyles.mainColor),
         SizedBox(height: 4.h),
-        Text(label, style: AppStyles.smallTextStyle), // 레이블 텍스트
+        Text(label, style: AppStyles.smallTextStyle),
       ],
     );
   }
+
+  Widget _buildRecommendedProducts() {
+    return SliverToBoxAdapter(
+      child: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          if (state is HomeLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (state is HomeLoaded) {
+            return RecommendedProductsWidget(
+              recommendedProducts:
+                  state.recommendedProducts, // ProductModel로 수정
+              isPortrait:
+                  MediaQuery.of(context).orientation == Orientation.portrait,
+              userId: "userId_here", // userId 전달, 실제 로그인 구현 시 사용자 ID로 대체
+            );
+          }
+          return SizedBox.shrink();
+        },
+      ),
+    );
+  }
+
+  Widget _buildPopularProducts() {
+    return SliverToBoxAdapter(
+      child: BlocSelector<HomeBloc, HomeState, List<ProductModel>>(
+        selector: (state) => state is HomeLoaded ? state.popularProducts : [],
+        builder: (context, products) {
+          return products.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : PopularProductsWidget(
+                  popularProducts: products,
+                  isPortrait: MediaQuery.of(context).orientation ==
+                      Orientation.portrait,
+                );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return BlocSelector<HomeBloc, HomeState, bool>(
+      selector: (state) => state is HomeLoaded && state.isLoading,
+      builder: (context, isLoading) {
+        return SliverToBoxAdapter(
+          child: isLoading
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.h),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : SizedBox.shrink(),
+        );
+      },
+    );
+  }
 }
-///////////////////////
-// Container(
-// height: 8,
-// color: const Color.fromARGB(195, 232, 227, 227),
-// ),
-// const SizedBox(
-// height: 20,
-// ),
-// Center(
-// child: SizedBox(
-// width: MediaQuery.of(context).size.width * 0.95, // 이미지 크기 설정
-// child: InkWell(
-// onTap: () {
-// print("쿠폰 눌림");
-// },
-// child: Image.asset(
-// 'assets/image/mypage/coupon_image.jpeg', //네트워크 이미지
-// ),
-// ),
-// ),
-// ),
-// const SizedBox(
-// height: 20,
-// ),
