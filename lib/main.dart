@@ -7,13 +7,17 @@ import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
+import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 
 import 'blocs/history/history_bloc.dart';
+import 'blocs/search/filtered_tags/filtered_tags_cubit.dart';
+import 'blocs/search/tag_list/tag_list_cubit.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 
-main() async {
-  // Flutter 바인딩 초기화
+
+void main() async {
+  // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -54,6 +58,18 @@ class MyApp extends StatelessWidget {
             ),
             BlocProvider<CategoryCubit>(
               create: (context) => CategoryCubit()..loadCategories(),
+            ),
+            BlocProvider<TagSearchCubit>(
+              create: (context) => TagSearchCubit(),
+            ),
+            BlocProvider<TagListCubit>(
+              create: (context) => TagListCubit(),
+            ),
+            BlocProvider<FilteredTagsCubit>(
+              create: (context) => FilteredTagsCubit(
+                initialTags: context.read<TagListCubit>().state.tags,
+                tagSearchCubit: context.read<TagSearchCubit>(),
+              ),
             ),
           ],
           child: MaterialApp.router(

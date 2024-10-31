@@ -2,23 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
-import 'package:onlyveyou/models/product_model.dart'; // 수정된 부분: ProductModel 임포트
+import 'package:onlyveyou/constants/app_constants.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
-// 추천 상품 목록을 보여주는 위젯
-class RecommendedProductsWidget extends StatelessWidget {
-  final List<ProductModel> recommendedProducts; // 수정된 부분: 타입 변경
-  final bool isPortrait;
-  final String userId; // 추가된 부분: userId를 전달
-
-  RecommendedProductsWidget({
-    required this.recommendedProducts,
-    required this.isPortrait,
-    required this.userId, // 추가된 부분: userId 필드 추가
-    Key? key,
-  }) : super(key: key);
-
-  // 가격 포맷팅 메서드 추가
+class MorePopularScreen extends StatelessWidget {
   String _formatPrice(String price) {
     try {
       return price.replaceAllMapped(
@@ -30,78 +18,90 @@ class RecommendedProductsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 추천 상품 섹션 제목과 더보기 버튼
-        Padding(
-          padding: AppStyles.defaultPadding,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('국한님을 위한 추천상품', style: AppStyles.headingStyle),
-              GestureDetector(
-                onTap: () => context.push('/more-recommended'),
-                child: Text(
-                  '더보기 >',
-                  style: AppStyles.bodyTextStyle
-                      .copyWith(color: AppStyles.greyColor),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: Container(),
+        title: Text(
+          '연관 인기 상품',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.close, color: Colors.black),
+            onPressed: () => context.pop(),
+          ),
+        ],
+      ),
+      body: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          if (state is HomeLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (state is HomeLoaded) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<HomeBloc>().add(RefreshHomeData());
+              },
+              child: GridView.builder(
+                padding: EdgeInsets.all(16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.45,
                 ),
-              )
-            ],
-          ),
-        ),
-        // 추천 상품 리스트뷰
-        SizedBox(
-          height: isPortrait ? 340 : 240,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: recommendedProducts.length,
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            itemBuilder: (context, index) => _buildProductCard(context, index),
-          ),
-        ),
-      ],
+                itemCount: state.popularProducts.length,
+                itemBuilder: (context, index) =>
+                    _buildProductCard(state.popularProducts[index], context),
+              ),
+            );
+          }
+          return Center(child: Text('상품을 불러올 수 없습니다.'));
+        },
+      ),
     );
   }
 
-  Widget _buildProductCard(BuildContext context, int index) {
-    final item = recommendedProducts[index];
+  Widget _buildProductCard(ProductModel product, BuildContext context) {
+    final originalPrice = int.tryParse(product.price) ?? 0;
+    final discountedPrice =
+        originalPrice * (100 - product.discountPercent) ~/ 100;
+
     return Container(
-      width: 150,
-      margin: EdgeInsets.only(right: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 상품 이미지
-          Container(
-            width: 150,
-            height: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: item.productImageList.isNotEmpty
-                  ? Image.network(
-                      item.productImageList.first,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(child: Icon(Icons.error));
-                      },
-                    )
-                  : Image.asset(
-                      'assets/default_image.png', // 기본 로컬 이미지
-                      fit: BoxFit.contain,
-                    ),
+          // 상품 이미지
+          AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Hero(
+                tag: 'product_${product.productId}',
+                child: Image.network(
+                  product.productImageList.first,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(child: Icon(Icons.error));
+                  },
+                ),
+              ),
             ),
           ),
           SizedBox(height: 8),
 
-          // 2. 상품명
+          // 상품명
           Text(
-            item.name,
+            product.name,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -111,10 +111,10 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 4),
 
-          // 3. 가격 정보
-          if (item.discountPercent > 0)
+          // 가격 정보
+          if (product.discountPercent > 0)
             Text(
-              '${item.price}원',
+              '${_formatPrice(product.price)}원',
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 color: Colors.grey,
@@ -124,9 +124,9 @@ class RecommendedProductsWidget extends StatelessWidget {
           SizedBox(height: 2),
           Row(
             children: [
-              if (item.discountPercent > 0)
+              if (product.discountPercent > 0)
                 Text(
-                  '${item.discountPercent}%',
+                  '${product.discountPercent}%',
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
@@ -134,9 +134,8 @@ class RecommendedProductsWidget extends StatelessWidget {
                   ),
                 ),
               SizedBox(width: 4),
-              // 할인된 가격 표시
               Text(
-                '${_formatPrice(item.discountedPrice.toString())}원', // 할인 가격을 포맷팅하여 표시
+                '${_formatPrice(discountedPrice.toString())}원',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -146,7 +145,7 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 6),
 
-          // 4. 태그들
+          // 태그
           Row(
             children: [
               Container(
@@ -164,7 +163,7 @@ class RecommendedProductsWidget extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 4),
-              if (item.isBest)
+              if (product.tagList.contains('BEST'))
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
@@ -183,17 +182,13 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 6),
 
-          // 5. 별점과 리뷰 수
+          // 별점과 리뷰 수
           Row(
             children: [
-              Icon(
-                Icons.star,
-                size: 12,
-                color: AppStyles.mainColor,
-              ),
+              Icon(Icons.star, size: 12, color: AppStyles.mainColor),
               SizedBox(width: 2),
               Text(
-                item.rating.toStringAsFixed(1),
+                product.rating.toStringAsFixed(1),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -201,7 +196,7 @@ class RecommendedProductsWidget extends StatelessWidget {
               ),
               SizedBox(width: 2),
               Text(
-                '(${item.reviewCount})',
+                '(${product.reviewList.length})',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -211,30 +206,32 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 5),
 
-          // 6. 좋아요와 장바구니 버튼
+          // 좋아요와 장바구니 버튼
           Row(
             children: [
               GestureDetector(
                 onTap: () {
-                  context
-                      .read<HomeBloc>()
-                      .add(ToggleProductFavorite(item, userId)); // userId 전달
+                  context.read<HomeBloc>().add(ToggleProductFavorite(
+                      product, AppConstants.currentUserId));
                 },
                 child: Container(
                   width: 20,
                   height: 20,
                   child: Icon(
-                    item.isFavorite(userId)
+                    product.favoriteList.contains(AppConstants.currentUserId)
                         ? Icons.favorite
                         : Icons.favorite_border,
                     size: 18,
-                    color: item.isFavorite(userId) ? Colors.red : Colors.grey,
+                    color: product.favoriteList
+                            .contains(AppConstants.currentUserId)
+                        ? Colors.red
+                        : Colors.grey,
                   ),
                 ),
               ),
               SizedBox(width: 25),
               GestureDetector(
-                onTap: () {},
+                onTap: () => _handleAddToCart(context, product),
                 child: Container(
                   width: 22,
                   height: 22,
@@ -248,6 +245,16 @@ class RecommendedProductsWidget extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _handleAddToCart(BuildContext context, ProductModel product) {
+    // TODO: 장바구니 추가 기능 구현
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('장바구니에 추가되었습니다.'),
+        duration: Duration(seconds: 2),
       ),
     );
   }
