@@ -33,6 +33,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+<<<<<<< HEAD
   asn1lib:
     dependency: transitive
     description:
@@ -41,6 +42,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.5"
+=======
+>>>>>>> feature/mypage
   async:
     dependency: transitive
     description:
@@ -137,6 +140,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+<<<<<<< HEAD
   convert:
     dependency: transitive
     description:
@@ -145,6 +149,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+=======
+>>>>>>> feature/mypage
   cross_file:
     dependency: transitive
     description:
@@ -193,6 +199,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+<<<<<<< HEAD
   dio:
     dependency: transitive
     description:
@@ -217,6 +224,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.3"
+=======
+>>>>>>> feature/mypage
   equatable:
     dependency: "direct main"
     description:
@@ -549,6 +558,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.19.0"
+<<<<<<< HEAD
   js:
     dependency: transitive
     description:
@@ -557,6 +567,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.1"
+=======
+>>>>>>> feature/mypage
   json_annotation:
     dependency: transitive
     description:
@@ -565,6 +577,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
+<<<<<<< HEAD
   kakao_flutter_sdk_auth:
     dependency: transitive
     description:
@@ -589,6 +602,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.6"
+=======
+>>>>>>> feature/mypage
   leak_tracker:
     dependency: transitive
     description:
@@ -757,6 +772,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+<<<<<<< HEAD
   pointycastle:
     dependency: transitive
     description:
@@ -765,6 +781,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.9.1"
+=======
+>>>>>>> feature/mypage
   provider:
     dependency: transitive
     description:
@@ -782,7 +800,11 @@ packages:
     source: hosted
     version: "0.28.0"
   shared_preferences:
+<<<<<<< HEAD
     dependency: "direct main"
+=======
+    dependency: transitive
+>>>>>>> feature/mypage
     description:
       name: shared_preferences
       sha256: "746e5369a43170c25816cc472ee016d3a66bc13fcf430c0bc41ad7b4b2922051"
