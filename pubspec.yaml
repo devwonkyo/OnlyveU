@@ -50,6 +50,8 @@ dependencies:
   equatable: ^2.0.5
   image_picker: ^1.1.2
   shimmer: ^3.0.0
+  kakao_flutter_sdk_user: ^1.9.5
+  shared_preferences: ^2.3.2
 
 
 dev_dependencies:

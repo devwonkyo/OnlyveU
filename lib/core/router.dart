@@ -14,7 +14,7 @@ import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -56,6 +56,7 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const ProfileEditScreen(),
+      ),
     ),
     GoRoute(
       path: '/signup', // 회원가입 화면
