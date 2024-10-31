@@ -25,7 +25,7 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           const SizedBox(width: 4),
           const Text(
-            'Onlyveyou',
+            "Only'veU",
             style: TextStyle(
               color: Colors.grey,
               fontSize: 16,
