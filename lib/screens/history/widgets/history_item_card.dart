@@ -138,7 +138,7 @@ class HistoryItemCard extends StatelessWidget {
             ),
           ),
 
-          // 3. 오른쪽 버튼 (편집 모드에 따라 달라짐)
+          // 3. 오른쪽 버튼들 (편집 모드에 따라 달라짐)
           Column(
             children: [
               if (isEditing)
@@ -148,13 +148,29 @@ class HistoryItemCard extends StatelessWidget {
                   onPressed: onDelete,
                 )
               else
-                // 일반 모드일 때는 좋아요 버튼 표시
-                IconButton(
-                  icon: Icon(
-                    item.isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: item.isFavorite ? Colors.red : Colors.grey,
-                  ),
-                  onPressed: onToggleFavorite,
+                // 일반 모드일 때는 좋아요와 장바구니 버튼 표시
+                Column(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        item.isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: item.isFavorite ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: onToggleFavorite,
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.shopping_bag_outlined,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        // TODO: 장바구니 담기 기능 구현
+                        print('장바구니에 담기: ${item.title}');
+                      },
+                    ),
+                  ],
                 ),
             ],
           ),
