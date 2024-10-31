@@ -16,7 +16,7 @@ import 'core/router.dart';
 import 'firebase_options.dart';
 
 
-main() async {
+void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
