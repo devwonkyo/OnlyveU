@@ -1,11 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 
-import '../../../utils/debounce.dart';
-
-class SearchTextField extends StatefulWidget {
-  const SearchTextField({
+class SearchTextField extends StatelessWidget {
+  SearchTextField({
     super.key,
     required this.controller,
     required this.onPressed,
@@ -13,27 +14,21 @@ class SearchTextField extends StatefulWidget {
   final TextEditingController controller;
   final void Function() onPressed;
 
-  @override
-  State<SearchTextField> createState() => _SearchTextFieldState();
-}
-
-class _SearchTextFieldState extends State<SearchTextField> {
-  final debounce = Debounce(milliseconds: 500);
+  final debounce = Debounce(milliseconds: 50);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity, // 원하는 너비 설정
-      height: 38.0, // 원하는 높이 설정
+      height: 38.h, // 원하는 높이 설정
       child: TextField(
+        minLines: 1,
         maxLines: 1,
-        controller: widget.controller,
+        controller: controller,
         onChanged: (String? newSearchTerm) {
           if (newSearchTerm != null) {
-            setState(() {
-              debounce.run(() {
-                context.read<TagSearchCubit>().setSearchTerm(newSearchTerm);
-              });
+            debounce.run(() {
+              context.read<TagSearchCubit>().setSearchTerm(newSearchTerm);
             });
           }
         },
@@ -42,7 +37,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
           filled: true,
           fillColor: Colors.grey[200],
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
           hintText: '상품, 브랜드, 성분 검색',
           hintStyle:
               const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
@@ -50,25 +45,24 @@ class _SearchTextFieldState extends State<SearchTextField> {
             borderSide: const BorderSide(
               color: Colors.transparent,
             ),
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(25.r),
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
               color: Colors.transparent,
             ),
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(25.r),
           ),
           // 보내기 버튼
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Visibility(
-                visible: widget.controller.text.isNotEmpty,
+                visible: controller.text.isNotEmpty,
                 child: IconButton(
                   onPressed: () {
-                    setState(() {
-                      widget.controller.clear();
-                    });
+                    controller.clear();
+                    context.read<TagSearchCubit>().setSearchTerm('');
                   },
                   icon: Icon(
                     Icons.cancel,
@@ -77,7 +71,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
                 ),
               ),
               IconButton(
-                onPressed: widget.onPressed,
+                onPressed: onPressed,
                 icon: const Icon(
                   Icons.search,
                 ),
@@ -87,5 +81,22 @@ class _SearchTextFieldState extends State<SearchTextField> {
         ),
       ),
     );
+  }
+}
+
+class Debounce {
+  final int milliseconds;
+  Debounce({
+    required this.milliseconds,
+  });
+
+  Timer? _timer;
+
+  void run(VoidCallback action) {
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+
+    _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }
