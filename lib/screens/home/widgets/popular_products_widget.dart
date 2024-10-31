@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/utils/styles.dart';
@@ -27,11 +28,14 @@ class PopularProductsWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('연관 인기 상품', style: AppStyles.headingStyle), // 섹션 제목
-              Text(
-                '더보기 >',
-                style: AppStyles.bodyTextStyle
-                    .copyWith(color: AppStyles.greyColor), // 더보기 버튼 스타일
-              ),
+              GestureDetector(
+                onTap: () => context.go('/more-popular'),
+                child: Text(
+                  '더보기 >',
+                  style: AppStyles.bodyTextStyle
+                      .copyWith(color: AppStyles.greyColor),
+                ),
+              )
             ],
           ),
         ),
@@ -90,6 +94,16 @@ class PopularProductsWidget extends StatelessWidget {
           SizedBox(height: 4),
 
           // 3. 가격 정보
+          if (item.originalPrice != null) // 할인 전 가격
+            Text(
+              '${item.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+              style: TextStyle(
+                decoration: TextDecoration.lineThrough,
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+            ),
+          SizedBox(height: 2),
           Row(
             children: [
               if (item.discountRate != null)
@@ -176,33 +190,37 @@ class PopularProductsWidget extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 0),
+          SizedBox(height: 5),
 
           // 6. 좋아요와 장바구니 버튼
           Row(
             children: [
-              IconButton(
-                icon: Icon(
-                  item.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  size: 18,
-                  color: item.isFavorite ? Colors.red : Colors.grey,
-                ),
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   context.read<HomeBloc>().add(ToggleProductFavorite(item));
                 },
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
-              ),
-              SizedBox(width: 12),
-              IconButton(
-                icon: Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 18,
-                  color: Colors.grey,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  child: Icon(
+                    item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    size: 18,
+                    color: item.isFavorite ? Colors.red : Colors.grey,
+                  ),
                 ),
-                onPressed: () {},
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
+              ),
+              SizedBox(width: 25),
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  child: Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
+                ),
               ),
             ],
           ),

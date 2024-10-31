@@ -7,6 +7,8 @@ import 'package:onlyveyou/screens/auth/signup_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home_screen.dart';
+import 'package:onlyveyou/screens/home/more_popular_screen.dart';
+import 'package:onlyveyou/screens/home/more_recommended_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/profile_edit_screen.dart';
 
@@ -64,6 +66,20 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/find-id',
       builder: (context, state) => FindIdScreen(),
+    ),
+    GoRoute(
+      path: '/more-recommended',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        MoreRecommendedScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/more-popular',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        MorePopularScreen(),
+      ),
     ),
   ],
 );
