@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/category_model.dart';
 
 class MainCategoryItem extends StatelessWidget {
@@ -24,7 +25,7 @@ class MainCategoryItem extends StatelessWidget {
         child: Text(
           category.name,
           style: TextStyle(
-            color: isSelected ? Colors.green : Colors.black87,
+            color: isSelected ? AppsColor.pastelGreen : Colors.black87,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             fontSize: 14,
           ),

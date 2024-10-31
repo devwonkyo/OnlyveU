@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
+import 'package:onlyveyou/screens/category/category_product_list_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home_screen.dart';
@@ -122,6 +123,11 @@ final GoRouter router = GoRouter(
         state,
         MorePopularScreen(),
       ),
+    ),
+    //카테고리 리스트
+    GoRoute(
+      path: '/categroy/productlist', // 회원가입 화면
+      builder: (context, state) => CategoryProductListScreen(),
     ),
   ],
 );
