@@ -48,6 +48,7 @@ class VerifyCurrentPasswordScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               BlocBuilder<PasswordBloc, PasswordState>(
+                //textfield 관련 blocbuilder
                 builder: (context, state) {
                   return Container(
                     decoration: BoxDecoration(
@@ -74,6 +75,7 @@ class VerifyCurrentPasswordScreen extends StatelessWidget {
               ),
               const Spacer(),
               BlocBuilder<PasswordBloc, PasswordState>(
+                //버튼 활성화 관련 blocbuilder
                 builder: (context, state) {
                   bool isButtonEnabled =
                       state is PasswordEditing && state.isButtonEnabled;

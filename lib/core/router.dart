@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
+import 'package:onlyveyou/blocs/mypage/password/password_event.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
-import 'package:onlyveyou/screens/category/category_product_list_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home_screen.dart';
@@ -23,7 +23,7 @@ import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -38,7 +38,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) =>
-              _buildPageWithTransition(state, Home()),
+              _buildPageWithTransition(state, const Home()),
         ),
         GoRoute(
           path: '/history',
@@ -123,11 +123,6 @@ final GoRouter router = GoRouter(
         state,
         MorePopularScreen(),
       ),
-    ),
-    //카테고리 리스트
-    GoRoute(
-      path: '/categroy/productlist', // 회원가입 화면
-      builder: (context, state) => CategoryProductListScreen(),
     ),
   ],
 );
