@@ -3,12 +3,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/screens/category/category_skeletion_screen.dart';
 import 'package:onlyveyou/screens/category/widgets/main_category_item.dart';
 import 'package:onlyveyou/screens/category/widgets/sub_category_header.dart';
 import 'package:onlyveyou/screens/category/widgets/sub_category_item.dart';
+import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class CategoryScreen extends StatefulWidget {
   @override
@@ -27,54 +30,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Row(
-          children: [
-            Icon(
-              Icons.spa,
-              color: AppsColor.pastelGreen,
-              size: 20.sp, // ScreenUtil을 사용하여 아이콘 크기 조정
-            ),
-            SizedBox(width: 8.w), // ScreenUtil을 사용하여 여백 조정
-            Text(
-              '온니브유',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 16.sp, // ScreenUtil을 사용하여 텍스트 크기 조정
-              ),
-            ),
-            SizedBox(width: 4.w), // 여백
-            Text(
-              'Onlyveyou',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14.sp, // ScreenUtil을 사용하여 텍스트 크기 조정
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.search,
-              color: Colors.black,
-              size: 24.sp, // 아이콘 크기 조정
-            ),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.shopping_bag_outlined,
-              color: Colors.black,
-              size: 24.sp, // 아이콘 크기 조정
-            ),
-            onPressed: () {},
-          ),
-        ],
-      ),
+      appBar: DefaultAppBar(mainColor: AppsColor.pastelGreen),
       body: BlocBuilder<CategoryCubit, CategoryState>(
         builder: (context, state) {
           if (state is CategoryLoading) {
@@ -128,6 +84,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             onTap: () {
                               // 클릭 시 실행할 코드
                               print("카테고리 헤더 클릭 : ${category.name}");
+                              context.push("/categroy/productlist");
                             },
                             child: // 카테고리 헤더
                             SubCategoryHeader(
@@ -143,12 +100,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                 onTap: () {
                                   // 클릭 시 실행할 코드
                                   print('click ${subcategory.name}');
+                                  context.push("/categroy/productlist");
                                 },
                                 child: SubCategoryItem(title: subcategory.name),
                               )
                           ).toList(),
                           // 구분선
-                          Divider(
+                          const Divider(
                             color: AppsColor.lightGray,
                             thickness: 1.0,
                             height: 10,

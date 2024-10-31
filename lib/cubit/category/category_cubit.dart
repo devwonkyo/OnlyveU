@@ -1,16 +1,16 @@
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/category_model.dart';
+import 'package:onlyveyou/repositories/category_repository.dart';
 
 part 'category_state.dart';
 
 class CategoryCubit extends Cubit<CategoryState> {
-  final FirebaseFirestore _firestore;
+  final CategoryRepository _categoryRepository;
   List<Category> categories = [];
   int selectedIndex = 0;
 
-  CategoryCubit({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
+  CategoryCubit({required CategoryRepository categoryRepository})
+      : _categoryRepository = categoryRepository,
         super(CategoryInitial());
 
   void selectCategory(int index) {
@@ -21,14 +21,7 @@ class CategoryCubit extends Cubit<CategoryState> {
   Future<void> loadCategories() async {
     emit(CategoryLoading());
     try {
-      final snapshot = await _firestore
-          .collection('categories')
-          .orderBy('id') // id 기준으로 오름차순 정렬
-          .get();
-
-      categories = snapshot.docs
-          .map((doc) => Category.fromFirestore(doc.data()))
-          .toList();
+      categories = await _categoryRepository.fetchCategories();
       emit(CategoryLoaded(categories));
     } catch (e) {
       emit(CategoryError(e.toString()));
