@@ -75,6 +75,7 @@ final GoRouter router = GoRouter(
       ),
     ),
     GoRoute(
+      //장바구니, 파이어베이스에 프로덕트 5개 연동해보기
       path: '/more-popular',
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
@@ -105,3 +106,7 @@ CustomTransitionPage<void> _buildPageWithTransition(
     transitionDuration: const Duration(milliseconds: 300),
   );
 }
+
+//장바구니, 파이어베이스에 프로덕트 5개 연동해보기
+//파이어베이스, 장바구니 그리기
+// 더미 데이터 넣기
