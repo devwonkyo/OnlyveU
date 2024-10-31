@@ -1,27 +1,20 @@
 // lib/config/routes/app_router.dart
 import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
-<<<<<<< HEAD
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
-=======
-import 'package:onlyveyou/blocs/mypage/password/password_event.dart';
->>>>>>> feature/mypage
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home_screen.dart';
-<<<<<<< HEAD
 import 'package:onlyveyou/screens/home/more_popular_screen.dart';
 import 'package:onlyveyou/screens/home/more_recommended_screen.dart';
-=======
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/nickname_edit_screen.dart';
 
 import 'package:onlyveyou/screens/mypage/edit/password/set_new_password_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
->>>>>>> feature/mypage
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 
@@ -58,12 +51,8 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-<<<<<<< HEAD
           pageBuilder: (context, state) =>
               _buildPageWithTransition(state, const SearchScreen()),
-=======
-          builder: (context, state) => const SearchScreen(),
->>>>>>> feature/mypage
         ),
       ],
     ),
@@ -76,9 +65,6 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const ProfileEditScreen(),
-<<<<<<< HEAD
-      ),
-=======
       ), // 괄호 수정
     ),
     GoRoute(
@@ -113,7 +99,6 @@ final GoRouter router = GoRouter(
       path: '/phone_number_edit',
       pageBuilder: (context, state) => _buildPageWithTransition(
           state, const PhoneNumberEditScreen()), // 괄호 수정
->>>>>>> feature/mypage
     ),
     GoRoute(
       path: '/signup', // 회원가입 화면

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
-import 'package:onlyveyou/screens/search/widgets/show_tags.dart';
+import 'package:onlyveyou/screens/search/widgets/searched_screen.dart';
+import 'package:onlyveyou/screens/search/widgets/searching_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'widgets/search_main.dart';
+import 'widgets/search_initial_screen.dart';
 import 'widgets/search_text_field.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -18,12 +20,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _sendMessage() {
     FocusScope.of(context).unfocus();
-
-    _messageController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    _messageController.text = context.watch<TagSearchCubit>().state.searchTerm;
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -40,17 +42,15 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ],
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(40.0), // 검색창의 높이 설정
+            preferredSize: Size.fromHeight(40.h), // 검색창의 높이 설정
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(
-                      color: Colors.grey[200]!, width: 1), // 탭 바 하단의 구분선
+                  bottom: BorderSide(color: Colors.grey[200]!, width: 1.w),
                 ),
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                 child: SearchTextField(
                   controller: _messageController,
                   onPressed: _sendMessage,
@@ -63,8 +63,9 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             children: [
               context.watch<TagSearchCubit>().state.searchTerm.isEmpty
-                  ? const SearchMain()
-                  : const ShowTags(),
+                  ? const SearchInitialScreen()
+                  : const SearchingScreen(),
+              // SearchedScreen(),
             ],
           ),
         ),
@@ -72,9 +73,3 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
-
-/*
-할일
-- search_text_field의 x와 돋보기 아이콘 간격 줄이기 (뭘해도안됌);
-- 검색어 입력 후 x 누르면 다시 main으로 안감;
- */
