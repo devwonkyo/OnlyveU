@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
-import 'package:onlyveyou/models/history_item.dart';
+import 'package:onlyveyou/constants/app_constants.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class MorePopularScreen extends StatelessWidget {
+  String _formatPrice(String price) {
+    try {
+      return price.replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+    } catch (e) {
+      return '0';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,27 +41,39 @@ class MorePopularScreen extends StatelessWidget {
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
+          if (state is HomeLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
           if (state is HomeLoaded) {
-            return GridView.builder(
-              padding: EdgeInsets.all(16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.45,
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<HomeBloc>().add(RefreshHomeData());
+              },
+              child: GridView.builder(
+                padding: EdgeInsets.all(16),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.45,
+                ),
+                itemCount: state.popularProducts.length,
+                itemBuilder: (context, index) =>
+                    _buildProductCard(state.popularProducts[index], context),
               ),
-              itemCount: state.popularProducts.length,
-              itemBuilder: (context, index) =>
-                  _buildProductCard(state.popularProducts[index], context),
             );
           }
-          return Center(child: CircularProgressIndicator());
+          return Center(child: Text('상품을 불러올 수 없습니다.'));
         },
       ),
     );
   }
 
-  Widget _buildProductCard(HistoryItem item, BuildContext context) {
+  Widget _buildProductCard(ProductModel product, BuildContext context) {
+    final originalPrice = int.tryParse(product.price) ?? 0;
+    final discountedPrice =
+        originalPrice * (100 - product.discountPercent) ~/ 100;
+
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,9 +85,15 @@ class MorePopularScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.asset(
-                item.imageUrl,
-                fit: BoxFit.contain,
+              child: Hero(
+                tag: 'product_${product.productId}',
+                child: Image.network(
+                  product.productImageList.first,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(child: Icon(Icons.error));
+                  },
+                ),
               ),
             ),
           ),
@@ -73,7 +101,7 @@ class MorePopularScreen extends StatelessWidget {
 
           // 상품명
           Text(
-            item.title,
+            product.name,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -84,9 +112,9 @@ class MorePopularScreen extends StatelessWidget {
           SizedBox(height: 4),
 
           // 가격 정보
-          if (item.originalPrice != null)
+          if (product.discountPercent > 0)
             Text(
-              '${item.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+              '${_formatPrice(product.price)}원',
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 color: Colors.grey,
@@ -96,9 +124,9 @@ class MorePopularScreen extends StatelessWidget {
           SizedBox(height: 2),
           Row(
             children: [
-              if (item.discountRate != null)
+              if (product.discountPercent > 0)
                 Text(
-                  '${item.discountRate}%',
+                  '${product.discountPercent}%',
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
@@ -107,7 +135,7 @@ class MorePopularScreen extends StatelessWidget {
                 ),
               SizedBox(width: 4),
               Text(
-                '${item.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                '${_formatPrice(discountedPrice.toString())}원',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -135,7 +163,7 @@ class MorePopularScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 4),
-              if (item.isBest)
+              if (product.tagList.contains('BEST'))
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
@@ -160,7 +188,7 @@ class MorePopularScreen extends StatelessWidget {
               Icon(Icons.star, size: 12, color: AppStyles.mainColor),
               SizedBox(width: 2),
               Text(
-                item.rating.toStringAsFixed(1),
+                product.rating.toStringAsFixed(1),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -168,7 +196,7 @@ class MorePopularScreen extends StatelessWidget {
               ),
               SizedBox(width: 2),
               Text(
-                '(${item.reviewCount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')})',
+                '(${product.reviewList.length})',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -179,27 +207,31 @@ class MorePopularScreen extends StatelessWidget {
           SizedBox(height: 5),
 
           // 좋아요와 장바구니 버튼
-          // 6. 좋아요와 장바구니 버튼
-          // 6. 좋아요와 장바구니 버튼
           Row(
             children: [
               GestureDetector(
                 onTap: () {
-                  context.read<HomeBloc>().add(ToggleProductFavorite(item));
+                  context.read<HomeBloc>().add(ToggleProductFavorite(
+                      product, AppConstants.currentUserId));
                 },
                 child: Container(
                   width: 20,
                   height: 20,
                   child: Icon(
-                    item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    product.favoriteList.contains(AppConstants.currentUserId)
+                        ? Icons.favorite
+                        : Icons.favorite_border,
                     size: 18,
-                    color: item.isFavorite ? Colors.red : Colors.grey,
+                    color: product.favoriteList
+                            .contains(AppConstants.currentUserId)
+                        ? Colors.red
+                        : Colors.grey,
                   ),
                 ),
               ),
               SizedBox(width: 25),
               GestureDetector(
-                onTap: () {},
+                onTap: () => _handleAddToCart(context, product),
                 child: Container(
                   width: 22,
                   height: 22,
@@ -213,6 +245,16 @@ class MorePopularScreen extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _handleAddToCart(BuildContext context, ProductModel product) {
+    // TODO: 장바구니 추가 기능 구현
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('장바구니에 추가되었습니다.'),
+        duration: Duration(seconds: 2),
       ),
     );
   }

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
-import 'package:onlyveyou/models/history_item.dart';
+import 'package:onlyveyou/constants/app_constants.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
-// 인기 상품 목록을 보여주는 위젯
 class PopularProductsWidget extends StatelessWidget {
-  final List<HistoryItem> popularProducts; // 인기 상품 리스트
-  final bool isPortrait; // 세로 모드 여부
+  final List<ProductModel> popularProducts;
+  final bool isPortrait;
 
   PopularProductsWidget({
     required this.popularProducts,
@@ -16,20 +16,28 @@ class PopularProductsWidget extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  String _formatPrice(String price) {
+    try {
+      return price.replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+    } catch (e) {
+      return '0';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 인기 상품 섹션 제목과 더보기 버튼
         Padding(
           padding: AppStyles.defaultPadding,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('연관 인기 상품', style: AppStyles.headingStyle), // 섹션 제목
+              Text('연관 인기 상품', style: AppStyles.headingStyle),
               GestureDetector(
-                onTap: () => context.push('/more-popular'), //^ go를 push로 변경
+                onTap: () => context.push('/more-popular'),
                 child: Text(
                   '더보기 >',
                   style: AppStyles.bodyTextStyle
@@ -39,12 +47,11 @@ class PopularProductsWidget extends StatelessWidget {
             ],
           ),
         ),
-        // 인기 상품 리스트뷰
         SizedBox(
-          height: isPortrait ? 340 : 240, // 세로/가로 모드에 따라 높이 설정
+          height: isPortrait ? 340 : 240,
           child: ListView.builder(
-            scrollDirection: Axis.horizontal, // 가로 스크롤
-            itemCount: popularProducts.length, // 아이템 수
+            scrollDirection: Axis.horizontal,
+            itemCount: popularProducts.length,
             padding: EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) => _buildProductCard(index, context),
           ),
@@ -53,37 +60,47 @@ class PopularProductsWidget extends StatelessWidget {
     );
   }
 
-  // 각 상품 카드를 생성하는 위젯
   Widget _buildProductCard(int index, BuildContext context) {
-    // context 추가
-    final item = popularProducts[index];
+    final product = popularProducts[index];
+    final originalPrice = int.tryParse(product.price) ?? 0;
+    final discountedPrice =
+        originalPrice * (100 - product.discountPercent) ~/ 100;
+
     return Container(
-      width: 150, // 카드 너비 고정
-      margin: EdgeInsets.only(right: 12), // 카드 간격
+      width: 150,
+      margin: EdgeInsets.only(right: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. 상품 이미지
           Container(
-            width: 150, // 이미지 너비
-            height: 150, // 이미지 높이
+            width: 150,
+            height: 150,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: Colors.white,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                item.imageUrl, // HistoryItem의 이미지 URL 사용
-                fit: BoxFit.contain,
-              ),
+              child: product.productImageList.isNotEmpty
+                  ? Image.network(
+                      product.productImageList.first,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Center(child: Icon(Icons.error));
+                      },
+                    )
+                  : Image.asset(
+                      'assets/default_image.png', // 로컬 기본 이미지로 대체
+                      fit: BoxFit.contain,
+                    ),
             ),
           ),
           SizedBox(height: 8),
 
           // 2. 상품명
           Text(
-            item.title, // HistoryItem의 제목 사용
+            product.name,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -94,9 +111,9 @@ class PopularProductsWidget extends StatelessWidget {
           SizedBox(height: 4),
 
           // 3. 가격 정보
-          if (item.originalPrice != null) // 할인 전 가격
+          if (product.discountPercent > 0)
             Text(
-              '${item.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+              '${_formatPrice(product.price)}원',
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 color: Colors.grey,
@@ -106,9 +123,9 @@ class PopularProductsWidget extends StatelessWidget {
           SizedBox(height: 2),
           Row(
             children: [
-              if (item.discountRate != null)
+              if (product.discountPercent > 0)
                 Text(
-                  '${item.discountRate}%', // HistoryItem의 할인율 사용
+                  '${product.discountPercent}%',
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
@@ -117,7 +134,7 @@ class PopularProductsWidget extends StatelessWidget {
                 ),
               SizedBox(width: 4),
               Text(
-                '${item.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원', // HistoryItem의 가격 사용
+                '${_formatPrice(discountedPrice.toString())}원',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
@@ -145,7 +162,7 @@ class PopularProductsWidget extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 4),
-              if (item.isBest) // isBest가 true일 때만 BEST 태그 표시
+              if (product.tagList.contains('BEST'))
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
@@ -174,7 +191,7 @@ class PopularProductsWidget extends StatelessWidget {
               ),
               SizedBox(width: 2),
               Text(
-                item.rating.toStringAsFixed(1),
+                product.rating.toStringAsFixed(1),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -182,7 +199,7 @@ class PopularProductsWidget extends StatelessWidget {
               ),
               SizedBox(width: 2),
               Text(
-                '(${item.reviewCount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')})',
+                '(${product.reviewList.length})',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -197,15 +214,24 @@ class PopularProductsWidget extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
-                  context.read<HomeBloc>().add(ToggleProductFavorite(item));
+                  if (AppConstants.currentUserId != null) {
+                    context.read<HomeBloc>().add(ToggleProductFavorite(
+                        product, AppConstants.currentUserId!));
+                  }
                 },
                 child: Container(
                   width: 20,
                   height: 20,
                   child: Icon(
-                    item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    product.favoriteList
+                            .contains(AppConstants.currentUserId ?? '')
+                        ? Icons.favorite
+                        : Icons.favorite_border,
                     size: 18,
-                    color: item.isFavorite ? Colors.red : Colors.grey,
+                    color: product.favoriteList
+                            .contains(AppConstants.currentUserId ?? '')
+                        ? Colors.red
+                        : Colors.grey,
                   ),
                 ),
               ),
