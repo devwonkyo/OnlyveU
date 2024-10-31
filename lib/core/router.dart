@@ -1,12 +1,14 @@
 // lib/config/routes/app_router.dart
 import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
-import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home_screen.dart';
+import 'package:onlyveyou/screens/home/more_popular_screen.dart';
+import 'package:onlyveyou/screens/home/more_recommended_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/profile_edit_screen.dart';
 
@@ -43,7 +45,8 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          builder: (context, state) => SearchScreen(),
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, const SearchScreen()),
         ),
       ],
     ),
@@ -65,6 +68,21 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/find-id',
       builder: (context, state) => FindIdScreen(),
+    ),
+    GoRoute(
+      path: '/more-recommended',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        MoreRecommendedScreen(),
+      ),
+    ),
+    GoRoute(
+      //장바구니, 파이어베이스에 프로덕트 5개 연동해보기
+      path: '/more-popular',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        MorePopularScreen(),
+      ),
     ),
   ],
 );
@@ -90,3 +108,7 @@ CustomTransitionPage<void> _buildPageWithTransition(
     transitionDuration: const Duration(milliseconds: 300),
   );
 }
+
+//장바구니, 파이어베이스에 프로덕트 5개 연동해보기
+//파이어베이스, 장바구니 그리기
+// 더미 데이터 넣기
