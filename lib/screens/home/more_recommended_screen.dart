@@ -5,84 +5,75 @@ import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
-// 추천 상품 목록을 보여주는 위젯
-class RecommendedProductsWidget extends StatelessWidget {
-  final List<HistoryItem> recommendedProducts; // 추천 상품 리스트
-  final bool isPortrait; // 세로 모드 여부
-
-  RecommendedProductsWidget({
-    required this.recommendedProducts,
-    required this.isPortrait,
-    Key? key,
-  }) : super(key: key);
-
+class MoreRecommendedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
-      children: [
-        // 추천 상품 섹션 제목과 더보기 버튼
-        Padding(
-          padding: AppStyles.defaultPadding, // 스타일에 맞춘 패딩 적용
-          child: Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween, // 제목과 더보기 버튼을 양쪽으로 배치
-            children: [
-              Text('국한님을 위한 추천상품', style: AppStyles.headingStyle), // 섹션 제목
-              GestureDetector(
-                onTap: () => context.go('/more-recommended'),
-                child: Text(
-                  '더보기 >',
-                  style: AppStyles.bodyTextStyle
-                      .copyWith(color: AppStyles.greyColor),
-                ),
-              )
-            ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: Container(), // leading 부분 제거
+        title: Text(
+          '국한님을 위한 추천상품',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        // 추천 상품 리스트뷰
-        SizedBox(
-          height: isPortrait ? 340 : 240, // 세로/가로 모드에 따라 높이 설정
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal, // 가로 스크롤 설정
-            itemCount: recommendedProducts.length, // 아이템 수
-            padding: EdgeInsets.symmetric(horizontal: 16), // 가로 패딩
-            itemBuilder: (context, index) => _buildProductCard(index, context),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.close, color: Colors.black),
+            onPressed: () => context.go('/home'), // 홈 화면으로 이동
           ),
-        ),
-      ],
+        ],
+      ),
+      body: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          if (state is HomeLoaded) {
+            return GridView.builder(
+              padding: EdgeInsets.all(16),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.45,
+              ),
+              itemCount: state.recommendedProducts.length,
+              itemBuilder: (context, index) =>
+                  _buildProductCard(state.recommendedProducts[index], context),
+            );
+          }
+          return Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 
-  Widget _buildProductCard(int index, BuildContext context) {
-    final item = recommendedProducts[index];
+  Widget _buildProductCard(HistoryItem item, BuildContext context) {
     return Container(
-      width: 150, // 카드 너비 고정
-      margin: EdgeInsets.only(right: 12), // 카드 간격
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 상품 이미지
-          Container(
-            width: 150, // 이미지 너비
-            height: 150, // 이미지 높이
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+          // 상품 이미지
+          AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Image.asset(
-                item.imageUrl, // HistoryItem의 이미지 URL 사용
+                item.imageUrl,
                 fit: BoxFit.contain,
               ),
             ),
           ),
           SizedBox(height: 8),
 
-          // 2. 상품명
+          // 상품명
           Text(
-            item.title, // HistoryItem의 제목 사용
+            item.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -92,7 +83,7 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 4),
 
-// 3. 가격 정보
+          // 가격 정보
           if (item.originalPrice != null)
             Text(
               '${item.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
@@ -126,7 +117,7 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 6),
 
-          // 4. 태그들
+          // 태그
           Row(
             children: [
               Container(
@@ -144,7 +135,7 @@ class RecommendedProductsWidget extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 4),
-              if (item.isBest) // isBest가 true일 때만 BEST 태그 표시
+              if (item.isBest)
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
@@ -163,14 +154,10 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 6),
 
-          // 5. 별점과 리뷰 수
+          // 별점과 리뷰 수
           Row(
             children: [
-              Icon(
-                Icons.star,
-                size: 12,
-                color: AppStyles.mainColor,
-              ),
+              Icon(Icons.star, size: 12, color: AppStyles.mainColor),
               SizedBox(width: 2),
               Text(
                 item.rating.toStringAsFixed(1),
@@ -191,7 +178,8 @@ class RecommendedProductsWidget extends StatelessWidget {
           ),
           SizedBox(height: 5),
 
-// 6. 좋아요와 장바구니 버튼
+          // 좋아요와 장바구니 버튼
+          // 6. 좋아요와 장바구니 버튼
           Row(
             children: [
               GestureDetector(

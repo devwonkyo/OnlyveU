@@ -1,4 +1,3 @@
-// models/history_item.dart
 class HistoryItem {
   final String id;
   final String title;
@@ -8,6 +7,8 @@ class HistoryItem {
   final int? discountRate;
   final bool isBest;
   final bool isFavorite;
+  final double rating;
+  final int reviewCount;
 
   HistoryItem({
     required this.id,
@@ -18,9 +19,10 @@ class HistoryItem {
     this.discountRate,
     this.isBest = false,
     this.isFavorite = false,
+    this.rating = 0.0,
+    this.reviewCount = 0,
   });
 
-  // Firebase 변환 메서드
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -31,6 +33,8 @@ class HistoryItem {
       'discountRate': discountRate,
       'isBest': isBest,
       'isFavorite': isFavorite,
+      'rating': rating,
+      'reviewCount': reviewCount,
     };
   }
 
@@ -44,6 +48,8 @@ class HistoryItem {
       discountRate: map['discountRate'],
       isBest: map['isBest'],
       isFavorite: map['isFavorite'],
+      rating: map['rating'] ?? 0.0,
+      reviewCount: map['reviewCount'] ?? 0,
     );
   }
 }

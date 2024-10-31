@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
-import 'package:onlyveyou/screens/home/widgets/banner_widget.dart';
 import 'package:onlyveyou/screens/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/widgets/recommended_products_widget.dart';
 import 'package:onlyveyou/utils/styles.dart';
@@ -46,23 +45,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   //배너
                   child: _buildTabBar(), // 상단에 고정되는 탭 바
                 ),
-                SliverToBoxAdapter(
-                  child: BlocBuilder<HomeBloc, HomeState>(
-                    buildWhen: (previous, current) =>
-                        current is HomeLoaded || current is HomeLoading,
-                    builder: (context, state) {
-                      if (state is HomeLoading) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (state is HomeLoaded) {
-                        return BannerWidget(
-                          pageController: _pageController,
-                          bannerItems: state.bannerItems,
-                        );
-                      }
-                      return SizedBox.shrink();
-                    },
-                  ),
-                ),
+                //배너 돌다보면 앱 느려짐 평소엔 주석해둘것
+                // SliverToBoxAdapter(
+                //   child: BlocBuilder<HomeBloc, HomeState>(
+                //     buildWhen: (previous, current) =>
+                //         current is HomeLoaded || current is HomeLoading,
+                //     builder: (context, state) {
+                //       if (state is HomeLoading) {
+                //         return Center(child: CircularProgressIndicator());
+                //       } else if (state is HomeLoaded) {
+                //         return BannerWidget(
+                //           pageController: _pageController,
+                //           bannerItems: state.bannerItems,
+                //         );
+                //       }
+                //       return SizedBox.shrink();
+                //     },
+                //   ),
+                // ),
                 SliverToBoxAdapter(
                   child: _buildQuickMenu(MediaQuery.of(context).orientation ==
                       Orientation.portrait),
@@ -75,8 +75,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       if (state is HomeLoading) {
                         return Center(child: CircularProgressIndicator());
                       } else if (state is HomeLoaded) {
+                        // RecommendedProductsWidget이 이제 List<HistoryItem>을 받도록 변경됨
                         return RecommendedProductsWidget(
-                          recommendedProducts: state.recommendedProducts,
+                          recommendedProducts:
+                              state.recommendedProducts, // List<HistoryItem> 타입
                           isPortrait: MediaQuery.of(context).orientation ==
                               Orientation.portrait,
                         );
@@ -86,6 +88,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ),
                 ),
                 SliverToBoxAdapter(
+                  child: InkWell(
+                    onTap: () => print("쿠폰 눌림"),
+                    child: Image.asset(
+                      'assets/image/banner4.png',
+                      width: MediaQuery.of(context).size.width * 0.95,
+                    ),
+                  ),
+                ),
+
+                SliverToBoxAdapter(
                   child: BlocBuilder<HomeBloc, HomeState>(
                     buildWhen: (previous, current) =>
                         current is HomeLoaded || current is HomeLoading,
@@ -93,8 +105,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       if (state is HomeLoading) {
                         return Center(child: CircularProgressIndicator());
                       } else if (state is HomeLoaded) {
+                        // PopularProductsWidget도 List<HistoryItem>을 받도록 변경됨
                         return PopularProductsWidget(
-                          popularProducts: state.popularProducts,
+                          popularProducts:
+                              state.popularProducts, // List<HistoryItem> 타입
                           isPortrait: MediaQuery.of(context).orientation ==
                               Orientation.portrait,
                         );
@@ -173,3 +187,27 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 }
+///////////////////////
+// Container(
+// height: 8,
+// color: const Color.fromARGB(195, 232, 227, 227),
+// ),
+// const SizedBox(
+// height: 20,
+// ),
+// Center(
+// child: SizedBox(
+// width: MediaQuery.of(context).size.width * 0.95, // 이미지 크기 설정
+// child: InkWell(
+// onTap: () {
+// print("쿠폰 눌림");
+// },
+// child: Image.asset(
+// 'assets/image/mypage/coupon_image.jpeg', //네트워크 이미지
+// ),
+// ),
+// ),
+// ),
+// const SizedBox(
+// height: 20,
+// ),
