@@ -67,7 +67,7 @@ class TagListState extends Equatable {
   List<Object> get props => [tags];
 
   @override
-  String toString() => 'TagListState(todos: $tags)';
+  String toString() => 'TagListState(tags: $tags)';
 
   TagListState copyWith({
     List<Tag>? tags,

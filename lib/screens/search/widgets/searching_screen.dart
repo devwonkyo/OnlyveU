@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
+import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 
-class ShowTags extends StatelessWidget {
-  const ShowTags({super.key});
+class SearchingScreen extends StatelessWidget {
+  const SearchingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,10 @@ class ShowTags extends StatelessWidget {
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(tags[index].name),
-          onTap: () {},
+          onTap: () {
+            context.read<TagSearchCubit>().setSearchTerm(tags[index].name);
+            FocusScope.of(context).unfocus();
+          },
         );
       },
     );
