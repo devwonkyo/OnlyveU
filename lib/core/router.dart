@@ -85,6 +85,11 @@ final GoRouter router = GoRouter(
         MorePopularScreen(),
       ),
     ),
+    //카테고리 리스트
+    GoRoute(
+      path: '/categroy/productlist', // 회원가입 화면
+      builder: (context, state) => CategoryProductListScreen(),
+    ),
   ],
 );
 

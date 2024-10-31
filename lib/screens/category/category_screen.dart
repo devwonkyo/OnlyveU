@@ -84,7 +84,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             onTap: () {
                               // 클릭 시 실행할 코드
                               print("카테고리 헤더 클릭 : ${category.name}");
-                              context.go("/categroy/productlist");
+                              context.push("/categroy/productlist");
                             },
                             child: // 카테고리 헤더
                             SubCategoryHeader(
@@ -100,6 +100,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                 onTap: () {
                                   // 클릭 시 실행할 코드
                                   print('click ${subcategory.name}');
+                                  context.push("/categroy/productlist");
                                 },
                                 child: SubCategoryItem(title: subcategory.name),
                               )

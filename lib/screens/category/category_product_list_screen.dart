@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/category/category_bloc.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/category/widgets/filter_item.dart';
 import 'package:onlyveyou/screens/category/widgets/product_item.dart';
+import 'package:onlyveyou/widgets/product_widgets/horizental_product_card.dart';
 
 class CategoryProductListScreen extends StatefulWidget {
   const CategoryProductListScreen({super.key});
@@ -135,7 +137,7 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                       ),
                       itemCount: products.length,
                       itemBuilder: (context, index) {
-                        return ProductItem();
+                        return HorizontalProductCard(productModel: products[index]);
                       },
                     );
                   } else {

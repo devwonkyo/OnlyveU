@@ -12,6 +12,7 @@ import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_list/tag_list_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
+import 'package:onlyveyou/repositories/category_repository.dart';
 
 
 import 'blocs/history/history_bloc.dart';
@@ -51,7 +52,7 @@ class MyApp extends StatelessWidget {
               create: (context) => ProfileEditBloc(),
             ),
             BlocProvider<CategoryCubit>(
-              create: (context) => CategoryCubit()..loadCategories(),
+              create: (context) => CategoryCubit(categoryRepository: CategoryRepository())..loadCategories()
             ),
             BlocProvider<TagSearchCubit>(
               create: (context) => TagSearchCubit(),
