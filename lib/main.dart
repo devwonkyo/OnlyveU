@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
@@ -9,8 +9,15 @@ import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
+import 'package:onlyveyou/blocs/search/tag_list/tag_list_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
+import 'package:onlyveyou/repositories/category_repository.dart';
+
+
 import 'blocs/history/history_bloc.dart';
 import 'blocs/search/filtered_tags/filtered_tags_cubit.dart';
 import 'blocs/search/tag_list/tag_list_cubit.dart';
@@ -57,7 +64,7 @@ class MyApp extends StatelessWidget {
               create: (context) => ProfileEditBloc(),
             ),
             BlocProvider<CategoryCubit>(
-              create: (context) => CategoryCubit()..loadCategories(),
+              create: (context) => CategoryCubit(categoryRepository: CategoryRepository())..loadCategories()
             ),
             BlocProvider<TagSearchCubit>(
               create: (context) => TagSearchCubit(),

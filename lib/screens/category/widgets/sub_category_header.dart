@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/config/color.dart';
 
 class SubCategoryHeader extends StatelessWidget {
   final String icon;
@@ -16,7 +17,7 @@ class SubCategoryHeader extends StatelessWidget {
     // iconName에 따라 IconData 반환
     switch (iconName) {
       case 'skin':
-        return Icons.spa; // 예: 'skin'을 spa 아이콘과 매칭
+        return Icons.spa;
       case 'makeup':
         return Icons.brush;
       case 'mask':
@@ -47,13 +48,13 @@ class SubCategoryHeader extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8.r),
             decoration: BoxDecoration(
-              color: Color(0xFF1EC800).withOpacity(0.1),
+              color: AppsColor.pastelGreen.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child:Icon(
               _getIconData(icon), // 문자열을 IconData로 변환해서 사용
               size: 20.sp,
-              color: Color(0xFF1EC800),
+              color: AppsColor.pastelGreen,
             ),
           ),
           SizedBox(width: 8.w),
