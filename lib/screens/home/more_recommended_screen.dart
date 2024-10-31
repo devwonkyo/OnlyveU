@@ -64,11 +64,21 @@ class MoreRecommendedScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.asset(
-                item.productImageList.isNotEmpty
-                    ? item.productImageList[0]
-                    : 'assets/default.png',
-                fit: BoxFit.contain,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: item.productImageList.isNotEmpty
+                    ? Image.network(
+                        item.productImageList[0],
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                              child: Icon(Icons.error)); // 이미지 로딩 실패 시 아이콘 표시
+                        },
+                      )
+                    : Image.asset(
+                        'assets/default.png', // 로컬 기본 이미지
+                        fit: BoxFit.contain,
+                      ),
               ),
             ),
           ),

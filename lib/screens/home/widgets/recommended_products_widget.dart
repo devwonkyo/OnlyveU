@@ -18,6 +18,16 @@ class RecommendedProductsWidget extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  // 가격 포맷팅 메서드 추가
+  String _formatPrice(String price) {
+    try {
+      return price.replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+    } catch (e) {
+      return '0';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -124,8 +134,9 @@ class RecommendedProductsWidget extends StatelessWidget {
                   ),
                 ),
               SizedBox(width: 4),
+              // 할인된 가격 표시
               Text(
-                '${item.discountedPrice}원',
+                '${_formatPrice(item.discountedPrice.toString())}원', // 할인 가격을 포맷팅하여 표시
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,

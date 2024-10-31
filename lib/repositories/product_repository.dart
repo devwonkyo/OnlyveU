@@ -29,14 +29,14 @@ class ProductRepository {
           await _firestore.collection('products').limit(3).get();
 
       // 데이터 확인을 위한 로그 추가
-      print("Products fetched: ${snapshot.docs.length}"); //^
+      print("Products fetched: ${snapshot.docs.length}");
 
       // ProductModel로 변환 후 반환
       return snapshot.docs
           .map((doc) => ProductModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error fetching popular products: $e'); //^
+      print('Error fetching popular products: $e');
       throw Exception('인기 상품을 불러오는데 실패했습니다.');
     }
   }
