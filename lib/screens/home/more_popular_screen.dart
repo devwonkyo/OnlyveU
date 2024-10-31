@@ -25,7 +25,7 @@ class MorePopularScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.close, color: Colors.black),
-            onPressed: () => context.go('/home'),
+            onPressed: () => context.pop(),
           ),
         ],
       ),

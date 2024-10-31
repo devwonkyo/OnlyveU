@@ -29,7 +29,7 @@ class PopularProductsWidget extends StatelessWidget {
             children: [
               Text('연관 인기 상품', style: AppStyles.headingStyle), // 섹션 제목
               GestureDetector(
-                onTap: () => context.go('/more-popular'),
+                onTap: () => context.push('/more-popular'), //^ go를 push로 변경
                 child: Text(
                   '더보기 >',
                   style: AppStyles.bodyTextStyle
