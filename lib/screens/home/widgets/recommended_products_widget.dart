@@ -30,7 +30,7 @@ class RecommendedProductsWidget extends StatelessWidget {
             children: [
               Text('국한님을 위한 추천상품', style: AppStyles.headingStyle), // 섹션 제목
               GestureDetector(
-                onTap: () => context.go('/more-recommended'),
+                onTap: () => context.push('/more-recommended'),
                 child: Text(
                   '더보기 >',
                   style: AppStyles.bodyTextStyle

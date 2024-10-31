@@ -25,7 +25,7 @@ class MoreRecommendedScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.close, color: Colors.black),
-            onPressed: () => context.go('/home'), // 홈 화면으로 이동
+            onPressed: () => context.pop('/home'), // 홈 화면으로 이동
           ),
         ],
       ),
