@@ -18,12 +18,6 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _messageController = TextEditingController();
 
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
-  }
-
   void _sendMessage() {
     FocusScope.of(context).unfocus();
   }

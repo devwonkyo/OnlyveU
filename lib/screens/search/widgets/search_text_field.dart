@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 
-class SearchTextField extends StatelessWidget {
+class SearchTextField extends StatefulWidget {
   SearchTextField({
     super.key,
     required this.controller,
@@ -14,7 +14,19 @@ class SearchTextField extends StatelessWidget {
   final TextEditingController controller;
   final void Function() onPressed;
 
-  final debounce = Debounce(milliseconds: 50);
+  @override
+  State<SearchTextField> createState() => _SearchTextFieldState();
+}
+
+class _SearchTextFieldState extends State<SearchTextField> {
+  final debounce = Debounce(milliseconds: 500);
+
+  @override
+  void dispose() {
+    widget.controller.clear();
+    widget.controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +36,7 @@ class SearchTextField extends StatelessWidget {
       child: TextField(
         minLines: 1,
         maxLines: 1,
-        controller: controller,
+        controller: widget.controller,
         onChanged: (String? newSearchTerm) {
           if (newSearchTerm != null) {
             debounce.run(() {
@@ -58,10 +70,10 @@ class SearchTextField extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Visibility(
-                visible: controller.text.isNotEmpty,
+                visible: widget.controller.text.isNotEmpty,
                 child: IconButton(
                   onPressed: () {
-                    controller.clear();
+                    widget.controller.clear();
                     context.read<TagSearchCubit>().setSearchTerm('');
                   },
                   icon: Icon(
@@ -71,7 +83,7 @@ class SearchTextField extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed: onPressed,
+                onPressed: widget.onPressed,
                 icon: const Icon(
                   Icons.search,
                 ),
