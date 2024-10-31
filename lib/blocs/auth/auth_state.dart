@@ -1,6 +1,20 @@
-part of 'auth_bloc.dart';
+import 'package:meta/meta.dart';
 
 @immutable
-sealed class AuthState {}
+abstract class AuthState {}
 
-final class AuthInitial extends AuthState {}
+class AuthInitial extends AuthState {}
+
+class AuthLoading extends AuthState {}
+
+class SignUpSuccess extends AuthState {}
+
+class LoginSuccess extends AuthState {
+  final String userId;
+  LoginSuccess({required this.userId});
+}
+
+class AuthFailure extends AuthState {
+  final String message;
+  AuthFailure(this.message);
+}
