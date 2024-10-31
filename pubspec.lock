@@ -33,6 +33,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+<<<<<<< HEAD
+  asn1lib:
+    dependency: transitive
+    description:
+      name: asn1lib
+      sha256: "6b151826fcc95ff246cd219a0bf4c753ea14f4081ad71c61939becf3aba27f70"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.5"
+=======
+>>>>>>> feature/mypage
   async:
     dependency: transitive
     description:
@@ -129,6 +140,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+<<<<<<< HEAD
+  convert:
+    dependency: transitive
+    description:
+      name: convert
+      sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
+=======
+>>>>>>> feature/mypage
   cross_file:
     dependency: transitive
     description:
@@ -177,6 +199,33 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+<<<<<<< HEAD
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      sha256: "5598aa796bbf4699afd5c67c0f5f6e2ed542afc956884b9cd58c306966efc260"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.7.0"
+  dio_web_adapter:
+    dependency: transitive
+    description:
+      name: dio_web_adapter
+      sha256: "33259a9276d6cea88774a0000cfae0d861003497755969c92faa223108620dc8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  encrypt:
+    dependency: transitive
+    description:
+      name: encrypt
+      sha256: "62d9aa4670cc2a8798bab89b39fc71b6dfbacf615de6cf5001fb39f7e4a996a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.3"
+=======
+>>>>>>> feature/mypage
   equatable:
     dependency: "direct main"
     description:
@@ -509,6 +558,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.19.0"
+<<<<<<< HEAD
+  js:
+    dependency: transitive
+    description:
+      name: js
+      sha256: c1b2e9b5ea78c45e1a0788d29606ba27dc5f71f019f32ca5140f61ef071838cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.1"
+=======
+>>>>>>> feature/mypage
   json_annotation:
     dependency: transitive
     description:
@@ -517,6 +577,33 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
+<<<<<<< HEAD
+  kakao_flutter_sdk_auth:
+    dependency: transitive
+    description:
+      name: kakao_flutter_sdk_auth
+      sha256: "686996c63c7e006ccf9a0bdfee5307465d7ae134d2f1ae2b4a06c597604689bc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.6"
+  kakao_flutter_sdk_common:
+    dependency: transitive
+    description:
+      name: kakao_flutter_sdk_common
+      sha256: "698d5f63d15438ad47af3baf0815fd30dfcacfa76640e96e5a18fc8504f25bde"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.6"
+  kakao_flutter_sdk_user:
+    dependency: "direct main"
+    description:
+      name: kakao_flutter_sdk_user
+      sha256: f3692feefad530bcfcdd1b8cf685b0c2c3da4a6d28a7df7f57529e57b7040f1b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.6"
+=======
+>>>>>>> feature/mypage
   leak_tracker:
     dependency: transitive
     description:
@@ -685,6 +772,17 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+<<<<<<< HEAD
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      sha256: "4be0097fcf3fd3e8449e53730c631200ebc7b88016acecab2b0da2f0149222fe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.9.1"
+=======
+>>>>>>> feature/mypage
   provider:
     dependency: transitive
     description:
@@ -702,7 +800,11 @@ packages:
     source: hosted
     version: "0.28.0"
   shared_preferences:
+<<<<<<< HEAD
+    dependency: "direct main"
+=======
     dependency: transitive
+>>>>>>> feature/mypage
     description:
       name: shared_preferences
       sha256: "746e5369a43170c25816cc472ee016d3a66bc13fcf430c0bc41ad7b4b2922051"

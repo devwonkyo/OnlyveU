@@ -110,7 +110,7 @@ class MyPageScreen extends StatelessWidget {
                           children: [
                             TextButton(
                                 onPressed: () {
-                                  context.go('/profile_edit');
+                                  context.push('/profile_edit');
                                 }, //go router이용해서 내 정보 수정 화면으로 이동
                                 child: const Row(
                                   children: [

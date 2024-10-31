@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
-import 'package:onlyveyou/models/history_item.dart';
+import 'package:onlyveyou/models/product_model.dart'; // ProductModel로 수정
 import 'package:onlyveyou/utils/styles.dart';
 
 class MoreRecommendedScreen extends StatelessWidget {
@@ -13,7 +13,7 @@ class MoreRecommendedScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: Container(), // leading 부분 제거
+        leading: Container(),
         title: Text(
           '국한님을 위한 추천상품',
           style: TextStyle(
@@ -25,7 +25,7 @@ class MoreRecommendedScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.close, color: Colors.black),
-            onPressed: () => context.go('/home'), // 홈 화면으로 이동
+            onPressed: () => context.pop('/home'),
           ),
         ],
       ),
@@ -51,7 +51,8 @@ class MoreRecommendedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(HistoryItem item, BuildContext context) {
+  // ProductModel 타입을 사용하도록 수정
+  Widget _buildProductCard(ProductModel item, BuildContext context) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,9 +64,21 @@ class MoreRecommendedScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.asset(
-                item.imageUrl,
-                fit: BoxFit.contain,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: item.productImageList.isNotEmpty
+                    ? Image.network(
+                        item.productImageList[0],
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                              child: Icon(Icons.error)); // 이미지 로딩 실패 시 아이콘 표시
+                        },
+                      )
+                    : Image.asset(
+                        'assets/default.png', // 로컬 기본 이미지
+                        fit: BoxFit.contain,
+                      ),
               ),
             ),
           ),
@@ -73,7 +86,7 @@ class MoreRecommendedScreen extends StatelessWidget {
 
           // 상품명
           Text(
-            item.title,
+            item.name,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -84,74 +97,23 @@ class MoreRecommendedScreen extends StatelessWidget {
           SizedBox(height: 4),
 
           // 가격 정보
-          if (item.originalPrice != null)
+          Text(
+            '${item.price}원',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          SizedBox(height: 2),
+          if (item.discountPercent > 0)
             Text(
-              '${item.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+              '${item.discountedPrice}원',
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 color: Colors.grey,
                 fontSize: 12,
               ),
             ),
-          SizedBox(height: 2),
-          Row(
-            children: [
-              if (item.discountRate != null)
-                Text(
-                  '${item.discountRate}%',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              SizedBox(width: 4),
-              Text(
-                '${item.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 6),
-
-          // 태그
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '오늘드림',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-              SizedBox(width: 4),
-              if (item.isBest)
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'BEST',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-            ],
-          ),
           SizedBox(height: 6),
 
           // 별점과 리뷰 수
@@ -168,7 +130,7 @@ class MoreRecommendedScreen extends StatelessWidget {
               ),
               SizedBox(width: 2),
               Text(
-                '(${item.reviewCount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')})',
+                '(${item.reviewCount})',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
@@ -179,20 +141,25 @@ class MoreRecommendedScreen extends StatelessWidget {
           SizedBox(height: 5),
 
           // 좋아요와 장바구니 버튼
-          // 6. 좋아요와 장바구니 버튼
           Row(
             children: [
               GestureDetector(
                 onTap: () {
-                  context.read<HomeBloc>().add(ToggleProductFavorite(item));
+                  context
+                      .read<HomeBloc>()
+                      .add(ToggleProductFavorite(item, 'userId_here'));
                 },
                 child: Container(
                   width: 20,
                   height: 20,
                   child: Icon(
-                    item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    item.isFavorite('userId_here')
+                        ? Icons.favorite
+                        : Icons.favorite_border,
                     size: 18,
-                    color: item.isFavorite ? Colors.red : Colors.grey,
+                    color: item.isFavorite('userId_here')
+                        ? Colors.red
+                        : Colors.grey,
                   ),
                 ),
               ),
