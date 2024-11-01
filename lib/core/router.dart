@@ -1,6 +1,8 @@
 // lib/config/routes/app_router.dart
 import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/models/category_model.dart';
+import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -126,8 +128,11 @@ final GoRouter router = GoRouter(
     ),
     //카테고리 리스트
     GoRoute(
-      path: '/categroy/productlist', // 회원가입 화면
-      builder: (context, state) => CategoryProductListScreen(),
+      path: '/categroy/productlist',
+      builder: (context, state) {
+        final categroySelection = state.extra as CategorySelection;
+        return CategoryProductListScreen(categorySelection: categroySelection,);
+      }
     ),
   ],
 );
