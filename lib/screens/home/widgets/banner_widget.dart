@@ -130,3 +130,20 @@ class _BannerWidgetState extends State<BannerWidget> {
     );
   }
 }
+// SliverToBoxAdapter(
+//   child: BlocBuilder<HomeBloc, HomeState>(
+//     buildWhen: (previous, current) =>
+//         current is HomeLoaded || current is HomeLoading,
+//     builder: (context, state) {
+//       if (state is HomeLoading) {
+//         return Center(child: CircularProgressIndicator());
+//       } else if (state is HomeLoaded) {
+//         return BannerWidget(
+//           pageController: _pageController,
+//           bannerItems: state.bannerItems,
+//         );
+//       }
+//       return SizedBox.shrink();
+//     },
+//   ),
+// ),

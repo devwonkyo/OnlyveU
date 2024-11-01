@@ -3,7 +3,6 @@ import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
-import 'package:onlyveyou/blocs/mypage/password/password_event.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
 import 'package:onlyveyou/screens/category/category_product_list_screen.dart';
@@ -14,18 +13,18 @@ import 'package:onlyveyou/screens/home/more_popular_screen.dart';
 import 'package:onlyveyou/screens/home/more_recommended_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/nickname_edit_screen.dart';
-
 import 'package:onlyveyou/screens/mypage/edit/password/set_new_password_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
-import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
+import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
+import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 
 import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/home',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -115,6 +114,13 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         MoreRecommendedScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/cart',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        ShoppingCartScreen(),
       ),
     ),
     GoRoute(
