@@ -52,6 +52,7 @@ dependencies:
   shimmer: ^3.0.0
   kakao_flutter_sdk_user: ^1.9.5
   shared_preferences: ^2.3.2
+  stream_transform: ^2.1.0
 
 
 dev_dependencies:

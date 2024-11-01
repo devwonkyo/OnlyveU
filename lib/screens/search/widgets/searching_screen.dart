@@ -20,9 +20,11 @@ class SearchingScreen extends StatelessWidget {
         itemCount: tags.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(tags[index].name),
+            title: Text(tags[index].category),
             onTap: () {
-              context.read<TagSearchCubit>().setSearchTerm(tags[index].name);
+              context
+                  .read<TagSearchCubit>()
+                  .setSearchTerm(tags[index].category);
               FocusScope.of(context).unfocus();
             },
           );

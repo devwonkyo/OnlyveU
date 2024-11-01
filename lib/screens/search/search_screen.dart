@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/blocs/search/search_navigation/search_navigation_bloc.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 import 'package:onlyveyou/screens/search/widgets/search_complete_screen.dart';
 import 'package:onlyveyou/screens/search/widgets/searching_screen.dart';
@@ -59,10 +60,25 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
         ),
-        body: context.watch<TagSearchCubit>().state.searchTerm.isEmpty
-            ? const SearchInitialScreen()
-            : const SearchingScreen(),
-        // SearchCompleteScreen(),
+        body:
+            // BlocBuilder<SearchNavigationBloc, SearchNavigationState>(
+            //   builder: (context, state) {
+            //     switch (state.) {
+            //       case SearchNavigationSelected(selectedSearchStatus: SearchStatus.initial):
+            //         return Center(child: CircularProgressIndicator());
+            //       case GetTopicLoaded:
+            //         return YourWidget();
+            //       case GetTopicError:
+            //         return ErrorWidget();
+            //       default:
+            //         return Container();
+            //     }
+            //   },
+            // )
+            // context.watch<TagSearchCubit>().state.searchTerm.isEmpty
+            //     ? const SearchInitialScreen()
+            //     : const SearchingScreen(),
+            SearchCompleteScreen(),
       ),
     );
   }

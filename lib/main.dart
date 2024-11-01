@@ -12,6 +12,7 @@ import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.da
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
+import 'package:onlyveyou/blocs/search/search_navigation/search_navigation_bloc.dart';
 import 'package:onlyveyou/blocs/search/tag_list/tag_list_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
@@ -66,6 +67,9 @@ class MyApp extends StatelessWidget {
                 create: (context) =>
                     CategoryCubit(categoryRepository: CategoryRepository())
                       ..loadCategories()),
+            BlocProvider<SearchNavigationBloc>(
+              create: (context) => SearchNavigationBloc(),
+            ),
             BlocProvider<TagSearchCubit>(
               create: (context) => TagSearchCubit(),
             ),
