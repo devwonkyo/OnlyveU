@@ -18,12 +18,14 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _scrollController.addListener(_onScroll);
+    _pageController.dispose();
     context.read<HomeBloc>().add(LoadHomeData());
   }
 
@@ -106,11 +108,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         labelPadding: EdgeInsets.symmetric(horizontal: 16.w),
         tabs: [
           Tab(text: '홈'),
-          Tab(text: '딘토'),
-          Tab(text: '오톡'),
           Tab(text: '랭킹'),
+          Tab(text: '오특'),
           Tab(text: '매거진'),
-          Tab(text: 'LUXE EDIT'),
+          // Tab(text: '딘토'),
+          //  Tab(text: 'LUXE EDIT'),
         ],
         labelColor: AppStyles.mainColor,
         unselectedLabelColor: AppStyles.greyColor,
