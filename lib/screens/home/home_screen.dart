@@ -152,9 +152,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       childAspectRatio: isPortrait ? 1 : 1.2,
       padding: AppStyles.defaultPadding,
       children: [
-        _buildQuickMenuItem('W케어', Icons.favorite),
-        _buildQuickMenuItem('건강템찾기', Icons.medication),
-        _buildQuickMenuItem('라이브', Icons.live_tv),
+        _buildQuickMenuItem('이벤트', Icons.favorite),
+        _buildQuickMenuItem('픽업', Icons.medication),
+        _buildQuickMenuItem('뭐할까?', Icons.live_tv),
         _buildQuickMenuItem('선물하기', Icons.card_giftcard),
         _buildQuickMenuItem('세일', Icons.local_offer),
       ],
