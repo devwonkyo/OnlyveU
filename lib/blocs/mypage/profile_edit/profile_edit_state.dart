@@ -31,3 +31,16 @@ class ProfileEditError extends ProfileEditState {
   @override
   List<Object?> get props => [message];
 }
+
+// 이메일 로딩 중 상태
+class EmailLoading extends ProfileEditState {}
+
+// 이메일 로드 성공 상태
+class EmailLoaded extends ProfileEditState {
+  final String email;
+
+  EmailLoaded(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
