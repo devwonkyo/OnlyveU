@@ -36,3 +36,15 @@ class NicknameEditFailure extends NicknameEditState {
   @override
   List<Object?> get props => [errorMessage];
 }
+
+//닉네임 가져오기 State
+class NicknameLoading extends NicknameEditState {}
+
+class NicknameLoaded extends NicknameEditState {
+  final String nickname;
+
+  const NicknameLoaded(this.nickname);
+
+  @override
+  List<Object?> get props => [nickname];
+}
