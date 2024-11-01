@@ -27,7 +27,13 @@ class ProfileInfoTile extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (trailingText != null) Text(trailingText!),
+              if (trailingText != null)
+                Text(
+                  trailingText!,
+                  style: const TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
               const SizedBox(width: 5),
               const Icon(Icons.arrow_forward_ios, size: 16),
             ],
