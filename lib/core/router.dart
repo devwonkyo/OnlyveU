@@ -1,7 +1,6 @@
 // lib/config/routes/app_router.dart
 import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/models/category_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
@@ -25,7 +24,7 @@ import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -54,8 +53,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          pageBuilder: (context, state) =>
-              _buildPageWithTransition(state, const SearchScreen()),
+          builder: (context, state) => SearchScreen(),
         ),
       ],
     ),
