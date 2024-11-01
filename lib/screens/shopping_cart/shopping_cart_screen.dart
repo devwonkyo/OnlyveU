@@ -160,15 +160,15 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  'https://via.placeholder.com/80',
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              //        ClipRRect(
+              //           borderRadius: BorderRadius.circular(8),
+              //           child: Image.network(
+              //           'https://via.placeholder.com/80',
+              //            width: 80,
+              //           height: 80,
+              //           fit: BoxFit.cover,
+              //         ),
+              //       ),
               SizedBox(width: 12),
               Expanded(
                 child: Column(
