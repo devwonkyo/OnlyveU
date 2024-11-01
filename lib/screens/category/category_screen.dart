@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
+import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/category/category_skeletion_screen.dart';
 import 'package:onlyveyou/screens/category/widgets/main_category_item.dart';
 import 'package:onlyveyou/screens/category/widgets/sub_category_header.dart';
@@ -84,7 +85,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             onTap: () {
                               // 클릭 시 실행할 코드
                               print("카테고리 헤더 클릭 : ${category.name}");
-                              context.push("/categroy/productlist");
+                              final categorySelection = CategorySelection(category: category);
+                              context.push("/categroy/productlist",extra: categorySelection);
                             },
                             child: // 카테고리 헤더
                             SubCategoryHeader(
@@ -100,7 +102,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                 onTap: () {
                                   // 클릭 시 실행할 코드
                                   print('click ${subcategory.name}');
-                                  context.push("/categroy/productlist");
+                                  final categorySelection = CategorySelection(category: category, selectedSubcategoryId: subcategory.id);
+                                  context.push("/categroy/productlist",extra: categorySelection);
                                 },
                                 child: SubCategoryItem(title: subcategory.name),
                               )
@@ -123,6 +126,22 @@ class _CategoryScreenState extends State<CategoryScreen> {
           return SizedBox();
         },
       ),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: _scrollToTop, // 버튼 클릭 시 맨 위로 스크롤
+        backgroundColor: Colors.white, // 버튼 배경색
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0), // 모서리 반지름
+          side: const BorderSide(
+            color: AppsColor.lightGray, // 테두리 색상
+            width: 1.0, // 테두리 두께
+          ),
+        ),
+        elevation: 0,
+        child: const Icon(
+          Icons.arrow_upward_outlined,
+          color: AppsColor.darkGray, // 아이콘 색상
+        ),
+      ),// 위로 이동 아이콘
     );
   }
 
@@ -202,5 +221,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
     _rightScrollController.removeListener(_onScroll);
     _rightScrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToTop() {
+    // 스크롤을 맨 위로 이동
+    _rightScrollController.animateTo(
+      0, // 맨 위로 이동
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 }
