@@ -3,9 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
-
-import '../../utils/app_constants.dart';
 
 class MorePopularScreen extends StatelessWidget {
   String _formatPrice(String price) {
@@ -210,25 +209,33 @@ class MorePopularScreen extends StatelessWidget {
           // 좋아요와 장바구니 버튼
           Row(
             children: [
-              GestureDetector(
-                onTap: () {
-                  context.read<HomeBloc>().add(ToggleProductFavorite(
-                      product, AppConstants.currentUserId));
+              FutureBuilder<String>(
+                future: OnlyYouSharedPreference().getCurrentUserId(),
+                builder: (context, snapshot) {
+                  final userId = snapshot.data ?? 'temp_user_id';
+                  return GestureDetector(
+                    onTap: () async {
+                      final prefs = OnlyYouSharedPreference();
+                      final currentUserId = await prefs.getCurrentUserId();
+                      context
+                          .read<HomeBloc>()
+                          .add(ToggleProductFavorite(product, currentUserId));
+                    },
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      child: Icon(
+                        product.favoriteList.contains(userId)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        size: 18,
+                        color: product.favoriteList.contains(userId)
+                            ? Colors.red
+                            : Colors.grey,
+                      ),
+                    ),
+                  );
                 },
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  child: Icon(
-                    product.favoriteList.contains(AppConstants.currentUserId)
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    size: 18,
-                    color: product.favoriteList
-                            .contains(AppConstants.currentUserId)
-                        ? Colors.red
-                        : Colors.grey,
-                  ),
-                ),
               ),
               SizedBox(width: 25),
               GestureDetector(
