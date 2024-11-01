@@ -53,14 +53,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
 
         if (userCredential.user?.emailVerified ?? false) {
-          // 로그인 성공 시 사용자 ID 포함하여 상태 발행
+          // SharedPreferences에 userId 저장
+          await _prefs.setUserId(userCredential.user!.uid);
+
+          // 다른 사용자 정보도 저장
+          await _prefs.setEmail(event.email);
+          // ... 다른 정보들 저장
+
           emit(LoginSuccess(userId: userCredential.user!.uid));
         } else {
           emit(AuthFailure('이메일 인증을 완료해주세요.'));
           await _firebaseAuth.signOut();
         }
-      } on FirebaseAuthException catch (e) {
-        emit(AuthFailure(e.message ?? '로그인에 실패했습니다.'));
+      } catch (e) {
+        emit(AuthFailure('로그인에 실패했습니다.'));
       }
     });
   }
