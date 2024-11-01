@@ -77,4 +77,26 @@ class OnlyYouSharedPreference {
     SharedPreferences preferences = await prefs;
     await preferences.clear();
   }
+
+  Future<String> getCurrentUserId() async {
+    SharedPreferences preferences = await prefs;
+    return preferences.getString('userId') ?? 'temp_user_id';
+  }
+
+  // 사용자 ID 저장
+  Future<void> setUserId(String userId) async {
+    SharedPreferences preferences = await prefs;
+    await preferences.setString('userId', userId);
+  }
+
+  // 디버깅용 사용자 정보 체크 메서드
+  Future<void> checkCurrentUser() async {
+    print('=== User Info Check ===');
+    print('User ID: ${await getCurrentUserId()}');
+    print('Email: ${await getEmail()}');
+    print('Nickname: ${await getNickname()}');
+    print('Phone: ${await getPhone()}');
+    print('Gender: ${await getGender()}');
+    print('=====================');
+  }
 }

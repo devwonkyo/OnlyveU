@@ -14,7 +14,7 @@ import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
-import 'package:onlyveyou/utils/app_constants.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
 import 'core/router.dart';
@@ -30,7 +30,8 @@ void main() async {
     nativeAppKey: '0236522723df3e1aa869fe36e25e6297',
     javaScriptAppKey: 'Ye8ebc7de132c8c4f0b6881be99e20f5e',
   );
-  AppConstants.checkCurrentUser();
+  final prefs = OnlyYouSharedPreference();
+  await prefs.checkCurrentUser();
   runApp(const MyApp());
 }
 
