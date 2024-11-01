@@ -12,12 +12,12 @@ import 'package:onlyveyou/screens/home/more_popular_screen.dart';
 import 'package:onlyveyou/screens/home/more_recommended_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/nickname_edit_screen.dart';
-
 import 'package:onlyveyou/screens/mypage/edit/password/set_new_password_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
-import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
+import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
+import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 
 import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
@@ -30,6 +30,10 @@ final GoRouter router = GoRouter(
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/cart',
+          builder: (context, state) => ShoppingCartScreen(),
+        ),
         GoRoute(
           path: '/category',
           pageBuilder: (context, state) => _buildPageWithTransition(

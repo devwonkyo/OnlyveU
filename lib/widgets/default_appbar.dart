@@ -43,7 +43,9 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         IconButton(
           icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            context.push('/cart');
+          },
         ),
       ],
     );
