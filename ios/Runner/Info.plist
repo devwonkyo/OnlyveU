@@ -20,5 +20,9 @@
 	<string></string>
 	<key>CFBundleGetInfoString</key>
 	<string></string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>
