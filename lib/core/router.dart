@@ -1,10 +1,12 @@
 // lib/config/routes/app_router.dart
 import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_event.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
+import 'package:onlyveyou/screens/category/category_product_list_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home_screen.dart';
@@ -52,8 +54,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          pageBuilder: (context, state) =>
-              _buildPageWithTransition(state, const SearchScreen()),
+          builder: (context, state) => const SearchScreen(),
         ),
       ],
     ),
@@ -124,6 +125,15 @@ final GoRouter router = GoRouter(
         MorePopularScreen(),
       ),
     ),
+    //카테고리 리스트
+    GoRoute(
+        path: '/categroy/productlist',
+        builder: (context, state) {
+          final categroySelection = state.extra as CategorySelection;
+          return CategoryProductListScreen(
+            categorySelection: categroySelection,
+          );
+        }),
   ],
 );
 
