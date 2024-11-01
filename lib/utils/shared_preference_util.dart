@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnlyYouSharedPreference {
@@ -79,6 +80,15 @@ class OnlyYouSharedPreference {
   }
 
   Future<String> getCurrentUserId() async {
+    // 1. Firebase 확인
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      SharedPreferences preferences = await prefs;
+      await preferences.setString('userId', firebaseUser.uid);
+      return firebaseUser.uid;
+    }
+
+    // 2. SharedPreferences 확인
     SharedPreferences preferences = await prefs;
     return preferences.getString('userId') ?? 'temp_user_id';
   }
