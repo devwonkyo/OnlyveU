@@ -31,10 +31,6 @@ final GoRouter router = GoRouter(
       },
       routes: [
         GoRoute(
-          path: '/cart',
-          builder: (context, state) => ShoppingCartScreen(),
-        ),
-        GoRoute(
           path: '/category',
           pageBuilder: (context, state) => _buildPageWithTransition(
               state, CategoryScreen()), //^ builder를 pageBuilder로 변경
@@ -118,6 +114,13 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         MoreRecommendedScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/cart',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        ShoppingCartScreen(),
       ),
     ),
     GoRoute(
