@@ -18,6 +18,8 @@ class SetNewPasswordEditing extends SetNewPasswordState {
   List<Object?> get props => [isButtonEnabled];
 }
 
+class SetNewPasswordInProgress extends SetNewPasswordState {} // 비밀번호 업데이트 중 상태
+
 class SetNewPasswordSuccess extends SetNewPasswordState {}
 
 class SetNewPasswordFailure extends SetNewPasswordState {
