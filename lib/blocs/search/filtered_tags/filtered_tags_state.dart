@@ -1,7 +1,7 @@
 part of 'filtered_tags_cubit.dart';
 
 class FilteredTagsState extends Equatable {
-  final List<Tag> filteredTags;
+  final List<SuggestionModel> filteredTags;
   const FilteredTagsState({
     required this.filteredTags,
   });
@@ -17,7 +17,7 @@ class FilteredTagsState extends Equatable {
   String toString() => 'FilteredTagsState(filteredTags: $filteredTags)';
 
   FilteredTagsState copyWith({
-    List<Tag>? filteredTags,
+    List<SuggestionModel>? filteredTags,
   }) {
     return FilteredTagsState(
       filteredTags: filteredTags ?? this.filteredTags,

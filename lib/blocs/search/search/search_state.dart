@@ -7,12 +7,37 @@ sealed class SearchState extends Equatable {
   List<Object> get props => [];
 }
 
-final class SearchInitial extends SearchState {}
+final class SearchInitialState extends SearchState {}
 
-final class Searching extends SearchState {}
+final class SearchSuggestionsState extends SearchState {
+  final List<SuggestionModel> suggestions;
 
-class SearchComplete extends SearchState {
-  final List<String> results;
+  const SearchSuggestionsState(this.suggestions);
 
-  const SearchComplete(this.results);
+  @override
+  List<Object> get props => [suggestions];
+
+  @override
+  String toString() => 'SearchSuggestionsState(suggestions: $suggestions)';
+}
+
+final class SearchResultState extends SearchState {
+  final List<ProductModel> results;
+
+  const SearchResultState(this.results);
+
+  @override
+  List<Object> get props => [results];
+
+  @override
+  String toString() => 'SearchResultState(results: $results)';
+}
+
+final class SearchErrorState extends SearchState {
+  final String message;
+
+  const SearchErrorState(this.message);
+
+  @override
+  List<Object> get props => [message];
 }
