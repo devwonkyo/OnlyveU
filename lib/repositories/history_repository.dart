@@ -1,16 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 class HistoryRepository {
   final FirebaseFirestore _firestore;
+  final _prefs = OnlyYouSharedPreference();
 
   HistoryRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  // Firestore에서 ProductModel을 불러오고 HistoryItem으로 변환하여 반환
   Future<List<HistoryItem>> fetchHistoryItems() async {
     try {
+      // 현재 사용자 ID 가져오기
+      final userId = await _prefs.getCurrentUserId();
+
       final QuerySnapshot snapshot =
           await _firestore.collection('products').get();
 
@@ -26,8 +30,8 @@ class HistoryRepository {
           originalPrice: product.discountedPrice,
           discountRate: product.discountPercent,
           isBest: product.isBest,
-          isFavorite:
-              product.favoriteList.contains('currentUserId'), // 실제 유저 ID 사용 필요
+          // 하드코딩된 'currentUserId' 대신 실제 userId 사용
+          isFavorite: product.favoriteList.contains(userId),
           rating: product.rating,
           reviewCount: product.reviewCount,
         );
