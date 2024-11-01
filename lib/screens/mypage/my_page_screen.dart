@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/%08theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/%08theme/theme_event.dart';
+import 'package:onlyveyou/blocs/%08theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/widgets/my_page_widget/build_icon_with_label.dart';
 import 'package:onlyveyou/widgets/my_page_widget/custom_section.dart';
@@ -68,7 +72,7 @@ class MyPageScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'seongyeon', //사용자 이름으로 대체
+                            'seongyeon', // 사용자 이름으로 대체
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -109,30 +113,31 @@ class MyPageScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             TextButton(
-                                onPressed: () {
-                                  context.push('/profile_edit');
-                                }, //go router이용해서 내 정보 수정 화면으로 이동
-                                child: const Row(
-                                  children: [
-                                    Icon(
-                                      Icons.person_pin,
-                                      color: Color.fromARGB(255, 205, 202, 202),
-                                      size: 30,
+                              onPressed: () {
+                                context.push('/profile_edit');
+                              },
+                              child: const Row(
+                                children: [
+                                  Icon(
+                                    Icons.person_pin,
+                                    color: Color.fromARGB(255, 205, 202, 202),
+                                    size: 30,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    '프로필',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppsColor.darkGray,
                                     ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '프로필',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppsColor.darkGray,
-                                      ),
-                                    ),
-                                  ],
-                                )),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                   const SizedBox(height: 40),
@@ -227,11 +232,13 @@ class MyPageScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('주문/배송 조회',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          )),
+                      const Text(
+                        '주문/배송 조회',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
                       TextButton(
                         onPressed: () {
                           // 버튼 클릭 시 동작
@@ -254,7 +261,7 @@ class MyPageScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                   const SizedBox(height: 18),
@@ -283,25 +290,21 @@ class MyPageScreen extends StatelessWidget {
               height: 8,
               color: const Color.fromARGB(195, 232, 227, 227),
             ),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             Center(
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.95, // 이미지 크기 설정
+                width: MediaQuery.of(context).size.width * 0.95,
                 child: InkWell(
                   onTap: () {
                     print("쿠폰 눌림");
                   },
                   child: Image.asset(
-                    'assets/image/mypage/coupon_image.jpeg', //네트워크 이미지
+                    'assets/image/mypage/coupon_image.jpeg',
                   ),
                 ),
               ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             Column(
               children: [
                 CustomSection(
@@ -340,6 +343,31 @@ class MyPageScreen extends StatelessWidget {
                   ],
                 ),
                 buildListItem(Icons.logout, '로그아웃'),
+                ListTile(
+                  leading: const Icon(
+                    Icons.brightness_4,
+                  ),
+                  title: const Text(
+                    '다크 모드',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  trailing: BlocBuilder<ThemeBloc, ThemeState>(
+                    builder: (context, state) {
+                      return Switch(
+                        value: state is ThemeDark,
+                        onChanged: (value) {
+                          if (value) {
+                            context.read<ThemeBloc>().add(ToggleTheme());
+                          } else {
+                            context.read<ThemeBloc>().add(SetSystemTheme());
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ],
