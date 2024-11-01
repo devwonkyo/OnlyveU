@@ -20,3 +20,6 @@ class SaveProfileImage extends ProfileEditEvent {
   //props에 포함된 속성들의 값이 같으면, equatable은 두 객체를 같은 객체로 간주
   //이 코드에서는 이미지가 같다면 같은 객체로 인식해서 재렌더링 방지 -> 앱 성능 최적화
 }
+
+// 이메일을 불러오는 이벤트 추가
+class LoadEmail extends ProfileEditEvent {}
