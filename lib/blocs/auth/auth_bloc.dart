@@ -1,12 +1,15 @@
 import 'package:bloc/bloc.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
+
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _prefs = OnlyYouSharedPreference();
 
   AuthBloc() : super(AuthInitial()) {
     on<SignUpRequested>((event, emit) async {
@@ -27,6 +30,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           'phone': event.phone,
           'gender': event.gender,
         });
+        // SharedPreferences에 사용자 정보 저장
+        await _prefs.setUserId(userCredential.user!.uid);
+        await _prefs.setEmail(event.email);
+        await _prefs.setNickname(event.nickname);
+        await _prefs.setPhone(event.phone);
+        await _prefs.setGender(event.gender);
 
         emit(SignUpSuccess());
       } on FirebaseAuthException catch (e) {

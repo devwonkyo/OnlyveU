@@ -8,11 +8,13 @@ abstract class GetProductEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadProducts extends GetProductEvent {
+//main카테고리일 경우에만 true
+class GetProducts extends GetProductEvent {
   final String? filter;
+  final bool? isMainCategory;
 
-  const LoadProducts({this.filter});
+  const GetProducts({this.filter, this.isMainCategory = false});
 
   @override
-  List<Object> get props => [filter ?? ''];
+  List<Object> get props => [filter ?? '', isMainCategory ?? false];
 }

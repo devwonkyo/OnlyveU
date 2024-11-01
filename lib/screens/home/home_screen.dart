@@ -18,12 +18,14 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _scrollController.addListener(_onScroll);
+    _pageController = PageController();
     context.read<HomeBloc>().add(LoadHomeData());
   }
 
@@ -31,6 +33,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   void dispose() {
     _tabController.dispose();
     _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -58,6 +61,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 child: CustomScrollView(
                   controller: _scrollController,
                   slivers: [
+                    // SliverToBoxAdapter(
+                    //   child: BlocBuilder<HomeBloc, HomeState>(
+                    //     buildWhen: (previous, current) =>
+                    //         current is HomeLoaded || current is HomeLoading,
+                    //     builder: (context, state) {
+                    //       if (state is HomeLoading) {
+                    //         return Center(child: CircularProgressIndicator());
+                    //       } else if (state is HomeLoaded) {
+                    //         return BannerWidget(
+                    //           pageController: _pageController,
+                    //           bannerItems: state.bannerItems,
+                    //         );
+                    //       }
+                    //       return SizedBox.shrink();
+                    //     },
+                    //   ),
+                    // ),
                     SliverToBoxAdapter(
                       child: _buildQuickMenu(
                         MediaQuery.of(context).orientation ==
@@ -106,11 +126,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         labelPadding: EdgeInsets.symmetric(horizontal: 16.w),
         tabs: [
           Tab(text: '홈'),
-          Tab(text: '딘토'),
-          Tab(text: '오톡'),
           Tab(text: '랭킹'),
+          Tab(text: '오특'),
           Tab(text: '매거진'),
-          Tab(text: 'LUXE EDIT'),
+          // Tab(text: '딘토'),
+          //  Tab(text: 'LUXE EDIT'),
         ],
         labelColor: AppStyles.mainColor,
         unselectedLabelColor: AppStyles.greyColor,
@@ -132,9 +152,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       childAspectRatio: isPortrait ? 1 : 1.2,
       padding: AppStyles.defaultPadding,
       children: [
-        _buildQuickMenuItem('W케어', Icons.favorite),
-        _buildQuickMenuItem('건강템찾기', Icons.medication),
-        _buildQuickMenuItem('라이브', Icons.live_tv),
+        _buildQuickMenuItem('이벤트', Icons.favorite),
+        _buildQuickMenuItem('픽업', Icons.medication),
+        _buildQuickMenuItem('뭐할까?', Icons.live_tv),
         _buildQuickMenuItem('선물하기', Icons.card_giftcard),
         _buildQuickMenuItem('세일', Icons.local_offer),
       ],
