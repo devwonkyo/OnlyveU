@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
-import 'package:onlyveyou/constants/app_constants.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
+
+import '../../utils/app_constants.dart';
 
 class MorePopularScreen extends StatelessWidget {
   String _formatPrice(String price) {
