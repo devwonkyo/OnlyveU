@@ -8,17 +8,18 @@ part 'getproduct_state.dart';
 
 class GetProductBloc extends Bloc<GetProductEvent, GetProductState> {
   GetProductBloc() : super(GetProductInitial()) {
-    on<LoadProducts>(_onLoadProducts);
+    on<GetProducts>(_onLoadProducts);
   }
 
-  Future<void> _onLoadProducts(LoadProducts event, Emitter<GetProductState> emit) async {
+  Future<void> _onLoadProducts(GetProducts event, Emitter<GetProductState> emit) async {
     emit(GetProductLoading());
 
     try {
       final querySnapshot = await FirebaseFirestore.instance.collection('products').get();
       final products = querySnapshot.docs.map((doc) => ProductModel.fromJson(doc.data())).toList();
 
-      if (event.filter != null) {
+      //fillter id로 조회 //ismain카테고리 확인해서
+      if (event.isMainCategory!) {
         emit(GetProductLoaded(products));
       } else {
         emit(GetProductLoaded(products));
