@@ -1,23 +1,24 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
-import 'package:onlyveyou/blocs/theme/theme_state.dart';
+import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
-import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
 import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_list/tag_list_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
+import 'package:onlyveyou/repositories/history_repository.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
 import 'core/router.dart';
@@ -33,6 +34,8 @@ void main() async {
     nativeAppKey: '0236522723df3e1aa869fe36e25e6297',
     javaScriptAppKey: 'Ye8ebc7de132c8c4f0b6881be99e20f5e',
   );
+  final prefs = OnlyYouSharedPreference();
+  await prefs.checkCurrentUser();
   runApp(const MyApp());
 }
 
@@ -55,8 +58,9 @@ class MyApp extends StatelessWidget {
               ),
               BlocProvider<HistoryBloc>(
                 create: (context) => HistoryBloc(
-                    // FirebaseFirestore.instance, // Firebase를 사용하는 경우
-                    ),
+                  repository:
+                      HistoryRepository(), // HistoryRepository 인스턴스 전달// FirebaseFirestore.instance, // Firebase를 사용하는 경우
+                ),
               ),
               BlocProvider<ProfileEditBloc>(
                 create: (context) => ProfileEditBloc(),

@@ -1,4 +1,3 @@
-// HistoryItemCard: 히스토리 목록의 각 아이템을 보여주는 위젯
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/models/history_item.dart';
 
@@ -35,11 +34,13 @@ class HistoryItemCard extends StatelessWidget {
           // 1. 상품 이미지 부분
           ClipRRect(
             borderRadius: BorderRadius.circular(8), // 이미지 모서리 둥글게
-            child: Image.asset(
-              item.imageUrl,
+            child: Image.network(
+              item.imageUrl, // Firestore에서 불러온 이미지 URL 사용
               width: 100,
               height: 100,
               fit: BoxFit.cover, // 이미지가 영역에 꽉 차게 표시
+              errorBuilder: (context, error, stackTrace) =>
+                  Icon(Icons.image, size: 100), // 에러 시 기본 아이콘 표시
             ),
           ),
           SizedBox(width: 16), // 이미지와 텍스트 사이 간격
@@ -62,10 +63,9 @@ class HistoryItemCard extends StatelessWidget {
                 SizedBox(height: 4),
 
                 // 2.2 원래 가격 (할인 전 가격) - 있는 경우에만 표시
-                if (item.originalPrice != null)
+                if (item.originalPrice != null && item.originalPrice! > 0) //^
                   Text(
-                    // 천 단위마다 콤마 추가하는 정규식 사용
-                    '${item.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
+                    '${item.originalPrice!.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 14,
@@ -80,7 +80,7 @@ class HistoryItemCard extends StatelessWidget {
                 Row(
                   children: [
                     // 할인율 표시 (있는 경우에만)
-                    if (item.discountRate != null)
+                    if (item.discountRate != null && item.discountRate! > 0) //^
                       Text(
                         '${item.discountRate}%',
                         style: TextStyle(
