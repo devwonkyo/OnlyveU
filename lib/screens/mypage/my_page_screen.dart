@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/blocs/%08theme/theme_bloc.dart';
-import 'package:onlyveyou/blocs/%08theme/theme_event.dart';
-import 'package:onlyveyou/blocs/%08theme/theme_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_event.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/widgets/my_page_widget/build_icon_with_label.dart';
 import 'package:onlyveyou/widgets/my_page_widget/custom_section.dart';
