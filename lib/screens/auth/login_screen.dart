@@ -5,7 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/auth/auth_event.dart';
 import 'package:onlyveyou/blocs/auth/auth_state.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -57,6 +58,33 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       print("유저 정보 저장 오류: $e");
+    }
+  }
+
+  Future<void> _loginWithKakao() async {
+    try {
+      // 카카오톡 로그인 시도, 실패하면 계정 로그인 시도
+      try {
+        await kakao.UserApi.instance.loginWithKakaoTalk();
+      } catch (error) {
+        // 카카오톡 로그인이 실패했을 때 계정으로 로그인 시도
+        await kakao.UserApi.instance.loginWithKakaoAccount();
+      }
+
+      // 로그인 성공 시 사용자 정보 확인
+      kakao.User kakaoUser = await kakao.UserApi.instance.me();
+
+      // 유저 정보 로컬에 저장 (필요시)
+      await OnlyYouSharedPreference()
+          .setEmail(kakaoUser.kakaoAccount?.email ?? '');
+      await OnlyYouSharedPreference()
+          .setNickname(kakaoUser.kakaoAccount?.profile?.nickname ?? '');
+
+      // 로그인 성공 후 홈 화면으로 이동
+      context.go('/home');
+    } catch (e) {
+      print("카카오 로그인 실패: $e");
+      _showDialog("카카오 로그인에 실패했습니다.");
     }
   }
 
@@ -142,6 +170,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         ));
                   },
                   child: Text('로그인', style: TextStyle(color: Colors.white)),
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  onPressed: () {
+                    _loginWithKakao(); // 카카오 로그인 기능 호출
+                  },
+                  child:
+                      Text('카카오톡으로 로그인', style: TextStyle(color: Colors.black)),
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    side: BorderSide(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    // 구글 로그인 기능 추가
+                  },
+                  child: Text('구글로 로그인', style: TextStyle(color: Colors.black)),
                 ),
                 Spacer(),
                 Center(
