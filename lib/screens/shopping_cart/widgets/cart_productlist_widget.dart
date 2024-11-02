@@ -55,17 +55,36 @@ class CartProductListWidget extends StatelessWidget {
                   ),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
+                    child: Image.network(
+                      // .asset에서 .network로 변경
                       item.productImageList.first,
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
+                        print('Error loading image: $error'); // 에러 로깅 추가
                         return Container(
                           width: 80,
                           height: 80,
                           color: Colors.grey[200],
                           child: Icon(Icons.image_not_supported),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        // 로딩 상태 표시 추가
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[200],
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
                         );
                       },
                     ),

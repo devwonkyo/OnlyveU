@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/models/product_model.dart';
 
 import 'widgets/cart_bottombar_widget.dart';
 import 'widgets/cart_tab_header_widget.dart';
-import 'widgets/dummy_products.dart'; // 더미데이터 import
 
 class ShoppingCartScreen extends StatefulWidget {
   @override
@@ -16,29 +16,18 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
   bool isAllSelected = false;
   Map<String, bool> selectedItems = {};
   Map<String, int> itemQuantities = {};
-  late List<ProductModel> regularDeliveryItems;
-  late List<ProductModel> pickupItems;
+  // late 제거하고 빈 리스트로 초기화
+  List<ProductModel> regularDeliveryItems = [];
+  List<ProductModel> pickupItems = [];
 
-  @override //더미데이터 가져오는 부분
+  // 로딩 상태 추가
+  bool isLoading = true;
+
+  @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-
-    // 더미데이터로 초기화 - 상품 2개를 기본으로 설정
-    regularDeliveryItems = [
-      dummyProducts[0], // '[간담갈필름] 바이오힐보...'
-      dummyProducts[1], // '[단델리온] 엑스트라 골드...'
-      dummyProducts[2], // '[수디] 프리미엄 저자극...'
-      dummyProducts[3], // '[포맨트] 시그니처 퍼퓸...'
-      dummyProducts[4], // '[6년연속1위] 메디힐 에센셜 마스크팩'
-    ];
-    pickupItems = [];
-
-    // 초기값 설정 - 기본적으로 모든 상품이 선택된 상태
-    for (var item in [...regularDeliveryItems, ...pickupItems]) {
-      selectedItems[item.productId] = true; // 기본적으로 선택된 상태
-      itemQuantities[item.productId] = 1; // 수량은 1로 초기화
-    }
+    _loadProducts();
 
     _tabController.addListener(() {
       setState(() {
@@ -46,6 +35,35 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
         selectedItems.clear();
       });
     });
+  }
+
+  // 상품 로드 함수 분리
+  Future<void> _loadProducts() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .limit(5)
+          .get();
+
+      setState(() {
+        regularDeliveryItems = snapshot.docs
+            .map((doc) => ProductModel.fromFirestore(doc))
+            .toList();
+
+        // 초기값 설정
+        for (var item in regularDeliveryItems) {
+          selectedItems[item.productId] = true;
+          itemQuantities[item.productId] = 1;
+        }
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching products: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('상품 정보를 불러오는데 실패했습니다.')),
+      );
+      isLoading = false;
+    }
   }
 
   void updateItemSelection(String productId, bool? value) {
@@ -154,34 +172,38 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
           ),
         ],
       ),
-      body: CartTabHeaderWidget(
-        regularDeliveryItems: regularDeliveryItems,
-        pickupItems: pickupItems,
-        selectedItems: selectedItems,
-        itemQuantities: itemQuantities,
-        isAllSelected: isAllSelected,
-        onSelectAll: onSelectAll,
-        onRemoveItem: (item) => setState(() {
-          if (_tabController.index == 0) {
-            regularDeliveryItems.remove(item);
-          } else {
-            pickupItems.remove(item);
-          }
-          selectedItems.remove(item.productId);
-          itemQuantities.remove(item.productId);
-        }),
-        updateQuantity: updateQuantity,
-        onUpdateSelection: updateItemSelection,
-        onDeleteSelected: onDeleteSelected,
-        moveToPickup: moveToPickup,
-        moveToRegularDelivery: moveToRegularDelivery,
-        tabController: _tabController,
-      ),
-      bottomNavigationBar: CartBottomBarWidget(
-        currentItems: currentItems,
-        selectedItems: selectedItems,
-        itemQuantities: itemQuantities,
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : CartTabHeaderWidget(
+              regularDeliveryItems: regularDeliveryItems,
+              pickupItems: pickupItems,
+              selectedItems: selectedItems,
+              itemQuantities: itemQuantities,
+              isAllSelected: isAllSelected,
+              onSelectAll: onSelectAll,
+              onRemoveItem: (item) => setState(() {
+                if (_tabController.index == 0) {
+                  regularDeliveryItems.remove(item);
+                } else {
+                  pickupItems.remove(item);
+                }
+                selectedItems.remove(item.productId);
+                itemQuantities.remove(item.productId);
+              }),
+              updateQuantity: updateQuantity,
+              onUpdateSelection: updateItemSelection,
+              onDeleteSelected: onDeleteSelected,
+              moveToPickup: moveToPickup,
+              moveToRegularDelivery: moveToRegularDelivery,
+              tabController: _tabController,
+            ),
+      bottomNavigationBar: isLoading
+          ? null
+          : CartBottomBarWidget(
+              currentItems: currentItems,
+              selectedItems: selectedItems,
+              itemQuantities: itemQuantities,
+            ),
     );
   }
 
