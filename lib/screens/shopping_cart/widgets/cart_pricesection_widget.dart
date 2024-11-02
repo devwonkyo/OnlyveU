@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/product_model.dart';
 
+//탭 헤더 페이지에 묶여있어서 쇼핑카트 스크린에 안나와도 된다
 //가격계산
 class CartPriceSectionWidget extends StatelessWidget {
   final List<ProductModel> items;
