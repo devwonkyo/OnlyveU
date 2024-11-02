@@ -3,6 +3,7 @@ import 'package:onlyveyou/models/product_model.dart';
 
 import 'widgets/cart_bottombar_widget.dart';
 import 'widgets/cart_tab_header_widget.dart';
+import 'widgets/dummy_products.dart'; // 더미데이터 import
 
 class ShoppingCartScreen extends StatefulWidget {
   @override
@@ -23,17 +24,17 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    // TODO: 실제 데이터로 초기화 필요
+    // 더미데이터로 초기화 - 상품 2개를 기본으로 설정
     regularDeliveryItems = [
-      // 샘플 데이터 추가
+      dummyProducts[0], // '[간담갈필름] 바이오힐보 프로바이오 덤 멜팅 콜라겐 딥샷'
+      dummyProducts[8], // '[6년연속1위] 메디힐 에센셜 마스크팩'
     ];
-    pickupItems = [
-      // 샘플 데이터 추가
-    ];
+    pickupItems = [];
 
+    // 초기값 설정 - 기본적으로 모든 상품이 선택된 상태
     for (var item in [...regularDeliveryItems, ...pickupItems]) {
-      selectedItems[item.productId] = false;
-      itemQuantities[item.productId] = 1;
+      selectedItems[item.productId] = true; // 기본적으로 선택된 상태
+      itemQuantities[item.productId] = 1; // 수량은 1로 초기화
     }
 
     _tabController.addListener(() {
