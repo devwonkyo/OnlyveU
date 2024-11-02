@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../models/product_model.dart';
 
+//가격계산
 class CartPriceSectionWidget extends StatelessWidget {
   final List<ProductModel> items;
   final Map<String, bool> selectedItems;

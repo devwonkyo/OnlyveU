@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/screens/history/widgets/dummy_products.dart';
 
-import 'widgets/cart_pricesection_widget.dart';
-import 'widgets/cart_productlist_widget.dart';
+import 'widgets/cart_bottombar_widget.dart';
+import 'widgets/cart_tab_header_widget.dart';
 
 class ShoppingCartScreen extends StatefulWidget {
   @override
@@ -14,7 +13,6 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool isAllSelected = false;
-
   Map<String, bool> selectedItems = {};
   Map<String, int> itemQuantities = {};
   late List<ProductModel> regularDeliveryItems;
@@ -25,13 +23,87 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    regularDeliveryItems = dummyProducts.take(5).toList();
-    pickupItems = dummyProducts.skip(5).take(2).toList();
+    // TODO: 실제 데이터로 초기화 필요
+    regularDeliveryItems = [
+      // 샘플 데이터 추가
+    ];
+    pickupItems = [
+      // 샘플 데이터 추가
+    ];
 
     for (var item in [...regularDeliveryItems, ...pickupItems]) {
       selectedItems[item.productId] = false;
       itemQuantities[item.productId] = 1;
     }
+
+    _tabController.addListener(() {
+      setState(() {
+        isAllSelected = false;
+        selectedItems.clear();
+      });
+    });
+  }
+
+  void updateItemSelection(String productId, bool? value) {
+    setState(() {
+      selectedItems[productId] = value ?? false;
+      final currentItems =
+          _tabController.index == 0 ? regularDeliveryItems : pickupItems;
+      isAllSelected =
+          currentItems.every((item) => selectedItems[item.productId] == true);
+    });
+  }
+
+  void moveToRegularDelivery() {
+    setState(() {
+      List<ProductModel> itemsToMove = pickupItems
+          .where((item) => selectedItems[item.productId] == true)
+          .toList();
+      pickupItems.removeWhere((item) => selectedItems[item.productId] == true);
+      regularDeliveryItems.addAll(itemsToMove);
+      selectedItems.clear();
+      isAllSelected = false;
+      _tabController.animateTo(0);
+    });
+  }
+
+  void onSelectAll(bool? value) {
+    setState(() {
+      final currentItems =
+          _tabController.index == 0 ? regularDeliveryItems : pickupItems;
+      for (var item in currentItems) {
+        selectedItems[item.productId] = value ?? false;
+      }
+      isAllSelected = value ?? false;
+    });
+  }
+
+  void onDeleteSelected() {
+    setState(() {
+      if (_tabController.index == 0) {
+        regularDeliveryItems
+            .removeWhere((item) => selectedItems[item.productId] == true);
+      } else {
+        pickupItems
+            .removeWhere((item) => selectedItems[item.productId] == true);
+      }
+      selectedItems.clear();
+      isAllSelected = false;
+    });
+  }
+
+  void moveToPickup() {
+    setState(() {
+      List<ProductModel> itemsToMove = regularDeliveryItems
+          .where((item) => selectedItems[item.productId] == true)
+          .toList();
+      regularDeliveryItems
+          .removeWhere((item) => selectedItems[item.productId] == true);
+      pickupItems.addAll(itemsToMove);
+      selectedItems.clear();
+      isAllSelected = false;
+      _tabController.animateTo(1);
+    });
   }
 
   void updateQuantity(String productId, bool increment) {
@@ -45,89 +117,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
     });
   }
 
-  String formatPrice(String price) {
-    return price.replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  Widget _buildTabs() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!, width: 1),
-        ),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        tabs: [
-          Tab(text: '일반 배송(${regularDeliveryItems.length})'),
-          Tab(text: '픽업(${pickupItems.length})'),
-        ],
-        labelColor: Colors.black,
-        unselectedLabelColor: Colors.grey,
-        indicatorColor: Colors.black,
-      ),
-    );
-  }
-
-  Widget _buildBottomBar() {
-    List<ProductModel> currentItems =
-        _tabController.index == 0 ? regularDeliveryItems : pickupItems;
-    final totalPrice = CartPriceSectionWidget.calculateTotalPrice(
-      items: currentItems,
-      selectedItems: selectedItems,
-      itemQuantities: itemQuantities,
-    );
-    final totalDiscount = CartPriceSectionWidget.calculateTotalDiscount(
-      items: currentItems,
-      selectedItems: selectedItems,
-      itemQuantities: itemQuantities,
-    );
-    final finalPrice = totalPrice - totalDiscount;
-
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[300]!)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {},
-              child: Text('선물하기'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                side: BorderSide(color: Colors.grey[300]!),
-              ),
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {},
-              child: Text('구매하기 (${formatPrice(finalPrice.toString())}원)'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final currentItems =
+        _tabController.index == 0 ? regularDeliveryItems : pickupItems;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -156,67 +150,40 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
           ),
         ],
       ),
-      body: Column(
-        children: [
-          _buildTabs(), // TabBar는 고정되어 스크롤되지 않음
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // 일반 배송 탭 내용
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      CartProductListWidget(
-                        items: regularDeliveryItems,
-                        isPickup: false,
-                        selectedItems: selectedItems,
-                        itemQuantities: itemQuantities,
-                        updateQuantity: updateQuantity,
-                        onRemoveItem: (item) => setState(() {
-                          regularDeliveryItems.remove(item);
-                          selectedItems.remove(item.productId);
-                          itemQuantities.remove(item.productId);
-                        }),
-                      ),
-                      CartPriceSectionWidget(
-                        items: regularDeliveryItems,
-                        selectedItems: selectedItems,
-                        itemQuantities: itemQuantities,
-                      ),
-                    ],
-                  ),
-                ),
-                // 픽업 탭 내용
-                SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      CartProductListWidget(
-                        items: pickupItems,
-                        isPickup: true,
-                        selectedItems: selectedItems,
-                        itemQuantities: itemQuantities,
-                        updateQuantity: updateQuantity,
-                        onRemoveItem: (item) => setState(() {
-                          pickupItems.remove(item);
-                          selectedItems.remove(item.productId);
-                          itemQuantities.remove(item.productId);
-                        }),
-                      ),
-                      CartPriceSectionWidget(
-                        items: pickupItems,
-                        selectedItems: selectedItems,
-                        itemQuantities: itemQuantities,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: CartTabHeaderWidget(
+        regularDeliveryItems: regularDeliveryItems,
+        pickupItems: pickupItems,
+        selectedItems: selectedItems,
+        itemQuantities: itemQuantities,
+        isAllSelected: isAllSelected,
+        onSelectAll: onSelectAll,
+        onRemoveItem: (item) => setState(() {
+          if (_tabController.index == 0) {
+            regularDeliveryItems.remove(item);
+          } else {
+            pickupItems.remove(item);
+          }
+          selectedItems.remove(item.productId);
+          itemQuantities.remove(item.productId);
+        }),
+        updateQuantity: updateQuantity,
+        onUpdateSelection: updateItemSelection,
+        onDeleteSelected: onDeleteSelected,
+        moveToPickup: moveToPickup,
+        moveToRegularDelivery: moveToRegularDelivery,
+        tabController: _tabController,
       ),
-      bottomNavigationBar: _buildBottomBar(), // 하단 버튼 영역
+      bottomNavigationBar: CartBottomBarWidget(
+        currentItems: currentItems,
+        selectedItems: selectedItems,
+        itemQuantities: itemQuantities,
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 }
