@@ -19,15 +19,18 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
   late List<ProductModel> regularDeliveryItems;
   late List<ProductModel> pickupItems;
 
-  @override
+  @override //더미데이터 가져오는 부분
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
     // 더미데이터로 초기화 - 상품 2개를 기본으로 설정
     regularDeliveryItems = [
-      dummyProducts[0], // '[간담갈필름] 바이오힐보 프로바이오 덤 멜팅 콜라겐 딥샷'
-      dummyProducts[8], // '[6년연속1위] 메디힐 에센셜 마스크팩'
+      dummyProducts[0], // '[간담갈필름] 바이오힐보...'
+      dummyProducts[1], // '[단델리온] 엑스트라 골드...'
+      dummyProducts[2], // '[수디] 프리미엄 저자극...'
+      dummyProducts[3], // '[포맨트] 시그니처 퍼퓸...'
+      dummyProducts[4], // '[6년연속1위] 메디힐 에센셜 마스크팩'
     ];
     pickupItems = [];
 

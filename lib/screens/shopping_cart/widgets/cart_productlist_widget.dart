@@ -3,7 +3,7 @@ import 'package:onlyveyou/utils/format_price.dart';
 
 import '../../../models/product_model.dart';
 
-// utils.dart 파일 임포트
+//이것도 탭 헤더에 물려있어서 따로 안해도 된다.// utils.dart 파일 임포트
 // 상품 리스트
 class CartProductListWidget extends StatelessWidget {
   final List<ProductModel> items;
