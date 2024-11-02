@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 
 import '../../../models/product_model.dart';
-// utils.dart 파일 임포트
 
+// utils.dart 파일 임포트
+// 상품 리스트
 class CartProductListWidget extends StatelessWidget {
   final List<ProductModel> items;
   final bool isPickup;
@@ -11,6 +12,7 @@ class CartProductListWidget extends StatelessWidget {
   final Map<String, int> itemQuantities;
   final Function(String productId, bool increment) updateQuantity;
   final Function(ProductModel item) onRemoveItem;
+  final Function(String productId, bool? value) onUpdateSelection;
 
   const CartProductListWidget({
     required this.items,
@@ -19,6 +21,7 @@ class CartProductListWidget extends StatelessWidget {
     required this.itemQuantities,
     required this.updateQuantity,
     required this.onRemoveItem,
+    required this.onUpdateSelection,
   });
 
   @override
@@ -44,9 +47,8 @@ class CartProductListWidget extends StatelessWidget {
                 children: [
                   Checkbox(
                     value: selectedItems[item.productId] ?? false,
-                    onChanged: (value) {
-                      selectedItems[item.productId] = value ?? false;
-                    },
+                    onChanged: (value) =>
+                        onUpdateSelection(item.productId, value),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
