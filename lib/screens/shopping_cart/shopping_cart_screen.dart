@@ -25,10 +25,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
     _tabController = TabController(length: 2, vsync: this);
     context.read<CartBloc>().add(LoadCart());
 
-    // 탭 변경 시 해당 탭의 아이템들 선택 상태 초기화
+    // 탭 변경 리스너 수정
     _tabController.addListener(() {
       final cartBloc = context.read<CartBloc>();
-      cartBloc.add(SelectAllItems(true));
+      // 탭 변경 이벤트를 추가하여 현재 탭 정보 업데이트
+      cartBloc.add(UpdateCurrentTab(_tabController.index == 0));
     });
   }
 
