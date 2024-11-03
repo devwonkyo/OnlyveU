@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'widgets/cart_bottombar_widget.dart';
@@ -8,6 +9,7 @@ import 'widgets/cart_tab_header_widget.dart';
 //위젯이 1탭헤더에서 프라이스 위젯쓰고, 프로덕트리스트 위젯쓴다.
 ///     2바텀바에서 프라이스 위젯 쓴다
 
+// 유저에 좋아요리스트 , 장바구니 리스트( 일반배송 픽업 구분)
 class ShoppingCartScreen extends StatefulWidget {
   @override
   _ShoppingCartScreenState createState() => _ShoppingCartScreenState();
@@ -16,16 +18,16 @@ class ShoppingCartScreen extends StatefulWidget {
 class _ShoppingCartScreenState extends State<ShoppingCartScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
+//상단탭 2개
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     context.read<CartBloc>().add(LoadCart());
-
+//전체 선택
     _tabController.addListener(() {
       final cartBloc = context.read<CartBloc>();
-      cartBloc.add(const SelectAllItems(false));
+      cartBloc.add(const SelectAllItems(true));
     });
   }
 
@@ -36,6 +38,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
+            //앱바
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
@@ -53,26 +56,25 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
             actions: [
               IconButton(
                 icon: Icon(Icons.search, color: Colors.black),
-                onPressed: () {},
+                onPressed: () => context.go('/search'),
               ),
               IconButton(
                 icon: Icon(Icons.home_outlined, color: Colors.black),
-                onPressed: () {},
+                onPressed: () => context.go('/home'),
               ),
             ],
           ),
           body: state.isLoading
               ? Center(child: CircularProgressIndicator())
               : CartTabHeaderWidget(
+                  //헤더 위젯 - 그쪽 페이지로 가자
                   regularDeliveryItems: state.regularDeliveryItems,
                   pickupItems: state.pickupItems,
                   selectedItems: state.selectedItems,
                   itemQuantities: state.itemQuantities,
                   isAllSelected: state.isAllSelected,
                   onSelectAll: (value) {
-                    context
-                        .read<CartBloc>()
-                        .add(SelectAllItems(value ?? false));
+                    context.read<CartBloc>().add(SelectAllItems(value ?? true));
                   },
                   onRemoveItem: (item) {
                     context.read<CartBloc>().add(RemoveItem(item));
@@ -85,7 +87,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
                   onUpdateSelection: (productId, value) {
                     context
                         .read<CartBloc>()
-                        .add(UpdateItemSelection(productId, value ?? false));
+                        .add(UpdateItemSelection(productId, value ?? true));
                   },
                   onDeleteSelected: () {
                     context.read<CartBloc>().add(DeleteSelectedItems());
@@ -101,6 +103,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
           bottomNavigationBar: state.isLoading
               ? null
               : CartBottomBarWidget(
+                  //바텀 위젯
                   currentItems: _tabController.index == 0
                       ? state.regularDeliveryItems
                       : state.pickupItems,

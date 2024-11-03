@@ -61,7 +61,7 @@ class CartBottomBarWidget extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   Text(
-                    '${formatPrice(finalPrice.toString())}원',
+                    '${formatPrice(finalPrice.toString())}원', //가격 계산
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   Text(

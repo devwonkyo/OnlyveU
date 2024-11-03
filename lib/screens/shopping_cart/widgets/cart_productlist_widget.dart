@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:onlyveyou/utils/format_price.dart';
+import 'package:onlyveyou/utils/format_price.dart'; //천만위마다 점찍는거
 
 import '../../../models/product_model.dart';
 
-//이것도 탭 헤더에 물려있어서 따로 안해도 된다.// utils.dart 파일 임포트
-// 상품 리스트
+// CartProductListWidget: 장바구니에 담긴 상품 리스트를 보여주는 위젯
 class CartProductListWidget extends StatelessWidget {
-  final List<ProductModel> items;
-  final bool isPickup;
-  final Map<String, bool> selectedItems;
-  final Map<String, int> itemQuantities;
-  final Function(String productId, bool increment) updateQuantity;
-  final Function(ProductModel item) onRemoveItem;
-  final Function(String productId, bool? value) onUpdateSelection;
+  final List<ProductModel> items; // 장바구니에 담긴 상품 목록
+  final bool isPickup; // 픽업 여부를 나타내는 플래그
+  final Map<String, bool> selectedItems; // 선택된 상품 정보 (key: 상품 ID, value: 선택 여부)
+  final Map<String, int> itemQuantities; // 각 상품의 수량 정보
+  final Function(String productId, bool increment)
+      updateQuantity; // 상품 수량을 변경하는 함수
+  final Function(ProductModel item) onRemoveItem; // 특정 상품을 제거하는 함수
+  final Function(String productId, bool? value)
+      onUpdateSelection; // 선택 상태를 업데이트하는 함수
 
   const CartProductListWidget({
     required this.items,
@@ -27,42 +28,47 @@ class CartProductListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      // 상품 목록을 아이템 단위로 구성
       children: items.map((item) {
         return Container(
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+            border:
+                Border(bottom: BorderSide(color: Colors.grey[300]!)), // 하단 경계선
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isPickup)
+              if (isPickup) // 픽업인 경우 픽업 매장 표시
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text('픽업 매장: 거여역점',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
+              // 상품 정보와 체크박스, 이미지 등을 포함한 행(Row) 구성
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 상품 선택 여부를 나타내는 체크박스
                   Checkbox(
                     value: selectedItems[item.productId] ?? false,
                     onChanged: (value) =>
-                        onUpdateSelection(item.productId, value),
+                        onUpdateSelection(item.productId, value), // 선택 상태 업데이트
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
+                  // 상품 이미지 표시
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      // .asset에서 .network로 변경
                       item.productImageList.first,
                       width: 80,
                       height: 80,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.cover, // 이미지가 꽉 차도록 설정
                       errorBuilder: (context, error, stackTrace) {
-                        print('Error loading image: $error'); // 에러 로깅 추가
+                        // 이미지 로딩 실패 시 대체 이미지
+                        print('Error loading image: $error');
                         return Container(
                           width: 80,
                           height: 80,
@@ -71,7 +77,7 @@ class CartProductListWidget extends StatelessWidget {
                         );
                       },
                       loadingBuilder: (context, child, loadingProgress) {
-                        // 로딩 상태 표시 추가
+                        // 이미지 로딩 상태 표시
                         if (loadingProgress == null) return child;
                         return Container(
                           width: 80,
@@ -89,47 +95,53 @@ class CartProductListWidget extends StatelessWidget {
                       },
                     ),
                   ),
-                  SizedBox(width: 12),
+                  SizedBox(width: 12), // 이미지와 텍스트 사이의 간격
                   Expanded(
+                    // 상품 이름 텍스트
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.name,
+                          item.name, // 상품 이름
                           style: TextStyle(fontSize: 14),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2, // 이름이 길 경우 두 줄로 표시
+                          overflow: TextOverflow.ellipsis, // 길면 생략 처리
                         ),
                       ],
                     ),
                   ),
+                  // 상품 제거 버튼
                   IconButton(
                     icon: Icon(Icons.close, size: 20),
-                    onPressed: () => onRemoveItem(item),
+                    onPressed: () => onRemoveItem(item), // 상품 제거 함수 호출
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
                   ),
                 ],
               ),
               SizedBox(height: 12),
+
+              // 수량 조절 및 가격 표시 행
               Row(
                 children: [
                   SizedBox(width: 50),
-                  _buildQuantityControl(item),
+                  _buildQuantityControl(item), // 수량 조절 버튼
                   Spacer(),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
+                      // 원래 가격 (할인 전)
                       Text(
-                        '${formatPrice(item.price)}원', // formatPrice 호출
+                        '${formatPrice(item.price)}원',
                         style: TextStyle(
-                          decoration: TextDecoration.lineThrough,
+                          decoration: TextDecoration.lineThrough, // 취소선
                           color: Colors.grey,
                           fontSize: 12,
                         ),
                       ),
+                      // 할인된 가격 (최종 가격)
                       Text(
-                        '${formatPrice(item.discountedPrice.toString())}원', // formatPrice 호출
+                        '${formatPrice(item.discountedPrice.toString())}원',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -146,6 +158,7 @@ class CartProductListWidget extends StatelessWidget {
     );
   }
 
+  // _buildQuantityControl: 상품 수량을 증가/감소시킬 수 있는 컨트롤러
   Widget _buildQuantityControl(ProductModel item) {
     return Container(
       height: 28,
@@ -156,15 +169,18 @@ class CartProductListWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 수량 감소 버튼
           SizedBox(
             width: 28,
             height: 28,
             child: IconButton(
               icon: Icon(Icons.remove, size: 16),
-              onPressed: () => updateQuantity(item.productId, false),
+              onPressed: () =>
+                  updateQuantity(item.productId, false), // 수량 감소 함수 호출
               padding: EdgeInsets.zero,
             ),
           ),
+          // 현재 수량 표시
           Container(
             width: 30,
             height: 28,
@@ -176,16 +192,18 @@ class CartProductListWidget extends StatelessWidget {
               ),
             ),
             child: Text(
-              '${itemQuantities[item.productId] ?? 1}',
+              '${itemQuantities[item.productId] ?? 1}', // 현재 수량 (기본값: 1)
               style: TextStyle(fontSize: 14),
             ),
           ),
+          // 수량 증가 버튼
           SizedBox(
             width: 28,
             height: 28,
             child: IconButton(
               icon: Icon(Icons.add, size: 16),
-              onPressed: () => updateQuantity(item.productId, true),
+              onPressed: () =>
+                  updateQuantity(item.productId, true), // 수량 증가 함수 호출
               padding: EdgeInsets.zero,
             ),
           ),

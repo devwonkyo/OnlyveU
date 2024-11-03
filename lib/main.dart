@@ -18,13 +18,13 @@ import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
+import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
-import 'screens/shopping_cart/shopping_cart_screen.dart';
 
 void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
