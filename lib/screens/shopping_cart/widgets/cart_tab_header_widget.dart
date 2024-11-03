@@ -80,7 +80,7 @@ class CartTabHeaderWidget extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          _buildCartHeader(context, true), // 장바구니 상단에 전체 선택 및 삭제 기능
+          _buildCartHeader(context, false), // 장바구니 상단에 전체 선택 및 삭제 기능
           CartProductListWidget(
             // 상품 목록을 표시하는 위젯
             items: regularDeliveryItems,
@@ -109,7 +109,7 @@ class CartTabHeaderWidget extends StatelessWidget {
         : SingleChildScrollView(
             child: Column(
               children: [
-                _buildCartHeader(context, true), // 장바구니 상단에 전체 선택 및 삭제 기능
+                _buildCartHeader(context, false), // 장바구니 상단에 전체 선택 및 삭제 기능
                 CartProductListWidget(
                   // 상품 목록을 표시하는 위젯
                   items: pickupItems,
@@ -160,16 +160,13 @@ class CartTabHeaderWidget extends StatelessWidget {
           TextButton(
             onPressed: () {
               if (selectedItems.values.contains(true)) {
-                // 선택된 상품이 있을 때만 동작
-                if (isRegularDelivery) {
-                  // 일반 배송이면 픽업으로 이동
+                if (tabController.index == 0) {
+                  // isRegularDelivery 대신 tabController.index로 확인
                   moveToPickup();
                 } else {
-                  // 픽업이면 일반 배송으로 이동
                   moveToRegularDelivery();
                 }
               } else {
-                // 선택된 상품이 없을 경우 경고 메시지 표시
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('변경할 상품을 선택해주세요')),
                 );
@@ -178,8 +175,10 @@ class CartTabHeaderWidget extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  '배송방법 변경',
-                  style: TextStyle(color: Colors.black87), // 텍스트 색상
+                  tabController.index == 0
+                      ? '픽업으로 변경'
+                      : '일반배송으로 변경', // 탭에 따라 텍스트 변경
+                  style: TextStyle(color: Colors.black87),
                 ),
                 Icon(Icons.chevron_right, size: 20, color: Colors.black87),
               ],
