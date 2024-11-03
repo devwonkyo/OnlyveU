@@ -6,8 +6,8 @@ import '../../blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'widgets/cart_bottombar_widget.dart';
 import 'widgets/cart_tab_header_widget.dart';
 //스크린에서 1탭헤더. 2바텀바만 쓰고
-//위젯이 1탭헤더에서 프라이스 위젯쓰고, 프로덕트리스트 위젯쓴다.
-///     2바텀바에서 프라이스 위젯 쓴다
+//스크린 ㅡ A탭헤더에서 C프라이스 위젯쓰고, D프로덕트리스트 위젯쓴다.
+///     ㄴ B바텀바에서 C프라이스 위젯 쓴다
 
 // 유저에 좋아요리스트 , 장바구니 리스트( 일반배송 픽업 구분)
 class ShoppingCartScreen extends StatefulWidget {
@@ -74,6 +74,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
                   itemQuantities: state.itemQuantities,
                   isAllSelected: state.isAllSelected,
                   onSelectAll: (value) {
+                    //이벤트 로직들이 블록에 가있음
                     context.read<CartBloc>().add(SelectAllItems(value ?? true));
                   },
                   onRemoveItem: (item) {
