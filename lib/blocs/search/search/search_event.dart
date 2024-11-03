@@ -20,3 +20,14 @@ final class TextChangedEvent extends SearchEvent {
   @override
   String toString() => 'TextChangedEvent(text: $text)';
 }
+
+class ShowResultEvent extends SearchEvent {
+  final String text;
+  const ShowResultEvent({required this.text});
+
+  @override
+  List<Object> get props => [text];
+
+  @override
+  String toString() => 'ShowResultEvent(text: $text)';
+}

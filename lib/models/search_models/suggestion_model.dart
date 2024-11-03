@@ -6,7 +6,7 @@ class SuggestionModel extends Equatable {
   final int popularity;
   const SuggestionModel({
     required this.term,
-    required this.popularity,
+    this.popularity = 0,
   });
 
   @override

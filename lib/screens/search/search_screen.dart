@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:onlyveyou/blocs/search/search_navigation/search_navigation_bloc.dart';
-import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
-import 'package:onlyveyou/screens/search/widgets/search_complete_screen.dart';
-import 'package:onlyveyou/screens/search/widgets/searching_screen.dart';
+import 'package:onlyveyou/repositories/product_repository.dart';
+import 'package:onlyveyou/repositories/search_repositories/suggestion_repository_impl.dart';
+import 'package:onlyveyou/screens/search/widgets/search_result_screen.dart';
+import 'package:onlyveyou/screens/search/widgets/search_suggestion_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../blocs/search/search/search_bloc.dart';
 import 'widgets/search_initial_screen.dart';
 import 'widgets/search_text_field.dart';
 
@@ -21,12 +22,19 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _sendMessage() {
     FocusScope.of(context).unfocus();
+    context
+        .read<SearchBloc>()
+        .add(ShowResultEvent(text: _messageController.text));
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    _messageController.text = context.watch<TagSearchCubit>().state.searchTerm;
-
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -60,25 +68,21 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
         ),
-        body:
-            // BlocBuilder<SearchNavigationBloc, SearchNavigationState>(
-            //   builder: (context, state) {
-            //     switch (state.) {
-            //       case SearchNavigationSelected(selectedSearchStatus: SearchStatus.initial):
-            //         return Center(child: CircularProgressIndicator());
-            //       case GetTopicLoaded:
-            //         return YourWidget();
-            //       case GetTopicError:
-            //         return ErrorWidget();
-            //       default:
-            //         return Container();
-            //     }
-            //   },
-            // )
-            // context.watch<TagSearchCubit>().state.searchTerm.isEmpty
-            //     ? const SearchInitialScreen()
-            //     : const SearchingScreen(),
-            SearchCompleteScreen(),
+        body: BlocBuilder<SearchBloc, SearchState>(
+          builder: (context, state) {
+            return switch (state) {
+              SearchInitialState() => const SearchInitialScreen(),
+              SearchSuggestionState() => SearchSuggestionScreen(
+                  suggestions: state.suggestions,
+                  controller: _messageController,
+                ),
+              SearchResultState() => SearchResultScreen(results: state.results),
+              SearchErrorState() => Text(state.message),
+              SearchLoadingState() =>
+                const Center(child: CircularProgressIndicator()),
+            };
+          },
+        ),
       ),
     );
   }

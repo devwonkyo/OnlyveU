@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
+import 'package:onlyveyou/blocs/search/search/search_bloc.dart';
 
 class SearchTextField extends StatefulWidget {
   const SearchTextField({
@@ -18,13 +18,6 @@ class SearchTextField extends StatefulWidget {
 
 class _SearchTextFieldState extends State<SearchTextField> {
   @override
-  void dispose() {
-    widget.controller.clear();
-    widget.controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity, // 원하는 너비 설정
@@ -34,7 +27,8 @@ class _SearchTextFieldState extends State<SearchTextField> {
         maxLines: 1,
         controller: widget.controller,
         onChanged: (newSearchTerm) {
-          context.read<TagSearchCubit>().setSearchTerm(newSearchTerm);
+          setState(() {});
+          context.read<SearchBloc>().add(TextChangedEvent(text: newSearchTerm));
         },
         // 입력창
         decoration: InputDecoration(
@@ -58,29 +52,38 @@ class _SearchTextFieldState extends State<SearchTextField> {
             borderRadius: BorderRadius.circular(25.r),
           ),
           // 보내기 버튼
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Visibility(
-                visible: widget.controller.text.isNotEmpty,
-                child: IconButton(
-                  onPressed: () {
-                    widget.controller.clear();
-                    context.read<TagSearchCubit>().setSearchTerm('');
-                  },
-                  icon: Icon(
-                    Icons.cancel,
-                    color: Colors.grey[400],
+          suffixIcon: Container(
+            width: 70.w,
+            // color: Colors.red,
+            padding: EdgeInsets.only(right: 12.w),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Visibility(
+                  visible: widget.controller.text.isNotEmpty,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {});
+                      widget.controller.text = '';
+                      context
+                          .read<SearchBloc>()
+                          .add(const TextChangedEvent(text: ''));
+                    },
+                    child: Icon(
+                      Icons.cancel,
+                      color: Colors.grey[400],
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                onPressed: widget.onPressed,
-                icon: const Icon(
-                  Icons.search,
+                GestureDetector(
+                  onTap: widget.onPressed,
+                  child: const Icon(
+                    Icons.search,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
