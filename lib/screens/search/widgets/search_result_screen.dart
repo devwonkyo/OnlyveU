@@ -6,8 +6,12 @@ import '../../../blocs/home/home_bloc.dart';
 import '../../../models/product_model.dart';
 import '../../../utils/styles.dart';
 
-class SearchCompleteScreen extends StatelessWidget {
-  const SearchCompleteScreen({super.key});
+class SearchResultScreen extends StatelessWidget {
+  const SearchResultScreen({
+    super.key,
+    required this.results,
+  });
+  final List<ProductModel> results;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +25,7 @@ class SearchCompleteScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '총 154개',
+                  '총 ${results.length}개',
                   style: TextStyle(fontSize: 15.sp),
                 ),
                 Row(
@@ -39,23 +43,16 @@ class SearchCompleteScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: BlocBuilder<HomeBloc, HomeState>(
-              builder: (context, state) {
-                if (state is HomeLoaded) {
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10.w,
-                      childAspectRatio: 0.45.r,
-                      mainAxisExtent: 330.h,
-                    ),
-                    itemCount: state.recommendedProducts.length,
-                    itemBuilder: (context, index) =>
-                        ProductCard(item: state.recommendedProducts[index]),
-                  );
-                }
-                return const Center(child: CircularProgressIndicator());
-              },
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10.w,
+                childAspectRatio: 0.45.r,
+                mainAxisExtent: 330.h,
+              ),
+              itemCount: results.length,
+              itemBuilder: (context, index) =>
+                  ProductCard(item: results[index]),
             ),
           ),
         ],

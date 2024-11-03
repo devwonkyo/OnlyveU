@@ -23,13 +23,4 @@ class SuggestionRepositoryImpl implements SuggestionRepository {
         .map((doc) => SuggestionModel.fromFirestore(doc))
         .toList();
   }
-
-  // Future<List<SuggestionModel>> search(String term) async {
-  // final cachedResult = cache.get(term);
-  // if (cachedResult != null) {
-  //   return cachedResult;
-  // }
-  // final result = await client.search(term);
-  // cache.set(term, result);
-  // return result;
 }

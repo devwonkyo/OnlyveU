@@ -9,10 +9,10 @@ sealed class SearchState extends Equatable {
 
 final class SearchInitialState extends SearchState {}
 
-final class SearchSuggestionsState extends SearchState {
+final class SearchSuggestionState extends SearchState {
   final List<SuggestionModel> suggestions;
 
-  const SearchSuggestionsState(this.suggestions);
+  const SearchSuggestionState(this.suggestions);
 
   @override
   List<Object> get props => [suggestions];
@@ -41,3 +41,5 @@ final class SearchErrorState extends SearchState {
   @override
   List<Object> get props => [message];
 }
+
+final class SearchLoadingState extends SearchState {}
