@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 
+//
 // Events
 // CartEvent: 장바구니 관련 이벤트의 기본 클래스
 abstract class CartEvent extends Equatable {
