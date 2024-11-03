@@ -60,6 +60,14 @@ class MoveToPickup extends CartEvent {} // 항목을 픽업으로 이동
 
 class MoveToRegularDelivery extends CartEvent {} // 항목을 일반 배송으로 이동
 
+class UpdateCurrentTab extends CartEvent {
+  final bool isRegularDelivery;
+  const UpdateCurrentTab(this.isRegularDelivery);
+
+  @override
+  List<Object> get props => [isRegularDelivery];
+}
+
 // State
 // CartState: 장바구니 상태를 나타내는 클래스
 class CartState extends Equatable {
@@ -70,6 +78,7 @@ class CartState extends Equatable {
   final bool isAllSelected; // 모든 항목 선택 여부
   final bool isLoading; // 로딩 중 여부
   final String? error; // 오류 메시지
+  final bool isRegularDeliveryTab;
 
   const CartState({
     this.regularDeliveryItems = const [],
@@ -79,11 +88,11 @@ class CartState extends Equatable {
     this.isAllSelected = true,
     this.isLoading = false,
     this.error,
+    this.isRegularDeliveryTab = true,
   });
 
   // 현재 상태에서 필요한 일부 값만 수정하여 새로운 상태를 반환하는 copyWith 메서드
   CartState copyWith({
-    //copyWith 메서드로 필요한 부분 일부 가져옴
     List<ProductModel>? regularDeliveryItems,
     List<ProductModel>? pickupItems,
     Map<String, bool>? selectedItems,
@@ -91,6 +100,7 @@ class CartState extends Equatable {
     bool? isAllSelected,
     bool? isLoading,
     String? error,
+    bool? isRegularDeliveryTab,
   }) {
     return CartState(
       regularDeliveryItems: regularDeliveryItems ?? this.regularDeliveryItems,
@@ -100,6 +110,7 @@ class CartState extends Equatable {
       isAllSelected: isAllSelected ?? this.isAllSelected,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      isRegularDeliveryTab: isRegularDeliveryTab ?? this.isRegularDeliveryTab,
     );
   }
 
@@ -112,6 +123,7 @@ class CartState extends Equatable {
         isAllSelected,
         isLoading,
         error,
+        isRegularDeliveryTab,
       ];
 }
 
@@ -130,7 +142,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<SelectAllItems>(_onSelectAllItems); // 모든 항목 선택/해제
     on<DeleteSelectedItems>(_onDeleteSelectedItems); // 선택된 항목 삭제
     on<MoveToPickup>(_onMoveToPickup); // 항목을 픽업으로 이동
-    on<MoveToRegularDelivery>(_onMoveToRegularDelivery); // 항목을 일반 배송으로 이동
+    on<MoveToRegularDelivery>(_onMoveToRegularDelivery);
+    on<UpdateCurrentTab>(_onUpdateCurrentTab); // 항목을 일반 배송으로 이동
   }
 
   // 장바구니 데이터를 Firestore에서 불러오는 로직
@@ -302,6 +315,26 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       pickupItems: updatedPickupItems,
       selectedItems: updatedSelectedItems,
       isAllSelected: false,
+    ));
+  }
+
+  void _onUpdateCurrentTab(UpdateCurrentTab event, Emitter<CartState> emit) {
+    // 현재 탭 업데이트
+    emit(state.copyWith(isRegularDeliveryTab: event.isRegularDelivery));
+
+    // 현재 탭의 아이템들 전체 선택
+    final currentItems = event.isRegularDelivery
+        ? state.regularDeliveryItems
+        : state.pickupItems;
+
+    final updatedSelectedItems = Map<String, bool>.from(state.selectedItems);
+    for (var item in currentItems) {
+      updatedSelectedItems[item.productId] = true;
+    }
+
+    emit(state.copyWith(
+      selectedItems: updatedSelectedItems,
+      isAllSelected: true,
     ));
   }
 
