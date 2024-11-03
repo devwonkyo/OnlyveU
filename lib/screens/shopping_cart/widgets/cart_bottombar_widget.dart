@@ -17,24 +17,22 @@ class CartBottomBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 총 상품금액
+    // 현재 탭의 선택된 아이템만 필터링하여 계산
     final totalPrice = CartPriceSectionWidget.calculateTotalPrice(
-      items: currentItems,
+      items: currentItems, // 현재 탭의 아이템만 전달
       selectedItems: selectedItems,
       itemQuantities: itemQuantities,
     );
 
-    // 할인금액
     final totalDiscount = CartPriceSectionWidget.calculateTotalDiscount(
-      items: currentItems,
+      items: currentItems, // 현재 탭의 아이템만 전달
       selectedItems: selectedItems,
       itemQuantities: itemQuantities,
     );
 
-    // 최종 결제금액 (할인 적용)
     final finalPrice = totalPrice - totalDiscount;
 
-    // 선택된 상품들의 총 수량 계산
+    // 현재 탭의 선택된 아이템 수량 계산
     final totalSelectedCount = currentItems
         .where((item) => selectedItems[item.productId] == true)
         .fold(0, (sum, item) => sum + (itemQuantities[item.productId] ?? 1));
@@ -50,7 +48,6 @@ class CartBottomBarWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 총 금액 정보
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -61,7 +58,7 @@ class CartBottomBarWidget extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   Text(
-                    '${formatPrice(finalPrice.toString())}원', //가격 계산
+                    '${formatPrice(finalPrice.toString())}원',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   Text(
@@ -84,7 +81,6 @@ class CartBottomBarWidget extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12),
-          // 버튼
           Row(
             children: [
               Expanded(
