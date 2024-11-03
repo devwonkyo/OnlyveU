@@ -187,7 +187,10 @@ class CartTabHeaderWidget extends StatelessWidget {
           Spacer(),
           // 선택 삭제 버튼
           TextButton(
-            onPressed: onDeleteSelected, // 선택된 상품 삭제
+            onPressed: () {
+              // 선택된 상품 삭제 시 현재 탭 정보 전달
+              onDeleteSelected();
+            },
             child: Text(
               '선택삭제',
               style: TextStyle(color: Colors.black87),

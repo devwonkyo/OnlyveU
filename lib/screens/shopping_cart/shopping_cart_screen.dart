@@ -24,10 +24,11 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     context.read<CartBloc>().add(LoadCart());
-//전체 선택
+
+    // 탭 변경 시 해당 탭의 아이템들 선택 상태 초기화
     _tabController.addListener(() {
       final cartBloc = context.read<CartBloc>();
-      cartBloc.add(const SelectAllItems(true));
+      cartBloc.add(SelectAllItems(true));
     });
   }
 
@@ -91,7 +92,9 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
                         .add(UpdateItemSelection(productId, value ?? true));
                   },
                   onDeleteSelected: () {
-                    context.read<CartBloc>().add(DeleteSelectedItems());
+                    context
+                        .read<CartBloc>()
+                        .add(DeleteSelectedItems(_tabController.index == 0));
                   },
                   moveToPickup: () {
                     context.read<CartBloc>().add(MoveToPickup());

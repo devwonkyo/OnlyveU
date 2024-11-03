@@ -48,7 +48,13 @@ class SelectAllItems extends CartEvent {
   List<Object> get props => [value];
 }
 
-class DeleteSelectedItems extends CartEvent {} // 선택된 항목 삭제
+class DeleteSelectedItems extends CartEvent {
+  final bool isRegularDelivery; // 현재 탭이 일반배송인지 여부
+  const DeleteSelectedItems(this.isRegularDelivery);
+
+  @override
+  List<Object> get props => [isRegularDelivery];
+} // 선택된 항목 삭제
 
 class MoveToPickup extends CartEvent {} // 항목을 픽업으로 이동
 
@@ -215,7 +221,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   // 모든 항목 선택/해제 처리
   void _onSelectAllItems(SelectAllItems event, Emitter<CartState> emit) {
     final updatedSelectedItems = Map<String, bool>.from(state.selectedItems);
-    for (var item in state.regularDeliveryItems) {
+
+    // 현재 선택된 아이템 리스트 결정
+    final currentItems = state.regularDeliveryItems + state.pickupItems;
+
+    // 모든 아이템의 선택 상태를 업데이트
+    for (var item in currentItems) {
       updatedSelectedItems[item.productId] = event.value;
     }
 
@@ -228,25 +239,48 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   // 선택된 항목을 삭제
   void _onDeleteSelectedItems(
       DeleteSelectedItems event, Emitter<CartState> emit) {
-    final updatedRegularItems = state.regularDeliveryItems
-        .where((item) => !state.selectedItems[item.productId]!)
-        .toList();
-    final updatedPickupItems = state.pickupItems
-        .where((item) => !state.selectedItems[item.productId]!)
-        .toList();
+    if (event.isRegularDelivery) {
+      // 일반배송 탭에서의 삭제
+      final updatedRegularItems = state.regularDeliveryItems
+          .where((item) => !state.selectedItems[item.productId]!)
+          .toList();
 
-    final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-      ..removeWhere((key, value) => value);
-    final updatedQuantities = Map<String, int>.from(state.itemQuantities)
-      ..removeWhere((key, _) => state.selectedItems[key] == true);
+      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
+        ..removeWhere((key, value) =>
+            value &&
+            state.regularDeliveryItems.any((item) => item.productId == key));
 
-    emit(state.copyWith(
-      regularDeliveryItems: updatedRegularItems,
-      pickupItems: updatedPickupItems,
-      selectedItems: updatedSelectedItems,
-      itemQuantities: updatedQuantities,
-      isAllSelected: false,
-    ));
+      final updatedQuantities = Map<String, int>.from(state.itemQuantities)
+        ..removeWhere((key, _) => state.regularDeliveryItems.any((item) =>
+            item.productId == key && state.selectedItems[key] == true));
+
+      emit(state.copyWith(
+        regularDeliveryItems: updatedRegularItems,
+        selectedItems: updatedSelectedItems,
+        itemQuantities: updatedQuantities,
+        isAllSelected: false,
+      ));
+    } else {
+      // 픽업 탭에서의 삭제
+      final updatedPickupItems = state.pickupItems
+          .where((item) => !state.selectedItems[item.productId]!)
+          .toList();
+
+      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
+        ..removeWhere((key, value) =>
+            value && state.pickupItems.any((item) => item.productId == key));
+
+      final updatedQuantities = Map<String, int>.from(state.itemQuantities)
+        ..removeWhere((key, _) => state.pickupItems.any((item) =>
+            item.productId == key && state.selectedItems[key] == true));
+
+      emit(state.copyWith(
+        pickupItems: updatedPickupItems,
+        selectedItems: updatedSelectedItems,
+        itemQuantities: updatedQuantities,
+        isAllSelected: false,
+      ));
+    }
   }
 
   // 선택된 항목을 픽업 목록으로 이동
