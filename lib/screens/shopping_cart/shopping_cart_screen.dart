@@ -107,8 +107,7 @@ class _ShoppingCartScreenState extends State<ShoppingCartScreen>
           bottomNavigationBar: state.isLoading
               ? null
               : CartBottomBarWidget(
-                  //바텀 위젯
-                  currentItems: _tabController.index == 0
+                  currentItems: _tabController.index == 0 // 현재 탭에 따라 아이템 리스트 선택
                       ? state.regularDeliveryItems
                       : state.pickupItems,
                   selectedItems: state.selectedItems,
