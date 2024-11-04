@@ -5,6 +5,7 @@ import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/widgets/recommended_products_widget.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 
@@ -176,16 +177,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return SliverToBoxAdapter(
       child: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
-          if (state is HomeLoading) {
-            return Center(child: CircularProgressIndicator());
-          }
           if (state is HomeLoaded) {
-            return RecommendedProductsWidget(
-              recommendedProducts:
-                  state.recommendedProducts, // ProductModel로 수정
-              isPortrait:
-                  MediaQuery.of(context).orientation == Orientation.portrait,
-              userId: "userId_here", // userId 전달, 실제 로그인 구현 시 사용자 ID로 대체
+            return FutureBuilder<String>(
+              future: OnlyYouSharedPreference().getCurrentUserId(),
+              builder: (context, snapshot) {
+                // userId를 가져오는 동안에는 RecommendedProductsWidget을
+                // temp_user_id와 함께 보여줍니다.
+                return RecommendedProductsWidget(
+                  recommendedProducts: state.recommendedProducts,
+                  isPortrait: MediaQuery.of(context).orientation ==
+                      Orientation.portrait,
+                  userId: snapshot.data ?? 'temp_user_id',
+                );
+              },
             );
           }
           return SizedBox.shrink();
