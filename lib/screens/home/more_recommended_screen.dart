@@ -133,6 +133,44 @@ class MoreRecommendedScreen extends StatelessWidget {
           ),
           SizedBox(height: 6),
 
+          // 태그 (인기, BEST 등)
+          Row(
+            children: [
+              if (item.tagList.contains('popular'))
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '인기',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              if (item.tagList.contains('popular')) SizedBox(width: 4),
+              if (item.tagList.contains('BEST'))
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'BEST',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 6),
+
           // 별점과 리뷰 수
           Row(
             children: [
