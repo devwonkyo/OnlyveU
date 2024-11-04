@@ -63,7 +63,7 @@ class HistoryItemCard extends StatelessWidget {
                 SizedBox(height: 4),
 
                 // 2.2 원래 가격 (할인 전 가격) - 있는 경우에만 표시
-                if (item.originalPrice != null && item.originalPrice! > 0) //^
+                if (item.originalPrice != null && item.originalPrice! > 0)
                   Text(
                     '${item.originalPrice!.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}원',
                     style: TextStyle(
@@ -80,7 +80,7 @@ class HistoryItemCard extends StatelessWidget {
                 Row(
                   children: [
                     // 할인율 표시 (있는 경우에만)
-                    if (item.discountRate != null && item.discountRate! > 0) //^
+                    if (item.discountRate != null && item.discountRate! > 0)
                       Text(
                         '${item.discountRate}%',
                         style: TextStyle(
@@ -113,7 +113,7 @@ class HistoryItemCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        '오늘드림',
+                        '픽업가능',
                         style: TextStyle(fontSize: 12),
                       ),
                     ),

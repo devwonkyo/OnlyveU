@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/history/history_bloc.dart';
-import 'package:onlyveyou/screens/history/widgets/history_item_card.dart';
+import 'package:onlyveyou/screens/history/widgets/history_item_card.dart'; // 히스토리 아이템 카드 위젯
 
 import '../../../models/history_item.dart';
 
-// 1. 상단 탭바 위젯
+// 1. 상단 탭바 위젯: '최근 본'과 '좋아요한' 탭을 제공
 class HistoryTabBar extends StatelessWidget {
-  // TabController를 통해 탭 전환을 관리
-  final TabController tabController;
-
+  final TabController tabController; // 탭 전환을 관리하는 컨트롤러
   const HistoryTabBar({required this.tabController});
 
   @override
   Widget build(BuildContext context) {
     return TabBar(
-      controller: tabController,
+      controller: tabController, // 전달받은 탭 컨트롤러
       tabs: [
         // 첫 번째 탭: '최근 본'
         Tab(
@@ -38,20 +36,21 @@ class HistoryTabBar extends StatelessWidget {
           ),
         ),
       ],
-      labelColor: Color(0xFFC9C138), // 선택된 탭의 색상
-      unselectedLabelColor: Colors.grey, // 선택되지 않은 탭의 색상
-      indicatorColor: Color(0xFFC9C138), // 탭 아래 표시되는 인디케이터 색상
+      //선택된거 메인칼러 나오도록, 선택안된건 회색
+      labelColor: Color(0xFFC9C138),
+      unselectedLabelColor: Colors.grey,
+      indicatorColor: Color(0xFFC9C138), // 탭 아래 표시되는 인디케이터 색상-작대기
     );
   }
 }
 
-// 2. 필터 섹션 위젯 (아이템 개수 표시 및 편집 버튼 포함)
+// 2.총 몇개 개수 설정
 class HistoryFilterSection extends StatelessWidget {
-  final int itemCount; // 표시할 아이템 개수
-  final bool isEditing; // 편집 모드 여부
-  final VoidCallback onClearAll; // 전체 삭제 버튼 클릭 시 실행할 함수
-  final VoidCallback onEditToggle; // 편집 버튼 클릭 시 실행할 함수
-  final bool isFavoriteTab; // 현재 탭이 좋아요 탭인지 여부
+  final int itemCount; // 현재 탭에 표시할 아이템 개수
+  final bool isEditing; // 현재 편집 모드 여부
+  final VoidCallback onClearAll; // 전체 삭제 버튼을 클릭했을 때 실행할 함수-내부저장함수
+  final VoidCallback onEditToggle; // 편집 버튼을 클릭했을 때 실행할 함수
+  final bool isFavoriteTab; // 좋아요 탭 여부
 
   const HistoryFilterSection({
     required this.itemCount,
@@ -63,20 +62,20 @@ class HistoryFilterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mainColor = Color(0xFFC9C138); // 앱의 메인 색상
+    final mainColor = Color(0xFFC9C138); // 메인 색상
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // 좌우로 배치
         children: [
           // 좌측: 아이템 개수 표시
-          // 좋아요 탭일 경우 실시간으로 좋아요 개수 업데이트
-          isFavoriteTab
+          isFavoriteTab // 좋아요 탭인지 여부 확인
               ? BlocBuilder<HistoryBloc, HistoryState>(
                   builder: (context, state) {
-                    int favoriteCount = state.favoriteItems.length;
-                    // RichText를 사용하여 텍스트의 일부분만 다른 스타일 적용
+                    int favoriteCount =
+                        state.favoriteItems.length; // 좋아요한 아이템 수
+                    // RichText를 사용하여 일부 텍스트 스타일을 다르게 설정
                     return RichText(
                       text: TextSpan(
                         style: TextStyle(
@@ -128,28 +127,28 @@ class HistoryFilterSection extends StatelessWidget {
           // 우측: 편집/완료 버튼
           Row(
             children: [
-              // 편집 모드일 때만 전체삭제 버튼 표시
+              // 편집 모드일 때만 전체 삭제 버튼 표시
               if (isEditing)
                 TextButton(
-                  onPressed: onClearAll,
+                  onPressed: onClearAll, // 전체 삭제 함수 호출
                   style: TextButton.styleFrom(
                     foregroundColor: mainColor,
                     padding: EdgeInsets.symmetric(horizontal: 8),
                   ),
                   child: Text(
-                    '전체삭제',
+                    '전체삭제', // 버튼 텍스트
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),
               // 편집/완료 토글 버튼
               TextButton(
-                onPressed: onEditToggle,
+                onPressed: onEditToggle, // 편집 모드 토글
                 style: TextButton.styleFrom(
                   foregroundColor: mainColor,
                   padding: EdgeInsets.symmetric(horizontal: 8),
                 ),
                 child: Text(
-                  isEditing ? '완료' : '편집',
+                  isEditing ? '완료' : '편집', // 편집 중일 경우 '완료', 아닐 경우 '편집'
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
               ),
@@ -161,12 +160,12 @@ class HistoryFilterSection extends StatelessWidget {
   }
 }
 
-// 3. 히스토리 리스트 표시 위젯
+// 3. 히스토리 리스트 표시 위젯: 아이템 목록을 보여주는 위젯
 class HistoryListView extends StatelessWidget {
-  final List<HistoryItem> items; // 표시할 아이템 목록
+  final List<HistoryItem> items; // 히스토리 아이템 리스트
   final bool isEditing; // 편집 모드 여부
-  final Function(HistoryItem) onDelete; // 삭제 콜백
-  final Function(HistoryItem) onToggleFavorite; // 좋아요 토글 콜백
+  final Function(HistoryItem) onDelete; // 아이템 삭제 콜백
+  final Function(HistoryItem) onToggleFavorite; // 좋아요 상태 토글 콜백
 
   const HistoryListView({
     required this.items,
@@ -177,15 +176,16 @@ class HistoryListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ListView.builder를 사용하여 효율적으로 목록 표시
+    // ListView.builder를 사용하여 아이템 목록을 효율적으로 표시
     return ListView.builder(
-      itemCount: items.length,
+      itemCount: items.length, // 아이템 수
       itemBuilder: (context, index) {
         return HistoryItemCard(
-          item: items[index],
-          isEditing: isEditing,
-          onDelete: () => onDelete(items[index]),
-          onToggleFavorite: () => onToggleFavorite(items[index]),
+          item: items[index], // 히스토리 아이템 카드에 아이템 전달
+          isEditing: isEditing, // 편집 모드 여부 전달
+          onDelete: () => onDelete(items[index]), // 삭제 함수 호출
+          onToggleFavorite: () =>
+              onToggleFavorite(items[index]), // 좋아요 토글 함수 호출
         );
       },
     );
