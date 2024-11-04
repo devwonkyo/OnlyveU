@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 
 import '../../../models/product_model.dart';
 //탭 헤더 페이지에 묶여있어서 쇼핑카트 스크린에 안나와도 된다

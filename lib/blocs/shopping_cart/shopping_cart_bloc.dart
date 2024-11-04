@@ -153,8 +153,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     try {
       // Firestore에서 제품 데이터를 불러와 장바구니에 저장
       final snapshot = await _firestore.collection('products').limit(5).get();
-      final items =
-          snapshot.docs.map((doc) => ProductModel.fromFirestore(doc)).toList();
+      final items = snapshot.docs
+          .map(
+              (doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
 
       // 초기 선택 상태 및 수량 설정
       final initialSelectedItems = Map.fromEntries(
