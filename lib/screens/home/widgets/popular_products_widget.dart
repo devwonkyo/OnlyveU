@@ -76,23 +76,23 @@ class PopularProductsWidget extends StatelessWidget {
           Container(
             width: 150,
             height: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
-            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: product.productImageList.isNotEmpty
                   ? Image.network(
                       product.productImageList.first,
-                      fit: BoxFit.contain,
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Center(child: Icon(Icons.error));
                       },
                     )
                   : Image.asset(
-                      'assets/default_image.png', // 로컬 기본 이미지로 대체
-                      fit: BoxFit.contain,
+                      'assets/default_image.png',
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
                     ),
             ),
           ),
@@ -147,22 +147,23 @@ class PopularProductsWidget extends StatelessWidget {
           // 4. 태그들
           Row(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '오늘드림',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.black87,
+              if (product.isPopular) // item 대신 product 사용
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '인기',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-              ),
               SizedBox(width: 4),
-              if (product.tagList.contains('BEST'))
+              if (product.isBest) // item 대신 product 사용
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
