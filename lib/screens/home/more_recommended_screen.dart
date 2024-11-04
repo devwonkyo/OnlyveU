@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart'; // ProductModel로 수정
 import 'package:onlyveyou/utils/styles.dart';
 
