@@ -10,19 +10,25 @@ import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
-import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
-import 'package:onlyveyou/blocs/search/tag_list/tag_list_cubit.dart';
-import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
+
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
+
+import 'package:onlyveyou/repositories/product_repository.dart';
+import 'package:onlyveyou/repositories/search_repositories/suggestion_repository_impl.dart';
+
+
+
+import 'blocs/search/search/search_bloc.dart';
+
 import 'core/router.dart';
 import 'firebase_options.dart';
 
@@ -76,18 +82,6 @@ class MyApp extends StatelessWidget {
                   create: (context) =>
                       CategoryCubit(categoryRepository: CategoryRepository())
                         ..loadCategories()),
-              BlocProvider<TagSearchCubit>(
-                create: (context) => TagSearchCubit(),
-              ),
-              BlocProvider<TagListCubit>(
-                create: (context) => TagListCubit(),
-              ),
-              BlocProvider<FilteredTagsCubit>(
-                create: (context) => FilteredTagsCubit(
-                  initialTags: context.read<TagListCubit>().state.tags,
-                  tagSearchCubit: context.read<TagSearchCubit>(),
-                ),
-              ),
               BlocProvider<PasswordBloc>(
                 // PasswordBloc 추가
                 create: (context) => PasswordBloc(),
@@ -104,6 +98,12 @@ class MyApp extends StatelessWidget {
               ),
               BlocProvider<ThemeBloc>(
                 create: (context) => ThemeBloc(),
+              ),
+              BlocProvider<SearchBloc>(
+                create: (context) => SearchBloc(
+                  suggestionRepository: SuggestionRepositoryImpl(),
+                  productRepository: ProductRepository(),
+                ),
               ),
             ],
             child: BlocBuilder<ThemeBloc, ThemeState>(
