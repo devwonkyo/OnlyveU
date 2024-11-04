@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string></string>
+	<string>com.example.onlyveyou</string> <!-- 고유한 앱 식별자 설정 -->
 	<key>CFBundleExecutable</key>
-	<string></string>
+	<string>Runner</string> <!-- 실행 파일 이름 설정 -->
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>LSApplicationCategoryType</key>
-	<string></string>
+	<string>public.app-category.utilities</string> <!-- 앱 카테고리 설정 -->
 	<key>CFBundleName</key>
-	<string></string>
+	<string>onlyveyou</string> <!-- 앱 이름 설정 -->
 	<key>CFBundleDisplayName</key>
-	<string></string>
+	<string>OnlyVeYou</string> <!-- 앱 표시 이름 설정 -->
 	<key>CFBundleVersion</key>
-	<string></string>
+	<string>1</string>
 	<key>CFBundleShortVersionString</key>
-	<string></string>
+	<string>1.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string></string>
+	<string>OnlyVeYou 앱 정보</string> <!-- 설명 정보 설정 -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

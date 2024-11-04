@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_event.dart';
+import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_state.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -14,6 +17,8 @@ class MyPageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<NicknameEditBloc>().add(LoadCurrentNickname());
+
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -71,12 +76,22 @@ class MyPageScreen extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'seongyeon', // 사용자 이름으로 대체
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          BlocBuilder<NicknameEditBloc, NicknameEditState>(
+                            builder: (context, state) {
+                              if (state is NicknameLoading) {
+                                return const CircularProgressIndicator();
+                              } else if (state is NicknameLoaded) {
+                                return Text(
+                                  state.nickname, // 사용자 이름으로 대체
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              } else {
+                                return const Text('닉네임을 불러올 수 없다');
+                              }
+                            },
                           ),
                           TextButton(
                             onPressed: () {
@@ -355,13 +370,19 @@ class MyPageScreen extends StatelessWidget {
                   ),
                   trailing: BlocBuilder<ThemeBloc, ThemeState>(
                     builder: (context, state) {
+                      final themeBloc = context.read<ThemeBloc>();
+                      bool isDarkMode = false;
+                      if (state is ThemeDark) {
+                        isDarkMode = true;
+                      }
                       return Switch(
-                        value: state is ThemeDark,
+                        value: isDarkMode,
+                        activeColor: AppsColor.pastelGreen,
                         onChanged: (value) {
                           if (value) {
-                            context.read<ThemeBloc>().add(ToggleTheme());
+                            themeBloc.add(SetDarkTheme());
                           } else {
-                            context.read<ThemeBloc>().add(SetSystemTheme());
+                            themeBloc.add(SetLightTheme());
                           }
                         },
                       );
