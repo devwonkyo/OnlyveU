@@ -136,7 +136,7 @@ List<ProductModel> generateDummyProducts() {
       productImageList: productImages,
       descriptionImageList: productImages,
       price: basePrice.toString(),
-      discountPercent: random.nextInt(5) * 10,
+      discountPercent: (random.nextInt(4) + 1) * 10,
       categoryId: categoryId,
       subcategoryId: '${categoryId}_${random.nextInt(3) + 1}',
       favoriteList: [],
