@@ -89,7 +89,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ),
         ];
 
-        // Firestore에서 추천 및 인기 상품 데이터 가져오기
+        // Firestore에서 데이터 가져오기
         final QuerySnapshot recommendedSnapshot =
             await _firestore.collection('products').limit(5).get();
 
@@ -100,14 +100,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             "Recommended products fetched: ${recommendedSnapshot.docs.length}");
         print("Popular products fetched: ${popularSnapshot.docs.length}");
 
-        // 추천 및 인기 상품 변환
-        final recommendedProducts = recommendedSnapshot.docs
-            .map((doc) => ProductModel.fromMap(doc.data() as Map<String,dynamic>))
-            .toList();
+        // fromFirestore 메서드 사용하여 변환
+        final recommendedProducts = recommendedSnapshot.docs.map((doc) {
+          //TODO MAP 타입변환
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          data['productId'] = doc.id;
+          return ProductModel.fromMap(data);
+        }).toList();
 
-        final popularProducts = popularSnapshot.docs
-            .map((doc) => ProductModel.fromMap(doc.data() as Map<String,dynamic>))
-            .toList();
+        final popularProducts = popularSnapshot.docs.map((doc) {
+          //TODO MAP 타입변환
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          data['productId'] = doc.id;
+          return ProductModel.fromMap(data);
+        }).toList();
 
         emit(HomeLoaded(
           bannerItems: bannerItems,
@@ -203,7 +209,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
               .get();
 
           final newProducts = moreProducts.docs
-              .map((doc) => ProductModel.fromMap(doc.data() as Map<String,dynamic>))
+              .map((doc) =>
+                  ProductModel.fromMap(doc.data() as Map<String, dynamic>))
               .toList();
 
           emit(currentState.copyWith(
