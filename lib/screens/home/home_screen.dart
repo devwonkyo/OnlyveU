@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/screens/home/widgets/banner_widget.dart';
 import 'package:onlyveyou/screens/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/widgets/recommended_products_widget.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
@@ -62,23 +63,23 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 child: CustomScrollView(
                   controller: _scrollController,
                   slivers: [
-                    // SliverToBoxAdapter(
-                    //   child: BlocBuilder<HomeBloc, HomeState>(
-                    //     buildWhen: (previous, current) =>
-                    //         current is HomeLoaded || current is HomeLoading,
-                    //     builder: (context, state) {
-                    //       if (state is HomeLoading) {
-                    //         return Center(child: CircularProgressIndicator());
-                    //       } else if (state is HomeLoaded) {
-                    //         return BannerWidget(
-                    //           pageController: _pageController,
-                    //           bannerItems: state.bannerItems,
-                    //         );
-                    //       }
-                    //       return SizedBox.shrink();
-                    //     },
-                    //   ),
-                    // ),
+                    SliverToBoxAdapter(
+                      child: BlocBuilder<HomeBloc, HomeState>(
+                        buildWhen: (previous, current) =>
+                            current is HomeLoaded || current is HomeLoading,
+                        builder: (context, state) {
+                          if (state is HomeLoading) {
+                            return Center(child: CircularProgressIndicator());
+                          } else if (state is HomeLoaded) {
+                            return BannerWidget(
+                              pageController: _pageController,
+                              bannerItems: state.bannerItems,
+                            );
+                          }
+                          return SizedBox.shrink();
+                        },
+                      ),
+                    ),
                     SliverToBoxAdapter(
                       child: _buildQuickMenu(
                         MediaQuery.of(context).orientation ==
