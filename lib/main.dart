@@ -24,6 +24,7 @@ import 'blocs/history/history_bloc.dart';
 import 'blocs/search/search/search_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
+import 'screens/search/search_text_field/bloc/search_text_field_bloc.dart';
 
 void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
@@ -92,6 +93,9 @@ class MyApp extends StatelessWidget {
                   suggestionRepository: SuggestionRepositoryImpl(),
                   productRepository: ProductRepository(),
                 ),
+              ),
+              BlocProvider<SearchTextFieldBloc>(
+                create: (context) => SearchTextFieldBloc(),
               ),
             ],
             child: BlocBuilder<ThemeBloc, ThemeState>(

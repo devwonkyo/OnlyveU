@@ -36,7 +36,7 @@ class _SearchInitialScreenState extends State<SearchInitialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('build!!!!: ${widget.recentSearches}');
+    // print('build!!!!: ${widget.recentSearches}');
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(top: 20.h),
