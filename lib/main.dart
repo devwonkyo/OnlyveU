@@ -16,6 +16,7 @@ import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.da
 import 'package:onlyveyou/blocs/search/filtered_tags/filtered_tags_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_list/tag_list_cubit.dart';
 import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
+import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 
@@ -33,6 +34,7 @@ void main() async {
     nativeAppKey: '0236522723df3e1aa869fe36e25e6297',
     javaScriptAppKey: 'Ye8ebc7de132c8c4f0b6881be99e20f5e',
   );
+  print("hash key ${await KakaoSdk.origin}");
   runApp(const MyApp());
 }
 
@@ -41,75 +43,73 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-        designSize: const Size(375, 812),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (_, child) {
-          return MultiBlocProvider(
-            providers: [
-              BlocProvider<AuthBloc>(
-                create: (context) => AuthBloc(),
-              ),
-              BlocProvider<HomeBloc>(
-                create: (context) => HomeBloc(),
-              ),
-              BlocProvider<HistoryBloc>(
-                create: (context) => HistoryBloc(
-                    // FirebaseFirestore.instance, // Firebase를 사용하는 경우
-                    ),
-              ),
-              BlocProvider<ProfileEditBloc>(
-                create: (context) => ProfileEditBloc(),
-              ),
-              BlocProvider<CategoryCubit>(
-                  create: (context) =>
-                      CategoryCubit(categoryRepository: CategoryRepository())
-                        ..loadCategories()),
-              BlocProvider<TagSearchCubit>(
-                create: (context) => TagSearchCubit(),
-              ),
-              BlocProvider<TagListCubit>(
-                create: (context) => TagListCubit(),
-              ),
-              BlocProvider<FilteredTagsCubit>(
-                create: (context) => FilteredTagsCubit(
-                  initialTags: context.read<TagListCubit>().state.tags,
-                  tagSearchCubit: context.read<TagSearchCubit>(),
-                ),
-              ),
-              BlocProvider<PasswordBloc>(
-                // PasswordBloc 추가
-                create: (context) => PasswordBloc(),
-              ),
-              BlocProvider<SetNewPasswordBloc>(
-                // PasswordBloc 추가
-                create: (context) => SetNewPasswordBloc(),
-              ),
-              BlocProvider<NicknameEditBloc>(
-                create: (context) => NicknameEditBloc(),
-              ),
-              BlocProvider<PhoneNumberBloc>(
-                create: (context) => PhoneNumberBloc(),
-              ),
-              BlocProvider<ThemeBloc>(
-                create: (context) => ThemeBloc(),
-              ),
-            ],
-            child: BlocBuilder<ThemeBloc, ThemeState>(
-              builder: (context, state) {
-                return MaterialApp.router(
-                  debugShowCheckedModeBanner: false,
-                  themeMode: state.themeMode,
-                  theme: ThemeData(
-                    scaffoldBackgroundColor: Colors.white,
-                    fontFamily: 'Pretendard',
-                  ),
-                  darkTheme: ThemeData.dark(),
-                  routerConfig: router,
-                );
-              },
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, child) {
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<AuthBloc>(
+              create: (context) => AuthBloc(),
             ),
-          );
-        });
+            BlocProvider<HomeBloc>(
+              create: (context) => HomeBloc(),
+            ),
+            BlocProvider<HistoryBloc>(
+              create: (context) => HistoryBloc(
+                  // FirebaseFirestore.instance, // Firebase를 사용하는 경우
+                  ),
+            ),
+            BlocProvider<ProfileEditBloc>(
+              create: (context) => ProfileEditBloc(),
+            ),
+            BlocProvider<CategoryCubit>(
+                create: (context) =>
+                    CategoryCubit(categoryRepository: CategoryRepository())
+                      ..loadCategories()),
+            BlocProvider<TagSearchCubit>(
+              create: (context) => TagSearchCubit(),
+            ),
+            BlocProvider<TagListCubit>(
+              create: (context) => TagListCubit(),
+            ),
+            BlocProvider<FilteredTagsCubit>(
+              create: (context) => FilteredTagsCubit(
+                initialTags: context.read<TagListCubit>().state.tags,
+                tagSearchCubit: context.read<TagSearchCubit>(),
+              ),
+            ),
+            BlocProvider<PasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => PasswordBloc(),
+            ),
+            BlocProvider<SetNewPasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => SetNewPasswordBloc(),
+            ),
+            BlocProvider<NicknameEditBloc>(
+              create: (context) => NicknameEditBloc(),
+            ),
+            BlocProvider<PhoneNumberBloc>(
+              create: (context) => PhoneNumberBloc(),
+            ),
+            BlocProvider<ThemeBloc>(
+              create: (context) => ThemeBloc(),
+            ),
+          ],
+          child: BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, state) {
+              return MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                themeMode: state.themeMode,
+                theme: lightThemeData(),
+                darkTheme: darkThemeData(),
+                routerConfig: router,
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }
