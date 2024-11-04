@@ -102,11 +102,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
         // 추천 및 인기 상품 변환
         final recommendedProducts = recommendedSnapshot.docs
-            .map((doc) => ProductModel.fromFirestore(doc))
+            .map((doc) => ProductModel.fromMap(doc.data() as Map<String,dynamic>))
             .toList();
 
         final popularProducts = popularSnapshot.docs
-            .map((doc) => ProductModel.fromFirestore(doc))
+            .map((doc) => ProductModel.fromMap(doc.data() as Map<String,dynamic>))
             .toList();
 
         emit(HomeLoaded(
@@ -203,7 +203,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
               .get();
 
           final newProducts = moreProducts.docs
-              .map((doc) => ProductModel.fromFirestore(doc))
+              .map((doc) => ProductModel.fromMap(doc.data() as Map<String,dynamic>))
               .toList();
 
           emit(currentState.copyWith(

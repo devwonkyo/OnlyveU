@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/models/product_model.dart';
 
@@ -15,7 +16,15 @@ class HistoryRepository {
           await _firestore.collection('products').get();
 
       return snapshot.docs.map((doc) {
-        final product = ProductModel.fromFirestore(doc);
+        // doc.data()가 null이 아닌 경우만 ProductModel 생성
+        final data = doc.data() as Map<String, dynamic>?;
+
+        if (data == null) {
+          throw Exception('Product data is null for document ID: ${doc.id}');
+        }
+
+        final product = ProductModel.fromMap(data);
+
         return HistoryItem(
           id: product.productId,
           title: product.name,
