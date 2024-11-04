@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 
 import '../../../models/product_model.dart';

@@ -95,7 +95,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
 
         if (doc.exists) {
           // Firestore 문서에서 ProductModel 객체 생성
-          final product = ProductModel.fromFirestore(doc);
+          final product =
+              ProductModel.fromMap(doc.data() as Map<String, dynamic>);
           List<String> updatedFavoriteList =
               List<String>.from(product.favoriteList);
 
