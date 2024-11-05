@@ -140,7 +140,8 @@ List<ProductModel> generateDummyProducts() {
       categoryId: categoryId,
       subcategoryId: '${categoryId}_${random.nextInt(3) + 1}',
       favoriteList: [],
-      reviewList: List.generate(random.nextInt(50),
+      reviewList: List.generate(
+          random.nextInt(50), //리뷰리스트 나중에 기능 구현 하고 내가 쓴 리뷰 추가하도록 하기
           (index) => 'REVIEW${index.toString().padLeft(3, '0')}'),
       tagList: List.generate(random.nextInt(3) + 1,
           (index) => 'TAG${(index + 1).toString().padLeft(3, '0')}'),
@@ -154,6 +155,19 @@ List<ProductModel> generateDummyProducts() {
       isPopular: random.nextBool(),
     ));
   }
+  //여기서 로직짜서 별점과 리뷰수 우리가 넣을때는 우리가 한거 추가하도록 로직수정해야함
+// 별점 기준으로 상위 20%는 BEST 상품으로 설정
+  products.sort((a, b) => b.rating.compareTo(a.rating));
+  final bestProductCount = (products.length * 0.2).round();
+  for (var i = 0; i < bestProductCount; i++) {
+    products[i] = products[i].copyWith(isBest: true);
+  }
 
+// 리뷰 수 기준으로 상위 30%는 인기 상품으로 설정
+  products.sort((a, b) => b.reviewList.length.compareTo(a.reviewList.length));
+  final popularProductCount = (products.length * 0.3).round();
+  for (var i = 0; i < popularProductCount; i++) {
+    products[i] = products[i].copyWith(isPopular: true);
+  }
   return products;
 }
