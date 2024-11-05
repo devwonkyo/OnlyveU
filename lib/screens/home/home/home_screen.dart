@@ -5,7 +5,9 @@ import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/home/widgets/recommended_products_widget.dart';
+import 'package:onlyveyou/screens/home/later/later_tap_screen.dart';
 import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
+import 'package:onlyveyou/screens/home/todaysale/todaysale_tap_screen.dart';
 import 'package:onlyveyou/utils/firebase_data_uploader.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
@@ -63,7 +65,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 children: [
                   _buildHomeTab(),
                   _buildRankingTab(),
-                  _buildSpecialTab(),
+                  _buildTodaySaleTab(),
                   _buildMagazineTab(),
                 ],
               ),
@@ -144,24 +146,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return RankingTabScreen();
   }
 
-  // 오특 탭 컨텐츠
-  Widget _buildSpecialTab() {
-    return Center(
-      child: Text(
-        '오특 컨텐츠',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
+  Widget _buildTodaySaleTab() {
+    return TodaySaleTabScreen();
   }
 
-  // 매거진 탭 컨텐츠
+  // 나중에 탭 컨텐츠
   Widget _buildMagazineTab() {
-    return Center(
-      child: Text(
-        '나중에 컨텐츠',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
+    return const LaterTabScreen();
   }
 
   // 기존 위젯들...
