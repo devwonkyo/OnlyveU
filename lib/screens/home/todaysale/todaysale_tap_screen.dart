@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/utils/styles.dart';
 
 class TodaySaleTabScreen extends StatefulWidget {
   const TodaySaleTabScreen({Key? key}) : super(key: key);
@@ -32,22 +33,29 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen>
     return Column(
       children: [
         // Tab Bar
-        Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[300]!, width: 1),
+        Theme(
+          data: Theme.of(context).copyWith(
+            tabBarTheme: TabBarTheme(
+              indicator:
+                  BoxDecoration(color: Colors.transparent), // 인디케이터 투명 처리 //^
+              dividerColor: Colors.transparent, // 기본 검은색 테두리 제거 //^
+              overlayColor: MaterialStateProperty.all(
+                  Colors.transparent), // 터치시 오버레이 색상 제거 //^
             ),
           ),
-          child: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: '오늘의 특가'),
-              Tab(text: '위클리 특가'),
-            ],
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.black,
-            indicatorWeight: 2,
+          child: Container(
+            color: Colors.white, // 배경색을 흰색으로 설정 //^
+            child: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(text: '오늘의 특가'),
+                Tab(text: '위클리 특가'),
+              ],
+              labelColor: AppStyles.mainColor,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Colors.transparent, // 인디케이터 색상 투명 //^
+              indicatorWeight: 0.1, // 인디케이터 두께 0 //^
+            ),
           ),
         ),
 
