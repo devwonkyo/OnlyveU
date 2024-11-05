@@ -11,10 +11,6 @@ abstract class ThemeState extends Equatable {
   List<Object> get props => [themeMode];
 }
 
-class ThemeInitial extends ThemeState {
-  const ThemeInitial() : super(ThemeMode.system);
-}
-
 class ThemeLight extends ThemeState {
   const ThemeLight() : super(ThemeMode.light);
 }

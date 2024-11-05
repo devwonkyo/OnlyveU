@@ -140,3 +140,9 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     });
   }
 }
+//////////////
+// 셔터쪽
+//  지희님 셔터님
+// 결제
+// 데이터 관리 매장 데이터
+//

@@ -14,7 +14,8 @@ class ProductRepository {
           await _firestore.collection('products').limit(5).get();
 
       return snapshot.docs
-          .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching recommended products: $e');
@@ -33,7 +34,8 @@ class ProductRepository {
 
       // ProductModel로 변환 후 반환
       return snapshot.docs
-          .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching popular products: $e');
@@ -69,5 +71,47 @@ class ProductRepository {
       print('Error fetching product: $e');
       throw Exception('상품을 불러오는데 실패했습니다.');
     }
+  }
+
+// 검색할때 필요해서 구현했습니다.
+  Future<List<ProductModel>> search(String term) async {
+    final querySnapshot = await _firestore
+        .collection('products')
+        .where('name', isGreaterThanOrEqualTo: term)
+        .where('name', isLessThanOrEqualTo: '$term\uf8ff')
+        .orderBy('name')
+        .get();
+
+    final categorySnapshot = await _firestore
+        .collection('products')
+        .where('category', isGreaterThanOrEqualTo: term)
+        .where('category', isLessThanOrEqualTo: '$term\uf8ff')
+        .orderBy('category')
+        .get();
+
+    final brandNameSnapshot = await _firestore
+        .collection('products')
+        .where('brandName', isGreaterThanOrEqualTo: term)
+        .where('brandName', isLessThanOrEqualTo: '$term\uf8ff')
+        .orderBy('brandName')
+        .get();
+
+    final tagListSnapshot = await _firestore
+        .collection('products')
+        .where('tagList', arrayContains: term)
+        .get();
+
+    final allDocs = [
+      ...querySnapshot.docs,
+      ...categorySnapshot.docs,
+      ...brandNameSnapshot.docs,
+      ...tagListSnapshot.docs,
+    ];
+
+    final uniqueDocs = allDocs.toSet().toList();
+
+    return uniqueDocs
+        .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
+        .toList();
   }
 }

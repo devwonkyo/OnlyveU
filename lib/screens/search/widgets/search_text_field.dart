@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/blocs/search/tag_search/tag_search_cubit.dart';
+import 'package:onlyveyou/blocs/search/search/search_bloc.dart';
 
 class SearchTextField extends StatefulWidget {
-  SearchTextField({
+  const SearchTextField({
     super.key,
     required this.controller,
     required this.onPressed,
@@ -19,30 +17,18 @@ class SearchTextField extends StatefulWidget {
 }
 
 class _SearchTextFieldState extends State<SearchTextField> {
-  final debounce = Debounce(milliseconds: 500);
-
-  @override
-  void dispose() {
-    widget.controller.clear();
-    widget.controller.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity, // 원하는 너비 설정
-      height: 38.h, // 원하는 높이 설정
+      height: 40.h, // 원하는 높이 설정
       child: TextField(
         minLines: 1,
         maxLines: 1,
         controller: widget.controller,
-        onChanged: (String? newSearchTerm) {
-          if (newSearchTerm != null) {
-            debounce.run(() {
-              context.read<TagSearchCubit>().setSearchTerm(newSearchTerm);
-            });
-          }
+        onChanged: (newSearchTerm) {
+          setState(() {});
+          context.read<SearchBloc>().add(TextChangedEvent(text: newSearchTerm));
         },
         // 입력창
         decoration: InputDecoration(
@@ -66,49 +52,41 @@ class _SearchTextFieldState extends State<SearchTextField> {
             borderRadius: BorderRadius.circular(25.r),
           ),
           // 보내기 버튼
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Visibility(
-                visible: widget.controller.text.isNotEmpty,
-                child: IconButton(
-                  onPressed: () {
-                    widget.controller.clear();
-                    context.read<TagSearchCubit>().setSearchTerm('');
-                  },
-                  icon: Icon(
-                    Icons.cancel,
-                    color: Colors.grey[400],
+          suffixIcon: Container(
+            width: 70.w,
+            // color: Colors.red,
+            padding: EdgeInsets.only(right: 12.w),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Visibility(
+                  visible: widget.controller.text.isNotEmpty,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {});
+                      widget.controller.text = '';
+                      context
+                          .read<SearchBloc>()
+                          .add(const TextChangedEvent(text: ''));
+                    },
+                    child: Icon(
+                      Icons.cancel,
+                      color: Colors.grey[400],
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                onPressed: widget.onPressed,
-                icon: const Icon(
-                  Icons.search,
+                GestureDetector(
+                  onTap: widget.onPressed,
+                  child: const Icon(
+                    Icons.search,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
-}
-
-class Debounce {
-  final int milliseconds;
-  Debounce({
-    required this.milliseconds,
-  });
-
-  Timer? _timer;
-
-  void run(VoidCallback action) {
-    if (_timer != null) {
-      _timer!.cancel();
-    }
-
-    _timer = Timer(Duration(milliseconds: milliseconds), action);
   }
 }
