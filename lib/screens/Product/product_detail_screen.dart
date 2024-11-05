@@ -72,10 +72,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildImageSection(state.product),
-                          _buildBrandSection(state.product),
-                          _buildTitleSection(state.product),
-                          _buildPriceSection(state.product),
-                          _buildRatingSection(state.product),
+                          _buildProductInfo(state.product),
                           _buildImageSection(state.product),
                           _buildImageSection(state.product),
                           _buildImageSection(state.product),
