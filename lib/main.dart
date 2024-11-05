@@ -17,6 +17,7 @@ import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.da
 
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
+import 'package:onlyveyou/repositories/auth_repository.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
 
@@ -67,7 +68,9 @@ class MyApp extends StatelessWidget {
               child: ShoppingCartScreen(),
             ),
             BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(),
+              create: (context) => AuthBloc(
+                  authRepository: AuthRepository(),
+                  sharedPreference: OnlyYouSharedPreference()),
             ),
             BlocProvider<HomeBloc>(
               create: (context) => HomeBloc(),
