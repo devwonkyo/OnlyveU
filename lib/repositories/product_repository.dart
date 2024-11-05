@@ -14,7 +14,8 @@ class ProductRepository {
           await _firestore.collection('products').limit(5).get();
 
       return snapshot.docs
-          .map((doc) => ProductModel.fromFirestore(doc))
+          .map(
+              (doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching recommended products: $e');
@@ -33,7 +34,8 @@ class ProductRepository {
 
       // ProductModel로 변환 후 반환
       return snapshot.docs
-          .map((doc) => ProductModel.fromFirestore(doc))
+          .map(
+              (doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching popular products: $e');
@@ -62,7 +64,7 @@ class ProductRepository {
           await _firestore.collection('products').doc(productId).get();
 
       if (doc.exists) {
-        return ProductModel.fromFirestore(doc);
+        return ProductModel.fromMap(doc.data() as Map<String, dynamic>);
       }
       return null;
     } catch (e) {
@@ -108,6 +110,8 @@ class ProductRepository {
 
     final uniqueDocs = allDocs.toSet().toList();
 
-    return uniqueDocs.map((doc) => ProductModel.fromFirestore(doc)).toList();
+    return uniqueDocs
+        .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
+        .toList();
   }
 }

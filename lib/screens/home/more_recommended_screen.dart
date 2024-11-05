@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart'; // ProductModel로 수정
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -69,7 +70,7 @@ class MoreRecommendedScreen extends StatelessWidget {
                 child: item.productImageList.isNotEmpty
                     ? Image.network(
                         item.productImageList[0],
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Center(
                               child: Icon(Icons.error)); // 이미지 로딩 실패 시 아이콘 표시
@@ -77,7 +78,7 @@ class MoreRecommendedScreen extends StatelessWidget {
                       )
                     : Image.asset(
                         'assets/default.png', // 로컬 기본 이미지
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                       ),
               ),
             ),
@@ -96,24 +97,78 @@ class MoreRecommendedScreen extends StatelessWidget {
           ),
           SizedBox(height: 4),
 
-          // 가격 정보
-          Text(
-            '${item.price}원',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-          SizedBox(height: 2),
+          // 할인 전 가격 (위쪽에 표시)
           if (item.discountPercent > 0)
             Text(
-              '${item.discountedPrice}원',
+              '${item.price}원',
               style: TextStyle(
                 decoration: TextDecoration.lineThrough,
                 color: Colors.grey,
                 fontSize: 12,
               ),
             ),
+          SizedBox(height: 2),
+
+          // 할인 후 가격과 할인률
+          Row(
+            children: [
+              if (item.discountPercent > 0)
+                Text(
+                  '${item.discountPercent}%',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              SizedBox(width: 4),
+              Text(
+                '${item.discountedPrice}원',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6),
+
+          // 태그 (인기, BEST 등)
+          Row(
+            children: [
+              if (item.tagList.contains('popular'))
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '인기',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              if (item.tagList.contains('popular')) SizedBox(width: 4),
+              if (item.tagList.contains('BEST'))
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'BEST',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           SizedBox(height: 6),
 
           // 별점과 리뷰 수

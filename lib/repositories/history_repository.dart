@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/models/product_model.dart';
 
@@ -8,14 +9,17 @@ class HistoryRepository {
   HistoryRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  // Firestore에서 ProductModel을 불러오고 HistoryItem으로 변환하여 반환
   Future<List<HistoryItem>> fetchHistoryItems() async {
     try {
       final QuerySnapshot snapshot =
           await _firestore.collection('products').get();
-
+      // return snapshot.docs.map((doc) {
+      //   final product = ProductModel.fromFirestore(doc);
       return snapshot.docs.map((doc) {
-        final product = ProductModel.fromFirestore(doc);
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        data['productId'] = doc.id; // doc.id를 productId로 추가
+
+        final product = ProductModel.fromMap(data); //알아보기
         return HistoryItem(
           id: product.productId,
           title: product.name,
@@ -30,6 +34,7 @@ class HistoryRepository {
               product.favoriteList.contains('currentUserId'), // 실제 유저 ID 사용 필요
           rating: product.rating,
           reviewCount: product.reviewCount,
+          isPopular: product.isPopular,
         );
       }).toList();
     } catch (e) {

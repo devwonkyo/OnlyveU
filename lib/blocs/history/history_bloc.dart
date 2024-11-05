@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import '../../models/history_item.dart';
+import '../../models/product_model.dart'; // ProductModel을 임포트
 import '../../repositories/history_repository.dart';
 
 // 1. 이벤트 정의 - 앱에서 발생할 수 있는 모든 액션들
@@ -37,7 +40,9 @@ class HistoryState {
 
 // 3. BLoC 구현 - 이벤트를 받아서 상태를 변경하는 로직
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
-  final HistoryRepository _repository; // Firebase와의 연동을 위한 repository
+  final HistoryRepository _repository;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _prefs = OnlyYouSharedPreference(); // Firebase와의 연동을 위한 repository
 
   // BLoC 생성자
   HistoryBloc({required HistoryRepository repository})
@@ -78,25 +83,54 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
           favoriteItems: updatedFavoriteItems));
     });
 
-    // 3.3 ToggleFavorite 이벤트를 처리하여 좋아요 상태 토글
-    on<ToggleFavorite>((event, emit) {
-      // 모든 아이템을 순회하며 해당 아이템의 좋아요 상태 변경
-      final updatedRecentItems = state.recentItems.map((item) {
-        if (item.id == event.item.id) {
-          // 좋아요 상태를 반전시켜 새로운 객체 반환
-          return item.copyWith(isFavorite: !item.isFavorite);
+    // 3.3 ToggleFavorite 이벤트 핸들러 수정
+    on<ToggleFavorite>((event, emit) async {
+      try {
+        // 현재 사용자 ID 가져오기
+        final userId = await _prefs.getCurrentUserId();
+
+        // Firestore에서 해당 상품 문서 가져오기
+        final docRef = _firestore.collection('products').doc(event.item.id);
+        final doc = await docRef.get();
+
+        if (doc.exists) {
+          // Firestore 문서에서 ProductModel 객체 생성
+          final product =
+              ProductModel.fromMap(doc.data() as Map<String, dynamic>);
+          List<String> updatedFavoriteList =
+              List<String>.from(product.favoriteList);
+
+          // 좋아요 목록 업데이트
+          if (updatedFavoriteList.contains(userId)) {
+            updatedFavoriteList.remove(userId);
+          } else {
+            updatedFavoriteList.add(userId);
+          }
+
+          // Firestore 업데이트
+          await docRef.update({'favoriteList': updatedFavoriteList});
+
+          // 로컬 상태 업데이트
+          final updatedRecentItems = state.recentItems.map((item) {
+            if (item.id == event.item.id) {
+              return item.copyWith(isFavorite: !item.isFavorite);
+            }
+            return item;
+          }).toList();
+
+          // 좋아요 상태가 true인 아이템만 필터링하여 좋아요 리스트 생성
+          final updatedFavoriteItems =
+              updatedRecentItems.where((item) => item.isFavorite).toList();
+
+          // 새로운 상태로 emit하여 좋아요 상태 변경
+          emit(HistoryState(
+            recentItems: updatedRecentItems,
+            favoriteItems: updatedFavoriteItems,
+          ));
         }
-        return item; // 나머지 아이템은 그대로 반환
-      }).toList();
-
-      // 좋아요 상태가 true인 아이템만 필터링하여 좋아요 리스트 생성
-      final updatedFavoriteItems =
-          updatedRecentItems.where((item) => item.isFavorite).toList();
-
-      // 새로운 상태로 emit하여 좋아요 상태 변경
-      emit(HistoryState(
-          recentItems: updatedRecentItems,
-          favoriteItems: updatedFavoriteItems));
+      } catch (e) {
+        print('Error toggling favorite: $e');
+      }
     });
 
     // 3.4 ClearHistory 이벤트를 처리하여 모든 히스토리 삭제
@@ -106,3 +140,9 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     });
   }
 }
+//////////////
+// 셔터쪽
+//  지희님 셔터님
+// 결제
+// 데이터 관리 매장 데이터
+//

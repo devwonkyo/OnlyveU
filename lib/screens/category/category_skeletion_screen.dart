@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CategorySkeletonScreen extends StatelessWidget {
+  const CategorySkeletonScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,7 +101,7 @@ class CategorySkeletonScreen extends StatelessWidget {
     return Column(
       children: List.generate(
         5,
-            (index) => Padding(
+        (index) => Padding(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           child: SkeletonItem(
             child: Container(
@@ -119,7 +121,7 @@ class CategorySkeletonScreen extends StatelessWidget {
 class SkeletonItem extends StatelessWidget {
   final Widget child;
 
-  const SkeletonItem({Key? key, required this.child}) : super(key: key);
+  const SkeletonItem({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

@@ -78,16 +78,19 @@ class OnlyYouSharedPreference {
     await preferences.clear();
   }
 
+  // userId 저장
+  Future<void> setUserId(String userId) async {
+    SharedPreferences preferences = await prefs;
+    await preferences.setString('userId', userId);
+  }
+
+  // userId 가져오기
   Future<String> getCurrentUserId() async {
     SharedPreferences preferences = await prefs;
     return preferences.getString('userId') ?? 'temp_user_id';
   }
 
-  // 사용자 ID 저장
-  Future<void> setUserId(String userId) async {
-    SharedPreferences preferences = await prefs;
-    await preferences.setString('userId', userId);
-  }
+  // 로그아웃 시 userId 포함하여 모든 정보 삭제
 
   // 디버깅용 사용자 정보 체크 메서드
   Future<void> checkCurrentUser() async {
@@ -98,5 +101,17 @@ class OnlyYouSharedPreference {
     print('Phone: ${await getPhone()}');
     print('Gender: ${await getGender()}');
     print('=====================');
+    // 테마 모드 저장
+  }
+
+  Future<void> setThemeMode(bool isDarkMode) async {
+    SharedPreferences preferences = await prefs;
+    preferences.setBool('isDarkMode', isDarkMode);
+  }
+
+  // 테마 모드 읽기
+  Future<bool> getThemeMode() async {
+    SharedPreferences preferences = await prefs;
+    return preferences.getBool('isDarkMode') ?? false; // 기본값은 라이트 모드
   }
 }

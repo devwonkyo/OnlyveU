@@ -19,6 +19,7 @@ import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
 
 import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
@@ -34,7 +35,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/category',
           pageBuilder: (context, state) => _buildPageWithTransition(
-              state, CategoryScreen()), //^ builder를 pageBuilder로 변경
+              state, const CategoryScreen()), //^ builder를 pageBuilder로 변경
         ),
         GoRoute(
           path: '/home',
@@ -54,6 +55,11 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/search',
           builder: (context, state) => const SearchScreen(),
+        ),
+        GoRoute(
+          path: '/order-status',
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, const OrderStatusScreen()),
         ),
       ],
     ),
