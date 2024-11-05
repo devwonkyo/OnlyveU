@@ -101,5 +101,17 @@ class OnlyYouSharedPreference {
     print('Phone: ${await getPhone()}');
     print('Gender: ${await getGender()}');
     print('=====================');
+    // 테마 모드 저장
+  }
+
+  Future<void> setThemeMode(bool isDarkMode) async {
+    SharedPreferences preferences = await prefs;
+    preferences.setBool('isDarkMode', isDarkMode);
+  }
+
+  // 테마 모드 읽기
+  Future<bool> getThemeMode() async {
+    SharedPreferences preferences = await prefs;
+    return preferences.getBool('isDarkMode') ?? false; // 기본값은 라이트 모드
   }
 }
