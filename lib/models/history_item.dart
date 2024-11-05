@@ -9,6 +9,7 @@ class HistoryItem {
   final bool isFavorite;
   final double rating;
   final int reviewCount;
+  final bool isPopular;
 
   HistoryItem({
     required this.id,
@@ -21,6 +22,7 @@ class HistoryItem {
     required this.isFavorite,
     required this.rating,
     required this.reviewCount,
+    required this.isPopular,
   });
 
   // copyWith 메서드 추가
@@ -35,6 +37,7 @@ class HistoryItem {
     bool? isFavorite,
     double? rating,
     int? reviewCount,
+    bool? isPopular,
   }) {
     return HistoryItem(
       id: id ?? this.id,
@@ -47,6 +50,7 @@ class HistoryItem {
       isFavorite: isFavorite ?? this.isFavorite,
       rating: rating ?? this.rating,
       reviewCount: reviewCount ?? this.reviewCount,
+      isPopular: isPopular ?? this.isPopular,
     );
   }
 }
