@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/screens/home/todaysale/widgets/todaysale_card_widget.dart';
@@ -12,11 +14,48 @@ class TodaySaleTabScreen extends StatefulWidget {
 
 class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
   final ScrollController _scrollController = ScrollController();
+  late Timer _timer;
+  Duration _remainingTime = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateRemainingTime(); //^ 초기 시간 계산
+    _startTimer(); //^ 타이머 시작
+  }
+
+  void _calculateRemainingTime() {
+    final now = DateTime.now();
+    // 자정에서 9시간을 뺀 시간을 기준으로 설정
+    final midnight = DateTime(now.year, now.month, now.day + 1)
+        .subtract(Duration(hours: 9)); //^
+    _remainingTime = midnight.difference(now); //^ 현재 시간과 자정 간의 차이 계산
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_remainingTime > Duration.zero) {
+          _remainingTime -= Duration(seconds: 1); //^ 1초씩 감소
+        } else {
+          _timer.cancel(); //^ 남은 시간이 0이 되면 타이머 취소
+        }
+      });
+    });
+  }
 
   @override
   void dispose() {
+    _timer.cancel();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = (duration.inHours % 24).toString().padLeft(2, '0');
+    final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
+    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return '$hours:$minutes:$seconds';
   }
 
   @override
@@ -59,7 +98,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                           size: 16.sp, color: AppStyles.mainColor),
                       SizedBox(width: 4.w),
                       Text(
-                        '02:51:47',
+                        _formatDuration(_remainingTime), //^ 남은 시간 표시
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w900,
@@ -67,7 +106,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                         ),
                       ),
                       Text(
-                        ' 분후',
+                        ' 남음',
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppStyles.mainColor,
