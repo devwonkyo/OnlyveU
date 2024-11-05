@@ -89,25 +89,33 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ),
         ];
 
-        // Firestore에서 추천 및 인기 상품 데이터 가져오기
-        final QuerySnapshot recommendedSnapshot =
-            await _firestore.collection('products').limit(5).get();
+        // 추천 상품 쿼리 수정 - isBest가 true인 상품만 가져오기
+        final QuerySnapshot recommendedSnapshot = await _firestore
+            .collection('products')
+            .where('isBest', isEqualTo: true) // isBest가 true인 것만 필터링
+            .get();
 
-        final QuerySnapshot popularSnapshot =
-            await _firestore.collection('products').limit(5).get();
+        // 인기 상품 쿼리
+        final QuerySnapshot popularSnapshot = await _firestore
+            .collection('products')
+            .where('isPopular', isEqualTo: true)
+            .get();
 
         print(
             "Recommended products fetched: ${recommendedSnapshot.docs.length}");
         print("Popular products fetched: ${popularSnapshot.docs.length}");
 
-        // 추천 및 인기 상품 변환
-        final recommendedProducts = recommendedSnapshot.docs
-            .map((doc) => ProductModel.fromFirestore(doc))
-            .toList();
+        final recommendedProducts = recommendedSnapshot.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          data['productId'] = doc.id;
+          return ProductModel.fromMap(data);
+        }).toList();
 
-        final popularProducts = popularSnapshot.docs
-            .map((doc) => ProductModel.fromFirestore(doc))
-            .toList();
+        final popularProducts = popularSnapshot.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          data['productId'] = doc.id;
+          return ProductModel.fromMap(data);
+        }).toList();
 
         emit(HomeLoaded(
           bannerItems: bannerItems,
@@ -203,7 +211,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
               .get();
 
           final newProducts = moreProducts.docs
-              .map((doc) => ProductModel.fromFirestore(doc))
+              .map((doc) =>
+                  ProductModel.fromMap(doc.data() as Map<String, dynamic>))
               .toList();
 
           emit(currentState.copyWith(
