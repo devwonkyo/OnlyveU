@@ -11,12 +11,18 @@ final class TextChanged extends SearchTextFieldEvent {
   final String text;
 
   const TextChanged(this.text);
+
+  @override
+  List<Object> get props => [text];
 }
 
 final class TextSubmitted extends SearchTextFieldEvent {
   final String text;
 
   const TextSubmitted(this.text);
+
+  @override
+  List<Object> get props => [text];
 }
 
-final class TextDelete extends SearchTextFieldEvent {}
+final class TextDeleted extends SearchTextFieldEvent {}

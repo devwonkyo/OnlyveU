@@ -7,8 +7,12 @@ sealed class SearchTextFieldState extends Equatable {
   List<Object> get props => [];
 }
 
-final class Empty extends SearchTextFieldState {}
+final class SearchTextFieldEmpty extends SearchTextFieldState {}
 
-final class Typing extends SearchTextFieldState {}
+final class SearchTextFieldTyping extends SearchTextFieldState {
+  final String text;
 
-final class Submitted extends SearchTextFieldState {}
+  const SearchTextFieldTyping(this.text);
+}
+
+final class SearchTextFieldSubmitted extends SearchTextFieldState {}

@@ -6,38 +6,22 @@ part 'search_text_field_state.dart';
 
 class SearchTextFieldBloc
     extends Bloc<SearchTextFieldEvent, SearchTextFieldState> {
-  SearchTextFieldBloc() : super(Empty()) {
+  SearchTextFieldBloc() : super(SearchTextFieldEmpty()) {
     on<TextChanged>((event, emit) {
       if (event.text.isEmpty) {
-        emit(Empty());
+        return emit(SearchTextFieldEmpty());
       } else {
-        emit(Typing());
+        print('STFBloc: ${event.text}');
+        return emit(SearchTextFieldTyping(event.text));
       }
     });
 
     on<TextSubmitted>((event, emit) {
-      if (event.text.isNotEmpty) {
-        emit(Submitted());
-      }
+      return emit(SearchTextFieldSubmitted());
     });
 
-    on<TextDelete>((event, emit) {
-      emit(Empty());
+    on<TextDeleted>((event, emit) {
+      return emit(SearchTextFieldEmpty());
     });
   }
 }
-
-
-
-// void _onTextChanged() {
-//     if (_state != SearchTextFieldState.typing && _controller.text.isNotEmpty) {
-//       return setState(() {
-//         _state = SearchTextFieldState.typing;
-//       });
-//     } else if (_state == SearchTextFieldState.submitted &&
-//         _controller.text.isEmpty) {
-//       return setState(() {
-//         _state = SearchTextFieldState.empty;
-//       });
-//     }
-//   }

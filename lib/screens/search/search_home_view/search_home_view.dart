@@ -3,35 +3,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../blocs/search/search/search_bloc.dart';
-import 'search_service.dart';
 
-class SearchInitialScreen extends StatefulWidget {
-  SearchInitialScreen({
+class SearchHomeView extends StatefulWidget {
+  SearchHomeView({
     super.key,
-    required this.controller,
   });
 
-  final TextEditingController controller;
   List<String> recentSearches = [];
 
   @override
-  State<SearchInitialScreen> createState() => _SearchInitialScreenState();
+  State<SearchHomeView> createState() => _SearchHomeViewState();
 }
 
-class _SearchInitialScreenState extends State<SearchInitialScreen> {
-  final SearchService _searchService = SearchService();
-
+class _SearchHomeViewState extends State<SearchHomeView> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => _loadRecentSearches());
-  }
-
-  Future<void> _loadRecentSearches() async {
-    final recentSearches = await _searchService.loadRecentSearches();
-    setState(() {
-      widget.recentSearches = recentSearches;
-    });
   }
 
   @override
@@ -57,7 +44,6 @@ class _SearchInitialScreenState extends State<SearchInitialScreen> {
                       padding: EdgeInsets.only(right: 10.w),
                       child: RecentlySearchButton(
                         name: sortedRecentSearches[index],
-                        controller: widget.controller,
                       ),
                     );
                   },
@@ -127,13 +113,10 @@ class SearchMainContainer extends StatelessWidget {
 
 class RecentlySearchButton extends StatelessWidget {
   final String name;
-  final TextEditingController controller;
-  final SearchService _searchService = SearchService();
 
   RecentlySearchButton({
     super.key,
     required this.name,
-    required this.controller,
   });
 
   @override
@@ -141,9 +124,9 @@ class RecentlySearchButton extends StatelessWidget {
     return OutlinedButton(
         onPressed: () {
           FocusScope.of(context).unfocus();
-          controller.text = name;
-          context.read<SearchBloc>().add(ShowResultEvent(text: name));
-          _searchService.saveRecentSearch(controller.text);
+          // controller.text = name;
+          // context.read<SearchBloc>().add(ShowResultEvent(text: name));
+          // _searchService.saveRecentSearch(controller.text);
         },
         style: OutlinedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 4.h)),
@@ -155,9 +138,7 @@ class RecentlySearchButton extends StatelessWidget {
             ),
             SizedBox(width: 5.w),
             GestureDetector(
-              onTap: () {
-                _searchService.removeRecentSearch(name);
-              },
+              onTap: () {},
               child: Icon(
                 Icons.close,
                 size: 15.sp,

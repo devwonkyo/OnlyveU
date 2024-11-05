@@ -1,47 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/blocs/search/search/search_bloc.dart';
 import 'package:onlyveyou/screens/search/search_text_field/bloc/search_text_field_bloc.dart';
 import 'package:onlyveyou/screens/search/search_text_field/search_text_field.dart';
-import 'package:onlyveyou/screens/search/search_view/bloc/search_view_bloc.dart';
-import 'package:onlyveyou/screens/search/widgets/search_initial_screen.dart';
-import 'package:onlyveyou/screens/search/widgets/search_service.dart';
+import 'package:onlyveyou/screens/search/search_home_view/search_home_view.dart';
 
-class SearchScreen extends StatefulWidget {
+import 'search_result_view/search_result_view.dart';
+import 'search_suggestion_view/bloc/search_suggestion_bloc.dart';
+import 'search_suggestion_view/search_suggestion_view.dart';
+
+class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
-}
-
-class _SearchScreenState extends State<SearchScreen> {
-  final TextEditingController _messageController = TextEditingController();
-  final SearchService _searchService = SearchService();
-
-  void _sendMessage() {
-    FocusScope.of(context).unfocus();
-    context
-        .read<SearchBloc>()
-        .add(ShowResultEvent(text: _messageController.text));
-    _searchService.saveRecentSearch(_messageController.text);
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    print('==========$runtimeType==========');
     return MultiBlocProvider(
       providers: [
         BlocProvider<SearchTextFieldBloc>(
           create: (context) => SearchTextFieldBloc(),
         ),
-        BlocProvider<SearchViewBloc>(
-          create: (context) => SearchViewBloc(),
+        BlocProvider(
+          create: (context) => SearchSuggestionBloc(),
         ),
       ],
       child: GestureDetector(
@@ -70,29 +50,17 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Padding(
                   padding:
                       EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                  child: SearchTextField(
-                      // controller: _messageController,
-                      // onSubmitted: _sendMessage,
-                      ),
+                  child: const SearchTextField(),
                 ),
               ),
             ),
           ),
-          // 나중에 리팩토링
-          body: BlocBuilder<SearchViewBloc, SearchViewState>(
+          body: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
             builder: (context, state) {
               return switch (state) {
-                Home() => SearchInitialScreen(controller: _messageController),
-                Suggestion() =>
-                  // SearchSuggestionScreen(
-                  //     suggestions: state.suggestions,
-                  //     controller: _messageController,
-                  //   ),
-                  const Center(child: CircularProgressIndicator()),
-                Result() =>
-                  // SearchResultScreen(results: state.results),
-                  const Center(child: CircularProgressIndicator()),
-                Loading() => const Center(child: CircularProgressIndicator()),
+                SearchTextFieldEmpty() => SearchHomeView(),
+                SearchTextFieldTyping() => SearchSuggestionView(),
+                SearchTextFieldSubmitted() => SearchResultView(),
                 Object() => throw UnimplementedError(),
               };
             },
