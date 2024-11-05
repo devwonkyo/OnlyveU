@@ -33,16 +33,19 @@ class CustomSection extends StatelessWidget {
 }
 
 // 재사용 가능한 리스트 항목 생성 함수
-Widget buildListItem(IconData icon, String title, {String? subtitle}) {
+
+Widget buildListItem(
+  IconData icon,
+  String title, {
+  String? subtitle,
+  VoidCallback? onTap, // onTap을 매개변수로 추가
+}) {
   return ListTile(
     leading: Icon(icon),
     title: Text(title),
     subtitle: subtitle != null
         ? Text(subtitle, style: const TextStyle(color: Colors.grey))
         : null,
-    onTap: () {
-      // 항목 클릭 시 동작
-      print("dd");
-    },
+    onTap: onTap, // onTap 매개변수 사용
   );
 }

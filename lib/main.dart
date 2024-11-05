@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
+import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -40,8 +41,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
-      name: "onlyveyou",
-      options: DefaultFirebaseOptions.currentPlatform);
+      name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
   // print("hash key ${await KakaoSdk.origin}");
 
@@ -116,6 +116,9 @@ class MyApp extends StatelessWidget {
                 suggestionRepository: SuggestionRepositoryImpl(),
                 productRepository: ProductRepository(),
               ),
+            ),
+            BlocProvider<PaymentBloc>(
+              create: (context) => PaymentBloc(),
             ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
