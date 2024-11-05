@@ -1,17 +1,24 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:onlyveyou/repositories/auth_repository.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  final AuthRepository authRepository;
+  final OnlyYouSharedPreference sharedPreference;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _prefs = OnlyYouSharedPreference();
 
-  AuthBloc() : super(AuthInitial()) {
+  //authrepository 메서드 가져오기 위해서 사용
+  AuthBloc({required this.authRepository, required this.sharedPreference})
+      : super(AuthInitial()) {
+    on<LogoutRequested>(_onLogoutRequested);
+    on<DeleteAccountRequested>(_onDeleteAccountRequested);
     on<SignUpRequested>((event, emit) async {
       emit(AuthLoading());
       try {
@@ -69,5 +76,47 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthFailure('로그인에 실패했습니다.'));
       }
     });
+  }
+
+  Future<void> _onLogoutRequested(
+      LogoutRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading()); // 로그아웃 중 로딩 상태로 변경
+    try {
+      await sharedPreference.printAllData();
+      await authRepository.logout(); // 로그아웃 수행
+
+      await sharedPreference.clearPreference();
+      await sharedPreference.printAllData();
+      emit(LogoutSuccess()); // 로그아웃 성공 상태로 전환
+    } catch (e) {
+      emit(AuthFailure("로그아웃에 실패했습니다: $e"));
+    }
+  }
+
+  // 회원 탈퇴 로직
+  Future<void> _onDeleteAccountRequested(
+      DeleteAccountRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      // 현재 사용자 ID 가져오기
+      final currentUser = _firebaseAuth.currentUser;
+      if (currentUser == null) {
+        emit(AuthFailure("사용자가 인증되지 않았습니다."));
+        return;
+      }
+
+      // Firestore에서 유저 데이터 삭제
+      await _firestore.collection('users').doc(currentUser.email).delete();
+
+      // 내부 저장소의 사용자 데이터 삭제
+      await sharedPreference.clearPreference();
+
+      // Firebase Auth에서 계정 삭제
+      await authRepository.deleteAccount();
+
+      emit(LogoutSuccess()); // 탈퇴 후 로그인 화면으로 이동
+    } catch (e) {
+      emit(AuthFailure("회원 탈퇴에 실패했습니다: $e"));
+    }
   }
 }

@@ -1,9 +1,10 @@
 import 'dart:async'; // 주기적인 타이머를 위한 Timer 라이브러리 임포트
 
 import 'package:flutter/material.dart';
+import 'package:onlyveyou/models/home_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
-import '../../../models/home_model.dart'; // BannerItem 모델을 사용하기 위한 임포트
+// BannerItem 모델을 사용하기 위한 임포트
 
 // 배너 위젯 클래스 정의 (자동 슬라이드 기능 포함)
 class BannerWidget extends StatefulWidget {
