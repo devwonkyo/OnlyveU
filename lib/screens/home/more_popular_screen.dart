@@ -55,7 +55,7 @@ class MorePopularScreen extends StatelessWidget {
                   crossAxisCount: 2,
                   mainAxisSpacing: 20,
                   crossAxisSpacing: 16,
-                  childAspectRatio: 0.45,
+                  childAspectRatio: 0.5,
                 ),
                 itemCount: state.popularProducts.length,
                 itemBuilder: (context, index) =>
@@ -89,7 +89,7 @@ class MorePopularScreen extends StatelessWidget {
                 tag: 'product_${product.productId}',
                 child: Image.network(
                   product.productImageList.first,
-                  fit: BoxFit.contain,
+                  fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Center(child: Icon(Icons.error));
                   },
@@ -145,24 +145,25 @@ class MorePopularScreen extends StatelessWidget {
           ),
           SizedBox(height: 6),
 
-          // 태그
+// 태그 - 가격과 별점 사이에 위치하도록 이동
           Row(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '오늘드림',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.black87,
+              if (product.tagList.contains('popular'))
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '인기',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: 4),
+              if (product.tagList.contains('popular')) SizedBox(width: 4),
               if (product.tagList.contains('BEST'))
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -182,7 +183,7 @@ class MorePopularScreen extends StatelessWidget {
           ),
           SizedBox(height: 6),
 
-          // 별점과 리뷰 수
+// 별점과 리뷰 수
           Row(
             children: [
               Icon(Icons.star, size: 12, color: AppStyles.mainColor),

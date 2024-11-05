@@ -2,33 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/history_item.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 class HistoryRepository {
   final FirebaseFirestore _firestore;
-  final _prefs = OnlyYouSharedPreference();
 
   HistoryRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Future<List<HistoryItem>> fetchHistoryItems() async {
     try {
-      // 현재 사용자 ID 가져오기
-      final userId = await _prefs.getCurrentUserId();
-
       final QuerySnapshot snapshot =
           await _firestore.collection('products').get();
-
+      // return snapshot.docs.map((doc) {
+      //   final product = ProductModel.fromFirestore(doc);
       return snapshot.docs.map((doc) {
-        // doc.data()가 null이 아닌 경우만 ProductModel 생성
-        final data = doc.data() as Map<String, dynamic>?;
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        data['productId'] = doc.id; // doc.id를 productId로 추가
 
-        if (data == null) {
-          throw Exception('Product data is null for document ID: ${doc.id}');
-        }
-
-        final product = ProductModel.fromMap(data);
-
+        final product = ProductModel.fromMap(data); //알아보기
         return HistoryItem(
           id: product.productId,
           title: product.name,
@@ -39,10 +30,11 @@ class HistoryRepository {
           originalPrice: product.discountedPrice,
           discountRate: product.discountPercent,
           isBest: product.isBest,
-          // 하드코딩된 'currentUserId' 대신 실제 userId 사용
-          isFavorite: product.favoriteList.contains(userId),
+          isFavorite:
+              product.favoriteList.contains('currentUserId'), // 실제 유저 ID 사용 필요
           rating: product.rating,
           reviewCount: product.reviewCount,
+          isPopular: product.isPopular,
         );
       }).toList();
     } catch (e) {
