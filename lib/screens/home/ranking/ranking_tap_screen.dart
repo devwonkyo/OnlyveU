@@ -41,7 +41,7 @@ class _RankingTabScreenState extends State<RankingTabScreen> {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
-                color: AppStyles.mainColor,
+                color: Colors.black,
               ),
             ),
           ),

@@ -73,6 +73,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
 
   void _startTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (!mounted) return; // mounted 체크 추가 -노란 경고 때문
       setState(() {
         if (_remainingTime.inSeconds > 0) {
           _remainingTime = _remainingTime - Duration(seconds: 1);
@@ -84,6 +85,17 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
         }
       });
     });
+  }
+
+  @override //노란색 경고 때문에
+  void dispose() {
+    if (_timer.isActive) {
+      // Timer가 활성화되어 있는지 확인
+      _timer.cancel();
+    }
+    _scrollController.dispose();
+    _todaySaleBloc.close();
+    super.dispose();
   }
 
   String _formatDuration(Duration duration) {
@@ -181,26 +193,34 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                // 실제 상품의 첫 번째 이미지 사용
-                                product.productImageList.isNotEmpty
-                                    ? product.productImageList.first
-                                    : 'assets/images/placeholder.png', // 로컬 플레이스홀더 이미지 경로로 변경하세요
-                                width: 120.w,
-                                height: 120.w,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Container(
-                                  width: 120.w,
-                                  height: 120.w,
-                                  color: Colors.grey[200],
-                                  child: Icon(
-                                    Icons.image_not_supported_outlined,
-                                    size: 40.w,
-                                    color: Colors.grey[400],
-                                  ),
-                                ),
-                              ),
+                              child: product.productImageList.isNotEmpty
+                                  ? Image.network(
+                                      product.productImageList.first,
+                                      width: 120.w,
+                                      height: 120.w,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        width: 120.w,
+                                        height: 120.w,
+                                        color: Colors.grey[200],
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          size: 40.w,
+                                          color: Colors.grey[400],
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      // productImageList가 비어있을 때 보여줄 기본 컨테이너
+                                      width: 120.w,
+                                      height: 120.w,
+                                      color: Colors.grey[200],
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        size: 40.w,
+                                        color: Colors.grey[400],
+                                      ),
+                                    ),
                             ),
                             SizedBox(width: 16.w),
                             Expanded(
