@@ -6,58 +6,59 @@ import '../../../blocs/home/home_bloc.dart';
 import '../../../models/product_model.dart';
 import '../../../utils/styles.dart';
 
-class SearchResultScreen extends StatelessWidget {
-  const SearchResultScreen({
+class SearchResultView extends StatelessWidget {
+  const SearchResultView({
     super.key,
-    required this.results,
+    // required this.results,
   });
-  final List<ProductModel> results;
+  // final List<ProductModel> results;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 15.w),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 60.h,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '총 ${results.length}개',
-                  style: TextStyle(fontSize: 15.sp),
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.tune),
-                    SizedBox(width: 20.w),
-                    Text(
-                      '인기순',
-                      style: TextStyle(fontSize: 15.sp),
-                    ),
-                    const Icon(Icons.keyboard_arrow_down)
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10.w,
-                childAspectRatio: 0.45.r,
-                mainAxisExtent: 330.h,
-              ),
-              itemCount: results.length,
-              itemBuilder: (context, index) =>
-                  ProductCard(item: results[index]),
-            ),
-          ),
-        ],
-      ),
-    );
+    return Center(child: Text('result view'));
+    // Padding(
+    //   padding: EdgeInsets.symmetric(horizontal: 15.w),
+    //   child: Column(
+    //     children: [
+    //       SizedBox(
+    //         height: 60.h,
+    //         child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: [
+    //             Text(
+    //               '총 ${results.length}개',
+    //               style: TextStyle(fontSize: 15.sp),
+    //             ),
+    //             Row(
+    //               children: [
+    //                 const Icon(Icons.tune),
+    //                 SizedBox(width: 20.w),
+    //                 Text(
+    //                   '인기순',
+    //                   style: TextStyle(fontSize: 15.sp),
+    //                 ),
+    //                 const Icon(Icons.keyboard_arrow_down)
+    //               ],
+    //             ),
+    //           ],
+    //         ),
+    //       ),
+    //       Expanded(
+    //         child: GridView.builder(
+    //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    //             crossAxisCount: 2,
+    //             crossAxisSpacing: 10.w,
+    //             childAspectRatio: 0.45.r,
+    //             mainAxisExtent: 330.h,
+    //           ),
+    //           itemCount: results.length,
+    //           itemBuilder: (context, index) =>
+    //               ProductCard(item: results[index]),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+    // );
   }
 }
 
