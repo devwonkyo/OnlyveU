@@ -5,6 +5,7 @@ import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/home/widgets/recommended_products_widget.dart';
+import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
 import 'package:onlyveyou/utils/firebase_data_uploader.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
@@ -92,7 +93,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           Tab(text: '홈'),
           Tab(text: '랭킹'),
           Tab(text: '오특'),
-          Tab(text: 'AI추천'),
+          Tab(text: '기획'),
         ],
         labelColor: AppStyles.mainColor,
         unselectedLabelColor: AppStyles.greyColor,
@@ -140,12 +141,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   // 랭킹 탭 컨텐츠
   Widget _buildRankingTab() {
-    return Center(
-      child: Text(
-        '랭킹 컨텐츠',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
+    return RankingTabScreen();
   }
 
   // 오특 탭 컨텐츠

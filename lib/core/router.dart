@@ -11,7 +11,7 @@ import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/home/home/more_popular_screen.dart';
 import 'package:onlyveyou/screens/home/home/more_recommended_screen.dart';
-import 'package:onlyveyou/screens/home/ranking/ranking_screen.dart';
+import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/nickname_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/password/set_new_password_screen.dart';
@@ -40,7 +40,8 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/ranking',
-          builder: (context, state) => RankingScreen(),
+          builder: (context, state) =>
+              RankingTabScreen(), // RankingScreen을 RankingTabScreen으로 변경
         ),
         GoRoute(
           path: '/home',
