@@ -37,7 +37,9 @@ class CustomBottomNavBar extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: mainColor,
       unselectedItemColor: Colors.grey,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context)
+          .bottomNavigationBarTheme
+          .backgroundColor, // 테마의 색상 사용
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.menu),
@@ -85,6 +87,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
     if (currentPath.startsWith('/history')) return 2;
     if (currentPath.startsWith('/my')) return 3;
     if (currentPath.startsWith('/profile_edit')) return 3;
+    if (currentPath.startsWith('/order-status')) return 3;
     return 1; // 기본값은 홈
   }
 }
