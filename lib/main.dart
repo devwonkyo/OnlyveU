@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
+import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -113,6 +114,9 @@ class MyApp extends StatelessWidget {
                 suggestionRepository: SuggestionRepositoryImpl(),
                 productRepository: ProductRepository(),
               ),
+            ),
+            BlocProvider<ProductDetailBloc>(
+              create: (context) => ProductDetailBloc(ProductRepository()),
             ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
