@@ -1,39 +1,42 @@
 class InventoryModel {
-  /// 제품ID
   final String productId;
-
-  /// 전체 재고 수량
-  final int stock;
-
-  /// 매장별 재고 현황 Map
-  /// key: 매장 ID
-  /// value: 해당 매장의 재고 수량
-  final Map<String, int> storeStock;
-  //A -> 30
-  //B -> 20
-  //storeStock['A']
+  final String storeId;
+  int quantity;
 
   InventoryModel({
     required this.productId,
-    required this.stock,
-    required this.storeStock,
+    required this.storeId,
+    required this.quantity,
   });
 
-  /// InventoryModel 객체를 Map으로 변환
-  Map<String, dynamic> toMap() {
-    return {
-      'productId': productId,
-      'stock': stock,
-      'storeStock': storeStock,
-    };
-  }
-
-  /// Map에서 InventoryModel 객체를 생성
+  // Create inventory from map (JSON)
   factory InventoryModel.fromMap(Map<String, dynamic> map) {
     return InventoryModel(
       productId: map['productId'] as String,
-      stock: map['stock'] as int,
-      storeStock: Map<String, int>.from(map['storeStock'] as Map),
+      storeId: map['storeId'] as String,
+      quantity: map['quantity'] as int,
+    );
+  }
+
+  // Convert inventory to map (JSON)
+  Map<String, dynamic> toMap() {
+    return {
+      'productId': productId,
+      'storeId': storeId,
+      'quantity': quantity,
+    };
+  }
+
+  // Copy with method for creating a new instance with some modified fields
+  InventoryModel copyWith({
+    String? productId,
+    String? storeId,
+    int? quantity,
+  }) {
+    return InventoryModel(
+      productId: productId ?? this.productId,
+      storeId: storeId ?? this.storeId,
+      quantity: quantity ?? this.quantity,
     );
   }
 }
