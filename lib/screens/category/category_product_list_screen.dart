@@ -209,6 +209,7 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                               (context, index) {
                                 return VerticalProductCard(
                                   productModel: products[index],
+                                  onTap: () => context.push("/product-detail", extra: products[index].productId)
                                 );
                               },
                               childCount: products.length,

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart'; // Material 임포트 추가
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/category_selection.dart';
+import 'package:onlyveyou/screens/Product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -25,7 +26,7 @@ import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/home',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -146,6 +147,14 @@ final GoRouter router = GoRouter(
             categorySelection: categroySelection,
           );
         }),
+    GoRoute(
+      path: '/product-detail',
+      builder: (context, state) {
+        final productId = state.extra as String;
+        return ProductDetailScreen(
+          productId: productId ?? '',
+        );
+      }),
   ],
 );
 
