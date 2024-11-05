@@ -119,7 +119,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 TextField(
                   controller: nicknameController,
                   decoration: InputDecoration(
-                    hintText: '닉네임',
+                    hintText: '이메일',
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black),
                     ),
