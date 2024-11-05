@@ -114,4 +114,29 @@ class ProductRepository {
         .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
         .toList();
   }
+
+  //랭킹탭에 파베 끌어올때 썼습니다.-근데 이거 내가 만든거 아닌가?
+// 2. product_repository.dart에 추가할 메서드
+  Future<List<ProductModel>> getRankingProducts(String category) async {
+    try {
+      Query query = _firestore.collection('products');
+
+      // 카테고리 필터링
+      if (category != '전체') {
+        query = query.where('categoryId', isEqualTo: category);
+      }
+
+      // salesVolume으로 정렬하고 상위 10개 가져오기
+      final QuerySnapshot snapshot = // 판매량 내림차순 정렬
+          await query.orderBy('salesVolume', descending: true).limit(10).get();
+
+      return snapshot.docs
+          .map(
+              (doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('Error fetching ranking products: $e');
+      throw Exception('랭킹 상품을 불러오는데 실패했습니다.');
+    }
+  }
 }
