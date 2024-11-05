@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:onlyveyou/repositories/product_repository.dart';
-import 'package:onlyveyou/repositories/search_repositories/suggestion_repository_impl.dart';
 import 'package:onlyveyou/screens/search/widgets/search_result_screen.dart';
 import 'package:onlyveyou/screens/search/widgets/search_suggestion_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../blocs/search/search/search_bloc.dart';
 import 'widgets/search_initial_screen.dart';
+import 'widgets/search_service.dart';
 import 'widgets/search_text_field.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -19,12 +18,14 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final SearchService _searchService = SearchService();
 
   void _sendMessage() {
     FocusScope.of(context).unfocus();
     context
         .read<SearchBloc>()
         .add(ShowResultEvent(text: _messageController.text));
+    _searchService.saveRecentSearch(_messageController.text);
   }
 
   @override
@@ -68,10 +69,15 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
         ),
+        // 나중에 리팩토링
         body: BlocBuilder<SearchBloc, SearchState>(
           builder: (context, state) {
+            if (_messageController.text.isEmpty) {
+              state = SearchInitialState();
+            }
             return switch (state) {
-              SearchInitialState() => const SearchInitialScreen(),
+              SearchInitialState() =>
+                SearchInitialScreen(controller: _messageController),
               SearchSuggestionState() => SearchSuggestionScreen(
                   suggestions: state.suggestions,
                   controller: _messageController,

@@ -1,11 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class SearchInitialScreen extends StatelessWidget {
-  const SearchInitialScreen({super.key});
+import '../../../blocs/search/search/search_bloc.dart';
+import 'search_service.dart';
+
+class SearchInitialScreen extends StatefulWidget {
+  SearchInitialScreen({
+    super.key,
+    required this.controller,
+  });
+
+  final TextEditingController controller;
+  List<String> recentSearches = [];
+
+  @override
+  State<SearchInitialScreen> createState() => _SearchInitialScreenState();
+}
+
+class _SearchInitialScreenState extends State<SearchInitialScreen> {
+  final SearchService _searchService = SearchService();
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => _loadRecentSearches());
+  }
+
+  Future<void> _loadRecentSearches() async {
+    final recentSearches = await _searchService.loadRecentSearches();
+    setState(() {
+      widget.recentSearches = recentSearches;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    print('build!!!!: ${widget.recentSearches}');
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.only(top: 20.h),
@@ -14,52 +45,42 @@ class SearchInitialScreen extends StatelessWidget {
           children: [
             SearchMainContainer(
               title: '최근 검색어',
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Row(
-                    children: [
-                      const RecentlySearchButton(name: '보습'),
-                      SizedBox(width: 10.w),
-                      const RecentlySearchButton(name: '스킨'),
-                      SizedBox(width: 10.w),
-                      const RecentlySearchButton(name: '아이라이너'),
-                      SizedBox(width: 10.w),
-                      const RecentlySearchButton(name: '선크림'),
-                      SizedBox(width: 10.w),
-                      const RecentlySearchButton(name: '쿠션'),
-                    ],
-                  ),
+              child: SizedBox(
+                height: 40.h,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.recentSearches.length,
+                  itemBuilder: (context, index) {
+                    final sortedRecentSearches =
+                        List<String>.from(widget.recentSearches.reversed);
+                    return Padding(
+                      padding: EdgeInsets.only(right: 10.w),
+                      child: RecentlySearchButton(
+                        name: sortedRecentSearches[index],
+                        controller: widget.controller,
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
             SizedBox(height: 20.h),
             SearchMainContainer(
               title: '추천 키워드',
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Wrap(
-                  spacing: 10.w,
-                  children: [
-                    FilledButton(
-                        onPressed: () {}, child: const Text('세미매트밀착쿠션')),
-                    FilledButton(onPressed: () {}, child: const Text('콜라겐올인원')),
-                    FilledButton(
-                        onPressed: () {}, child: const Text('히알루산올인원')),
-                    FilledButton(
-                        onPressed: () {}, child: const Text('탱글젤리블리셔')),
-                  ],
-                ),
+              child: Wrap(
+                spacing: 10.w,
+                children: [
+                  FilledButton(onPressed: () {}, child: const Text('세미매트밀착쿠션')),
+                  FilledButton(onPressed: () {}, child: const Text('콜라겐올인원')),
+                  FilledButton(onPressed: () {}, child: const Text('히알루산올인원')),
+                  FilledButton(onPressed: () {}, child: const Text('탱글젤리블리셔')),
+                ],
               ),
             ),
             SizedBox(height: 20.h),
             SearchMainContainer(
               title: '급상승 검색어',
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: SizedBox(),
-              ),
+              child: SizedBox(),
             ),
           ],
         ),
@@ -95,7 +116,10 @@ class SearchMainContainer extends StatelessWidget {
           ],
         ),
         SizedBox(height: 10.h),
-        child,
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: child,
+        ),
       ],
     );
   }
@@ -103,16 +127,24 @@ class SearchMainContainer extends StatelessWidget {
 
 class RecentlySearchButton extends StatelessWidget {
   final String name;
+  final TextEditingController controller;
+  final SearchService _searchService = SearchService();
 
-  const RecentlySearchButton({
+  RecentlySearchButton({
     super.key,
     required this.name,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
-        onPressed: () {},
+        onPressed: () {
+          FocusScope.of(context).unfocus();
+          controller.text = name;
+          context.read<SearchBloc>().add(ShowResultEvent(text: name));
+          _searchService.saveRecentSearch(controller.text);
+        },
         style: OutlinedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 4.h)),
         child: Row(
@@ -122,9 +154,14 @@ class RecentlySearchButton extends StatelessWidget {
               style: TextStyle(fontSize: 15.sp),
             ),
             SizedBox(width: 5.w),
-            Icon(
-              Icons.close,
-              size: 15.sp,
+            GestureDetector(
+              onTap: () {
+                _searchService.removeRecentSearch(name);
+              },
+              child: Icon(
+                Icons.close,
+                size: 15.sp,
+              ),
             ),
           ],
         ));

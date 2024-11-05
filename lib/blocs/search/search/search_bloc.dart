@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+
 import 'package:stream_transform/stream_transform.dart';
 
 import 'package:onlyveyou/models/product_model.dart';
@@ -26,7 +27,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }) : super(SearchInitialState()) {
     on<TextChangedEvent>(_onTextChangedEvent,
         transformer: debounce(const Duration(milliseconds: 300)));
-
     on<ShowResultEvent>(_onShowResultEvent);
   }
 
