@@ -38,7 +38,10 @@ void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+      name: "onlyveyou",
+      options: DefaultFirebaseOptions.currentPlatform);
+
   // print("hash key ${await KakaoSdk.origin}");
 
   KakaoSdk.init(
