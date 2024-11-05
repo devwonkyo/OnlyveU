@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class RankingTabScreen extends StatefulWidget {
@@ -88,13 +87,14 @@ class _RankingTabScreenState extends State<RankingTabScreen>
                     setState(() {
                       selectedFilter = filter;
                     });
-                  },
+                  }, //AppStyles.mainColor.withOpacity(0.1),
                   backgroundColor: Colors.white,
-                  selectedColor: Colors.black.withOpacity(0.1),
+                  selectedColor: AppStyles.mainColor.withOpacity(0.1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                     side: BorderSide(
-                      color: isSelected ? Colors.black : Colors.grey[300]!,
+                      color:
+                          isSelected ? AppStyles.mainColor : Colors.grey[300]!,
                     ),
                   ),
                   labelStyle: TextStyle(
@@ -125,96 +125,150 @@ class _RankingTabScreenState extends State<RankingTabScreen>
   }
 
   Widget _buildRankingList() {
-    return ListView.separated(
+    return GridView.builder(
       padding: EdgeInsets.all(16.w),
-      itemCount: 20, // 예시로 20개 아이템 표시
-      separatorBuilder: (context, index) => SizedBox(height: 16.h),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 8.h, // 16.h에서 8.h로 수정
+        crossAxisSpacing: 16.w, // 가로 간격은 유지
+        mainAxisExtent: 340.h, // 400.h에서 340.h로 수정하여 카드 높이를 줄임
+      ),
+      itemCount: 10,
       itemBuilder: (context, index) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Ranking Number
-            Container(
-              width: 24.w,
-              height: 24.w,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: index < 3 ? Colors.black : Colors.grey[200],
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '${index + 1}',
-                style: TextStyle(
-                  color: index < 3 ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-
-            // Product Image
-            Container(
-              width: 100.w,
-              height: 100.w,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage('https://via.placeholder.com/100'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-
-            // Product Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        return Container(
+          width: double.infinity,
+          // height를 지정하지 않아 내용물 크기에 맞춰 자동 조절
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
                 children: [
-                  Text(
-                    '상품명 예시 ${index + 1}',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    '50% ${(20000 * (index + 1)).toString()}원',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
+                  // 상품 이미지
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      'https://via.placeholder.com/100',
+                      width: double.infinity,
+                      height: 180.h,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(Icons.image, size: 180.h),
                     ),
                   ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Icon(Icons.star,
-                          size: 16.sp, color: AppsColor.pastelGreen),
-                      SizedBox(width: 4.w),
-                      Text(
-                        '4.8',
+                  // 순위 표시
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      width: 24.w,
+                      height: 24.w,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color:
+                            index < 3 ? AppStyles.mainColor : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${index + 1}',
                         style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
                         ),
                       ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        '(999+)',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              // 나머지 내용들...
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '인기 상품 ${index + 1}',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      '99,900원',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        decoration: TextDecoration.lineThrough,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Text(
+                          '38%',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '61,520원',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Icon(Icons.star,
+                            size: 16.sp, color: AppStyles.mainColor),
+                        SizedBox(width: 4.w),
+                        Text(
+                          '4.8',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          '(6,817)',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.favorite_border,
+                          size: 20.sp,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(width: 16.w),
+                        Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 20.sp,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
