@@ -8,9 +8,10 @@ import 'package:onlyveyou/screens/auth/signup_screen.dart';
 import 'package:onlyveyou/screens/category/category_product_list_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
-import 'package:onlyveyou/screens/home/home_screen.dart';
-import 'package:onlyveyou/screens/home/more_popular_screen.dart';
-import 'package:onlyveyou/screens/home/more_recommended_screen.dart';
+import 'package:onlyveyou/screens/home/home/home_screen.dart';
+import 'package:onlyveyou/screens/home/home/more_popular_screen.dart';
+import 'package:onlyveyou/screens/home/home/more_recommended_screen.dart';
+import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/nickname_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/password/set_new_password_screen.dart';
@@ -18,8 +19,8 @@ import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_s
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
-import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
+import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 
 import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
@@ -36,6 +37,11 @@ final GoRouter router = GoRouter(
           path: '/category',
           pageBuilder: (context, state) => _buildPageWithTransition(
               state, const CategoryScreen()), //^ builder를 pageBuilder로 변경
+        ),
+        GoRoute(
+          path: '/ranking',
+          builder: (context, state) =>
+              RankingTabScreen(), // RankingScreen을 RankingTabScreen으로 변경
         ),
         GoRoute(
           path: '/home',
