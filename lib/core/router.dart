@@ -18,6 +18,7 @@ import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_s
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
+import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
 
@@ -146,6 +147,15 @@ final GoRouter router = GoRouter(
             categorySelection: categroySelection,
           );
         }),
+
+    //결제 화면
+    GoRoute(
+      path: '/payment',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        PaymentScreen(),
+      ), // 괄호 수정
+    ),
   ],
 );
 
