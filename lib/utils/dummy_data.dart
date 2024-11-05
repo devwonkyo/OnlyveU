@@ -57,6 +57,7 @@ List<ProductModel> generateDummyProducts() {
     'https://img.hankyung.com/photo/202410/2d058d65af505e45345c2ed917443cff.jpg',
   ];
 
+  // 브랜드 리스트
   final brands = [
     '[설화수]',
     '[헤라]',
@@ -67,107 +68,211 @@ List<ProductModel> generateDummyProducts() {
     '[시세이도]',
     '[랑콤]',
     '[에스티 로더]',
-    '[비오템]'
+    '[비오템]',
+    '[아모레퍼시픽]',
+    '[숨37]',
+    '[마몽드]',
+    '[미샤]',
+    '[더페이스샵]',
+    '[닥터자르트]',
+    '[AHC]',
+    '[메디힐]',
+    '[네이처리퍼블릭]',
+    '[토니모리]'
   ];
 
-  final skinCareProducts = [
-    '고농축 수분 크림 100ml 대용량',
-    '리커버리 에센스 스페셜 에디션 120ml',
-    '딥 클렌징 포뮬라 토너 200ml',
-    '비타민 C 앰플 세트 30ml x 3',
-    '프리미엄 로션 지복합성용 150ml',
-    '순한 클렌징 폼 포민트 케어 180ml',
-    '피부탄력 세럼 집중관리형 50ml',
-    '수분 충전 마스크팩 10개입',
-  ];
-  final makeupProducts = [
-    '풀 커버 파운데이션 SPF50+ PA+++ 30ml',
-    '롱래스팅 립스틱 세트 - 매트&글로스 2종',
-    '볼륨 마스카라 24시간 지속력 워터프루프',
-    '아이섀도우 팔레트 & 아이라이너 세트',
-    '울트라 커버 컨실러 듀오 세트 15g',
-    '내추럴 글로우 블러셔 & 하이라이터',
-    '올데이 세팅 아이브로우 펜슬 - 내추럴 브라운',
-  ];
-  final sunCareProducts = [
-    '고보습 선크림 SPF50+ PA+++ 100ml',
-    '멀티 프로텍션 선스틱 내추럴 핏',
-    '쿨링 선스프레이 150ml 대용량',
-    '프리미엄 선쿠션 SPF50+ PA+++',
-  ];
+  // 제품명 생성 함수 추가
+  String generateProductName(int categoryId, int subCategoryId, String brand) {
+    final mainAdjectives = [
+      '프리미엄',
+      '시그니처',
+      '울트라',
+      '퍼펙트',
+      '인텐시브',
+      '어드밴스드',
+      '리얼',
+      '더마',
+      '하이드라',
+      '센시티브'
+    ];
+    final effects = [
+      '고보습',
+      '진정',
+      '탄력',
+      '미백',
+      '영양',
+      '수분충전',
+      '광채',
+      '안티에이징',
+      '컴포팅',
+      '리페어'
+    ];
+    final ingredients = [
+      '히알루론산',
+      '콜라겐',
+      '세라마이드',
+      '펩타이드',
+      '비타민',
+      '판테놀',
+      '나이아신아마이드',
+      '아데노신',
+      '프로폴리스',
+      '스쿠알란'
+    ];
+    final special = [
+      '대용량',
+      '리미티드 에디션',
+      '선물세트',
+      '기획세트',
+      '듀오세트',
+      'NEW',
+      '3세대',
+      '2024 신상',
+      '업그레이드'
+    ];
+    final benefits = [
+      '주름개선',
+      '미백케어',
+      '피부진정',
+      '보습케어',
+      '피부탄력',
+      '모공케어',
+      '각질케어',
+      '밸런싱',
+      '브라이트닝',
+      '수분케어'
+    ];
 
-  final List<ProductModel> products = [];
-  final usedIndices = <int>{}; // 사용된 이미지 인덱스를 추적하기 위한 Set
-
-  for (int i = 0; i < 50; i++) {
-    // 아직 사용되지 않은 랜덤 인덱스 선택
-    int randomIndex;
-    do {
-      randomIndex = random.nextInt(imageUrls.length);
-    } while (usedIndices.contains(randomIndex) &&
-        usedIndices.length < imageUrls.length);
-
-    usedIndices.add(randomIndex);
-    final selectedImage = imageUrls[randomIndex];
-    final productImages = [selectedImage];
-
-    final brand = brands[random.nextInt(brands.length)];
-    List<String> productTypes;
-    String categoryId;
-
-    if (i < 25) {
-      productTypes = skinCareProducts;
-      categoryId = '1';
-    } else if (i < 40) {
-      productTypes = makeupProducts;
-      categoryId = '2';
-    } else {
-      productTypes = sunCareProducts;
-      categoryId = '3';
+    String getRandomItems(List<String> list, int count) {
+      list = List.from(list)..shuffle();
+      return list.take(count).join(' ');
     }
 
-    final productType = productTypes[random.nextInt(productTypes.length)];
-    final basePrice = 10000 + (random.nextInt(29) * 10000);
+    switch (categoryId) {
+      case 1: // 스킨케어
+        final types = ['토너', '에센스', '세럼', '앰플', '크림', '로션', '미스트', '오일'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            '${getRandomItems(ingredients, 2)} 함유 ${getRandomItems(effects, 2)} ' +
+            '${getRandomItems(benefits, 2)} ${types[random.nextInt(types.length)]} ' +
+            '${random.nextInt(100) + 1}ml';
 
-    products.add(ProductModel(
-      productId: 'PROD${i.toString().padLeft(3, '0')}',
-      name: '${brand} ${productType}',
-      brandName: brand,
-      productImageList: productImages,
-      descriptionImageList: productImages,
-      price: basePrice.toString(),
-      discountPercent: (random.nextInt(4) + 1) * 10,
-      categoryId: categoryId,
-      subcategoryId: '${categoryId}_${random.nextInt(3) + 1}',
-      favoriteList: [],
-      reviewList: List.generate(
-          random.nextInt(50), //리뷰리스트 나중에 기능 구현 하고 내가 쓴 리뷰 추가하도록 하기
-          (index) => 'REVIEW${index.toString().padLeft(3, '0')}'),
-      tagList: List.generate(random.nextInt(3) + 1,
-          (index) => 'TAG${(index + 1).toString().padLeft(3, '0')}'),
-      cartList: [],
-      visitCount: 100 + random.nextInt(900),
-      rating: 3.0 + (random.nextDouble() * 2.0),
-      registrationDate:
-          DateTime.now().subtract(Duration(days: random.nextInt(365))),
-      salesVolume: 50 + random.nextInt(950),
-      isBest: random.nextBool(),
-      isPopular: random.nextBool(),
-    ));
+      case 2: // 마스크팩
+        final types = ['시트 마스크', '하이드로겔 마스크', '클레이 마스크', '슬리핑 마스크', '패드', '패치'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            '${getRandomItems(ingredients, 2)} 더블 케어 ${getRandomItems(effects, 2)} ' +
+            '${types[random.nextInt(types.length)]} ${random.nextInt(5) + 1}매입 ' +
+            '${getRandomItems(benefits, 2)}';
+
+      case 3: // 클렌징
+        final types = ['폼 클렌저', '클렌징 오일', '클렌징 워터', '클렌징 밤', '클렌징 티슈'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            'pH${random.nextInt(3) + 5}.5 약산성 ${getRandomItems(ingredients, 1)} ' +
+            '${getRandomItems(effects, 2)} ${types[random.nextInt(types.length)]} ' +
+            '${random.nextInt(200) + 100}ml 데일리 딥클렌징';
+
+      case 4: // 선케어
+        final types = ['선크림', '선스틱', '선쿠션', '선스프레이', '선젤'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            '${getRandomItems(ingredients, 2)} 워터프루프 톤업 ' +
+            '${types[random.nextInt(types.length)]} SPF${random.nextInt(20) + 30} PA++++ ' +
+            '${getRandomItems(effects, 2)} ${random.nextInt(50) + 30}ml';
+
+      case 5: // 메이크업
+        final colors = ['로즈', '코랄', '핑크', '베이지', '브라운', '레드', '누드', '피치'];
+        final types = ['립스틱', '파운데이션', '마스카라', '아이라이너', '블러셔'];
+        final finishes = ['매트', '글로우', '새틴', '크리미', '벨벳', '래디언트', '시머'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            '${finishes[random.nextInt(finishes.length)]} ${colors[random.nextInt(colors.length)]} ' +
+            '${getRandomItems(ingredients, 1)} ${types[random.nextInt(types.length)]} ' +
+            '#${random.nextInt(20) + 1} ${getRandomItems(effects, 2)}';
+
+      case 6: // 뷰티소품
+        final types = ['메이크업 퍼프', '화장솜', '브러시', '마스카라 브러시', '파운데이션 브러시'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            '${types[random.nextInt(types.length)]} ${random.nextInt(3) + 1}개입 ' +
+            '프리미엄 퀄리티 ${getRandomItems(effects, 1)}';
+
+      case 7: // 맨즈케어
+        final types = ['올인원', '스킨', '로션', '에센스', '크림'];
+        return '$brand 맨즈 ${getRandomItems(mainAdjectives, 1)} ' +
+            '${getRandomItems(ingredients, 2)} ${getRandomItems(effects, 2)} ' +
+            '${types[random.nextInt(types.length)]} ${random.nextInt(200) + 100}ml ' +
+            '${getRandomItems(benefits, 1)}';
+
+      case 8: // 헤어케어
+        final types = ['샴푸', '트리트먼트', '에센스', '오일', '미스트'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            '${getRandomItems(ingredients, 2)} ${getRandomItems(effects, 2)} ' +
+            '${types[random.nextInt(types.length)]} ${random.nextInt(300) + 200}ml ' +
+            '${getRandomItems(benefits, 1)}';
+
+      case 9: // 바디케어
+        final types = ['바디워시', '바디로션', '바디크림', '바디오일', '바디미스트'];
+        return '$brand ${getRandomItems(special, 1)} ${getRandomItems(mainAdjectives, 1)} ' +
+            '${getRandomItems(ingredients, 2)} ${getRandomItems(effects, 2)} ' +
+            '${types[random.nextInt(types.length)]} ${random.nextInt(400) + 200}ml ' +
+            '${getRandomItems(benefits, 1)}';
+
+      default:
+        return '$brand 기본 제품';
+    }
   }
-  //여기서 로직짜서 별점과 리뷰수 우리가 넣을때는 우리가 한거 추가하도록 로직수정해야함
-// 별점 기준으로 상위 20%는 BEST 상품으로 설정
+
+  final List<ProductModel> products = [];
+
+  // 제품 생성 로직
+  for (int categoryId = 1; categoryId <= 9; categoryId++) {
+    for (int subCategoryId = 1; subCategoryId <= 5; subCategoryId++) {
+      for (int productNum = 1; productNum <= 5; productNum++) {
+        int randomIndex = random.nextInt(imageUrls.length);
+        String brand = brands[random.nextInt(brands.length)];
+        int basePrice = 10000 + (random.nextInt(29) * 10000);
+
+        products.add(ProductModel(
+          productId: '${categoryId}_${subCategoryId}_$productNum',
+          name: generateProductName(
+              categoryId, subCategoryId, brand), // 여기서 제품명 생성 함수 사용
+          brandName: brand,
+          productImageList: [imageUrls[randomIndex]],
+          descriptionImageList: [imageUrls[randomIndex]],
+          price: basePrice.toString(),
+          discountPercent: (random.nextInt(4) + 1) * 10,
+          categoryId: categoryId.toString(),
+          subcategoryId: '${categoryId}_$subCategoryId',
+          favoriteList: [],
+          reviewList: List.generate(random.nextInt(50),
+              (index) => 'REVIEW${index.toString().padLeft(3, '0')}'),
+          tagList: [
+            'NEW',
+            if (random.nextBool()) 'BEST',
+            if (random.nextBool()) 'SALE'
+          ],
+          cartList: [],
+          visitCount: 100 + random.nextInt(900),
+          rating: 3.0 + (random.nextDouble() * 2.0),
+          registrationDate:
+              DateTime.now().subtract(Duration(days: random.nextInt(365))),
+          salesVolume: 50 + random.nextInt(950),
+          isBest: random.nextBool(),
+          isPopular: random.nextBool(),
+        ));
+      }
+    }
+  }
+
+  // BEST 상품 설정
   products.sort((a, b) => b.rating.compareTo(a.rating));
   final bestProductCount = (products.length * 0.2).round();
   for (var i = 0; i < bestProductCount; i++) {
     products[i] = products[i].copyWith(isBest: true);
   }
 
-// 리뷰 수 기준으로 상위 30%는 인기 상품으로 설정
+  // 인기 상품 설정
   products.sort((a, b) => b.reviewList.length.compareTo(a.reviewList.length));
   final popularProductCount = (products.length * 0.3).round();
   for (var i = 0; i < popularProductCount; i++) {
     products[i] = products[i].copyWith(isPopular: true);
   }
+
   return products;
 }

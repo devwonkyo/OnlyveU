@@ -5,14 +5,14 @@ import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/home/widgets/recommended_products_widget.dart';
-
+import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
 import 'package:onlyveyou/utils/firebase_data_uploader.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({Key? key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -48,57 +48,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     }
   }
 
-  Future<void> _uploadDummyData(BuildContext context) async {
-    if (_isUploading) return;
-
-    try {
-      setState(() {
-        _isUploading = true;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-              SizedBox(width: 16),
-              Text('더미데이터 업로드 중...'),
-            ],
-          ),
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      final uploader = FirebaseDataUploader();
-      await uploader.initializeDatabase();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('더미데이터 업로드 완료!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('업로드 실패: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() {
-        _isUploading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,53 +58,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           children: [
             _buildTabBar(),
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  context.read<HomeBloc>().add(RefreshHomeData());
-                },
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    // SliverToBoxAdapter(
-                    //   child: BlocBuilder<HomeBloc, HomeState>(
-                    //     buildWhen: (previous, current) =>
-                    //         current is HomeLoaded || current is HomeLoading,
-                    //     builder: (context, state) {
-                    //       if (state is HomeLoading) {
-                    //         return Center(child: CircularProgressIndicator());
-                    //       } else if (state is HomeLoaded) {
-                    //         return BannerWidget(
-                    //           pageController: _pageController,
-                    //           bannerItems: state.bannerItems,
-                    //         );
-                    //       }
-                    //       return SizedBox.shrink();
-                    //     },
-                    //   ),
-                    // ),
-                    SliverToBoxAdapter(
-                      child: _buildQuickMenu(
-                        MediaQuery.of(context).orientation ==
-                            Orientation.portrait,
-                      ),
-                    ),
-                    _buildRecommendedProducts(),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.h),
-                        child: InkWell(
-                          onTap: () => print("쿠폰 눌림"),
-                          child: Image.asset(
-                            'assets/image/banner4.png',
-                            width: MediaQuery.of(context).size.width * 0.95,
-                          ),
-                        ),
-                      ),
-                    ),
-                    _buildPopularProducts(),
-                    _buildLoadingIndicator(),
-                  ],
-                ),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildHomeTab(),
+                  _buildRankingTab(),
+                  _buildSpecialTab(),
+                  _buildMagazineTab(),
+                ],
               ),
             ),
           ],
@@ -179,11 +89,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         padding: EdgeInsets.zero,
         indicatorPadding: EdgeInsets.zero,
         labelPadding: EdgeInsets.symmetric(horizontal: 16.w),
-        tabs: const [
+        tabs: [
           Tab(text: '홈'),
           Tab(text: '랭킹'),
           Tab(text: '오특'),
-          Tab(text: '매거진'),
+          Tab(text: '기획'),
         ],
         labelColor: AppStyles.mainColor,
         unselectedLabelColor: AppStyles.greyColor,
@@ -195,10 +105,71 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
+  // 홈 탭 컨텐츠
+  Widget _buildHomeTab() {
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<HomeBloc>().add(RefreshHomeData());
+      },
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: _buildQuickMenu(
+              MediaQuery.of(context).orientation == Orientation.portrait,
+            ),
+          ),
+          _buildRecommendedProducts(),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              child: InkWell(
+                onTap: () => print("쿠폰 눌림"),
+                child: Image.asset(
+                  'assets/image/banner4.png',
+                  width: MediaQuery.of(context).size.width * 0.95,
+                ),
+              ),
+            ),
+          ),
+          _buildPopularProducts(),
+          _buildLoadingIndicator(),
+        ],
+      ),
+    );
+  }
+
+  // 랭킹 탭 컨텐츠
+  Widget _buildRankingTab() {
+    return RankingTabScreen();
+  }
+
+  // 오특 탭 컨텐츠
+  Widget _buildSpecialTab() {
+    return Center(
+      child: Text(
+        '오특 컨텐츠',
+        style: TextStyle(fontSize: 24),
+      ),
+    );
+  }
+
+  // 매거진 탭 컨텐츠
+  Widget _buildMagazineTab() {
+    return Center(
+      child: Text(
+        '나중에 컨텐츠',
+        style: TextStyle(fontSize: 24),
+      ),
+    );
+  }
+
+  // 기존 위젯들...
   Widget _buildQuickMenu(bool isPortrait) {
+    // 기존 코드 유지
     return GridView.count(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
       crossAxisCount: isPortrait ? 5 : 8,
       mainAxisSpacing: 8.h,
       crossAxisSpacing: 8.w,
@@ -225,6 +196,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Widget _buildQuickMenuItem(String label, IconData icon, VoidCallback onTap) {
+    // 기존 코드 유지
     bool isUploading = _isUploading && label == '뭐할까';
 
     return InkWell(
@@ -239,7 +211,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               color: Colors.grey.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 2,
-              offset: const Offset(0, 1),
+              offset: Offset(0, 1),
             ),
           ],
         ),
@@ -260,7 +232,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 child: SizedBox(
                   width: 12.w,
                   height: 12.w,
-                  child: const CircularProgressIndicator(
+                  child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor:
                         AlwaysStoppedAnimation<Color>(AppStyles.mainColor),
@@ -271,6 +243,58 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  Future<void> _uploadDummyData(BuildContext context) async {
+    // 기존 코드 유지
+    if (_isUploading) return;
+
+    try {
+      setState(() {
+        _isUploading = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              SizedBox(width: 16),
+              Text('더미데이터 업로드 중...'),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      final uploader = FirebaseDataUploader();
+      await uploader.initializeDatabase();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('더미데이터 업로드 완료!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('업로드 실패: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
   }
 
   Widget _buildRecommendedProducts() {
@@ -290,7 +314,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               },
             );
           }
-          return const SizedBox.shrink();
+          return SizedBox.shrink();
         },
       ),
     );
@@ -302,7 +326,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         selector: (state) => state is HomeLoaded ? state.popularProducts : [],
         builder: (context, products) {
           return products.isEmpty
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(child: CircularProgressIndicator())
               : PopularProductsWidget(
                   popularProducts: products,
                   isPortrait: MediaQuery.of(context).orientation ==
@@ -322,10 +346,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ? Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.h),
-                    child: const CircularProgressIndicator(),
+                    child: CircularProgressIndicator(),
                   ),
                 )
-              : const SizedBox.shrink(),
+              : SizedBox.shrink(),
         );
       },
     );

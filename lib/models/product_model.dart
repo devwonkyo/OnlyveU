@@ -80,6 +80,7 @@ class ProductModel {
   // Firestore에 저장하기 위한 Map으로 변환
   Map<String, dynamic> toMap() {
     return {
+      'productId': productId,
       'name': name,
       'brandName': brandName,
       'productImageList': productImageList,
