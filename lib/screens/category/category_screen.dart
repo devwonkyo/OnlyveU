@@ -15,6 +15,8 @@ import 'package:onlyveyou/screens/category/widgets/sub_category_item.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class CategoryScreen extends StatefulWidget {
+  const CategoryScreen({super.key});
+
   @override
   State<CategoryScreen> createState() => _CategoryScreenState();
 }
@@ -61,7 +63,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         isSelected: isSelected,
                         onTap: () {
                           context.read<CategoryCubit>().selectCategory(index);
-                          _scrollToCategory(index);  // 여기서 스크롤 호출
+                          _scrollToCategory(index); // 여기서 스크롤 호출
                           print(index);
                         },
                       );
@@ -71,8 +73,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
                 // 오른쪽 서브카테고리 리스트
                 Expanded(
-                  child:ListView.builder(
-                    controller: _rightScrollController,  // 컨트롤러 연결
+                  child: ListView.builder(
+                    controller: _rightScrollController, // 컨트롤러 연결
                     itemCount: state.categories.length,
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     itemBuilder: (context, index) {
@@ -85,12 +87,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             onTap: () {
                               // 클릭 시 실행할 코드
                               print("카테고리 헤더 클릭 : ${category.name}");
-                              final categorySelection = CategorySelection(category: category);
-                              context.push("/categroy/productlist",extra: categorySelection);
+                              final categorySelection =
+                                  CategorySelection(category: category);
+                              context.push("/categroy/productlist",
+                                  extra: categorySelection);
                             },
                             child: // 카테고리 헤더
-                            SubCategoryHeader(
-                              icon : category.icon ?? "",  // 아이콘은 적절히 변경
+                                SubCategoryHeader(
+                              icon: category.icon ?? "", // 아이콘은 적절히 변경
                               title: category.name,
                               hasArrow: true,
                             ),
@@ -102,12 +106,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                 onTap: () {
                                   // 클릭 시 실행할 코드
                                   print('click ${subcategory.name}');
-                                  final categorySelection = CategorySelection(category: category, selectedSubcategoryId: subcategory.id);
-                                  context.push("/categroy/productlist",extra: categorySelection);
+                                  final categorySelection = CategorySelection(
+                                      category: category,
+                                      selectedSubcategoryId: subcategory.id);
+                                  context.push("/categroy/productlist",
+                                      extra: categorySelection);
                                 },
                                 child: SubCategoryItem(title: subcategory.name),
-                              )
-                          ).toList(),
+                              )),
                           // 구분선
                           const Divider(
                             color: AppsColor.lightGray,
@@ -123,7 +129,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             );
           }
 
-          return SizedBox();
+          return const SizedBox();
         },
       ),
       floatingActionButton: FloatingActionButton.small(
@@ -141,7 +147,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
           Icons.arrow_upward_outlined,
           color: AppsColor.darkGray, // 아이콘 색상
         ),
-      ),// 위로 이동 아이콘
+      ), // 위로 이동 아이콘
     );
   }
 
@@ -159,7 +165,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
     for (int i = 0; i < state.categories.length; i++) {
       // SubCategoryHeader 정확한 높이 계산
       double headerHeight = 32.h + // vertical padding (16.h * 2)
-          max(36.r, // 아이콘 컨테이너 (20.sp + 16.r for padding)
+          max(
+              36.r, // 아이콘 컨테이너 (20.sp + 16.r for padding)
               15.sp); // 텍스트 높이
 
       // SubCategoryItem 정확한 높이 계산
@@ -172,7 +179,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
           8.h + // SizedBox
           1.h; // Divider (실제 높이)
 
-      if (scrollOffset >= totalHeight && scrollOffset < (totalHeight + categoryHeight)) {
+      if (scrollOffset >= totalHeight &&
+          scrollOffset < (totalHeight + categoryHeight)) {
         currentIndex = i;
         break;
       }
@@ -193,7 +201,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
     for (int i = 0; i < index; i++) {
       // SubCategoryHeader 정확한 높이 계산
       double headerHeight = 32.h + // vertical padding (16.h * 2)
-          max(36.r, // 아이콘 컨테이너 (20.sp + 16.r for padding)
+          max(
+              36.r, // 아이콘 컨테이너 (20.sp + 16.r for padding)
               15.sp); // 텍스트 높이
 
       // SubCategoryItem 정확한 높이 계산
@@ -211,7 +220,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
     _rightScrollController.animateTo(
       totalHeight,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
@@ -227,7 +236,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     // 스크롤을 맨 위로 이동
     _rightScrollController.animateTo(
       0, // 맨 위로 이동
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }

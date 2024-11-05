@@ -264,18 +264,22 @@ class MyPageScreen extends StatelessWidget {
                           foregroundColor: Colors.black,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Row(
-                          children: [
-                            Text(
-                              '전체보기',
-                              style: TextStyle(fontSize: 15),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 15,
-                            ),
-                          ],
-                        ),
+                        child: TextButton(
+                            onPressed: () {
+                              context.push('/order-status');
+                            },
+                            child: const Row(
+                              children: [
+                                Text(
+                                  '전체보기',
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 15,
+                                ),
+                              ],
+                            )),
                       ),
                     ],
                   ),
