@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/utils/styles.dart';
 
 class RankingTabScreen extends StatefulWidget {
   const RankingTabScreen({Key? key}) : super(key: key);
@@ -14,7 +15,18 @@ class _RankingTabScreenState extends State<RankingTabScreen>
   late TabController _tabController;
   String selectedFilter = '전체';
   String selectedSort = '실시간';
-  final List<String> filters = ['전체', '스킨케어', '마스크팩', '클렌징', '색조'];
+  final List<String> filters = [
+    '전체',
+    '스킨케어',
+    '마스크팩',
+    '클렌징',
+    '선케어',
+    '메이크업',
+    '뷰티소품',
+    '맨즈케어',
+    '헤어케어',
+    '바디케어'
+  ];
   final List<String> sortOptions = ['실시간', '온라인픽', '오늘드림'];
 
   @override
@@ -34,22 +46,29 @@ class _RankingTabScreenState extends State<RankingTabScreen>
     return Column(
       children: [
         // 1. Tab Bar
-        Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Colors.grey[300]!, width: 1),
+        Theme(
+          data: Theme.of(context).copyWith(
+            tabBarTheme: TabBarTheme(
+              indicator:
+                  BoxDecoration(color: Colors.transparent), // 인디케이터 투명 처리 //^
+              dividerColor: Colors.transparent, // 기본 검은색 테두리 제거 //^
+              overlayColor: MaterialStateProperty.all(
+                  Colors.transparent), // 터치시 오버레이 색상 제거 //^
             ),
           ),
-          child: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: '판매 랭킹'),
-              Tab(text: '브랜드 랭킹'),
-            ],
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.black,
-            indicatorWeight: 2,
+          child: Container(
+            color: Colors.white, // 배경색을 흰색으로 설정 //^
+            child: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(text: '판매 랭킹'),
+                Tab(text: '브랜드 랭킹'),
+              ],
+              labelColor: AppStyles.mainColor,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Colors.transparent, // 인디케이터 색상 투명 //^
+              indicatorWeight: 0.1, // 인디케이터 두께 0 //^
+            ),
           ),
         ),
 
@@ -86,61 +105,6 @@ class _RankingTabScreenState extends State<RankingTabScreen>
                 ),
               );
             }).toList(),
-          ),
-        ),
-
-        // 3. Sort Options and Update Time
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    '29분 전 업데이트',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12.sp,
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: sortOptions.map((option) {
-                  bool isSelected = selectedSort == option;
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedSort = option;
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color:
-                                isSelected ? Colors.black : Colors.transparent,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        option,
-                        style: TextStyle(
-                          color: isSelected ? Colors.black : Colors.grey,
-                          fontSize: 14.sp,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
           ),
         ),
 
