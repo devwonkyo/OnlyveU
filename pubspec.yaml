@@ -52,6 +52,7 @@ dependencies:
   shimmer: ^3.0.0
   kakao_flutter_sdk_user: ^1.9.5
   shared_preferences: ^2.3.2
+  dropdown_button2: ^2.3.9
 
 
 dev_dependencies:

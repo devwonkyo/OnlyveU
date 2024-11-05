@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
@@ -94,7 +96,10 @@ class MyApp extends StatelessWidget {
               create: (context) => PhoneNumberBloc(),
             ),
             BlocProvider<ThemeBloc>(
-              create: (context) => ThemeBloc(),
+              create: (context) => ThemeBloc()..add(LoadTheme()),
+            ),
+            BlocProvider<OrderStatusBloc>(
+              create: (context) => OrderStatusBloc(),
             ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(

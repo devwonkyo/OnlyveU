@@ -21,7 +21,15 @@ ThemeData darkThemeData() {
       primary: Colors.white,
       surface: AppsColor.darkGray, // 배경색 (scaffoldBackgroundColor와 일치)
     ),
+
     brightness: Brightness.dark, // 다크 모드 명시
+
+    // BottomNavigationBar 테마 설정
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: AppsColor.darkGray, // 배경색 다크하게
+
+      unselectedItemColor: Colors.grey, // 미선택 아이템 색상
+    ),
   );
 }
 
