@@ -78,23 +78,23 @@ class RecommendedProductsWidget extends StatelessWidget {
           Container(
             width: 150,
             height: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
-            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: item.productImageList.isNotEmpty
                   ? Image.network(
                       item.productImageList.first,
-                      fit: BoxFit.contain,
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Center(child: Icon(Icons.error));
                       },
                     )
                   : Image.asset(
-                      'assets/default_image.png', // 기본 로컬 이미지
-                      fit: BoxFit.contain,
+                      'assets/default_image.png',
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
                     ),
             ),
           ),
@@ -150,20 +150,21 @@ class RecommendedProductsWidget extends StatelessWidget {
           // 4. 태그들
           Row(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '오늘드림',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.black87,
+              if (item.isPopular) // 오늘드림 대신 isPopular 조건 사용
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '인기', // '오늘드림' 대신 '인기'로 변경
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
-              ),
               SizedBox(width: 4),
               if (item.isBest)
                 Container(
