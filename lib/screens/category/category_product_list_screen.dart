@@ -16,7 +16,8 @@ class CategoryProductListScreen extends StatefulWidget {
   const CategoryProductListScreen({super.key, required this.categorySelection});
 
   @override
-  _CategoryProductListScreenState createState() => _CategoryProductListScreenState();
+  _CategoryProductListScreenState createState() =>
+      _CategoryProductListScreenState();
 }
 
 class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
@@ -32,10 +33,12 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
     _scrollController = ScrollController();
     _categoryBloc = GetProductBloc()..add(const GetProducts());
     _selectedFilterIndex = getIndex()!;
-    _filterOptions = [ Subcategory(id: widget.categorySelection.category.id, name: "전체"),
-      ...widget.categorySelection.category.subcategories];
+    _filterOptions = [
+      Subcategory(id: widget.categorySelection.category.id, name: "전체"),
+      ...widget.categorySelection.category.subcategories
+    ];
     //서브카테고리 없으면 메인카테고리
-    if(widget.categorySelection.selectedSubcategoryId == null){
+    if (widget.categorySelection.selectedSubcategoryId == null) {
       isMainCategory = true;
     }
 
@@ -73,7 +76,8 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.shopping_bag_outlined, color: Colors.black, size: 24.sp),
+            icon: Icon(Icons.shopping_bag_outlined,
+                color: Colors.black, size: 24.sp),
             onPressed: () {},
           ),
         ],
@@ -89,17 +93,20 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
               child: Row(
                 children: List.generate(
                   _filterOptions.length,
-                      (index) => GestureDetector(
+                  (index) => GestureDetector(
                     onTap: () {
                       setState(() {
                         _selectedFilterIndex = index;
                       });
                       //대주제 선택
-                      if(index == 0){
-                        _categoryBloc.add(GetProducts(filter: _filterOptions[index].id, isMainCategory: true));
+                      if (index == 0) {
+                        _categoryBloc.add(GetProducts(
+                            filter: _filterOptions[index].id,
+                            isMainCategory: true));
                         isMainCategory = true;
-                      }else{
-                        _categoryBloc.add(GetProducts(filter: _filterOptions[index].id));
+                      } else {
+                        _categoryBloc
+                            .add(GetProducts(filter: _filterOptions[index].id));
                         isMainCategory = false;
                       }
                     },
@@ -133,7 +140,8 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                     onPressed: () {
                       _showSortOptions(context);
                     },
-                    icon: Icon(Icons.keyboard_arrow_down, size: 20.sp, color: Colors.black87),
+                    icon: Icon(Icons.keyboard_arrow_down,
+                        size: 20.sp, color: Colors.black87),
                     label: Text(
                       '인기순',
                       style: TextStyle(
@@ -159,9 +167,9 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                       slivers: [
                         // 배너 영역
                         if (isMainCategory)
-                          SliverToBoxAdapter(
+                          const SliverToBoxAdapter(
                             child: Column(
-                              children: const [
+                              children: [
                                 MainPromotionBanner(),
                                 SizedBox(height: 16),
                                 SmallPromotionBanner(),
@@ -172,31 +180,33 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
 
                         // 텍스트 영역
                         if (isMainCategory)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                            child: Text(
-                              '${widget.categorySelection.category.name}에서 많이 본 상품이에요.',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black87,
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.w, vertical: 12.h),
+                              child: Text(
+                                '${widget.categorySelection.category.name}에서 많이 본 상품이에요.',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                         // 상품 그리드
                         SliverPadding(
                           padding: EdgeInsets.symmetric(horizontal: 16.w),
                           sliver: SliverGrid(
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               childAspectRatio: 0.6,
                               crossAxisSpacing: 16.w,
                               mainAxisSpacing: 24.h,
                             ),
                             delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
+                              (context, index) {
                                 return VerticalProductCard(
                                   productModel: products[index],
                                 );
@@ -226,12 +236,12 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
   }
 
   int? getIndex() {
-    if(widget.categorySelection.selectedSubcategoryId == null){
+    if (widget.categorySelection.selectedSubcategoryId == null) {
       return 0;
-    }else{
-      return int.tryParse(widget.categorySelection.selectedSubcategoryId!.split('_')[1]);
+    } else {
+      return int.tryParse(
+          widget.categorySelection.selectedSubcategoryId!.split('_')[1]);
     }
-
   }
 
   void _scrollToSelectedIndex() {
@@ -252,24 +262,24 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ListTile(
-              leading: Icon(Icons.star),
-              title: Text('인기순'),
+              leading: const Icon(Icons.star),
+              title: const Text('인기순'),
               onTap: () {
                 // 인기순 정렬을 선택했을 때 동작
                 Navigator.pop(context); // 바텀시트 닫기
               },
             ),
             ListTile(
-              leading: Icon(Icons.trending_up),
-              title: Text('최신순'),
+              leading: const Icon(Icons.trending_up),
+              title: const Text('최신순'),
               onTap: () {
                 // 최신순 정렬을 선택했을 때 동작
                 Navigator.pop(context); // 바텀시트 닫기
               },
             ),
             ListTile(
-              leading: Icon(Icons.price_change),
-              title: Text('가격순'),
+              leading: const Icon(Icons.price_change),
+              title: const Text('가격순'),
               onTap: () {
                 // 가격순 정렬을 선택했을 때 동작
                 Navigator.pop(context); // 바텀시트 닫기
