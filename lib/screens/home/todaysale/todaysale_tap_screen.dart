@@ -2,10 +2,12 @@
 
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/todaysale_bloc.dart';
+import 'package:onlyveyou/repositories/home/today_sale_repository.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class TodaySaleTabScreen extends StatefulWidget {
@@ -16,20 +18,24 @@ class TodaySaleTabScreen extends StatefulWidget {
 }
 
 class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
-  final ScrollController _scrollController = ScrollController();
-  late Timer _timer;
-  Duration _remainingTime = Duration.zero;
-  late TodaySaleBloc _todaySaleBloc;
+  final ScrollController _scrollController =
+      ScrollController(); // 상품 목록 스크롤을 위한 컨트롤러
+  late Timer _timer; // 남은 시간 타이머
+  Duration _remainingTime = Duration.zero; // 남은 시간 초기화
+  late TodaySaleBloc _todaySaleBloc; // 오늘의 특가 상품을 위한 Bloc
 
   @override
   void initState() {
     super.initState();
-    _calculateRemainingTime();
-    _startTimer();
-    _todaySaleBloc = TodaySaleBloc();
-    _todaySaleBloc.add(LoadTodaySaleProducts());
+    _calculateRemainingTime(); // 초기 남은 시간 계산
+    _startTimer(); // 타이머 시작
+    // FirebaseFirestore 리포지토리를 주입하여 Bloc 초기화
+    _todaySaleBloc = TodaySaleBloc(
+        repository: TodaySaleRepository(firestore: FirebaseFirestore.instance));
+    _todaySaleBloc.add(LoadTodaySaleProducts()); // 특가 상품 로드 이벤트 발생
   }
 
+  // 남은 시간을 자정 또는 다음 자정 기준으로 계산하는 메서드
   void _calculateRemainingTime() {
     final now = DateTime.now().add(Duration(hours: 9)); // 한국 시간으로 보정
     final todayMidnight =
@@ -43,61 +49,51 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
     }
   }
 
-  // //3분씩 디버그용
-  // void _calculateRemainingTime() {
-  //   final now = DateTime.now().add(Duration(hours: 9)); // 한국 시간
-  //
-  //   // 테스트를 위해 더 짧은 간격 설정 (예: 3분 간격)
-  //   final currentMinute = now.minute;
-  //   final nextInterval = ((currentMinute / 3).ceil() * 3) % 60;
-  //
-  //   final targetTime = DateTime(
-  //     now.year,
-  //     now.month,
-  //     now.day,
-  //     now.hour,
-  //     nextInterval,
-  //     0, // 초는 0으로
-  //   );
-  //
-  //   if (now.isBefore(targetTime)) {
-  //     _remainingTime = targetTime.difference(now);
-  //   } else {
-  //     // 다음 3분 간격
-  //     final nextTime = targetTime.add(Duration(minutes: 3));
-  //     _remainingTime = nextTime.difference(now);
-  //   }
-  //
-  //   print('다음 갱신 시간까지: ${_formatDuration(_remainingTime)}');
-  // }
+  // 디버그용 남은 시간을 짧게 설정하는 메서드 (현재 주석 처리)
+  /*
+  void _calculateRemainingTime() {
+    final now = DateTime.now().add(Duration(hours: 9));
+    final currentMinute = now.minute;
+    final nextInterval = ((currentMinute / 3).ceil() * 3) % 60;
+    final targetTime = DateTime(now.year, now.month, now.day, now.hour, nextInterval, 0);
 
+    if (now.isBefore(targetTime)) {
+      _remainingTime = targetTime.difference(now);
+    } else {
+      final nextTime = targetTime.add(Duration(minutes: 3));
+      _remainingTime = nextTime.difference(now);
+    }
+    print('다음 갱신 시간까지: ${_formatDuration(_remainingTime)}');
+  }
+  */
+
+  // 1초마다 남은 시간을 갱신하며 타이머를 관리하는 메서드
   void _startTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!mounted) return; // mounted 체크 추가 -노란 경고 때문
+      if (!mounted) return; // widget이 mounted 상태인지 확인하여 경고 방지
       setState(() {
         if (_remainingTime.inSeconds > 0) {
           _remainingTime = _remainingTime - Duration(seconds: 1);
         } else {
-          _todaySaleBloc.add(ShuffleProducts());
-          _calculateRemainingTime(); // 시간이 0이 되면 다음 타이머 시간 계산
-
-          /// 시간이 0이 되면 다음 타이머 시간 계산
+          _todaySaleBloc.add(ShuffleProducts()); // 시간이 0이 되면 상품 목록을 섞음
+          _calculateRemainingTime(); // 다음 타이머 시간을 계산
         }
       });
     });
   }
 
-  @override //노란색 경고 때문에
+  // 화면이 사라질 때 타이머와 Bloc 자원을 해제하는 메서드
+  @override
   void dispose() {
     if (_timer.isActive) {
-      // Timer가 활성화되어 있는지 확인
-      _timer.cancel();
+      _timer.cancel(); // 타이머가 활성화되어 있으면 해제
     }
-    _scrollController.dispose();
-    _todaySaleBloc.close();
+    _scrollController.dispose(); // 스크롤 컨트롤러 해제
+    _todaySaleBloc.close(); // Bloc 해제
     super.dispose();
   }
 
+  // Duration 타입의 시간을 시, 분, 초 형식으로 변환하는 메서드
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(duration.inHours.remainder(24));
@@ -105,7 +101,6 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return '$hours:$minutes:$seconds';
   }
-  // ... [기존의 timer 관련 메서드들은 유지]
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +108,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
       create: (context) => _todaySaleBloc,
       child: Column(
         children: [
+          // 상단 타이머와 할인율 정보 표시
           Container(
             padding: EdgeInsets.all(16.w),
             child: Column(
@@ -165,11 +161,12 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
               ],
             ),
           ),
+          // 상품 리스트 영역
           Expanded(
             child: BlocBuilder<TodaySaleBloc, TodaySaleState>(
               builder: (context, state) {
                 if (state is TodaySaleLoading) {
-                  return Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator()); // 로딩 상태
                 } else if (state is TodaySaleLoaded) {
                   return ListView.builder(
                     padding: EdgeInsets.zero,
@@ -191,6 +188,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // 상품 이미지 표시 (비어있으면 기본 아이콘 표시)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: product.productImageList.isNotEmpty
@@ -211,7 +209,6 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                       ),
                                     )
                                   : Container(
-                                      // productImageList가 비어있을 때 보여줄 기본 컨테이너
                                       width: 120.w,
                                       height: 120.w,
                                       color: Colors.grey[200],
@@ -227,6 +224,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // 상품명 표시
                                   Text(
                                     product.name,
                                     style: TextStyle(
@@ -237,6 +235,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   SizedBox(height: 4.h),
+                                  // 원래 가격 (취소선 표시)
                                   Text(
                                     '${product.price}원',
                                     style: TextStyle(
@@ -246,6 +245,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                     ),
                                   ),
                                   SizedBox(height: 4.h),
+                                  // 할인된 가격 표시
                                   Row(
                                     children: [
                                       Text(
@@ -266,6 +266,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                       ),
                                     ],
                                   ),
+                                  // BEST 태그 표시
                                   if (product.isBest) ...[
                                     SizedBox(height: 4.h),
                                     Container(
@@ -286,6 +287,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                     ),
                                   ],
                                   SizedBox(height: 4.h),
+                                  // 평점 및 리뷰 수 표시
                                   Row(
                                     children: [
                                       Icon(Icons.star,
@@ -293,7 +295,6 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                           color: AppStyles.mainColor),
                                       SizedBox(width: 4.w),
                                       Text(
-                                        // rating을 소수점 1자리까지만 표시하도록 수정
                                         product.rating.toStringAsFixed(1),
                                         style: TextStyle(
                                           fontSize: 11.sp,
@@ -313,6 +314,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                 ],
                               ),
                             ),
+                            // 찜하기와 장바구니 아이콘 표시
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -336,9 +338,9 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                     },
                   );
                 } else if (state is TodaySaleError) {
-                  return Center(child: Text(state.message));
+                  return Center(child: Text(state.message)); // 오류 메시지 표시
                 }
-                return Container();
+                return Container(); // 기본 상태
               },
             ),
           ),
@@ -347,6 +349,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
     );
   }
 
+  // 할인된 가격 계산 메서드
   String _calculateDiscountedPrice(String originalPrice, int discountPercent) {
     final price = int.parse(originalPrice.replaceAll(',', ''));
     final discountedPrice = price - (price * (discountPercent / 100)).round();
