@@ -1,5 +1,5 @@
 // lib/config/routes/app_router.dart
-import 'package:flutter/material.dart'; // Material 임포트 추가
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/Product/product_detail_screen.dart';
@@ -20,15 +20,18 @@ import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_s
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
+import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
+import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
+import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 
 import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -38,17 +41,21 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/category',
           pageBuilder: (context, state) => _buildPageWithTransition(
-              state, const CategoryScreen()), //^ builder를 pageBuilder로 변경
+              state, const CategoryScreen()), // builder 변경
         ),
         GoRoute(
           path: '/ranking',
-          builder: (context, state) =>
-              const RankingTabScreen(), // RankingScreen을 RankingTabScreen으로 변경
+          builder: (context, state) => const RankingTabScreen(),
         ),
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) =>
               _buildPageWithTransition(state, const Home()),
+        ),
+        GoRoute(
+          path: '/shutter',
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, const ShutterScreen()),
         ),
         GoRoute(
           path: '/history',
@@ -72,7 +79,7 @@ final GoRouter router = GoRouter(
       ],
     ),
     GoRoute(
-      path: '/login', // 기본 로그인 화면
+      path: '/login',
       builder: (context, state) => LoginScreen(),
     ),
     GoRoute(
@@ -80,43 +87,43 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const ProfileEditScreen(),
-      ), // 괄호 수정
+      ),
     ),
     GoRoute(
       path: '/nickname_edit',
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const NicknameEditScreen(),
-      ), // 괄호 수정
+      ),
     ),
     GoRoute(
       path: '/email_edit',
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const EmailEditScreen(),
-      ), // 괄호 수정
+      ),
     ),
     GoRoute(
       path: '/verify_password',
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const VerifyCurrentPasswordScreen(),
-      ), // 괄호 수정
+      ),
     ),
     GoRoute(
       path: '/set_new_password',
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         const SetNewPasswordScreen(),
-      ), // 괄호 수정
+      ),
     ),
     GoRoute(
       path: '/phone_number_edit',
-      pageBuilder: (context, state) => _buildPageWithTransition(
-          state, const PhoneNumberEditScreen()), // 괄호 수정
+      pageBuilder: (context, state) =>
+          _buildPageWithTransition(state, const PhoneNumberEditScreen()),
     ),
     GoRoute(
-      path: '/signup', // 회원가입 화면
+      path: '/signup',
       builder: (context, state) => SignupScreen(),
     ),
     GoRoute(
@@ -138,14 +145,12 @@ final GoRouter router = GoRouter(
       ),
     ),
     GoRoute(
-      //장바구니, 파이어베이스에 프로덕트 5개 연동해보기
       path: '/more-popular',
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         MorePopularScreen(),
       ),
     ),
-    //카테고리 리스트
     GoRoute(
         path: '/categroy/productlist',
         builder: (context, state) {
@@ -155,21 +160,31 @@ final GoRouter router = GoRouter(
           );
         }),
     GoRoute(
+      path: '/shutterpost',
+      builder: (context, state) => PostScreen(),
+    ),
+    GoRoute(
       path: '/product-detail',
       builder: (context, state) {
         final productId = state.extra as String;
         return ProductDetailScreen(
           productId: productId ?? '',
         );
-      }),
-
-    //결제 화면
+      },
+    ),
     GoRoute(
       path: '/payment',
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         PaymentScreen(),
-      ), // 괄호 수정
+      ),
+    ),
+    GoRoute(
+      path: '/new_delivery_address',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        const NewDeliveryAddressScreen(),
+      ),
     ),
   ],
 );
@@ -195,7 +210,3 @@ CustomTransitionPage<void> _buildPageWithTransition(
     transitionDuration: const Duration(milliseconds: 300),
   );
 }
-
-//장바구니, 파이어베이스에 프로덕트 5개 연동해보기
-//파이어베이스, 장바구니 그리기
-// 더미 데이터 넣기
