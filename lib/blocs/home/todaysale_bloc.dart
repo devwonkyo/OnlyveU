@@ -30,6 +30,9 @@ class TodaySaleError extends TodaySaleState {
   TodaySaleError(this.message);
 }
 
+///조금씩 더 해달라고 하면서 쌓아가기
+///가스라이팅하기. 역활부여하기.성능30% 향상
+//여러개 켜놓고 물어보기
 // BLoC
 class TodaySaleBloc extends Bloc<TodaySaleEvent, TodaySaleState> {
   final FirebaseFirestore _firestore;
