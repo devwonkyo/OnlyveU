@@ -1,4 +1,3 @@
-// 4. ranking_tap_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,20 +17,6 @@ class _RankingTabScreenState extends State<RankingTabScreen> {
   String selectedFilter = '전체';
   late RankingBloc _rankingBloc;
 
-  // 카테고리명과 ID 매핑
-  final Map<String, String> categoryIdMap = {
-    '전체': 'all',
-    '스킨케어': '1',
-    '마스크팩': '2',
-    '클렌징': '3',
-    '선케어': '4',
-    '메이크업': '5',
-    '뷰티소품': '6',
-    '맨즈케어': '7',
-    '헤어케어': '8',
-    '바디케어': '9',
-  };
-
   final List<String> categoryFilters = [
     '전체',
     '스킨케어',
@@ -44,6 +29,18 @@ class _RankingTabScreenState extends State<RankingTabScreen> {
     '헤어케어',
     '바디케어'
   ];
+
+  final Map<String, String> _categoryIdMap = {
+    '스킨케어': '1',
+    '마스크팩': '2',
+    '클렌징': '3',
+    '선케어': '4',
+    '메이크업': '5',
+    '뷰티소품': '6',
+    '맨즈케어': '7',
+    '헤어케어': '8',
+    '바디케어': '9',
+  };
 
   @override
   void initState() {
@@ -93,7 +90,13 @@ class _RankingTabScreenState extends State<RankingTabScreen> {
                       setState(() {
                         selectedFilter = filter;
                       });
-                      _rankingBloc.add(LoadRankingProducts(category: filter));
+
+                      if (filter != '전체') {
+                        _rankingBloc.add(LoadRankingProducts(
+                            categoryId: _categoryIdMap[filter]));
+                      } else {
+                        _rankingBloc.add(LoadRankingProducts());
+                      }
                     },
                     backgroundColor: Colors.white,
                     selectedColor: AppStyles.mainColor.withOpacity(0.1),
@@ -116,34 +119,92 @@ class _RankingTabScreenState extends State<RankingTabScreen> {
             ),
           ),
           Expanded(
-            child: BlocBuilder<RankingBloc, RankingState>(
-              builder: (context, state) {
-                if (state is RankingLoading) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (state is RankingLoaded) {
-                  return GridView.builder(
-                    padding: EdgeInsets.all(16.w),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 28.h,
-                      crossAxisSpacing: 16.w,
-                      mainAxisExtent: 340.h,
-                    ),
-                    itemCount: state.products.length,
-                    itemBuilder: (context, index) => RankingCardWidget(
-                      index: index,
-                      product: state.products[index],
-                    ),
-                  );
-                } else if (state is RankingError) {
-                  return Center(child: Text(state.message));
-                }
-                return Container();
-              },
-            ),
+            child: _buildRankingList(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRankingList() {
+    return BlocBuilder<RankingBloc, RankingState>(
+      builder: (context, state) {
+        if (state is RankingLoading) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: AppStyles.mainColor,
+            ),
+          );
+        } else if (state is RankingLoaded) {
+          if (state.products.isEmpty) {
+            return Center(
+              child: Text(
+                '상품이 없습니다.',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Colors.grey,
+                ),
+              ),
+            );
+          }
+          return RefreshIndicator(
+            color: AppStyles.mainColor,
+            onRefresh: () async {
+              if (selectedFilter == '전체') {
+                _rankingBloc.add(LoadRankingProducts());
+              } else {
+                _rankingBloc.add(LoadRankingProducts(
+                    categoryId: _categoryIdMap[selectedFilter]));
+              }
+            },
+            child: GridView.builder(
+              padding: EdgeInsets.all(16.w),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 24.h,
+                crossAxisSpacing: 16.w,
+                mainAxisExtent: 340.h,
+              ),
+              itemCount: state.products.length,
+              itemBuilder: (context, index) => RankingCardWidget(
+                index: index,
+                product: state.products[index],
+              ),
+            ),
+          );
+        } else if (state is RankingError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  state.message,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedFilter == '전체') {
+                      _rankingBloc.add(LoadRankingProducts());
+                    } else {
+                      _rankingBloc.add(LoadRankingProducts(
+                          categoryId: _categoryIdMap[selectedFilter]));
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppStyles.mainColor,
+                  ),
+                  child: Text('다시 시도'),
+                ),
+              ],
+            ),
+          );
+        }
+        return Container();
+      },
     );
   }
 }

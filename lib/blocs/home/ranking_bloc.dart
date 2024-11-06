@@ -1,4 +1,4 @@
-// 1. ranking_bloc.dart
+// ranking_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
@@ -7,8 +7,8 @@ import 'package:onlyveyou/repositories/product_repository.dart';
 abstract class RankingEvent {}
 
 class LoadRankingProducts extends RankingEvent {
-  final String category;
-  LoadRankingProducts({this.category = '전체'});
+  final String? categoryId;
+  LoadRankingProducts({this.categoryId});
 }
 
 // States
@@ -36,10 +36,19 @@ class RankingBloc extends Bloc<RankingEvent, RankingState> {
     on<LoadRankingProducts>((event, emit) async {
       emit(RankingLoading());
       try {
+        print(
+            'Loading products with categoryId: ${event.categoryId}'); // 디버그 로그
         final products =
-            await productRepository.getRankingProducts(event.category);
-        emit(RankingLoaded(products));
+            await productRepository.getRankingProducts(event.categoryId);
+        print('Loaded ${products.length} products'); // 로드된 상품 개수
+
+        if (products.isEmpty) {
+          emit(RankingError('상품이 없습니다.'));
+        } else {
+          emit(RankingLoaded(products));
+        }
       } catch (e) {
+        print('Error in RankingBloc: $e'); // 에러 로그
         emit(RankingError('랭킹 상품을 불러오는데 실패했습니다.'));
       }
     });
