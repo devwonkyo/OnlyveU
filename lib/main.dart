@@ -26,11 +26,6 @@ import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 
-import 'package:onlyveyou/repositories/product_repository.dart';
-import 'package:onlyveyou/repositories/search_repositories/suggestion_repository_impl.dart';
-
-import 'blocs/search/search/search_bloc.dart';
-
 import 'core/router.dart';
 import 'firebase_options.dart';
 
@@ -100,16 +95,46 @@ class MyApp extends StatelessWidget {
               create: (context) => PhoneNumberBloc(),
             ),
             BlocProvider<ThemeBloc>(
+              create: (context) => ThemeBloc(),
+            ),
+            BlocProvider<AuthBloc>(
+              create: (context) => AuthBloc(),
+            ),
+            BlocProvider<HomeBloc>(
+              create: (context) => HomeBloc(),
+            ),
+            BlocProvider<HistoryBloc>(
+              create: (context) => HistoryBloc(
+                repository:
+                    HistoryRepository(), // HistoryRepository 인스턴스 전달// FirebaseFirestore.instance, // Firebase를 사용하는 경우
+              ),
+            ),
+            BlocProvider<ProfileEditBloc>(
+              create: (context) => ProfileEditBloc(),
+            ),
+            BlocProvider<CategoryCubit>(
+                create: (context) =>
+                    CategoryCubit(categoryRepository: CategoryRepository())
+                      ..loadCategories()),
+            BlocProvider<PasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => PasswordBloc(),
+            ),
+            BlocProvider<SetNewPasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => SetNewPasswordBloc(),
+            ),
+            BlocProvider<NicknameEditBloc>(
+              create: (context) => NicknameEditBloc(),
+            ),
+            BlocProvider<PhoneNumberBloc>(
+              create: (context) => PhoneNumberBloc(),
+            ),
+            BlocProvider<ThemeBloc>(
               create: (context) => ThemeBloc()..add(LoadTheme()),
             ),
             BlocProvider<OrderStatusBloc>(
               create: (context) => OrderStatusBloc(),
-            ),
-            BlocProvider<SearchBloc>(
-              create: (context) => SearchBloc(
-                suggestionRepository: SuggestionRepositoryImpl(),
-                productRepository: ProductRepository(),
-              ),
             ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
