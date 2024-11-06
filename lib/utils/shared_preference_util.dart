@@ -114,4 +114,17 @@ class OnlyYouSharedPreference {
     SharedPreferences preferences = await prefs;
     return preferences.getBool('isDarkMode') ?? false; // 기본값은 라이트 모드
   }
+
+  // 모든 데이터 프린트 - 로그아웃 전에 현재 데이터 확인
+  Future<void> printAllData() async {
+    SharedPreferences preferences = await prefs;
+    print('=== 현재 내부 저장소에 있는 데이터 ===');
+    print('User ID: ${preferences.getString('userId') ?? '없음'}');
+    print('Email: ${preferences.getString('email') ?? '없음'}');
+    print('Nickname: ${preferences.getString('nickname') ?? '없음'}');
+    print('Phone: ${preferences.getString('phone') ?? '없음'}');
+    print('Gender: ${preferences.getString('gender') ?? '없음'}');
+    print('Theme Mode: ${preferences.getBool('isDarkMode') ?? '없음'}');
+    print('=========================');
+  }
 }
