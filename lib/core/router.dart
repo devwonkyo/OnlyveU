@@ -13,6 +13,7 @@ import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/home/home/more_popular_screen.dart';
 import 'package:onlyveyou/screens/home/home/more_recommended_screen.dart';
 import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
+import 'package:onlyveyou/screens/mypage/admin_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/nickname_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/password/set_new_password_screen.dart';
@@ -38,6 +39,13 @@ final GoRouter router = GoRouter(
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/admin',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const AdminPageScreen(),
+          ),
+        ),
         GoRoute(
           path: '/category',
           pageBuilder: (context, state) => _buildPageWithTransition(
