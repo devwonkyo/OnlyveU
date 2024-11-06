@@ -11,13 +11,12 @@ class SearchTextFieldBloc
       if (event.text.isEmpty) {
         return emit(SearchTextFieldEmpty());
       } else {
-        print('STFBloc: ${event.text}');
         return emit(SearchTextFieldTyping(event.text));
       }
     });
 
     on<TextSubmitted>((event, emit) {
-      return emit(SearchTextFieldSubmitted());
+      return emit(SearchTextFieldSubmitted(event.text));
     });
 
     on<TextDeleted>((event, emit) {

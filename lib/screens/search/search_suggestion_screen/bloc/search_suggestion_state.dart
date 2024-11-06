@@ -12,7 +12,7 @@ final class SearchSuggestionInitial extends SearchSuggestionState {}
 final class SearchSuggestionLoading extends SearchSuggestionState {}
 
 final class SearchSuggestionLoaded extends SearchSuggestionState {
-  final List<String> suggestions;
+  final List<SuggestionModel> suggestions;
 
   const SearchSuggestionLoaded(this.suggestions);
 
