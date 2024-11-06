@@ -8,7 +8,7 @@ import 'package:onlyveyou/blocs/shutter/shutter_state.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 
 class ShutterScreen extends StatelessWidget {
-  const ShutterScreen({Key? key}) : super(key: key);
+  const ShutterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class ShutterScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    const Text(
                       'SHUTTER',
                       style: TextStyle(
                         fontSize: 24,
@@ -39,17 +39,17 @@ class ShutterScreen extends StatelessWidget {
                       onPressed: () {
                         context.go('/shutterpost');
                       },
-                      child: Text(
+                      child: const Text(
                         '글쓰기 >',
                         style: TextStyle(
-                          color: const Color(0xFFC9C138),
+                          color: Color(0xFFC9C138),
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
-                Text(
+                const Text(
                   '요즘 인기있는',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
@@ -78,7 +78,7 @@ class ShutterScreen extends StatelessWidget {
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       children: List.generate(state.images.length,
                           (index) => _buildProfileCard(state.images[index])),
                     );
@@ -87,7 +87,7 @@ class ShutterScreen extends StatelessWidget {
 
                 // 새로운 게시물 섹션 추가
                 const SizedBox(height: 40),
-                Text(
+                const Text(
                   '게시물',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
@@ -95,21 +95,21 @@ class ShutterScreen extends StatelessWidget {
                 Column(
                   children: [
                     _buildPost(
-                      imagePath: 'assets/image/shutter/sample1.jpg',
+                      imagePath: 'assets/image/shutter/sample1.jpeg',
                       username: 'user123',
                       description: '오늘의 뷰티 팁!',
                       likes: 125,
                       comments: 12,
                     ),
                     _buildPost(
-                      imagePath: 'assets/image/shutter/sample2.jpg',
+                      imagePath: 'assets/image/shutter/sample2.jpeg',
                       username: 'beauty_queen',
                       description: '새로 산 립스틱 색상!',
                       likes: 80,
                       comments: 5,
                     ),
                     _buildPost(
-                      imagePath: 'assets/images/sample3.jpg',
+                      imagePath: 'assets/images/shutter/sample3.jpeg',
                       username: 'makeup_lover',
                       description: '간단한 데일리 메이크업!',
                       likes: 200,
@@ -137,7 +137,7 @@ class ShutterScreen extends StatelessWidget {
           backgroundColor: isSelected ? Colors.black : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: Colors.black),
+            side: const BorderSide(color: Colors.black),
           ),
         ),
         child: Text(
@@ -197,7 +197,7 @@ class ShutterScreen extends StatelessWidget {
                 // 사용자명과 설명
                 Text(
                   username,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
                 Text(description),
@@ -205,11 +205,11 @@ class ShutterScreen extends StatelessWidget {
                 // 좋아요, 댓글
                 Row(
                   children: [
-                    Icon(Icons.thumb_up, size: 16, color: Colors.grey),
+                    const Icon(Icons.thumb_up, size: 16, color: Colors.grey),
                     const SizedBox(width: 5),
                     Text('$likes likes'),
                     const SizedBox(width: 10),
-                    Icon(Icons.comment, size: 16, color: Colors.grey),
+                    const Icon(Icons.comment, size: 16, color: Colors.grey),
                     const SizedBox(width: 5),
                     Text('$comments comments'),
                   ],
