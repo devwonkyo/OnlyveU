@@ -233,8 +233,8 @@ List<ProductModel> generateDummyProducts() {
           name: generateProductName(
               categoryId, subCategoryId, brand), // 여기서 제품명 생성 함수 사용
           brandName: brand,
-          productImageList: [imageUrls[randomIndex]],
-          descriptionImageList: [imageUrls[randomIndex]],
+          productImageList: [imageUrls[randomIndex],imageUrls[randomIndex],imageUrls[randomIndex]],
+          descriptionImageList: [imageUrls[randomIndex],imageUrls[randomIndex],imageUrls[randomIndex]],
           price: basePrice.toString(),
           discountPercent: (random.nextInt(4) + 1) * 10,
           categoryId: categoryId.toString(),
