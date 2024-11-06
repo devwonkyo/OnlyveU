@@ -3,50 +3,62 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/screens/search/search_home_screen/recent_search_view/recent_search_view.dart';
 
+import '../../../repositories/search_repositories/recent_search_repository/recent_search_repository_impl.dart';
 import 'recent_search_view/bloc/recent_search_bloc.dart';
 
 class SearchHomeScreen extends StatelessWidget {
-  SearchHomeScreen({
+  const SearchHomeScreen({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    // print('build!!!!: ${widget.recentSearches}');
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(top: 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 로컬 데이터
-            SearchMainContainer(
-              title: '최근 검색어',
-              child: SizedBox(
-                height: 40.h,
-                child: const RecentSearchView(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<RecentSearchBloc>(
+          create: (context) => RecentSearchBloc(
+            repository: RecentSearchRepositoryImpl(),
+          ),
+        ),
+      ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(top: 20.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 로컬 데이터
+              SearchMainContainer(
+                title: '최근 검색어',
+                child: SizedBox(
+                  height: 40.h,
+                  child: const RecentSearchView(),
+                ),
               ),
-            ),
-            SizedBox(height: 20.h),
-            SearchMainContainer(
-              title: '추천 키워드',
-              child: Wrap(
-                spacing: 10.w,
-                children: [
-                  FilledButton(onPressed: () {}, child: const Text('세미매트밀착쿠션')),
-                  FilledButton(onPressed: () {}, child: const Text('콜라겐올인원')),
-                  FilledButton(onPressed: () {}, child: const Text('히알루산올인원')),
-                  FilledButton(onPressed: () {}, child: const Text('탱글젤리블리셔')),
-                ],
+              SizedBox(height: 20.h),
+              SearchMainContainer(
+                title: '추천 키워드',
+                child: Wrap(
+                  spacing: 10.w,
+                  children: [
+                    FilledButton(
+                        onPressed: () {}, child: const Text('세미매트밀착쿠션')),
+                    FilledButton(onPressed: () {}, child: const Text('콜라겐올인원')),
+                    FilledButton(
+                        onPressed: () {}, child: const Text('히알루산올인원')),
+                    FilledButton(
+                        onPressed: () {}, child: const Text('탱글젤리블리셔')),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 20.h),
-            // 서버 데이터
-            const SearchMainContainer(
-              title: '급상승 검색어',
-              child: SizedBox(),
-            ),
-          ],
+              SizedBox(height: 20.h),
+              // 서버 데이터
+              const SearchMainContainer(
+                title: '급상승 검색어',
+                child: SizedBox(),
+              ),
+            ],
+          ),
         ),
       ),
     );

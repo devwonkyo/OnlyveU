@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
-import 'package:onlyveyou/repositories/search_repositories/suggestion_repository_impl.dart';
+import 'package:onlyveyou/repositories/search_repositories/recent_search_repository/recent_search_repository_impl.dart';
+import 'package:onlyveyou/repositories/search_repositories/suggestion_repository/suggestion_repository_impl.dart';
 import 'package:onlyveyou/screens/search/search_home_screen/recent_search_view/bloc/recent_search_bloc.dart';
 import 'package:onlyveyou/screens/search/search_result_screen/search_result_screen.dart';
 
@@ -25,7 +26,9 @@ class SearchPage extends StatelessWidget {
           create: (context) => SearchTextFieldBloc(),
         ),
         BlocProvider<RecentSearchBloc>(
-          create: (context) => RecentSearchBloc(),
+          create: (context) => RecentSearchBloc(
+            repository: RecentSearchRepositoryImpl(),
+          ),
         ),
         BlocProvider(
           create: (context) => SearchSuggestionBloc(
@@ -88,10 +91,7 @@ class SearchPage extends StatelessWidget {
                 child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
                   builder: (context, state) {
                     if (state is SearchTextFieldEmpty) {
-                      // context
-                      //     .read<RecentSearchBloc>()
-                      //     .add(LoadRecentSearches());
-                      return SearchHomeScreen();
+                      return const SearchHomeScreen();
                     } else if (state is SearchTextFieldTyping) {
                       return const SearchSuggestionScreen();
                     } else if (state is SearchTextFieldSubmitted) {
