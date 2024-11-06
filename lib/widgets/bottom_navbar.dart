@@ -18,12 +18,15 @@ class CustomBottomNavBar extends StatelessWidget {
         context.go('/category');
         break;
       case 1:
-        context.go('/home');
+        context.go('/shutter');
         break;
       case 2:
-        context.go('/history');
+        context.go('/home');
         break;
       case 3:
+        context.go('/history');
+        break;
+      case 4:
         context.go('/my');
         break;
     }
@@ -44,6 +47,10 @@ class CustomBottomNavBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.menu),
           label: '카테고리',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.camera_enhance),
+          label: '셔터',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -83,12 +90,13 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
 
   int _calculateSelectedIndex(String currentPath) {
     if (currentPath.startsWith('/category')) return 0;
-    if (currentPath.startsWith('/home')) return 1;
-    if (currentPath.startsWith('/history')) return 2;
-    if (currentPath.startsWith('/my')) return 3;
-    if (currentPath.startsWith('/profile_edit')) return 3;
-    if (currentPath.startsWith('/order-status')) return 3;
-    return 1; // 기본값은 홈
+    if (currentPath.startsWith('/home')) return 2;
+    if (currentPath.startsWith('/shutter')) return 1;
+    if (currentPath.startsWith('/history')) return 3;
+    if (currentPath.startsWith('/my')) return 4;
+    if (currentPath.startsWith('/profile_edit')) return 4;
+    if (currentPath.startsWith('/order-status')) return 4;
+    return 2; // 기본값은 홈
   }
 }
 
