@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/home_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/repositories/home/home_repository.dart';
 
 // 이벤트 정의
 abstract class HomeEvent {}
@@ -19,12 +18,17 @@ class ToggleProductFavorite extends HomeEvent {
   ToggleProductFavorite(this.product, this.userId);
 }
 
-// 상태 정의
+// 상태 정의 (이전과 동일)
 abstract class HomeState {}
 
 class HomeInitial extends HomeState {}
 
 class HomeLoading extends HomeState {}
+
+class HomeError extends HomeState {
+  final String message;
+  HomeError(this.message);
+}
 
 class HomeLoaded extends HomeState {
   final List<BannerItem> bannerItems;
@@ -54,68 +58,21 @@ class HomeLoaded extends HomeState {
   }
 }
 
-class HomeError extends HomeState {
-  final String message;
-  HomeError(this.message);
-}
-
 // HomeBloc 구현
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final FirebaseFirestore _firestore;
+  final HomeRepository _homeRepository;
 
-  HomeBloc({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
+  HomeBloc({required HomeRepository homeRepository})
+      : _homeRepository = homeRepository,
         super(HomeInitial()) {
     // LoadHomeData 이벤트 핸들러
     on<LoadHomeData>((event, emit) async {
       emit(HomeLoading());
       try {
-        // 배너 데이터
-        final bannerItems = [
-          BannerItem(
-            title: '럭키 럭스에디트\n최대 2만원 혜택',
-            subtitle: '쿠폰부터 100% 리워드까지',
-            backgroundColor: Colors.black,
-          ),
-          BannerItem(
-            title: '가을 준비하기\n최대 50% 할인',
-            subtitle: '시즌 프리뷰 특가전',
-            backgroundColor: Color(0xFF8B4513),
-          ),
-          BannerItem(
-            title: '이달의 브랜드\n특별 기획전',
-            subtitle: '인기 브랜드 혜택 모음',
-            backgroundColor: Color(0xFF4A90E2),
-          ),
-        ];
-
-        // 추천 상품 쿼리 수정 - isBest가 true인 상품만 가져오기
-        final QuerySnapshot recommendedSnapshot = await _firestore
-            .collection('products')
-            .where('isBest', isEqualTo: true) // isBest가 true인 것만 필터링
-            .get();
-
-        // 인기 상품 쿼리
-        final QuerySnapshot popularSnapshot = await _firestore
-            .collection('products')
-            .where('isPopular', isEqualTo: true)
-            .get();
-
-        print(
-            "Recommended products fetched: ${recommendedSnapshot.docs.length}");
-        print("Popular products fetched: ${popularSnapshot.docs.length}");
-
-        final recommendedProducts = recommendedSnapshot.docs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['productId'] = doc.id;
-          return ProductModel.fromMap(data);
-        }).toList();
-
-        final popularProducts = popularSnapshot.docs.map((doc) {
-          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-          data['productId'] = doc.id;
-          return ProductModel.fromMap(data);
-        }).toList();
+        final bannerItems = _homeRepository.getBannerItems();
+        final recommendedProducts =
+            await _homeRepository.getRecommendedProducts();
+        final popularProducts = await _homeRepository.getPopularProducts();
 
         emit(HomeLoaded(
           bannerItems: bannerItems,
@@ -133,7 +90,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
         try {
-          // 좋아요 리스트 업데이트
           List<String> updatedFavoriteList =
               List<String>.from(event.product.favoriteList);
           if (updatedFavoriteList.contains(event.userId)) {
@@ -142,15 +98,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             updatedFavoriteList.add(event.userId);
           }
 
-          // Firestore 업데이트
-          await _firestore
-              .collection('products')
-              .doc(event.product.productId)
-              .update({
-            'favoriteList': updatedFavoriteList,
-          });
+          await _homeRepository.toggleProductFavorite(
+              event.product.productId, updatedFavoriteList);
 
-          // 로컬 상태 업데이트
           final updatedRecommended =
               currentState.recommendedProducts.map((product) {
             if (product.productId == event.product.productId) {
@@ -184,7 +134,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(currentState.copyWith(isLoading: true));
 
         try {
-          // 데이터 새로 로드
           add(LoadHomeData());
         } catch (e) {
           print('Error refreshing data: $e');
@@ -200,20 +149,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(currentState.copyWith(isLoading: true));
 
         try {
-          // 추가 상품 로드 로직
           final lastProduct = currentState.recommendedProducts.last;
-
-          final QuerySnapshot moreProducts = await _firestore
-              .collection('products')
-              .orderBy('productId') // 추가된 부분: orderBy
-              .startAfter([lastProduct.productId])
-              .limit(5)
-              .get();
-
-          final newProducts = moreProducts.docs
-              .map((doc) =>
-                  ProductModel.fromMap(doc.data() as Map<String, dynamic>))
-              .toList();
+          final newProducts =
+              await _homeRepository.getMoreProducts(lastProduct.productId);
 
           emit(currentState.copyWith(
             recommendedProducts: [
