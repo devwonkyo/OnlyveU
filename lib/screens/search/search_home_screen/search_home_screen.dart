@@ -1,25 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/screens/search/search_home_screen/recent_search_view/recent_search_view.dart';
 
-import '../../../blocs/search/search/search_bloc.dart';
+import 'recent_search_view/bloc/recent_search_bloc.dart';
 
-class SearchHomeView extends StatefulWidget {
-  SearchHomeView({
+class SearchHomeScreen extends StatelessWidget {
+  SearchHomeScreen({
     super.key,
   });
-
-  List<String> recentSearches = [];
-
-  @override
-  State<SearchHomeView> createState() => _SearchHomeViewState();
-}
-
-class _SearchHomeViewState extends State<SearchHomeView> {
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,24 +19,12 @@ class _SearchHomeViewState extends State<SearchHomeView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 로컬 데이터
             SearchMainContainer(
               title: '최근 검색어',
               child: SizedBox(
                 height: 40.h,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.recentSearches.length,
-                  itemBuilder: (context, index) {
-                    final sortedRecentSearches =
-                        List<String>.from(widget.recentSearches.reversed);
-                    return Padding(
-                      padding: EdgeInsets.only(right: 10.w),
-                      child: RecentlySearchButton(
-                        name: sortedRecentSearches[index],
-                      ),
-                    );
-                  },
-                ),
+                child: const RecentSearchView(),
               ),
             ),
             SizedBox(height: 20.h),
@@ -64,7 +41,8 @@ class _SearchHomeViewState extends State<SearchHomeView> {
               ),
             ),
             SizedBox(height: 20.h),
-            SearchMainContainer(
+            // 서버 데이터
+            const SearchMainContainer(
               title: '급상승 검색어',
               child: SizedBox(),
             ),
@@ -108,43 +86,5 @@ class SearchMainContainer extends StatelessWidget {
         ),
       ],
     );
-  }
-}
-
-class RecentlySearchButton extends StatelessWidget {
-  final String name;
-
-  RecentlySearchButton({
-    super.key,
-    required this.name,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-        onPressed: () {
-          FocusScope.of(context).unfocus();
-          // controller.text = name;
-          // context.read<SearchBloc>().add(ShowResultEvent(text: name));
-          // _searchService.saveRecentSearch(controller.text);
-        },
-        style: OutlinedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 4.h)),
-        child: Row(
-          children: [
-            Text(
-              name,
-              style: TextStyle(fontSize: 15.sp),
-            ),
-            SizedBox(width: 5.w),
-            GestureDetector(
-              onTap: () {},
-              child: Icon(
-                Icons.close,
-                size: 15.sp,
-              ),
-            ),
-          ],
-        ));
   }
 }

@@ -21,7 +21,6 @@ import 'package:onlyveyou/repositories/search_repositories/suggestion_repository
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
-import 'blocs/search/search/search_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 
@@ -86,12 +85,6 @@ class MyApp extends StatelessWidget {
               ),
               BlocProvider<ThemeBloc>(
                 create: (context) => ThemeBloc(),
-              ),
-              BlocProvider<SearchBloc>(
-                create: (context) => SearchBloc(
-                  suggestionRepository: SuggestionRepositoryImpl(),
-                  productRepository: ProductRepository(),
-                ),
               ),
             ],
             child: BlocBuilder<ThemeBloc, ThemeState>(

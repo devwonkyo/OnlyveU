@@ -20,7 +20,7 @@ import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 
-import '../screens/search/search_screen.dart';
+import '../screens/search/search_page.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
@@ -53,7 +53,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          builder: (context, state) => const SearchScreen(),
+          builder: (context, state) => const SearchPage(),
         ),
       ],
     ),

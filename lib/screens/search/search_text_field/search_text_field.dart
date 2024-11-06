@@ -33,42 +33,46 @@ class _SearchTextFieldState extends State<SearchTextField> {
     return SizedBox(
       width: double.infinity,
       height: 40.h,
-      child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
-        builder: (context, state) {
-          print('$state');
-          return TextField(
-            minLines: 1,
-            maxLines: 1,
-            controller: _controller,
-            onChanged: (text) {
-              context.read<SearchTextFieldBloc>().add(TextChanged(text));
-            },
-            onSubmitted: (text) {
-              context.read<SearchTextFieldBloc>().add(TextSubmitted(text));
-            },
-            // 입력창
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFEEEEEE),
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-              hintText: '제품, 성분, 브랜드 검색하기',
-              hintStyle: const TextStyle(
-                  color: Colors.grey, fontWeight: FontWeight.w400),
-              enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                  color: Colors.transparent,
-                ),
-                borderRadius: BorderRadius.circular(25.r),
+      child: BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
+        listener: (context, state) {
+          if (state is SearchTextFieldSubmitted) {
+            _controller.text = state.text;
+          }
+        },
+        child: TextField(
+          controller: _controller,
+          onChanged: (text) {
+            context.read<SearchTextFieldBloc>().add(TextChanged(text.trim()));
+          },
+          onSubmitted: (text) {
+            context.read<SearchTextFieldBloc>().add(TextSubmitted(text.trim()));
+          },
+          // 입력창
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFEEEEEE),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            hintText: '제품, 성분, 브랜드 검색하기',
+            hintStyle: const TextStyle(
+                color: Colors.grey, fontWeight: FontWeight.w400),
+            enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(
+                color: Colors.transparent,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                  color: Colors.transparent,
-                ),
-                borderRadius: BorderRadius.circular(25.r),
+              borderRadius: BorderRadius.circular(25.r),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(
+                color: Colors.transparent,
               ),
-              // 보내기 버튼
-              suffixIcon: Row(
+              borderRadius: BorderRadius.circular(25.r),
+            ),
+            // 보내기 버튼
+            suffixIcon: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
+                builder: (context, state) {
+              print('$state');
+              return Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -95,7 +99,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
                         FocusScope.of(context).unfocus();
                         context
                             .read<SearchTextFieldBloc>()
-                            .add(TextSubmitted(_controller.text));
+                            .add(TextSubmitted(_controller.text.trim()));
                       },
                       child: SizedBox(
                         width: 40.w,
@@ -107,10 +111,10 @@ class _SearchTextFieldState extends State<SearchTextField> {
                   ),
                   SizedBox(width: 10.w),
                 ],
-              ),
-            ),
-          );
-        },
+              );
+            }),
+          ),
+        ),
       ),
     );
   }
