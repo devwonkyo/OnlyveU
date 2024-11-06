@@ -20,18 +20,18 @@ import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_s
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
+import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
-import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
-import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
+import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 
 import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/home',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
