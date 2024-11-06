@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
+import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -17,6 +18,7 @@ import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.da
 
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
+import 'package:onlyveyou/repositories/auth_repository.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
 
@@ -39,8 +41,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
-      name: "onlyveyou",
-      options: DefaultFirebaseOptions.currentPlatform);
+      name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
   // print("hash key ${await KakaoSdk.origin}");
 
@@ -70,7 +71,9 @@ class MyApp extends StatelessWidget {
               child: ShoppingCartScreen(),
             ),
             BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(),
+              create: (context) => AuthBloc(
+                  authRepository: AuthRepository(),
+                  sharedPreference: OnlyYouSharedPreference()),
             ),
             BlocProvider<HomeBloc>(
               create: (context) => HomeBloc(),
@@ -113,6 +116,9 @@ class MyApp extends StatelessWidget {
                 suggestionRepository: SuggestionRepositoryImpl(),
                 productRepository: ProductRepository(),
               ),
+            ),
+            BlocProvider<PaymentBloc>(
+              create: (context) => PaymentBloc(),
             ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
