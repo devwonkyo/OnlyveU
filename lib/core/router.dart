@@ -20,6 +20,7 @@ import 'package:onlyveyou/screens/mypage/edit/password/verify_current_password_s
 import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
+import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
@@ -182,6 +183,13 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => _buildPageWithTransition(
         state,
         PaymentScreen(),
+      ), // 괄호 수정
+    ),
+    GoRoute(
+      path: '/new_delivery_address',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        const NewDeliveryAddressScreen(),
       ), // 괄호 수정
     ),
   ],
