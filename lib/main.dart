@@ -16,8 +16,6 @@ import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
-import 'package:onlyveyou/repositories/product_repository.dart';
-import 'package:onlyveyou/repositories/search_repositories/suggestion_repository_impl.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
