@@ -221,6 +221,7 @@ List<ProductModel> generateDummyProducts() {
   final List<ProductModel> products = [];
 
   // 제품 생성 로직
+  // 제품 생성 로직
   for (int categoryId = 1; categoryId <= 9; categoryId++) {
     for (int subCategoryId = 1; subCategoryId <= 5; subCategoryId++) {
       for (int productNum = 1; productNum <= 5; productNum++) {
@@ -228,15 +229,18 @@ List<ProductModel> generateDummyProducts() {
         String brand = brands[random.nextInt(brands.length)];
         int basePrice = 10000 + (random.nextInt(29) * 10000);
 
+        // rating을 소수점 한 자리로 제한
+        double rating =
+            3.0 + (random.nextInt(20) / 10); // 3.0부터 4.9까지 0.1 단위로 생성
+
         products.add(ProductModel(
           productId: '${categoryId}_${subCategoryId}_$productNum',
-          name: generateProductName(
-              categoryId, subCategoryId, brand), // 여기서 제품명 생성 함수 사용
+          name: generateProductName(categoryId, subCategoryId, brand),
           brandName: brand,
           productImageList: [imageUrls[randomIndex],imageUrls[randomIndex],imageUrls[randomIndex]],
           descriptionImageList: [imageUrls[randomIndex],imageUrls[randomIndex],imageUrls[randomIndex]],
           price: basePrice.toString(),
-          discountPercent: (random.nextInt(4) + 1) * 10,
+          discountPercent: (random.nextInt(10) + 1) * 5, // 5%부터 50%까지 5단위로 생성
           categoryId: categoryId.toString(),
           subcategoryId: '${categoryId}_$subCategoryId',
           favoriteList: [],
@@ -249,7 +253,7 @@ List<ProductModel> generateDummyProducts() {
           ],
           cartList: [],
           visitCount: 100 + random.nextInt(900),
-          rating: 3.0 + (random.nextDouble() * 2.0),
+          rating: rating,
           registrationDate:
               DateTime.now().subtract(Duration(days: random.nextInt(365))),
           salesVolume: 50 + random.nextInt(950),
