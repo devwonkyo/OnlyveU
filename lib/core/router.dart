@@ -23,6 +23,8 @@ import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
+import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
+import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 
 import '../screens/search/search_screen.dart';
 import '../widgets/bottom_navbar.dart';
@@ -49,6 +51,11 @@ final GoRouter router = GoRouter(
           path: '/home',
           pageBuilder: (context, state) =>
               _buildPageWithTransition(state, const Home()),
+        ),
+        GoRoute(
+          path: '/shutter',
+          pageBuilder: (context, state) =>
+              _buildPageWithTransition(state, const ShutterScreen()),
         ),
         GoRoute(
           path: '/history',
@@ -154,6 +161,12 @@ final GoRouter router = GoRouter(
             categorySelection: categroySelection,
           );
         }),
+    GoRoute(
+      path: '/shutterpost',
+      builder: (context, state) => PostScreen(), // PostScreen을 불러옵니다.
+        );
+      ),
+
     GoRoute(
       path: '/product-detail',
       builder: (context, state) {
