@@ -82,11 +82,10 @@ class MyApp extends StatelessWidget {
               )..add(LoadHomeData()),
               child: Home(), // HomeScreen 대신 Home을 사용
             ),
-            BlocProvider<HistoryBloc>(
+            BlocProvider(
               create: (context) => HistoryBloc(
-                repository:
-                    HistoryRepository(), // HistoryRepository 인스턴스 전달// FirebaseFirestore.instance, // Firebase를 사용하는 경우
-              ),
+                historyRepository: HistoryRepository(), // ProductRepository 제거
+              )..add(LoadHistoryItems()),
             ),
             BlocProvider<ProfileEditBloc>(
               create: (context) => ProfileEditBloc(),
