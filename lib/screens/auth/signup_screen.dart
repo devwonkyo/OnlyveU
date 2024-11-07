@@ -49,7 +49,22 @@ class _SignupScreenState extends State<SignupScreen> {
           );
         } else if (state is SignUpSuccess) {
           Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
-          _showDialog('회원가입이 완료되었습니다! 이메일 인증을 완료해주세요.');
+          showDialog(
+            context: context,
+            barrierDismissible: false, // 다이얼로그 바깥 터치로 닫기 방지
+            builder: (context) => AlertDialog(
+              content: Text('회원가입이 완료되었습니다! 이메일 인증 완료 후 로그인 해주세요.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 다이얼로그 닫기
+                    context.pop(); // 이전 화면으로 이동
+                  },
+                  child: Text('확인'),
+                ),
+              ],
+            ),
+          );
         } else if (state is AuthFailure) {
           Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
           _showDialog(state.message); // 실패 메시지 표시
@@ -119,7 +134,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 TextField(
                   controller: nicknameController,
                   decoration: InputDecoration(
-                    hintText: '이메일',
+                    hintText: '닉네임',
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black),
                     ),
