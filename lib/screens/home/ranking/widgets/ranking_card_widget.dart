@@ -145,6 +145,7 @@ class RankingCardWidget extends StatelessWidget {
                   ),
                   const Spacer(),
                   // 찜하기 및 장바구니 아이콘
+                  const Spacer(),
                   Row(
                     children: [
                       FutureBuilder<String>(
@@ -153,16 +154,13 @@ class RankingCardWidget extends StatelessWidget {
                           final userId = snapshot.data ?? 'temp_user_id';
                           return GestureDetector(
                             onTap: () async {
-                              print(
-                                  'Ranking Product ID: ${product.productId}'); // I작업 유지
+                              print('좋아요 누른 상품 ID: ${product.productId}');
                               final prefs = OnlyYouSharedPreference();
                               final currentUserId =
                                   await prefs.getCurrentUserId();
                               context.read<RankingBloc>().add(
-                                    ToggleProductFavorite(
-                                      product: product,
-                                      userId: currentUserId,
-                                    ),
+                                    ToggleProductFavorite(product,
+                                        currentUserId), //^ LoadRankingProducts에서 ToggleProductFavorite로 변경
                                   );
                             },
                             child: Icon(

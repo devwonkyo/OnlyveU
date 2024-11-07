@@ -13,10 +13,18 @@ class LoadRankingProducts extends RankingEvent {
   LoadRankingProducts({this.categoryId});
 }
 
+//좋아요랑 상품연결
+class ToggleRankingFavorite extends RankingEvent {
+  final ProductModel product;
+  final String userId;
+  ToggleRankingFavorite(this.product, this.userId);
+}
+
+// 좋아요랑 유저 연결
 class ToggleProductFavorite extends RankingEvent {
   final ProductModel product;
   final String userId;
-  ToggleProductFavorite({required this.product, required this.userId});
+  ToggleProductFavorite(this.product, this.userId);
 }
 
 /////stste
@@ -96,6 +104,6 @@ class RankingBloc extends Bloc<RankingEvent, RankingState> {
           print('Error toggling favorite in RankingBloc: $e');
         }
       }
-    });
+    }); //^
   }
 }
