@@ -219,6 +219,7 @@ class PopularProductsWidget extends StatelessWidget {
                   final userId = snapshot.data ?? 'temp_user_id';
                   return GestureDetector(
                     onTap: () async {
+                      print('Popular Product ID: ${product.productId}');
                       final prefs = OnlyYouSharedPreference();
                       final currentUserId = await prefs.getCurrentUserId();
                       context

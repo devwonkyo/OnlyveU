@@ -90,28 +90,36 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
         try {
-          List<String> updatedFavoriteList =
-              List<String>.from(event.product.favoriteList);
-          if (updatedFavoriteList.contains(event.userId)) {
-            updatedFavoriteList.remove(event.userId);
-          } else {
-            updatedFavoriteList.add(event.userId);
-          }
-
           await _homeRepository.toggleProductFavorite(
-              event.product.productId, updatedFavoriteList);
+              event.product.productId, event.userId);
 
+          // 상태 업데이트 (추천 상품 목록)
           final updatedRecommended =
               currentState.recommendedProducts.map((product) {
             if (product.productId == event.product.productId) {
-              return event.product.copyWith(favoriteList: updatedFavoriteList);
+              List<String> updatedFavoriteList =
+                  List<String>.from(product.favoriteList);
+              if (updatedFavoriteList.contains(event.userId)) {
+                updatedFavoriteList.remove(event.userId);
+              } else {
+                updatedFavoriteList.add(event.userId);
+              }
+              return product.copyWith(favoriteList: updatedFavoriteList);
             }
             return product;
           }).toList();
 
+          // 상태 업데이트 (인기 상품 목록)
           final updatedPopular = currentState.popularProducts.map((product) {
             if (product.productId == event.product.productId) {
-              return event.product.copyWith(favoriteList: updatedFavoriteList);
+              List<String> updatedFavoriteList =
+                  List<String>.from(product.favoriteList);
+              if (updatedFavoriteList.contains(event.userId)) {
+                updatedFavoriteList.remove(event.userId);
+              } else {
+                updatedFavoriteList.add(event.userId);
+              }
+              return product.copyWith(favoriteList: updatedFavoriteList);
             }
             return product;
           }).toList();
