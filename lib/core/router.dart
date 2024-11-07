@@ -27,7 +27,7 @@ import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 
-import '../screens/search/search_screen.dart';
+import '../screens/search/search_page.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
@@ -69,7 +69,7 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/search',
-          builder: (context, state) => const SearchScreen(),
+          builder: (context, state) => const SearchPage(),
         ),
         GoRoute(
           path: '/order-status',
