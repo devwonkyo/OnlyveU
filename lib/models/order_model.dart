@@ -50,7 +50,7 @@ class OrderModel {
 
   /// 총 주문 금액
   final int totalPrice;
-
+ 
   /// 주문 생성 시간
   final DateTime createdAt;
 
