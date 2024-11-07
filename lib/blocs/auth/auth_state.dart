@@ -18,3 +18,7 @@ class AuthFailure extends AuthState {
   final String message;
   AuthFailure(this.message);
 }
+
+class LogoutSuccess extends AuthState {}
+
+class DeleteAccountSuccess extends AuthState {}

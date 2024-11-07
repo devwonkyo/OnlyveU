@@ -3,15 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/screens/home/widgets/popular_products_widget.dart';
-import 'package:onlyveyou/screens/home/widgets/recommended_products_widget.dart';
+import 'package:onlyveyou/screens/home/home/widgets/popular_products_widget.dart';
+import 'package:onlyveyou/screens/home/home/widgets/recommended_products_widget.dart';
+
 import 'package:onlyveyou/utils/firebase_data_uploader.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   _HomeState createState() => _HomeState();
@@ -56,7 +57,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Row(
             children: [
               SizedBox(
@@ -79,7 +80,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       await uploader.initializeDatabase();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('더미데이터 업로드 완료!'),
           backgroundColor: Colors.green,
         ),
@@ -178,7 +179,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         padding: EdgeInsets.zero,
         indicatorPadding: EdgeInsets.zero,
         labelPadding: EdgeInsets.symmetric(horizontal: 16.w),
-        tabs: [
+        tabs: const [
           Tab(text: '홈'),
           Tab(text: '랭킹'),
           Tab(text: '오특'),
@@ -197,7 +198,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget _buildQuickMenu(bool isPortrait) {
     return GridView.count(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: isPortrait ? 5 : 8,
       mainAxisSpacing: 8.h,
       crossAxisSpacing: 8.w,
@@ -238,7 +239,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               color: Colors.grey.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 2,
-              offset: Offset(0, 1),
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -259,7 +260,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 child: SizedBox(
                   width: 12.w,
                   height: 12.w,
-                  child: CircularProgressIndicator(
+                  child: const CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor:
                         AlwaysStoppedAnimation<Color>(AppStyles.mainColor),
@@ -289,7 +290,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               },
             );
           }
-          return SizedBox.shrink();
+          return const SizedBox.shrink();
         },
       ),
     );
@@ -301,7 +302,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         selector: (state) => state is HomeLoaded ? state.popularProducts : [],
         builder: (context, products) {
           return products.isEmpty
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : PopularProductsWidget(
                   popularProducts: products,
                   isPortrait: MediaQuery.of(context).orientation ==
@@ -321,10 +322,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ? Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.h),
-                    child: CircularProgressIndicator(),
+                    child: const CircularProgressIndicator(),
                   ),
                 )
-              : SizedBox.shrink(),
+              : const SizedBox.shrink(),
         );
       },
     );

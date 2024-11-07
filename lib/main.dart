@@ -3,23 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
-import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
-import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
-import 'package:onlyveyou/blocs/theme/theme_event.dart';
-import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
-
+import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
+import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_event.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
+import 'package:onlyveyou/repositories/auth_repository.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
-
+import 'package:onlyveyou/repositories/home/home_repository.dart';
+import 'package:onlyveyou/repositories/product_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
+import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
@@ -33,7 +38,9 @@ void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+      name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
+
   // print("hash key ${await KakaoSdk.origin}");
 
   KakaoSdk.init(
@@ -58,14 +65,21 @@ class MyApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider(
-              create: (context) => CartBloc(),
+              create: (context) => CartBloc(
+                cartRepository: ShoppingCartRepository(),
+              )..add(LoadCart()),
               child: ShoppingCartScreen(),
             ),
             BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(),
+              create: (context) => AuthBloc(
+                  authRepository: AuthRepository(),
+                  sharedPreference: OnlyYouSharedPreference()),
             ),
-            BlocProvider<HomeBloc>(
-              create: (context) => HomeBloc(),
+            BlocProvider(
+              create: (context) => HomeBloc(
+                homeRepository: HomeRepository(),
+              )..add(LoadHomeData()),
+              child: Home(), // HomeScreen 대신 Home을 사용
             ),
             BlocProvider<HistoryBloc>(
               create: (context) => HistoryBloc(
@@ -98,10 +112,13 @@ class MyApp extends StatelessWidget {
               create: (context) => ThemeBloc(),
             ),
             BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(),
+              create: (context) => AuthBloc(
+                authRepository: AuthRepository(),
+                sharedPreference: OnlyYouSharedPreference(),
+              ),
             ),
             BlocProvider<HomeBloc>(
-              create: (context) => HomeBloc(),
+              create: (context) => HomeBloc(homeRepository: HomeRepository()),
             ),
             BlocProvider<HistoryBloc>(
               create: (context) => HistoryBloc(
@@ -135,6 +152,12 @@ class MyApp extends StatelessWidget {
             ),
             BlocProvider<OrderStatusBloc>(
               create: (context) => OrderStatusBloc(),
+            ),
+            BlocProvider<ProductDetailBloc>(
+              create: (context) => ProductDetailBloc(ProductRepository()),
+            ),
+            BlocProvider<PaymentBloc>(
+              create: (context) => PaymentBloc(),
             ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(

@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/auth/auth_event.dart';
@@ -8,6 +10,7 @@ import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:onlyveyou/models/user_model.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,6 +20,17 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  Future<void> _saveUserModelToFirestore(UserModel user) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set(user.toMap());
+    } catch (e) {
+      print("Firestore에 유저 모델 저장 오류: $e");
+    }
+  }
 
   void _showDialog(String message) {
     showDialog(
@@ -63,28 +77,66 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginWithKakao() async {
     try {
-      // 카카오톡 로그인 시도, 실패하면 계정 로그인 시도
-      try {
-        await kakao.UserApi.instance.loginWithKakaoTalk();
-      } catch (error) {
-        // 카카오톡 로그인이 실패했을 때 계정으로 로그인 시도
-        await kakao.UserApi.instance.loginWithKakaoAccount();
-      }
+      await kakao.UserApi.instance.loginWithKakaoTalk();
+    } catch (error) {
+      await kakao.UserApi.instance.loginWithKakaoAccount();
+    }
 
-      // 로그인 성공 시 사용자 정보 확인
+    try {
       kakao.User kakaoUser = await kakao.UserApi.instance.me();
 
-      // 유저 정보 로컬에 저장 (필요시)
-      await OnlyYouSharedPreference()
-          .setEmail(kakaoUser.kakaoAccount?.email ?? '');
-      await OnlyYouSharedPreference()
-          .setNickname(kakaoUser.kakaoAccount?.profile?.nickname ?? '');
+      String uid = kakaoUser.id.toString();
+      String email = kakaoUser.kakaoAccount?.email ?? '';
+      String nickname = kakaoUser.kakaoAccount?.profile?.nickname ?? '';
 
-      // 로그인 성공 후 홈 화면으로 이동
-      context.go('/home');
+      // UserModel 인스턴스 생성
+      UserModel userModel = UserModel(
+        uid: uid,
+        email: email,
+        nickname: nickname,
+      );
+
+      // Firebase Firestore에 UserModel 저장
+      await _saveUserModelToFirestore(userModel);
+
+      context.go('/home'); // 홈 화면으로 이동
     } catch (e) {
       print("카카오 로그인 실패: $e");
       _showDialog("카카오 로그인에 실패했습니다.");
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // UserModel 인스턴스 생성
+        UserModel userModel = UserModel(
+          uid: user.uid,
+          email: user.email ?? '',
+          nickname: user.displayName ?? '',
+        );
+
+        // Firebase Firestore에 UserModel 저장
+        await _saveUserModelToFirestore(userModel);
+
+        context.go('/home'); // 홈 화면으로 이동
+      }
+    } catch (e) {
+      print("구글 로그인 실패: $e");
+      _showDialog("구글 로그인에 실패했습니다.");
     }
   }
 
@@ -191,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     side: BorderSide(color: Colors.black),
                   ),
                   onPressed: () {
-                    // 구글 로그인 기능 추가
+                    _loginWithGoogle();
                   },
                   child: Text('구글로 로그인', style: TextStyle(color: Colors.black)),
                 ),
@@ -205,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          context.go('/signup'); // 회원가입 화면으로 이동
+                          context.push('/signup'); // 회원가입 화면으로 이동
                         },
                         child: Text(
                           '회원가입',

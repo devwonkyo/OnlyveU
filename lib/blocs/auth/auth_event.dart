@@ -25,3 +25,8 @@ class LoginRequested extends AuthEvent {
 
   LoginRequested({required this.email, required this.password});
 }
+
+class LogoutRequested extends AuthEvent {}
+
+// 회원 탈퇴 요청 이벤트
+class DeleteAccountRequested extends AuthEvent {}

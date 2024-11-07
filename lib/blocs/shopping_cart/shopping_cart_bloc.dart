@@ -1,22 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
-//
 // Events
-// CartEvent: 장바구니 관련 이벤트의 기본 클래스
 abstract class CartEvent extends Equatable {
   const CartEvent();
   @override
   List<Object> get props => [];
 }
 
-// 각 이벤트 정의
-class LoadCart extends CartEvent {} // 장바구니 로드
+class LoadCart extends CartEvent {}
 
 class UpdateItemSelection extends CartEvent {
-  // 아이템 선택 상태 업데이트
   final String productId;
   final bool isSelected;
   const UpdateItemSelection(this.productId, this.isSelected);
@@ -25,7 +21,6 @@ class UpdateItemSelection extends CartEvent {
 }
 
 class UpdateItemQuantity extends CartEvent {
-  // 아이템 수량 업데이트
   final String productId;
   final bool increment;
   const UpdateItemQuantity(this.productId, this.increment);
@@ -34,7 +29,6 @@ class UpdateItemQuantity extends CartEvent {
 }
 
 class RemoveItem extends CartEvent {
-  // 아이템 제거
   final ProductModel item;
   const RemoveItem(this.item);
   @override
@@ -42,7 +36,6 @@ class RemoveItem extends CartEvent {
 }
 
 class SelectAllItems extends CartEvent {
-  // 모든 항목 선택/해제
   final bool value;
   const SelectAllItems(this.value);
   @override
@@ -50,35 +43,32 @@ class SelectAllItems extends CartEvent {
 }
 
 class DeleteSelectedItems extends CartEvent {
-  final bool isRegularDelivery; // 현재 탭이 일반배송인지 여부
+  final bool isRegularDelivery;
   const DeleteSelectedItems(this.isRegularDelivery);
-
   @override
   List<Object> get props => [isRegularDelivery];
-} // 선택된 항목 삭제
+}
 
-class MoveToPickup extends CartEvent {} // 항목을 픽업으로 이동
+class MoveToPickup extends CartEvent {}
 
-class MoveToRegularDelivery extends CartEvent {} // 항목을 일반 배송으로 이동
+class MoveToRegularDelivery extends CartEvent {}
 
 class UpdateCurrentTab extends CartEvent {
   final bool isRegularDelivery;
   const UpdateCurrentTab(this.isRegularDelivery);
-
   @override
   List<Object> get props => [isRegularDelivery];
 }
 
 // State
-// CartState: 장바구니 상태를 나타내는 클래스
 class CartState extends Equatable {
-  final List<ProductModel> regularDeliveryItems; // 일반 배송 항목 목록
-  final List<ProductModel> pickupItems; // 픽업 항목 목록
-  final Map<String, bool> selectedItems; // 각 항목의 선택 여부
-  final Map<String, int> itemQuantities; // 각 항목의 수량
-  final bool isAllSelected; // 모든 항목 선택 여부
-  final bool isLoading; // 로딩 중 여부
-  final String? error; // 오류 메시지
+  final List<ProductModel> regularDeliveryItems;
+  final List<ProductModel> pickupItems;
+  final Map<String, bool> selectedItems;
+  final Map<String, int> itemQuantities;
+  final bool isAllSelected;
+  final bool isLoading;
+  final String? error;
   final bool isRegularDeliveryTab;
 
   const CartState({
@@ -92,7 +82,6 @@ class CartState extends Equatable {
     this.isRegularDeliveryTab = true,
   });
 
-  // 현재 상태에서 필요한 일부 값만 수정하여 새로운 상태를 반환하는 copyWith 메서드
   CartState copyWith({
     List<ProductModel>? regularDeliveryItems,
     List<ProductModel>? pickupItems,
@@ -128,37 +117,29 @@ class CartState extends Equatable {
       ];
 }
 
-// BLoC 시작
-// CartBloc: 장바구니 관련 이벤트를 받아 상태를 업데이트하는 로직을 정의
+// Bloc
 class CartBloc extends Bloc<CartEvent, CartState> {
-  final FirebaseFirestore _firestore;
+  final ShoppingCartRepository _cartRepository;
 
-  CartBloc({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance,
+  CartBloc({required ShoppingCartRepository cartRepository})
+      : _cartRepository = cartRepository,
         super(const CartState()) {
-    on<LoadCart>(_onLoadCart); // 장바구니 로드 처리
-    on<UpdateItemSelection>(_onUpdateItemSelection); // 아이템 선택 상태 업데이트
+    on<LoadCart>(_onLoadCart);
+    on<UpdateItemSelection>(_onUpdateItemSelection);
     on<UpdateItemQuantity>(_onUpdateItemQuantity);
     on<RemoveItem>(_onRemoveItem);
-    on<SelectAllItems>(_onSelectAllItems); // 모든 항목 선택/해제
-    on<DeleteSelectedItems>(_onDeleteSelectedItems); // 선택된 항목 삭제
-    on<MoveToPickup>(_onMoveToPickup); // 항목을 픽업으로 이동
+    on<SelectAllItems>(_onSelectAllItems);
+    on<DeleteSelectedItems>(_onDeleteSelectedItems);
+    on<MoveToPickup>(_onMoveToPickup);
     on<MoveToRegularDelivery>(_onMoveToRegularDelivery);
-    on<UpdateCurrentTab>(_onUpdateCurrentTab); // 항목을 일반 배송으로 이동
+    on<UpdateCurrentTab>(_onUpdateCurrentTab);
   }
 
-  // 장바구니 데이터를 Firestore에서 불러오는 로직
   Future<void> _onLoadCart(LoadCart event, Emitter<CartState> emit) async {
-    emit(state.copyWith(isLoading: true)); // 로딩 시작
+    emit(state.copyWith(isLoading: true));
     try {
-      // Firestore에서 제품 데이터를 불러와 장바구니에 저장
-      final snapshot = await _firestore.collection('products').limit(5).get();
-      final items = snapshot.docs
-          .map(
-              (doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
+      final items = await _cartRepository.loadCartItems();
 
-      // 초기 선택 상태 및 수량 설정
       final initialSelectedItems = Map.fromEntries(
         items.map((item) => MapEntry(item.productId, true)),
       );
@@ -173,22 +154,23 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         isLoading: false,
       ));
     } catch (e) {
-      // 오류 발생 시 오류 메시지 설정
       emit(state.copyWith(
-        error: '상품 정보를 불러오는데 실패했습니다.',
+        error: e.toString(),
         isLoading: false,
       ));
     }
   }
 
-  // 특정 아이템의 선택 상태를 업데이트
   void _onUpdateItemSelection(
       UpdateItemSelection event, Emitter<CartState> emit) {
     final updatedSelectedItems = Map<String, bool>.from(state.selectedItems);
     updatedSelectedItems[event.productId] = event.isSelected;
 
-    // 모든 항목이 선택되었는지 여부 확인
-    final isAllSelected = state.regularDeliveryItems.every(
+    final currentItems = state.isRegularDeliveryTab
+        ? state.regularDeliveryItems
+        : state.pickupItems;
+
+    final isAllSelected = currentItems.every(
       (item) => updatedSelectedItems[item.productId] == true,
     );
 
@@ -198,50 +180,56 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     ));
   }
 
-  // 특정 아이템의 수량을 증가 또는 감소
-  void _onUpdateItemQuantity(
-      UpdateItemQuantity event, Emitter<CartState> emit) {
+  Future<void> _onUpdateItemQuantity(
+      UpdateItemQuantity event, Emitter<CartState> emit) async {
     final updatedQuantities = Map<String, int>.from(state.itemQuantities);
     final currentQuantity = updatedQuantities[event.productId] ?? 1;
 
     if (event.increment && currentQuantity < 99) {
-      updatedQuantities[event.productId] = currentQuantity + 1; // 수량 증가
+      updatedQuantities[event.productId] = currentQuantity + 1;
+      await _cartRepository.updateProductQuantity(
+          event.productId, currentQuantity + 1);
     } else if (!event.increment && currentQuantity > 1) {
-      updatedQuantities[event.productId] = currentQuantity - 1; // 수량 감소
+      updatedQuantities[event.productId] = currentQuantity - 1;
+      await _cartRepository.updateProductQuantity(
+          event.productId, currentQuantity - 1);
     }
 
     emit(state.copyWith(itemQuantities: updatedQuantities));
   }
 
-  // 특정 아이템을 장바구니에서 제거
-  void _onRemoveItem(RemoveItem event, Emitter<CartState> emit) {
-    final updatedRegularItems =
-        List<ProductModel>.from(state.regularDeliveryItems)
-          ..removeWhere((item) => item.productId == event.item.productId);
-    final updatedPickupItems = List<ProductModel>.from(state.pickupItems)
-      ..removeWhere((item) => item.productId == event.item.productId);
+  Future<void> _onRemoveItem(RemoveItem event, Emitter<CartState> emit) async {
+    try {
+      await _cartRepository.removeProduct(event.item.productId);
 
-    final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-      ..remove(event.item.productId);
-    final updatedQuantities = Map<String, int>.from(state.itemQuantities)
-      ..remove(event.item.productId);
+      final updatedRegularItems =
+          List<ProductModel>.from(state.regularDeliveryItems)
+            ..removeWhere((item) => item.productId == event.item.productId);
+      final updatedPickupItems = List<ProductModel>.from(state.pickupItems)
+        ..removeWhere((item) => item.productId == event.item.productId);
 
-    emit(state.copyWith(
-      regularDeliveryItems: updatedRegularItems,
-      pickupItems: updatedPickupItems,
-      selectedItems: updatedSelectedItems,
-      itemQuantities: updatedQuantities,
-    ));
+      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
+        ..remove(event.item.productId);
+      final updatedQuantities = Map<String, int>.from(state.itemQuantities)
+        ..remove(event.item.productId);
+
+      emit(state.copyWith(
+        regularDeliveryItems: updatedRegularItems,
+        pickupItems: updatedPickupItems,
+        selectedItems: updatedSelectedItems,
+        itemQuantities: updatedQuantities,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
   }
 
-  // 모든 항목 선택/해제 처리
   void _onSelectAllItems(SelectAllItems event, Emitter<CartState> emit) {
     final updatedSelectedItems = Map<String, bool>.from(state.selectedItems);
+    final currentItems = state.isRegularDeliveryTab
+        ? state.regularDeliveryItems
+        : state.pickupItems;
 
-    // 현재 선택된 아이템 리스트 결정
-    final currentItems = state.regularDeliveryItems + state.pickupItems;
-
-    // 모든 아이템의 선택 상태를 업데이트
     for (var item in currentItems) {
       updatedSelectedItems[item.productId] = event.value;
     }
@@ -252,80 +240,131 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     ));
   }
 
-  // 선택된 항목을 삭제
-  void _onDeleteSelectedItems(
-      DeleteSelectedItems event, Emitter<CartState> emit) {
-    if (event.isRegularDelivery) {
-      // 일반배송 탭에서의 삭제
-      final updatedRegularItems = state.regularDeliveryItems
-          .where((item) => !state.selectedItems[item.productId]!)
-          .toList();
+  Future<void> _onDeleteSelectedItems(
+      DeleteSelectedItems event, Emitter<CartState> emit) async {
+    try {
+      final itemsToDelete = event.isRegularDelivery
+          ? state.regularDeliveryItems
+              .where((item) => state.selectedItems[item.productId] == true)
+          : state.pickupItems
+              .where((item) => state.selectedItems[item.productId] == true);
 
-      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-        ..removeWhere((key, value) =>
-            value &&
-            state.regularDeliveryItems.any((item) => item.productId == key));
+      final itemIds = itemsToDelete.map((e) => e.productId).toList();
+      await _cartRepository.removeSelectedProducts(itemIds);
 
-      final updatedQuantities = Map<String, int>.from(state.itemQuantities)
-        ..removeWhere((key, _) => state.regularDeliveryItems.any((item) =>
-            item.productId == key && state.selectedItems[key] == true));
+      if (event.isRegularDelivery) {
+        final updatedRegularItems = state.regularDeliveryItems
+            .where((item) => !state.selectedItems[item.productId]!)
+            .toList();
 
-      emit(state.copyWith(
-        regularDeliveryItems: updatedRegularItems,
-        selectedItems: updatedSelectedItems,
-        itemQuantities: updatedQuantities,
-        isAllSelected: false,
-      ));
-    } else {
-      // 픽업 탭에서의 삭제
-      final updatedPickupItems = state.pickupItems
-          .where((item) => !state.selectedItems[item.productId]!)
-          .toList();
+        final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
+          ..removeWhere((key, value) =>
+              value &&
+              state.regularDeliveryItems.any((item) => item.productId == key));
 
-      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-        ..removeWhere((key, value) =>
-            value && state.pickupItems.any((item) => item.productId == key));
+        final updatedQuantities = Map<String, int>.from(state.itemQuantities)
+          ..removeWhere((key, _) => state.regularDeliveryItems.any((item) =>
+              item.productId == key && state.selectedItems[key] == true));
 
-      final updatedQuantities = Map<String, int>.from(state.itemQuantities)
-        ..removeWhere((key, _) => state.pickupItems.any((item) =>
-            item.productId == key && state.selectedItems[key] == true));
+        emit(state.copyWith(
+          regularDeliveryItems: updatedRegularItems,
+          selectedItems: updatedSelectedItems,
+          itemQuantities: updatedQuantities,
+          isAllSelected: false,
+        ));
+      } else {
+        final updatedPickupItems = state.pickupItems
+            .where((item) => !state.selectedItems[item.productId]!)
+            .toList();
 
-      emit(state.copyWith(
-        pickupItems: updatedPickupItems,
-        selectedItems: updatedSelectedItems,
-        itemQuantities: updatedQuantities,
-        isAllSelected: false,
-      ));
+        final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
+          ..removeWhere((key, value) =>
+              value && state.pickupItems.any((item) => item.productId == key));
+
+        final updatedQuantities = Map<String, int>.from(state.itemQuantities)
+          ..removeWhere((key, _) => state.pickupItems.any((item) =>
+              item.productId == key && state.selectedItems[key] == true));
+
+        emit(state.copyWith(
+          pickupItems: updatedPickupItems,
+          selectedItems: updatedSelectedItems,
+          itemQuantities: updatedQuantities,
+          isAllSelected: false,
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
     }
   }
 
-  // 선택된 항목을 픽업 목록으로 이동
-  void _onMoveToPickup(MoveToPickup event, Emitter<CartState> emit) {
-    final itemsToMove = state.regularDeliveryItems
-        .where((item) => state.selectedItems[item.productId] == true)
-        .toList();
+  Future<void> _onMoveToPickup(
+      MoveToPickup event, Emitter<CartState> emit) async {
+    try {
+      final itemsToMove = state.regularDeliveryItems
+          .where((item) => state.selectedItems[item.productId] == true)
+          .toList();
 
-    final updatedRegularItems = state.regularDeliveryItems
-        .where((item) => state.selectedItems[item.productId] != true)
-        .toList();
+      // Update delivery method in Firestore
+      for (var item in itemsToMove) {
+        await _cartRepository.updateDeliveryMethod(item.productId, true);
+      }
 
-    final updatedPickupItems = [...state.pickupItems, ...itemsToMove];
-    final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-      ..removeWhere((key, value) => value);
+      final updatedRegularItems = state.regularDeliveryItems
+          .where((item) => state.selectedItems[item.productId] != true)
+          .toList();
 
-    emit(state.copyWith(
-      regularDeliveryItems: updatedRegularItems,
-      pickupItems: updatedPickupItems,
-      selectedItems: updatedSelectedItems,
-      isAllSelected: false,
-    ));
+      final updatedPickupItems = [...state.pickupItems, ...itemsToMove];
+      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
+        ..removeWhere((key, value) => value);
+
+      emit(state.copyWith(
+        regularDeliveryItems: updatedRegularItems,
+        pickupItems: updatedPickupItems,
+        selectedItems: updatedSelectedItems,
+        isAllSelected: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  Future<void> _onMoveToRegularDelivery(
+      MoveToRegularDelivery event, Emitter<CartState> emit) async {
+    try {
+      final itemsToMove = state.pickupItems
+          .where((item) => state.selectedItems[item.productId] == true)
+          .toList();
+
+      // Update delivery method in Firestore
+      for (var item in itemsToMove) {
+        await _cartRepository.updateDeliveryMethod(item.productId, false);
+      }
+
+      final updatedPickupItems = state.pickupItems
+          .where((item) => state.selectedItems[item.productId] != true)
+          .toList();
+
+      final updatedRegularItems = [
+        ...state.regularDeliveryItems,
+        ...itemsToMove
+      ];
+      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
+        ..removeWhere((key, value) => value);
+
+      emit(state.copyWith(
+        regularDeliveryItems: updatedRegularItems,
+        pickupItems: updatedPickupItems,
+        selectedItems: updatedSelectedItems,
+        isAllSelected: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
   }
 
   void _onUpdateCurrentTab(UpdateCurrentTab event, Emitter<CartState> emit) {
-    // 현재 탭 업데이트
     emit(state.copyWith(isRegularDeliveryTab: event.isRegularDelivery));
 
-    // 현재 탭의 아이템들 전체 선택
     final currentItems = event.isRegularDelivery
         ? state.regularDeliveryItems
         : state.pickupItems;
@@ -338,29 +377,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     emit(state.copyWith(
       selectedItems: updatedSelectedItems,
       isAllSelected: true,
-    ));
-  }
-
-  // 선택된 항목을 일반 배송 목록으로 이동
-  void _onMoveToRegularDelivery(
-      MoveToRegularDelivery event, Emitter<CartState> emit) {
-    final itemsToMove = state.pickupItems
-        .where((item) => state.selectedItems[item.productId] == true)
-        .toList();
-
-    final updatedPickupItems = state.pickupItems
-        .where((item) => state.selectedItems[item.productId] != true)
-        .toList();
-
-    final updatedRegularItems = [...state.regularDeliveryItems, ...itemsToMove];
-    final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-      ..removeWhere((key, value) => value);
-
-    emit(state.copyWith(
-      regularDeliveryItems: updatedRegularItems,
-      pickupItems: updatedPickupItems,
-      selectedItems: updatedSelectedItems,
-      isAllSelected: false,
     ));
   }
 }
