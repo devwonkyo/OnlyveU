@@ -218,6 +218,7 @@ class RecommendedProductsWidget extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
+                  print('Recommended Product ID: ${item.productId}');
                   context
                       .read<HomeBloc>()
                       .add(ToggleProductFavorite(item, userId)); // userId 전달
