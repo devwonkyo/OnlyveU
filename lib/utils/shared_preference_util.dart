@@ -128,3 +128,4 @@ class OnlyYouSharedPreference {
     print('=========================');
   }
 }
+//아이디 자체가 쉐어드 프리퍼런스에

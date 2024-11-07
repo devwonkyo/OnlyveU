@@ -96,16 +96,44 @@ class HomeRepository {
   }
 
   // 좋아요 토글 처리
-  Future<void> toggleProductFavorite(
-      String productId, List<String> favoriteList) async {
+  Future<void> toggleProductFavorite(String productId, String userId) async {
     try {
-      await _firestore
-          .collection('products')
-          .doc(productId)
-          .update({'favoriteList': favoriteList});
+      // 트랜잭션 시작
+      await _firestore.runTransaction((transaction) async {
+        // 1. 제품 문서 가져오기
+        final productDoc = _firestore.collection('products').doc(productId);
+        final productSnapshot = await transaction.get(productDoc);
+
+        // 2. 사용자 문서 가져오기
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
+
+        // 제품의 favoriteList 업데이트
+        List<String> favoriteList =
+            List<String>.from(productSnapshot.get('favoriteList') ?? []);
+
+        // 사용자의 likedItems 업데이트
+        List<String> likedItems =
+            List<String>.from(userSnapshot.get('likedItems') ?? []);
+
+        if (favoriteList.contains(userId)) {
+          // 좋아요 취소
+          favoriteList.remove(userId);
+          likedItems.remove(productId);
+        } else {
+          // 좋아요 추가
+          favoriteList.add(userId);
+          likedItems.add(productId);
+        }
+
+        // 트랜잭션으로 두 문서 동시 업데이트
+        transaction.update(productDoc, {'favoriteList': favoriteList});
+        //transaction.update(userDoc, {'likedItems': likedItems});
+      });
     } catch (e) {
       print('Error toggling favorite: $e');
       throw Exception('좋아요 처리에 실패했습니다.');
     }
   }
 }
+// home_repository.dart의 toggleProductFavorite 메서드 수정
