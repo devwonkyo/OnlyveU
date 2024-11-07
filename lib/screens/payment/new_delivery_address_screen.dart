@@ -59,7 +59,7 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
               height: 20,
             ),
 
-            const AddressSearchField(), // 새로운 커스텀 위젯
+             AddressSearchField(), // 새로운 커스텀 위젯
             const SizedBox(height: 20),
             Row(
               children: [
