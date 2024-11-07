@@ -32,7 +32,8 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
       FetchSearchResults event, Emitter<SearchResultState> emit) async {
     emit(SearchResultLoading());
     try {
-      final sanitizedText = event.query.replaceAll(RegExp(r'[^\w\s]+'), '');
+      final sanitizedText = event.query.replaceAll(
+          RegExp(r'[^\p{L}\p{N}\s]+', unicode: true), ''); // 특수문자 제거
       await Future.delayed(const Duration(seconds: 1));
       final products = await productRepository.searchLocal(sanitizedText);
       if (products.isEmpty) {

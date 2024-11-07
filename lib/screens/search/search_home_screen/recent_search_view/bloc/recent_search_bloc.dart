@@ -29,7 +29,12 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
     try {
       final recentSearches = await repository.loadRecentSearches();
       await Future.delayed(const Duration(seconds: 2));
-      emit(RecentSearchLoaded(recentSearches));
+      print('onLoadRecentSearch: $recentSearches');
+      if (recentSearches.isEmpty) {
+        emit(RecentSearchEmpty());
+      } else {
+        emit(RecentSearchLoaded(recentSearches));
+      }
     } catch (e) {
       emit(RecentSearchError(e.toString()));
     }
