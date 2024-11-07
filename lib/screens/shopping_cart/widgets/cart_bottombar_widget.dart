@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/shopping_cart/widgets/cart_pricesection_widget.dart';
 import 'package:onlyveyou/utils/format_price.dart';
@@ -9,11 +10,11 @@ class CartBottomBarWidget extends StatelessWidget {
   final Map<String, int> itemQuantities;
 
   const CartBottomBarWidget({
-    Key? key,
+    super.key,
     required this.currentItems,
     required this.selectedItems,
     required this.itemQuantities,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class CartBottomBarWidget extends StatelessWidget {
         .fold(0, (sum, item) => sum + (itemQuantities[item.productId] ?? 1));
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -54,7 +55,7 @@ class CartBottomBarWidget extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    '총 ${totalSelectedCount}건 ',
+                    '총 $totalSelectedCount건 ',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   Text(
@@ -73,14 +74,14 @@ class CartBottomBarWidget extends StatelessWidget {
               ),
               Text(
                 '${formatPrice(finalPrice.toString())}원',
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -90,21 +91,23 @@ class CartBottomBarWidget extends StatelessWidget {
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black,
                     side: BorderSide(color: Colors.grey[300]!),
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: Text('선물하기'),
+                  child: const Text('선물하기'),
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.push('/payment');
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  child: Text('구매하기'),
+                  child: const Text('구매하기'),
                 ),
               ),
             ],

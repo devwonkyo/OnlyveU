@@ -24,6 +24,7 @@ class FirebaseDataUploader {
 
         // Firestore에 저장할 데이터 준비
         Map<String, dynamic> productData = {
+          'productId': product.productId,
           'name': product.name,
           'brandName': product.brandName,
           'productImageList': product.productImageList,

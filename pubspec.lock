@@ -37,10 +37,10 @@ packages:
     dependency: transitive
     description:
       name: asn1lib
-      sha256: "6b151826fcc95ff246cd219a0bf4c753ea14f4081ad71c61939becf3aba27f70"
+      sha256: "4bae5ae63e6d6dd17c4aac8086f3dec26c0236f6a0f03416c6c19d830c367cf5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.5"
+    version: "1.5.8"
   async:
     dependency: transitive
     description:
@@ -449,10 +449,58 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: "6f1b756f6e863259a99135ff3c95026c3cdca17d10ebef2bba2261a25ddc8bbc"
+      sha256: ce89c5a993ca5eea74535f798478502c30a625ecb10a1de4d7fef5cd1bcac2a4
       url: "https://pub.dev"
     source: hosted
-    version: "14.3.0"
+    version: "14.4.1"
+  google_identity_services_web:
+    dependency: transitive
+    description:
+      name: google_identity_services_web
+      sha256: "5be191523702ba8d7a01ca97c17fca096822ccf246b0a9f11923a6ded06199b6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1+4"
+  google_sign_in:
+    dependency: "direct main"
+    description:
+      name: google_sign_in
+      sha256: fad6ddc80c427b0bba705f2116204ce1173e09cf299f85e053d57a55e5b2dd56
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.2.2"
+  google_sign_in_android:
+    dependency: transitive
+    description:
+      name: google_sign_in_android
+      sha256: "0928059d2f0840f63c7b07a30cf73b593ae872cdd0dbd46d1b9ba878d2599c01"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.33"
+  google_sign_in_ios:
+    dependency: transitive
+    description:
+      name: google_sign_in_ios
+      sha256: "83f015169102df1ab2905cf8abd8934e28f87db9ace7a5fa676998842fed228a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.7.8"
+  google_sign_in_platform_interface:
+    dependency: transitive
+    description:
+      name: google_sign_in_platform_interface
+      sha256: "1f6e5787d7a120cc0359ddf315c92309069171306242e181c09472d1b00a2971"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.5"
+  google_sign_in_web:
+    dependency: transitive
+    description:
+      name: google_sign_in_web
+      sha256: "042805a21127a85b0dc46bba98a37926f17d2439720e8a459d27045d8ef68055"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.4+2"
   html:
     dependency: transitive
     description:
