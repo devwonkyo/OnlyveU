@@ -80,7 +80,7 @@ class _ExpandableBottomSheetState extends State<ExpandableBottomSheet> with Sing
           children: [
             IconButton(
               padding: EdgeInsets.zero,
-              color: AppsColor.lightGray,
+              color: Colors.grey,
               icon: Icon(
                 _isExpanded ? Icons.keyboard_arrow_down_outlined : Icons.keyboard_arrow_up,
                 size: 24.sp,

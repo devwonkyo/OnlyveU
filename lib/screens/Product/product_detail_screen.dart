@@ -160,7 +160,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             itemBuilder: (context, index) {
               return Image.network(
                 product.productImageList[index],
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               );
             },
           ),
