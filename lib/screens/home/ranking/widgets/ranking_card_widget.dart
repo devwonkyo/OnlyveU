@@ -1,7 +1,10 @@
 // ranking_card_widget.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/home/ranking_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class RankingCardWidget extends StatelessWidget {
@@ -144,15 +147,35 @@ class RankingCardWidget extends StatelessWidget {
                   // 찜하기 및 장바구니 아이콘
                   Row(
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          // TODO: 좋아요 기능 구현
+                      FutureBuilder<String>(
+                        future: OnlyYouSharedPreference().getCurrentUserId(),
+                        builder: (context, snapshot) {
+                          final userId = snapshot.data ?? 'temp_user_id';
+                          return GestureDetector(
+                            onTap: () async {
+                              print(
+                                  'Ranking Product ID: ${product.productId}'); // I작업 유지
+                              final prefs = OnlyYouSharedPreference();
+                              final currentUserId =
+                                  await prefs.getCurrentUserId();
+                              context.read<RankingBloc>().add(
+                                    ToggleProductFavorite(
+                                      product: product,
+                                      userId: currentUserId,
+                                    ),
+                                  );
+                            },
+                            child: Icon(
+                              product.favoriteList.contains(userId)
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              size: 20.sp,
+                              color: product.favoriteList.contains(userId)
+                                  ? Colors.red
+                                  : Colors.grey,
+                            ),
+                          );
                         },
-                        child: Icon(
-                          Icons.favorite_border,
-                          size: 20.sp,
-                          color: Colors.grey,
-                        ),
                       ),
                       SizedBox(width: 16.w),
                       GestureDetector(

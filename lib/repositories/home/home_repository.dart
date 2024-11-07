@@ -98,37 +98,39 @@ class HomeRepository {
   // 좋아요 토글 처리
   Future<void> toggleProductFavorite(String productId, String userId) async {
     try {
-      // 트랜잭션 시작
       await _firestore.runTransaction((transaction) async {
         // 1. 제품 문서 가져오기
         final productDoc = _firestore.collection('products').doc(productId);
-        final productSnapshot = await transaction.get(productDoc);
-
-        // 2. 사용자 문서 가져오기
         final userDoc = _firestore.collection('users').doc(userId);
+
+        final productSnapshot = await transaction.get(productDoc);
         final userSnapshot = await transaction.get(userDoc);
 
-        // 제품의 favoriteList 업데이트
+        if (!productSnapshot.exists) {
+          throw Exception('상품을 찾을 수 없습니다.');
+        }
+
+        // 2. favoriteList와 likedItems 업데이트
         List<String> favoriteList =
             List<String>.from(productSnapshot.get('favoriteList') ?? []);
-
-        // 사용자의 likedItems 업데이트
-        List<String> likedItems =
-            List<String>.from(userSnapshot.get('likedItems') ?? []);
+        List<String> likedItems = List<String>.from(
+            userSnapshot.exists ? userSnapshot.get('likedItems') ?? [] : []);
 
         if (favoriteList.contains(userId)) {
-          // 좋아요 취소
           favoriteList.remove(userId);
           likedItems.remove(productId);
         } else {
-          // 좋아요 추가
           favoriteList.add(userId);
           likedItems.add(productId);
         }
 
-        // 트랜잭션으로 두 문서 동시 업데이트
+        // 3. 두 컬렉션 모두 업데이트
         transaction.update(productDoc, {'favoriteList': favoriteList});
-        //transaction.update(userDoc, {'likedItems': likedItems});
+        if (!userSnapshot.exists) {
+          transaction.set(userDoc, {'likedItems': likedItems});
+        } else {
+          transaction.update(userDoc, {'likedItems': likedItems});
+        }
       });
     } catch (e) {
       print('Error toggling favorite: $e');

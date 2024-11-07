@@ -1,8 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/home/ranking_repository.dart';
-// import 변경
 
+// import 변경
+//event
 // RankingEvent: 랭킹 상품 로드 이벤트 정의
 abstract class RankingEvent {}
 
@@ -12,6 +13,13 @@ class LoadRankingProducts extends RankingEvent {
   LoadRankingProducts({this.categoryId});
 }
 
+class ToggleProductFavorite extends RankingEvent {
+  final ProductModel product;
+  final String userId;
+  ToggleProductFavorite({required this.product, required this.userId});
+}
+
+/////stste
 // RankingState: 랭킹 상품 로드 상태 정의
 abstract class RankingState {}
 
@@ -58,6 +66,35 @@ class RankingBloc extends Bloc<RankingEvent, RankingState> {
       } catch (e) {
         print('Error in RankingBloc: $e');
         emit(RankingError('랭킹 상품을 불러오는데 실패했습니다.')); // 오류 발생 시 오류 상태로 전환
+      }
+    });
+
+    //좋아요 토글 기능
+    on<ToggleProductFavorite>((event, emit) async {
+      if (state is RankingLoaded) {
+        final currentState = state as RankingLoaded;
+        try {
+          await rankingRepository.toggleProductFavorite(
+              event.product.productId, event.userId);
+
+          final updatedProducts = currentState.products.map((product) {
+            if (product.productId == event.product.productId) {
+              List<String> updatedFavoriteList =
+                  List<String>.from(product.favoriteList);
+              if (updatedFavoriteList.contains(event.userId)) {
+                updatedFavoriteList.remove(event.userId);
+              } else {
+                updatedFavoriteList.add(event.userId);
+              }
+              return product.copyWith(favoriteList: updatedFavoriteList);
+            }
+            return product;
+          }).toList();
+
+          emit(RankingLoaded(updatedProducts));
+        } catch (e) {
+          print('Error toggling favorite in RankingBloc: $e');
+        }
       }
     });
   }
