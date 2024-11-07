@@ -27,17 +27,37 @@ class HistoryRepository {
     }
   }
 
-  Future<void> toggleFavorite(
-      String productId, List<String> favoriteList) async {
+  Future<void> toggleFavorite(String productId, String userId) async {
     try {
-      await _firestore
-          .collection('products')
-          .doc(productId)
-          .update({'favoriteList': favoriteList});
+      await _firestore.runTransaction((transaction) async {
+        final productDoc = _firestore.collection('products').doc(productId);
+        final userDoc = _firestore.collection('users').doc(userId);
+
+        final productSnapshot = await transaction.get(productDoc);
+        final userSnapshot = await transaction.get(userDoc);
+
+        // favoriteList와 likedItems 업데이트
+        List<String> favoriteList =
+            List<String>.from(productSnapshot.get('favoriteList') ?? []);
+        List<String> likedItems = List<String>.from(
+            userSnapshot.exists ? userSnapshot.get('likedItems') ?? [] : []);
+
+        // 삭제 로직
+        favoriteList.remove(userId);
+        likedItems.remove(productId);
+
+        // 트랜잭션으로 두 컬렉션 동시 업데이트
+        transaction.update(productDoc, {'favoriteList': favoriteList});
+        if (userSnapshot.exists) {
+          transaction.update(userDoc, {'likedItems': likedItems});
+        } else {
+          transaction.set(userDoc, {'likedItems': likedItems});
+        }
+      });
     } catch (e) {
-      print('Error toggling favorite: $e');
-      throw Exception('좋아요 처리에 실패했습니다.');
+      print('Error removing favorite: $e');
+      throw Exception('좋아요 삭제 처리에 실패했습니다.');
     }
-  }
+  } //^
 }
 ////////
