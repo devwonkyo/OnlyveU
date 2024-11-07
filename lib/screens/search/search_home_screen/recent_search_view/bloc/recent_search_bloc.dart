@@ -12,6 +12,8 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
     on<AddSearchTerm>(_onAddSearchTerm);
     on<LoadRecentSearches>(_onLoadRecentSearches);
     on<RemoveSearchTerm>(_onRemoveSearchTerm);
+
+    add(LoadRecentSearches());
   }
 
   void _onAddSearchTerm(

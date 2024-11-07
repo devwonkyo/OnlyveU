@@ -15,7 +15,7 @@ class SearchSuggestionScreen extends StatelessWidget {
     return BlocBuilder<SearchSuggestionBloc, SearchSuggestionState>(
       builder: (context, state) {
         if (state is SearchSuggestionInitial) {
-          return SearchHomeScreen();
+          return const SearchHomeScreen();
         } else if (state is SearchSuggestionLoading) {
           return const SizedBox();
         } else if (state is SearchSuggestionLoaded) {

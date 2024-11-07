@@ -14,13 +14,32 @@ class SearchResultBloc extends Bloc<SearchResultEvent, SearchResultState> {
     on<FetchSearchResults>(_onFetchSearchResults);
   }
 
+// 파이어스토어에 저장되어있는걸 검색함
+  // Future<void> _onFetchSearchResults(
+  //     FetchSearchResults event, Emitter<SearchResultState> emit) async {
+  //   emit(SearchResultLoading());
+  //   try {
+  //     await Future.delayed(const Duration(seconds: 1));
+  //     final products = await productRepository.search(event.query);
+  //     emit(SearchResultLoaded(products));
+  //   } catch (e) {
+  //     emit(SearchResultError(e.toString()));
+  //   }
+  // }
+
+  // 로컬에 저장한 후 검색함
   Future<void> _onFetchSearchResults(
       FetchSearchResults event, Emitter<SearchResultState> emit) async {
     emit(SearchResultLoading());
     try {
+      final sanitizedText = event.query.replaceAll(RegExp(r'[^\w\s]+'), '');
       await Future.delayed(const Duration(seconds: 1));
-      final products = await productRepository.search(event.query);
-      emit(SearchResultLoaded(products));
+      final products = await productRepository.searchLocal(sanitizedText);
+      if (products.isEmpty) {
+        emit(SearchResultEmpty());
+      } else {
+        emit(SearchResultLoaded(products));
+      }
     } catch (e) {
       emit(SearchResultError(e.toString()));
     }
