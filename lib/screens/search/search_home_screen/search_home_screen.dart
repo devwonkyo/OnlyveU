@@ -38,17 +38,21 @@ class SearchHomeScreen extends StatelessWidget {
               SizedBox(height: 20.h),
               SearchMainContainer(
                 title: '추천 키워드',
-                child: Wrap(
-                  spacing: 10.w,
-                  children: [
-                    FilledButton(
-                        onPressed: () {}, child: const Text('세미매트밀착쿠션')),
-                    FilledButton(onPressed: () {}, child: const Text('콜라겐올인원')),
-                    FilledButton(
-                        onPressed: () {}, child: const Text('히알루산올인원')),
-                    FilledButton(
-                        onPressed: () {}, child: const Text('탱글젤리블리셔')),
-                  ],
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Wrap(
+                    spacing: 10.w,
+                    children: [
+                      FilledButton(
+                          onPressed: () {}, child: const Text('세미매트밀착쿠션')),
+                      FilledButton(
+                          onPressed: () {}, child: const Text('콜라겐올인원')),
+                      FilledButton(
+                          onPressed: () {}, child: const Text('히알루산올인원')),
+                      FilledButton(
+                          onPressed: () {}, child: const Text('탱글젤리블리셔')),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 20.h),
@@ -92,10 +96,7 @@ class SearchMainContainer extends StatelessWidget {
           ],
         ),
         SizedBox(height: 10.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: child,
-        ),
+        child,
       ],
     );
   }

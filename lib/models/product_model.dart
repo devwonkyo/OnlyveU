@@ -46,10 +46,15 @@ class ProductModel {
 
   // 일반 Map으로부터 ProductModel 생성
   factory ProductModel.fromMap(Map<String, dynamic> map) {
-    //TODO MAP 타입변환
-    // Timestamp를 DateTime으로 변환
-    Timestamp timestamp = map['registrationDate'] as Timestamp;
-    DateTime date = timestamp.toDate();
+    // registrationDate 필드의 타입을 확인하고 변환
+    DateTime date;
+    if (map['registrationDate'] is Timestamp) {
+      date = (map['registrationDate'] as Timestamp).toDate();
+    } else if (map['registrationDate'] is String) {
+      date = DateTime.parse(map['registrationDate'] as String);
+    } else {
+      throw TypeError();
+    }
 
     return ProductModel(
       productId: map['productId'] ?? '',
@@ -95,7 +100,7 @@ class ProductModel {
       'cartList': cartList.map((item) => item.toMap()).toList(),
       'visitCount': visitCount,
       'rating': rating,
-      'registrationDate': Timestamp.fromDate(registrationDate),
+      'registrationDate': registrationDate.toIso8601String(),
       'salesVolume': salesVolume,
       'isBest': isBest,
       'isPopular': isPopular,

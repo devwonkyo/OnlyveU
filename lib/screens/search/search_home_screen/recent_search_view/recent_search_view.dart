@@ -18,17 +18,17 @@ class RecentSearchView extends StatelessWidget {
         builder: (context, state) {
           print(state);
           if (state is RecentSearchInitial) {
-            context.read<RecentSearchBloc>().add(LoadRecentSearches());
             return const SizedBox();
           } else if (state is RecentSearchLoading) {
             return const Center(child: Text('나중에 로딩화면 구현하기'));
           } else if (state is RecentSearchLoaded) {
             return ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
               scrollDirection: Axis.horizontal,
               itemCount: state.recentSearches.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: EdgeInsets.only(right: 10.w),
+                  padding: EdgeInsets.symmetric(horizontal: 5.w),
                   child: RecentlySearchButton(
                     title: state.recentSearches[index],
                   ),

@@ -56,7 +56,7 @@ class SearchResultScreen extends StatelessWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 10.w,
                         childAspectRatio: 0.45.r,
-                        mainAxisExtent: 330.h,
+                        mainAxisExtent: 350.h,
                       ),
                       itemCount: state.products.length,
                       itemBuilder: (context, index) =>
@@ -69,6 +69,8 @@ class SearchResultScreen extends StatelessWidget {
           );
         } else if (state is SearchResultError) {
           return Center(child: Text('Error: ${state.message}'));
+        } else if (state is SearchResultEmpty) {
+          return const Center(child: Text('검색 결과가 없습니다.'));
         } else {
           return const Center(child: Text('No results found.'));
         }
