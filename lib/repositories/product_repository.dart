@@ -167,7 +167,9 @@ class ProductRepository {
 
   Future<List<ProductModel>> searchLocal(String term) async {
     final storedProducts = await getStoredProducts();
+    print('hi: $term');
     if (term.isNotEmpty) {
+      print('hi2');
       return storedProducts.where((product) {
         return product.name.contains(term) ||
             product.categoryId.contains(term) ||
@@ -175,6 +177,7 @@ class ProductRepository {
             product.tagList.any((tag) => tag.contains(term));
       }).toList();
     } else {
+      print('hi3');
       return [];
     }
   }

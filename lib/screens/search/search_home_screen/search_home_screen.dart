@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/screens/search/search_home_screen/recent_search_view/recent_search_view.dart';
 
-import '../../../repositories/search_repositories/recent_search_repository/recent_search_repository_impl.dart';
+import '../search_text_field/bloc/search_text_field_bloc.dart';
 import 'recent_search_view/bloc/recent_search_bloc.dart';
 
 class SearchHomeScreen extends StatelessWidget {
@@ -13,14 +13,12 @@ class SearchHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<RecentSearchBloc>(
-          create: (context) => RecentSearchBloc(
-            repository: RecentSearchRepositoryImpl(),
-          ),
-        ),
-      ],
+    return BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
+      listener: (context, state) {
+        if (state is SearchTextFieldSubmitted) {
+          context.read<RecentSearchBloc>().add(AddSearchTerm(state.text));
+        }
+      },
       child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(top: 20.h),

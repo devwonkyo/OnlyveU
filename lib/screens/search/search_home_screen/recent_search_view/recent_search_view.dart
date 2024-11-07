@@ -12,34 +12,31 @@ class RecentSearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<RecentSearchBloc, RecentSearchState>(
-      listener: (context, state) {},
-      child: BlocBuilder<RecentSearchBloc, RecentSearchState>(
-        builder: (context, state) {
-          print(state);
-          if (state is RecentSearchInitial) {
-            return const SizedBox();
-          } else if (state is RecentSearchLoading) {
-            return const Center(child: Text('나중에 로딩화면 구현하기'));
-          } else if (state is RecentSearchLoaded) {
-            return ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 15.w),
-              scrollDirection: Axis.horizontal,
-              itemCount: state.recentSearches.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w),
-                  child: RecentlySearchButton(
-                    title: state.recentSearches[index],
-                  ),
-                );
-              },
-            );
-          } else {
-            return const SizedBox();
-          }
-        },
-      ),
+    return BlocBuilder<RecentSearchBloc, RecentSearchState>(
+      builder: (context, state) {
+        print(state);
+        if (state is RecentSearchInitial) {
+          return const SizedBox();
+        } else if (state is RecentSearchLoading) {
+          return const Center(child: Text('나중에 로딩화면 구현하기'));
+        } else if (state is RecentSearchLoaded) {
+          return ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 15.w),
+            scrollDirection: Axis.horizontal,
+            itemCount: state.recentSearches.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5.w),
+                child: RecentlySearchButton(
+                  title: state.recentSearches[index],
+                ),
+              );
+            },
+          );
+        } else {
+          return const SizedBox();
+        }
+      },
     );
   }
 }

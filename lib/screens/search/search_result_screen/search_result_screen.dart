@@ -6,6 +6,8 @@ import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import '../../../blocs/home/home_bloc.dart';
 import '../../../models/product_model.dart';
 import '../../../utils/styles.dart';
+import '../search_home_screen/recent_search_view/bloc/recent_search_bloc.dart';
+import '../search_text_field/bloc/search_text_field_bloc.dart';
 import 'bloc/search_result_bloc.dart';
 
 class SearchResultScreen extends StatelessWidget {
@@ -15,66 +17,73 @@ class SearchResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearchResultBloc, SearchResultState>(
-      builder: (context, state) {
-        if (state is SearchResultInitial) {
-          return const SizedBox();
-        } else if (state is SearchResultLoading) {
-          return const Center(child: Text('로딩화면 구현 예정'));
-        } else if (state is SearchResultLoaded) {
-          return Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.w),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 60.h,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '총 ${state.products.length}개',
-                          style: TextStyle(fontSize: 15.sp),
-                        ),
-                        Row(
-                          children: [
-                            const Icon(Icons.tune),
-                            SizedBox(width: 20.w),
-                            Text(
-                              '인기순',
-                              style: TextStyle(fontSize: 15.sp),
-                            ),
-                            const Icon(Icons.keyboard_arrow_down)
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10.w,
-                        childAspectRatio: 0.45.r,
-                        mainAxisExtent: 350.h,
-                      ),
-                      itemCount: state.products.length,
-                      itemBuilder: (context, index) =>
-                          ProductCard(item: state.products[index]),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else if (state is SearchResultError) {
-          return Center(child: Text('Error: ${state.message}'));
-        } else if (state is SearchResultEmpty) {
-          return const Center(child: Text('검색 결과가 없습니다.'));
-        } else {
-          return const Center(child: Text('No results found.'));
+    return BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
+      listener: (context, state) {
+        if (state is SearchTextFieldEmpty) {
+          context.read<RecentSearchBloc>().add(LoadRecentSearches());
         }
       },
+      child: BlocBuilder<SearchResultBloc, SearchResultState>(
+        builder: (context, state) {
+          if (state is SearchResultInitial) {
+            return const SizedBox();
+          } else if (state is SearchResultLoading) {
+            return const Center(child: Text('로딩화면 구현 예정'));
+          } else if (state is SearchResultLoaded) {
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15.w),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 60.h,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '총 ${state.products.length}개',
+                            style: TextStyle(fontSize: 15.sp),
+                          ),
+                          Row(
+                            children: [
+                              const Icon(Icons.tune),
+                              SizedBox(width: 20.w),
+                              Text(
+                                '인기순',
+                                style: TextStyle(fontSize: 15.sp),
+                              ),
+                              const Icon(Icons.keyboard_arrow_down)
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10.w,
+                          childAspectRatio: 0.45.r,
+                          mainAxisExtent: 350.h,
+                        ),
+                        itemCount: state.products.length,
+                        itemBuilder: (context, index) =>
+                            ProductCard(item: state.products[index]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          } else if (state is SearchResultError) {
+            return Center(child: Text('Error: ${state.message}'));
+          } else if (state is SearchResultEmpty) {
+            return const Center(child: Text('검색 결과가 없습니다.'));
+          } else {
+            return const Center(child: Text('No results found.'));
+          }
+        },
+      ),
     );
   }
 }
