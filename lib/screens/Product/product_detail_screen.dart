@@ -7,6 +7,7 @@ import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/utils/format_price.dart';
+import 'package:onlyveyou/widgets/small_promotion_banner.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -331,65 +332,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-      ],
-    );
-  }
+        Divider(thickness: 1,color: Colors.grey,),
 
-  Widget _buildBottomButtons() {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, -2),
-            ),
-          ],
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("일반배송"),
+              Text("2,500원 (20,000원 이상 무료배송 \n 평균 3일 이내 도착"),
+              Icon(Icons.chevron_right, size: 18.sp),
+            ],
+          ),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // 원하는 radius 값
-                  ),
-                ),
-                child: Text(
-                  '장바구니',
+
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+          child: OutlinedButton(
+            onPressed: () {},
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  '구매 가능 올영매장 찾기',
                   style: TextStyle(fontSize: 14.sp),
                 ),
-              ),
+                Icon(Icons.chevron_right, size: 18.sp),
+              ],
             ),
-            SizedBox(width: 16.w),
-            Expanded(
-              flex: 1,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),
-                  ) // 원하는 radius 값
-                ),
-                child: Text(
-                  '바로구매',
-                  style: TextStyle(fontSize: 14.sp, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+
+        SmallPromotionBanner(),
+
+
+
+      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:onlyveyou/models/user_model.dart';
 import 'package:onlyveyou/repositories/auth_repository.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
@@ -21,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<DeleteAccountRequested>(_onDeleteAccountRequested);
     on<SignUpRequested>((event, emit) async {
       emit(AuthLoading());
+      print('emit AuthLoading');
       try {
         // 회원가입 및 이메일 인증 전송
         UserCredential userCredential =
@@ -30,28 +32,38 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         );
         await userCredential.user?.sendEmailVerification();
 
-        // Firestore에 사용자 저장
-        await _firestore.collection('users').doc(event.email).set({
-          'email': event.email,
-          'nickname': event.nickname,
-          'phone': event.phone,
-          'gender': event.gender,
-        });
-        // SharedPreferences에 사용자 정보 저장
-        await _prefs.setUserId(userCredential.user!.uid);
-        await _prefs.setEmail(event.email);
-        await _prefs.setNickname(event.nickname);
-        await _prefs.setPhone(event.phone);
-        await _prefs.setGender(event.gender);
+        // 얻은 ID로 UserModel 생성
+        final userModel = UserModel(
+          uid: userCredential.user!.uid,  // Firestore가 생성한 ID를 uid로 사용
+          email: event.email,
+          nickname: event.nickname,
+          phone: event.phone,
+          gender: event.gender
+        );
+
+        // 3. Authentication의 UID로 Firestore 문서 저장
+        await _firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)  // Authentication의 UID 사용
+            .set(userModel.toMap());
+
+        // // SharedPreferences에 사용자 정보 저장
+        // await _prefs.setUserId(userCredential.user!.uid);
+        // await _prefs.setEmail(event.email);
+        // await _prefs.setNickname(event.nickname);
+        // await _prefs.setPhone(event.phone);
+        // await _prefs.setGender(event.gender);
 
         emit(SignUpSuccess());
+        print('emit SignUpSuccess');
       } on FirebaseAuthException catch (e) {
         emit(AuthFailure(e.message ?? '회원가입에 실패했습니다.'));
+        print('emit AuthFailure $e');
       }
     });
 
     on<LoginRequested>((event, emit) async {
-      emit(AuthLoading());
+      emit(LoginLoading());
       try {
         UserCredential userCredential =
             await _firebaseAuth.signInWithEmailAndPassword(
@@ -69,11 +81,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
           emit(LoginSuccess(userId: userCredential.user!.uid));
         } else {
-          emit(AuthFailure('이메일 인증을 완료해주세요.'));
+          emit(LoginFailure('이메일 인증을 완료해주세요.'));
           await _firebaseAuth.signOut();
         }
       } catch (e) {
-        emit(AuthFailure('로그인에 실패했습니다.'));
+        emit(LoginFailure('로그인에 실패했습니다.'));
       }
     });
   }
