@@ -30,6 +30,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: event.email,
           password: event.password,
         );
+
         await userCredential.user?.sendEmailVerification();
 
         // 얻은 ID로 UserModel 생성
