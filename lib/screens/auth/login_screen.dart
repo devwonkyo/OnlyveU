@@ -59,12 +59,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (userDoc.exists) {
         // Firebase에서 가져온 데이터
+        String userId = userDoc.get('uid');
         String email = userDoc.get('email');
         String gender = userDoc.get('gender');
         String nickname = userDoc.get('nickname');
         String phone = userDoc.get('phone');
 
         // SharedPreferences에 저장
+        await OnlyYouSharedPreference().setUserId(userId);
         await OnlyYouSharedPreference().setEmail(email);
         await OnlyYouSharedPreference().setGender(gender);
         await OnlyYouSharedPreference().setNickname(nickname);
@@ -99,6 +101,9 @@ class _LoginScreenState extends State<LoginScreen> {
       // Firebase Firestore에 UserModel 저장
       await _saveUserModelToFirestore(userModel);
 
+      //sharedpreferenc에 저장
+      _saveUserInfoToSharedPrefs(uid);
+
       context.go('/home'); // 홈 화면으로 이동
     } catch (e) {
       print("카카오 로그인 실패: $e");
@@ -131,6 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Firebase Firestore에 UserModel 저장
         await _saveUserModelToFirestore(userModel);
+        //sharedpreferenc에 저장
+        _saveUserInfoToSharedPrefs(user.uid);
 
         context.go('/home'); // 홈 화면으로 이동
       }
@@ -144,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthLoading) {
+        if (state is LoginLoading) {
           // 로딩 다이얼로그 표시
           showDialog(
             context: context,
@@ -155,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
           _saveUserInfoToSharedPrefs(state.userId); // 로그인 성공 시 유저 정보 저장
           context.go('/home'); // 홈 화면으로 이동
-        } else if (state is AuthFailure) {
+        } else if (state is LoginFailure) {
           Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
           _showDialog(state.message); // 실패 메시지 표시
         }

@@ -50,6 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
         } else if (state is SignUpSuccess) {
           Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
           _showDialog('회원가입이 완료되었습니다! 이메일 인증을 완료해주세요.');
+          context.pop();
         } else if (state is AuthFailure) {
           Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
           _showDialog(state.message); // 실패 메시지 표시
@@ -119,7 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 TextField(
                   controller: nicknameController,
                   decoration: InputDecoration(
-                    hintText: '이메일',
+                    hintText: '닉네임',
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.black),
                     ),
