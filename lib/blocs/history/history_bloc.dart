@@ -62,40 +62,54 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
 
     on<ToggleFavorite>((event, emit) async {
       try {
-        List<String> updatedFavoriteList =
-            List<String>.from(event.product.favoriteList);
-
-        if (updatedFavoriteList.contains(event.userId)) {
-          updatedFavoriteList.remove(event.userId);
-        } else {
-          updatedFavoriteList.add(event.userId);
-        }
-
         await _historyRepository.toggleFavorite(
           event.product.productId,
-          updatedFavoriteList,
-        );
+          event.userId,
+        ); //^
 
-        add(LoadHistoryItems());
+        add(LoadHistoryItems()); // 상태 새로고침
       } catch (e) {
         print('Error toggling favorite: $e');
       }
     });
+    on<RemoveHistoryItem>((event, emit) async {
+      try {
+        final userId = await _prefs.getCurrentUserId();
+        await _historyRepository.toggleFavorite(
+          event.product.productId,
+          userId,
+        ); //^
 
-    on<RemoveHistoryItem>((event, emit) {
-      final currentState = state;
-      emit(HistoryState(
-        recentItems: currentState.recentItems
-            .where((item) => item.productId != event.product.productId)
-            .toList(),
-        favoriteItems: currentState.favoriteItems
-            .where((item) => item.productId != event.product.productId)
-            .toList(),
-      ));
+        add(LoadHistoryItems());
+      } catch (e) {
+        print('Error removing history item: $e');
+      }
     });
 
-    on<ClearHistory>((event, emit) {
-      emit(HistoryState(recentItems: [], favoriteItems: []));
-    });
+    on<ClearHistory>((event, emit) async {
+      //^
+      try {
+        if (state is HistoryState) {
+          final currentState = state;
+          final userId = await _prefs.getCurrentUserId();
+
+          // 좋아요한 상품들 전체 삭제 처리
+          for (var product in currentState.favoriteItems) {
+            await _historyRepository.toggleFavorite(
+              //^ toggleFavorite로 변경
+              product.productId,
+              userId,
+            );
+          }
+
+          emit(HistoryState(
+            recentItems: currentState.recentItems,
+            favoriteItems: [], // 좋아요 목록 비우기
+          ));
+        }
+      } catch (e) {
+        print('Error clearing history: $e');
+      }
+    }); //^
   }
 }
