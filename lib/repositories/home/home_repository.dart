@@ -137,5 +137,33 @@ class HomeRepository {
       throw Exception('좋아요 처리에 실패했습니다.');
     }
   }
+
+  Future<void> addToCart(String productId, String userId) async {
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
+
+        // cartItems 업데이트
+        List<String> cartItems = List<String>.from(
+            userSnapshot.exists ? userSnapshot.get('cartItems') ?? [] : []);
+
+        // 이미 장바구니에 있는지 확인
+        if (!cartItems.contains(productId)) {
+          cartItems.add(productId);
+
+          // users 컬렉션만 업데이트
+          if (!userSnapshot.exists) {
+            transaction.set(userDoc, {'cartItems': cartItems});
+          } else {
+            transaction.update(userDoc, {'cartItems': cartItems});
+          }
+        }
+      });
+    } catch (e) {
+      print('Error adding to cart: $e');
+      throw Exception('장바구니 추가에 실패했습니다.');
+    }
+  }
 }
 // home_repository.dart의 toggleProductFavorite 메서드 수정

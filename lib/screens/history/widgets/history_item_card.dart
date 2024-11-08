@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/blocs/history/history_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
@@ -161,12 +163,27 @@ class HistoryItemCard extends StatelessWidget {
                           ),
                           onPressed: onToggleFavorite,
                         ),
-                        IconButton(
-                          icon: Icon(Icons.shopping_bag_outlined,
-                              color: Colors.grey),
-                          onPressed: () {
-                            // TODO: 장바구니 기능 구현
+                        GestureDetector(
+                          onTap: () async {
+                            final currentUserId =
+                                await OnlyYouSharedPreference()
+                                    .getCurrentUserId();
+                            context.read<HistoryBloc>().add(
+                                  AddToCart(product.productId, currentUserId),
+                                );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('장바구니에 추가되었습니다.')),
+                            );
                           },
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            child: Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                       ],
                     ),
