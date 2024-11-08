@@ -21,6 +21,13 @@ class ToggleFavorite extends HistoryEvent {
 
 class ClearHistory extends HistoryEvent {}
 
+//장바구니 담기
+class AddToCart extends HistoryEvent {
+  final String productId;
+  final String userId;
+  AddToCart(this.productId, this.userId);
+}
+
 // State
 class HistoryState {
   final List<ProductModel> recentItems;
@@ -111,6 +118,14 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
         print('Error clearing history: $e');
       }
     }); //^
+//장바구니
+    on<AddToCart>((event, emit) async {
+      try {
+        await _historyRepository.addToCart(event.productId, event.userId);
+      } catch (e) {
+        print('Error adding to cart: $e');
+      }
+    });
   }
 }
 

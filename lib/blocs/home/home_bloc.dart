@@ -18,6 +18,12 @@ class ToggleProductFavorite extends HomeEvent {
   ToggleProductFavorite(this.product, this.userId);
 }
 
+class AddToCart extends HomeEvent {
+  final String productId;
+  final String userId;
+  AddToCart(this.productId, this.userId);
+}
+
 // 상태 정의 (이전과 동일)
 abstract class HomeState {}
 
@@ -170,6 +176,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         } catch (e) {
           print('Error loading more products: $e');
           emit(currentState.copyWith(isLoading: false));
+        }
+      }
+    });
+    on<AddToCart>((event, emit) async {
+      if (state is HomeLoaded) {
+        final currentState = state as HomeLoaded;
+        try {
+          await _homeRepository.addToCart(event.productId, event.userId);
+        } catch (e) {
+          print('Error adding to cart: $e');
         }
       }
     });
