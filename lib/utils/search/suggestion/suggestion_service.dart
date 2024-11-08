@@ -51,36 +51,58 @@ class SuggestionService {
 
   Future<void> addCategoriesToSuggestions() async {
     try {
-      final querySnapshot = await _firestore.collection('categories').get();
+      // categories 컬렉션의 모든 문서를 가져옴
+      QuerySnapshot categoriesSnapshot =
+          await _firestore.collection('categories').get();
 
-      // 각 문서에서 name 값을 추출하고 SuggestionModel 형식으로 변환합니다.
-      for (final doc in querySnapshot.docs) {
-        final data = doc.data();
-        final name = data['name'] as String;
+      for (QueryDocumentSnapshot categoryDoc in categoriesSnapshot.docs) {
+        String name = categoryDoc.get('name');
+        List<dynamic> subcategories = categoryDoc.get('subcategories');
 
-        // Firestore에서 이미 존재하는 문서를 확인합니다.
-        final existingDoc =
-            await _firestore.collection('suggestions').doc(name).get();
+        // 각 카테고리와 서브카테고리를 SuggestionModel로 변환하여 suggestions 컬렉션에 추가
+        await _addSuggestionIfNotExists(name, 'category');
 
-        if (!existingDoc.exists) {
-          final suggestion = SuggestionModel(
-            term: name,
-            popularity: 0,
-            trendScore: 0.0,
-            sourceCollection: 'category', // sourceCollection 필드 설정
-          );
-
-          // 변환된 SuggestionModel 객체를 suggestions 컬렉션에 추가합니다.
-          await _firestore
-              .collection('suggestions')
-              .doc(suggestion.term)
-              .set(suggestion.toFirestore());
+        for (var subcategory in subcategories) {
+          if (subcategory is Map<String, dynamic> &&
+              subcategory.containsKey('name')) {
+            String subcategoryName = subcategory['name'];
+            if (subcategoryName.contains('/')) {
+              List<String> subcategoryParts = subcategoryName.split('/');
+              for (String part in subcategoryParts) {
+                await _addSuggestionIfNotExists(part.trim(), 'subcategory');
+              }
+            } else {
+              await _addSuggestionIfNotExists(subcategoryName, 'subcategory');
+            }
+          } else {
+            print('Invalid subcategory type: $subcategory');
+          }
         }
       }
 
-      print('Categories added to suggestions successfully.');
+      print('Categories and subcategories added to suggestions successfully.');
     } catch (e) {
-      print('Error adding categories to suggestions: $e');
+      print('Error adding categories and subcategories to suggestions: $e');
+    }
+  }
+
+  Future<void> _addSuggestionIfNotExists(
+      String term, String sourceCollection) async {
+    DocumentSnapshot suggestionDoc =
+        await _firestore.collection('suggestions').doc(term).get();
+
+    if (!suggestionDoc.exists) {
+      SuggestionModel suggestion = SuggestionModel(
+        term: term,
+        popularity: 0,
+        trendScore: 0.0,
+        sourceCollection: sourceCollection,
+      );
+
+      await _firestore
+          .collection('suggestions')
+          .doc(suggestion.term)
+          .set(suggestion.toFirestore());
     }
   }
 }
