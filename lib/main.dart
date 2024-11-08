@@ -29,7 +29,8 @@ import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
-
+import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
+import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'core/router.dart';
@@ -198,6 +199,53 @@ class MyApp extends StatelessWidget {
                 );
               },
             ),
+            BlocProvider<ProfileEditBloc>(
+              create: (context) => ProfileEditBloc(),
+            ),
+            BlocProvider<CategoryCubit>(
+                create: (context) =>
+                    CategoryCubit(categoryRepository: CategoryRepository())
+                      ..loadCategories()),
+            BlocProvider<PasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => PasswordBloc(),
+            ),
+            BlocProvider<SetNewPasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => SetNewPasswordBloc(),
+            ),
+            BlocProvider<NicknameEditBloc>(
+              create: (context) => NicknameEditBloc(),
+            ),
+            BlocProvider<PhoneNumberBloc>(
+              create: (context) => PhoneNumberBloc(),
+            ),
+            BlocProvider<ThemeBloc>(
+              create: (context) => ThemeBloc()..add(LoadTheme()),
+            ),
+            BlocProvider<OrderStatusBloc>(
+              create: (context) => OrderStatusBloc(),
+            ),
+            BlocProvider<ProductDetailBloc>(
+              create: (context) => ProductDetailBloc(ProductRepository()),
+            ),
+            BlocProvider<PaymentBloc>(
+              create: (context) => PaymentBloc(),
+            ),
+            BlocProvider<PostBloc>(
+              create: (context) => PostBloc(),
+            ),
+          ],
+          child: BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, state) {
+              return MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                themeMode: state.themeMode,
+                theme: lightThemeData(),
+                darkTheme: darkThemeData(),
+                routerConfig: router,
+              );
+            },
           ),
         );
       },
