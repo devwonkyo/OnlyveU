@@ -214,6 +214,7 @@ class PopularProductsWidget extends StatelessWidget {
           Row(
             children: [
               FutureBuilder<String>(
+                // SharedPreferences에서 userId를 가져오는 부분 추가
                 future: OnlyYouSharedPreference().getCurrentUserId(),
                 builder: (context, snapshot) {
                   final userId = snapshot.data ?? 'temp_user_id';
@@ -221,15 +222,16 @@ class PopularProductsWidget extends StatelessWidget {
                     onTap: () async {
                       final prefs = OnlyYouSharedPreference();
                       final currentUserId = await prefs.getCurrentUserId();
-                      context
-                          .read<HomeBloc>()
-                          .add(ToggleProductFavorite(product, currentUserId));
+                      context.read<HomeBloc>().add(
+                            ToggleProductFavorite(product, currentUserId),
+                          );
                     },
                     child: Container(
                       width: 20,
                       height: 20,
                       child: Icon(
-                        product.favoriteList.contains(userId)
+                        product.favoriteList
+                                .contains(userId) // 익스텐션 대신 직접 리스트 체크
                             ? Icons.favorite
                             : Icons.favorite_border,
                         size: 18,

@@ -9,6 +9,8 @@ sealed class RecentSearchState extends Equatable {
 
 final class RecentSearchInitial extends RecentSearchState {}
 
+final class RecentSearchEmpty extends RecentSearchState {}
+
 final class RecentSearchLoading extends RecentSearchState {}
 
 final class RecentSearchLoaded extends RecentSearchState {

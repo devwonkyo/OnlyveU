@@ -85,33 +85,41 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     });
 
-    // ToggleProductFavorite 이벤트 핸들러
+    // 좋아요 부분
     on<ToggleProductFavorite>((event, emit) async {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
         try {
-          List<String> updatedFavoriteList =
-              List<String>.from(event.product.favoriteList);
-          if (updatedFavoriteList.contains(event.userId)) {
-            updatedFavoriteList.remove(event.userId);
-          } else {
-            updatedFavoriteList.add(event.userId);
-          }
-
           await _homeRepository.toggleProductFavorite(
-              event.product.productId, updatedFavoriteList);
+              event.product.productId, event.userId);
 
+          // 추천 상품 목록 업데이트
           final updatedRecommended =
               currentState.recommendedProducts.map((product) {
             if (product.productId == event.product.productId) {
-              return event.product.copyWith(favoriteList: updatedFavoriteList);
+              List<String> updatedFavoriteList =
+                  List<String>.from(product.favoriteList);
+              if (updatedFavoriteList.contains(event.userId)) {
+                updatedFavoriteList.remove(event.userId);
+              } else {
+                updatedFavoriteList.add(event.userId);
+              }
+              return product.copyWith(favoriteList: updatedFavoriteList);
             }
             return product;
           }).toList();
 
+          // 인기 상품 목록 업데이트
           final updatedPopular = currentState.popularProducts.map((product) {
             if (product.productId == event.product.productId) {
-              return event.product.copyWith(favoriteList: updatedFavoriteList);
+              List<String> updatedFavoriteList =
+                  List<String>.from(product.favoriteList);
+              if (updatedFavoriteList.contains(event.userId)) {
+                updatedFavoriteList.remove(event.userId);
+              } else {
+                updatedFavoriteList.add(event.userId);
+              }
+              return product.copyWith(favoriteList: updatedFavoriteList);
             }
             return product;
           }).toList();
@@ -126,7 +134,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         }
       }
     });
-
     // RefreshHomeData 이벤트 핸들러
     on<RefreshHomeData>((event, emit) async {
       if (state is HomeLoaded) {
