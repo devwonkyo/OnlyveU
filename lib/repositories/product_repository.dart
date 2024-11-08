@@ -110,8 +110,19 @@ class ProductRepository {
 
     final uniqueDocs = allDocs.toSet().toList();
 
-    return uniqueDocs
-        .map((doc) => ProductModel.fromMap(doc.data() as Map<String, dynamic>))
-        .toList();
+    return uniqueDocs.map((doc) => ProductModel.fromMap(doc.data())).toList();
+  }
+
+  Future<ProductModel?> fetchProductById(String productId) async {
+    try {
+      DocumentSnapshot doc =
+          await _firestore.collection('products').doc(productId).get();
+      if (doc.exists) {
+        return ProductModel.fromMap(doc.data() as Map<String, dynamic>);
+      }
+    } catch (e) {
+      print("Error fetching product data: $e");
+    }
+    return null;
   }
 }
