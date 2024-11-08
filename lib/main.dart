@@ -13,8 +13,8 @@ import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
-import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
@@ -29,14 +29,11 @@ import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
-import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
-import 'package:onlyveyou/screens/shutter/shutter_post.dart';
+
 import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
-import 'models/search_models/suggestion_model.dart';
-import 'models/search_models/trend_updater.dart';
 
 void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
@@ -136,45 +133,6 @@ class MyApp extends StatelessWidget {
               BlocProvider<ThemeBloc>(
                 create: (context) => ThemeBloc(),
               ),
-              BlocProvider<AuthBloc>(
-                create: (context) => AuthBloc(
-                  authRepository: AuthRepository(),
-                  sharedPreference: OnlyYouSharedPreference(),
-                ),
-              ),
-              BlocProvider<HomeBloc>(
-                create: (context) => HomeBloc(homeRepository: HomeRepository()),
-              ),
-              BlocProvider(
-                create: (context) => HistoryBloc(
-                  historyRepository:
-                      HistoryRepository(), // ProductRepository 제거
-                )..add(LoadHistoryItems()),
-              ),
-              BlocProvider<ProfileEditBloc>(
-                create: (context) => ProfileEditBloc(),
-              ),
-              BlocProvider<CategoryCubit>(
-                  create: (context) =>
-                      CategoryCubit(categoryRepository: CategoryRepository())
-                        ..loadCategories()),
-              BlocProvider<PasswordBloc>(
-                // PasswordBloc 추가
-                create: (context) => PasswordBloc(),
-              ),
-              BlocProvider<SetNewPasswordBloc>(
-                // PasswordBloc 추가
-                create: (context) => SetNewPasswordBloc(),
-              ),
-              BlocProvider<NicknameEditBloc>(
-                create: (context) => NicknameEditBloc(),
-              ),
-              BlocProvider<PhoneNumberBloc>(
-                create: (context) => PhoneNumberBloc(),
-              ),
-              BlocProvider<ThemeBloc>(
-                create: (context) => ThemeBloc()..add(LoadTheme()),
-              ),
               BlocProvider<OrderStatusBloc>(
                 create: (context) => OrderStatusBloc(),
               ),
@@ -186,6 +144,9 @@ class MyApp extends StatelessWidget {
                   orderRepository:
                       RepositoryProvider.of<OrderRepository>(context),
                 ),
+              ),
+              BlocProvider<PostBloc>(
+                create: (context) => PostBloc(),
               ),
             ],
             child: BlocBuilder<ThemeBloc, ThemeState>(
@@ -199,53 +160,6 @@ class MyApp extends StatelessWidget {
                 );
               },
             ),
-            BlocProvider<ProfileEditBloc>(
-              create: (context) => ProfileEditBloc(),
-            ),
-            BlocProvider<CategoryCubit>(
-                create: (context) =>
-                    CategoryCubit(categoryRepository: CategoryRepository())
-                      ..loadCategories()),
-            BlocProvider<PasswordBloc>(
-              // PasswordBloc 추가
-              create: (context) => PasswordBloc(),
-            ),
-            BlocProvider<SetNewPasswordBloc>(
-              // PasswordBloc 추가
-              create: (context) => SetNewPasswordBloc(),
-            ),
-            BlocProvider<NicknameEditBloc>(
-              create: (context) => NicknameEditBloc(),
-            ),
-            BlocProvider<PhoneNumberBloc>(
-              create: (context) => PhoneNumberBloc(),
-            ),
-            BlocProvider<ThemeBloc>(
-              create: (context) => ThemeBloc()..add(LoadTheme()),
-            ),
-            BlocProvider<OrderStatusBloc>(
-              create: (context) => OrderStatusBloc(),
-            ),
-            BlocProvider<ProductDetailBloc>(
-              create: (context) => ProductDetailBloc(ProductRepository()),
-            ),
-            BlocProvider<PaymentBloc>(
-              create: (context) => PaymentBloc(),
-            ),
-            BlocProvider<PostBloc>(
-              create: (context) => PostBloc(),
-            ),
-          ],
-          child: BlocBuilder<ThemeBloc, ThemeState>(
-            builder: (context, state) {
-              return MaterialApp.router(
-                debugShowCheckedModeBanner: false,
-                themeMode: state.themeMode,
-                theme: lightThemeData(),
-                darkTheme: darkThemeData(),
-                routerConfig: router,
-              );
-            },
           ),
         );
       },
