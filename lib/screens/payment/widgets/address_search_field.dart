@@ -68,15 +68,19 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
                   // 주소 검색 기능
                   print("주소 검색");
 
-                  KopoModel model = await Navigator.push(
+                  KopoModel? model = await Navigator.push(
                     context,
                     CupertinoPageRoute(
                       builder: (context) => RemediKopo(),
                     ),
                   );
-                  _AddressController.text =
-                      '${model.address!} ${model.buildingName!}';
-                  print(_AddressController.text);
+
+                  // null 체크
+                  if (model != null) {
+                    _AddressController.text =
+                        '${model.address!} ${model.buildingName ?? ''}';
+                    print(_AddressController.text);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,

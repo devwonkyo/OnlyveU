@@ -5,6 +5,7 @@ import 'package:onlyveyou/models/order_item_model.dart';
 enum OrderType {
   /// 픽업 주문
   pickup,
+
   /// 배송 주문
   delivery
 }
@@ -13,10 +14,13 @@ enum OrderType {
 enum OrderStatus {
   /// 주문 대기 (공통)
   pending,
+
   /// 주문 확인 (공통)
   confirmed,
+
   /// 주문 취소 (공통)
   canceled,
+
   /// 주문 완료 (공통)
   completed,
 
@@ -25,12 +29,13 @@ enum OrderStatus {
 
   /// 상품 준비중 (배송 주문)
   preparing,
+
   /// 배송중 (배송 주문)
   shipping,
+
   /// 배송 완료 (배송 주문)
   delivered,
 }
-
 
 class OrderModel {
   /// 주문 ID
@@ -48,9 +53,9 @@ class OrderModel {
   /// 주문 유형 (픽업/배송)
   final OrderType orderType;
 
-  /// 총 주문 금액
+  /// 총 주문 금액 - items의 가격 * 수량의 합으로 계산
   final int totalPrice;
- 
+
   /// 주문 생성 시간
   final DateTime createdAt;
 
@@ -66,11 +71,14 @@ class OrderModel {
     required this.items,
     required this.orderType,
     this.status = OrderStatus.pending,
-    required this.totalPrice,
     this.pickupTime,
     this.deliveryInfo,
     DateTime? createdAt,
-  }) : this.createdAt = createdAt ?? DateTime.now();
+  })  : createdAt = createdAt ?? DateTime.now(),
+        totalPrice = items.fold(
+            0,
+            (sum, item) =>
+                sum + (item.productPrice * item.quantity)); // items의 합으로 초기화
 
   Map<String, dynamic> toMap() {
     return {
@@ -88,24 +96,18 @@ class OrderModel {
   }
 
   factory OrderModel.fromMap(String id, Map<String, dynamic> map) {
-    final orderType = OrderType.values.firstWhere(
-            (e) => e.name == map['orderType']
-    );
+    final orderType =
+        OrderType.values.firstWhere((e) => e.name == map['orderType']);
 
     return OrderModel(
       id: id,
       userId: map['userId'],
       items: List<OrderItemModel>.from(
-          map['items'].map((item) => OrderItemModel.fromMap(item))
-      ),
-      status: OrderStatus.values.firstWhere(
-              (e) => e.name == map['status']
-      ),
+          map['items'].map((item) => OrderItemModel.fromMap(item))),
+      status: OrderStatus.values.firstWhere((e) => e.name == map['status']),
       orderType: orderType,
-      totalPrice: map['totalPrice'],
-      pickupTime: map['pickupTime'] != null
-          ? DateTime.parse(map['pickupTime'])
-          : null,
+      pickupTime:
+          map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
           : null,
