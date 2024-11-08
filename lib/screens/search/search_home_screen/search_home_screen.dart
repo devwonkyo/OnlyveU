@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/screens/search/search_home_screen/recent_search_view/recent_search_view.dart';
 
-import '../../../repositories/search_repositories/recent_search_repository/recent_search_repository_impl.dart';
+import '../search_text_field/bloc/search_text_field_bloc.dart';
 import 'recent_search_view/bloc/recent_search_bloc.dart';
+import '../../../utils/search/suggestion/suggestion_button.dart';
 
 class SearchHomeScreen extends StatelessWidget {
   const SearchHomeScreen({
@@ -13,14 +14,12 @@ class SearchHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<RecentSearchBloc>(
-          create: (context) => RecentSearchBloc(
-            repository: RecentSearchRepositoryImpl(),
-          ),
-        ),
-      ],
+    return BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
+      listener: (context, state) {
+        if (state is SearchTextFieldSubmitted) {
+          context.read<RecentSearchBloc>().add(AddSearchTerm(state.text));
+        }
+      },
       child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(top: 20.h),
@@ -28,34 +27,61 @@ class SearchHomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 로컬 데이터
-              SearchMainContainer(
-                title: '최근 검색어',
-                child: SizedBox(
-                  height: 40.h,
-                  child: const RecentSearchView(),
-                ),
+              BlocBuilder<RecentSearchBloc, RecentSearchState>(
+                builder: (context, state) {
+                  print(state);
+                  if (state is RecentSearchInitial) {
+                    return const SizedBox();
+                  } else if (state is RecentSearchLoading) {
+                    return const Center(child: Text('나중에 로딩화면 구현하기'));
+                  } else if (state is RecentSearchLoaded) {
+                    return SearchMainContainer(
+                      title: '최근 검색어',
+                      child: SizedBox(
+                        height: 40.h,
+                        child: RecentSearchView(
+                          itemCount: state.recentSearches.length,
+                          titleList: state.recentSearches,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return const SizedBox();
+                  }
+                },
               ),
               SizedBox(height: 20.h),
               SearchMainContainer(
                 title: '추천 키워드',
-                child: Wrap(
-                  spacing: 10.w,
-                  children: [
-                    FilledButton(
-                        onPressed: () {}, child: const Text('세미매트밀착쿠션')),
-                    FilledButton(onPressed: () {}, child: const Text('콜라겐올인원')),
-                    FilledButton(
-                        onPressed: () {}, child: const Text('히알루산올인원')),
-                    FilledButton(
-                        onPressed: () {}, child: const Text('탱글젤리블리셔')),
-                  ],
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Wrap(
+                    spacing: 10.w,
+                    children: [
+                      FilledButton(
+                          onPressed: () {}, child: const Text('세미매트밀착쿠션')),
+                      FilledButton(
+                          onPressed: () {}, child: const Text('콜라겐올인원')),
+                      FilledButton(
+                          onPressed: () {}, child: const Text('히알루산올인원')),
+                      FilledButton(
+                          onPressed: () {}, child: const Text('탱글젤리블리셔')),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 20.h),
               // 서버 데이터
-              const SearchMainContainer(
+              SearchMainContainer(
                 title: '급상승 검색어',
-                child: SizedBox(),
+                child:
+                    // const SizedBox(),
+                    Column(
+                  children: [
+                    BrandSuggestionUpdateButton(),
+                    CategorySuggestionUpdateButton(),
+                  ],
+                ),
               ),
             ],
           ),
@@ -92,10 +118,7 @@ class SearchMainContainer extends StatelessWidget {
           ],
         ),
         SizedBox(height: 10.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: child,
-        ),
+        child,
       ],
     );
   }

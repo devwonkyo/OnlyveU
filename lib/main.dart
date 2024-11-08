@@ -34,6 +34,8 @@ import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
+import 'models/search_models/suggestion_model.dart';
+import 'models/search_models/trend_updater.dart';
 
 void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
@@ -51,6 +53,22 @@ void main() async {
   final prefs = OnlyYouSharedPreference();
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
+
+// 모든 제품 로컬 저장 (검색용)
+  try {
+    final productRepository = ProductRepository();
+    await productRepository.fetchAndStoreAllProducts();
+    final storedProducts = await productRepository.getStoredProducts();
+    print('Stored products: ${storedProducts.length}');
+  } catch (e) {
+    print('Error fetching and storing products: $e');
+  }
+
+  // 트렌드 점수 업데이트 시작
+  // final trendCalculator = TrendCalculator();
+  // final trendUpdater = TrendUpdater(trendCalculator: trendCalculator);
+  // trendUpdater.startUpdating();
+
   runApp(const MyApp());
 }
 
