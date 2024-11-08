@@ -13,6 +13,13 @@ class LoadTodaySaleProducts extends TodaySaleEvent {}
 // 특가 상품 목록 섞기 이벤트
 class ShuffleProducts extends TodaySaleEvent {}
 
+//좋아요 이벤트
+class ToggleProductFavorite extends TodaySaleEvent {
+  final ProductModel product;
+  final String userId;
+  ToggleProductFavorite(this.product, this.userId);
+}
+
 // TodaySaleState: 특가 상품 로딩의 상태 정의
 abstract class TodaySaleState {}
 
@@ -60,6 +67,34 @@ class TodaySaleBloc extends Bloc<TodaySaleEvent, TodaySaleState> {
         print(
             'Products shuffled. New order length: ${shuffledProducts.length}');
         emit(TodaySaleLoaded(shuffledProducts)); // 섞인 상품 목록으로 상태 갱신
+      }
+    });
+    //좋아요 토글
+    on<ToggleProductFavorite>((event, emit) async {
+      if (state is TodaySaleLoaded) {
+        final currentState = state as TodaySaleLoaded;
+        try {
+          await repository.toggleProductFavorite(
+              event.product.productId, event.userId);
+
+          final updatedProducts = currentState.products.map((product) {
+            if (product.productId == event.product.productId) {
+              List<String> updatedFavoriteList =
+                  List<String>.from(product.favoriteList);
+              if (updatedFavoriteList.contains(event.userId)) {
+                updatedFavoriteList.remove(event.userId);
+              } else {
+                updatedFavoriteList.add(event.userId);
+              }
+              return product.copyWith(favoriteList: updatedFavoriteList);
+            }
+            return product;
+          }).toList();
+
+          emit(TodaySaleLoaded(updatedProducts));
+        } catch (e) {
+          print('Error toggling favorite in TodaySaleBloc: $e');
+        }
       }
     });
   }
