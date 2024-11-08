@@ -21,12 +21,16 @@ class BrandSuggestionUpdateButton extends StatelessWidget {
 }
 
 class CategorySuggestionUpdateButton extends StatelessWidget {
-  const CategorySuggestionUpdateButton({super.key});
+  final SuggestionService suggestionService = SuggestionService();
+  CategorySuggestionUpdateButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return ElevatedButton(
+      onPressed: () async {
+        await suggestionService.addCategoriesToSuggestions();
+      },
+      child: const Text('Update Category Suggestions'),
+    );
   }
 }
-
-// 파이어베이스의 products에서 brandName의 값을 SuggestionModel 형식으로 suggestions 컬랙션에 추가하고싶어

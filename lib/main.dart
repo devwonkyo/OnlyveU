@@ -63,9 +63,9 @@ void main() async {
   }
 
   // 트렌드 점수 업데이트 시작
-  final trendCalculator = TrendCalculator();
-  final trendUpdater = TrendUpdater(trendCalculator: trendCalculator);
-  trendUpdater.startUpdating();
+  // final trendCalculator = TrendCalculator();
+  // final trendUpdater = TrendUpdater(trendCalculator: trendCalculator);
+  // trendUpdater.startUpdating();
 
   runApp(const MyApp());
 }
