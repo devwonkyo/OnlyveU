@@ -1,8 +1,23 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/utils/styles.dart';
+import 'package:remedi_kopo/remedi_kopo.dart';
 
-class AddressSearchField extends StatelessWidget {
+class AddressSearchField extends StatefulWidget {
   const AddressSearchField({super.key});
+
+  @override
+  State<AddressSearchField> createState() => _AddressSearchFieldState();
+}
+
+class _AddressSearchFieldState extends State<AddressSearchField> {
+  final TextEditingController _AddressController = TextEditingController();
+
+  @override
+  void dispose() {
+    _AddressController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +41,7 @@ class AddressSearchField extends StatelessWidget {
           children: [
             Expanded(
               child: TextField(
+                controller: _AddressController,
                 decoration: InputDecoration(
                   hintText: '주소를 검색해주세요',
                   hintStyle: const TextStyle(color: Colors.grey),
@@ -48,9 +64,23 @@ class AddressSearchField extends StatelessWidget {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.053,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // 주소 검색 기능
                   print("주소 검색");
+
+                  KopoModel? model = await Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => RemediKopo(),
+                    ),
+                  );
+
+                  // null 체크
+                  if (model != null) {
+                    _AddressController.text =
+                        '${model.address!} ${model.buildingName ?? ''}';
+                    print(_AddressController.text);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,

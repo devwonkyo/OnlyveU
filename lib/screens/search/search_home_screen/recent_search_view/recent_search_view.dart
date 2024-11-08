@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:onlyveyou/screens/search/search_text_field/bloc/search_text_field_bloc.dart';
 
 import 'bloc/recent_search_bloc.dart';
@@ -8,38 +9,26 @@ import 'bloc/recent_search_bloc.dart';
 class RecentSearchView extends StatelessWidget {
   const RecentSearchView({
     super.key,
+    required this.itemCount,
+    required this.titleList,
   });
+  final int itemCount;
+  final List<String> titleList;
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<RecentSearchBloc, RecentSearchState>(
-      listener: (context, state) {},
-      child: BlocBuilder<RecentSearchBloc, RecentSearchState>(
-        builder: (context, state) {
-          print(state);
-          if (state is RecentSearchInitial) {
-            context.read<RecentSearchBloc>().add(LoadRecentSearches());
-            return const SizedBox();
-          } else if (state is RecentSearchLoading) {
-            return const Center(child: Text('나중에 로딩화면 구현하기'));
-          } else if (state is RecentSearchLoaded) {
-            return ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: state.recentSearches.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.only(right: 10.w),
-                  child: RecentlySearchButton(
-                    title: state.recentSearches[index],
-                  ),
-                );
-              },
-            );
-          } else {
-            return const SizedBox();
-          }
-        },
-      ),
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 15.w),
+      scrollDirection: Axis.horizontal,
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5.w),
+          child: RecentlySearchButton(
+            title: titleList[index],
+          ),
+        );
+      },
     );
   }
 }

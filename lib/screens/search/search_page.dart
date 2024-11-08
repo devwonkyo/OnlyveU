@@ -74,8 +74,7 @@ class SearchPage extends StatelessWidget {
               ),
               BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
                 listener: (context, state) {
-                  if (state is SearchTextFieldEmpty) {
-                  } else if (state is SearchTextFieldTyping) {
+                  if (state is SearchTextFieldTyping) {
                     context
                         .read<SearchSuggestionBloc>()
                         .add(FetchSearchSuggestions(state.text));
@@ -83,13 +82,11 @@ class SearchPage extends StatelessWidget {
                     context
                         .read<SearchResultBloc>()
                         .add(FetchSearchResults(state.text));
-                    context
-                        .read<RecentSearchBloc>()
-                        .add(AddSearchTerm(state.text));
                   }
                 },
                 child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
                   builder: (context, state) {
+                    print('$state');
                     if (state is SearchTextFieldEmpty) {
                       return const SearchHomeScreen();
                     } else if (state is SearchTextFieldTyping) {
