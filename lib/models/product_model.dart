@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:onlyveyou/models/cart_model.dart';
 
 class ProductModel {
   final String productId;
@@ -14,7 +13,6 @@ class ProductModel {
   final List<String> favoriteList;
   final List<String> reviewList;
   final List<String> tagList;
-  final List<CartModel> cartList;
   final int visitCount;
   final double rating;
   final DateTime registrationDate;
@@ -35,7 +33,6 @@ class ProductModel {
     required this.favoriteList,
     required this.reviewList,
     required this.tagList,
-    required this.cartList,
     required this.visitCount,
     required this.rating,
     required this.registrationDate,
@@ -70,9 +67,6 @@ class ProductModel {
       favoriteList: List<String>.from(map['favoriteList'] ?? []),
       reviewList: List<String>.from(map['reviewList'] ?? []),
       tagList: List<String>.from(map['tagList'] ?? []),
-      cartList: (map['cartList'] as List<dynamic>? ?? [])
-          .map((item) => CartModel.fromMap(item as Map<String, dynamic>))
-          .toList(),
       visitCount: map['visitCount'] ?? 0,
       rating: (map['rating'] ?? 0.0).toDouble(),
       registrationDate: date,
@@ -97,7 +91,6 @@ class ProductModel {
       'favoriteList': favoriteList,
       'reviewList': reviewList,
       'tagList': tagList,
-      'cartList': cartList.map((item) => item.toMap()).toList(),
       'visitCount': visitCount,
       'rating': rating,
       'registrationDate': registrationDate.toIso8601String(),
@@ -120,7 +113,6 @@ class ProductModel {
     List<String>? favoriteList,
     List<String>? reviewList,
     List<String>? tagList,
-    List<CartModel>? cartList,
     int? visitCount,
     double? rating,
     DateTime? registrationDate,
@@ -141,7 +133,6 @@ class ProductModel {
       favoriteList: favoriteList ?? this.favoriteList,
       reviewList: reviewList ?? this.reviewList,
       tagList: tagList ?? this.tagList,
-      cartList: cartList ?? this.cartList,
       visitCount: visitCount ?? this.visitCount,
       rating: rating ?? this.rating,
       registrationDate: registrationDate ?? this.registrationDate,
