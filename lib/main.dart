@@ -27,7 +27,8 @@ import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
-
+import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
+import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 
@@ -158,6 +159,9 @@ class MyApp extends StatelessWidget {
             ),
             BlocProvider<PaymentBloc>(
               create: (context) => PaymentBloc(),
+            ),
+            BlocProvider<PostBloc>(
+              create: (context) => PostBloc(),
             ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(

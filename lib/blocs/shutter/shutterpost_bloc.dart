@@ -1,9 +1,7 @@
-// post_bloc.dart
 import 'dart:io';
-
-import 'package:bloc/bloc.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_state.dart';
@@ -11,26 +9,12 @@ import 'package:onlyveyou/models/post_model.dart';
 
 class PostBloc extends Bloc<PostEvent, PostState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
 
-  PostBloc() : super(PostState()) {
-    on<AddImageEvent>((event, emit) async {
+  PostBloc() : super(PostState.initial()) {
+    on<AddImageEvent>((event, emit) {
       final updatedImages = List<XFile>.from(state.images)..add(event.image);
       emit(state.copyWith(images: updatedImages));
-
-      // Firebase Storage에 이미지 업로드
-      String imageUrl = await _uploadImageToStorage(event.image);
-      final updatedImageUrls = List<String>.from(state.imageUrls)
-        ..add(imageUrl);
-      emit(state.copyWith(imageUrls: updatedImageUrls));
-    });
-
-    on<RemoveImageEvent>((event, emit) {
-      final updatedImages = List<XFile>.from(state.images)
-        ..removeAt(event.index);
-      final updatedImageUrls = List<String>.from(state.imageUrls)
-        ..removeAt(event.index);
-      emit(state.copyWith(images: updatedImages, imageUrls: updatedImageUrls));
     });
 
     on<UpdateTextEvent>((event, emit) {
@@ -39,30 +23,30 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
     on<SubmitPostEvent>((event, emit) async {
       try {
-        final postModel = PostModel(
-          text: state.text,
-          imageUrls: state.imageUrls,
+        // 이미지 업로드 및 URL 수집
+        final imageUrls = await Future.wait(event.images.map((imageFile) async {
+          final ref = _firebaseStorage
+              .ref()
+              .child('post_images/${DateTime.now().millisecondsSinceEpoch}');
+          final uploadTask = await ref.putFile(File(imageFile.path));
+          return await uploadTask.ref.getDownloadURL();
+        }));
+
+        // Firestore에 저장할 데이터 생성
+        final post = PostModel(
+          text: event.text,
+          imageUrls: imageUrls,
           tags: event.tags,
         );
-        await _savePostToFirestore(postModel);
-        emit(state.copyWith(postStatus: PostStatus.success));
-      } catch (error) {
-        emit(state.copyWith(postStatus: PostStatus.failure));
+
+        // Firestore에 데이터 저장
+        await _firestore.collection('posts').add(post.toMap());
+
+        // 저장 성공 후 초기화
+        emit(state.copyWith(text: '', images: []));
+      } catch (e) {
+        print('Error saving post: $e');
       }
     });
-  }
-
-  // Firebase Storage에 이미지를 업로드하고 URL을 반환
-  Future<String> _uploadImageToStorage(XFile image) async {
-    final ref =
-        _storage.ref().child('posts/${DateTime.now().millisecondsSinceEpoch}');
-    await ref.putFile(File(image.path));
-    return await ref.getDownloadURL();
-  }
-
-  // Firestore에 게시물 저장
-  Future<void> _savePostToFirestore(PostModel post) async {
-    final postRef = _firestore.collection('posts').doc();
-    await postRef.set(post.toMap());
   }
 }
