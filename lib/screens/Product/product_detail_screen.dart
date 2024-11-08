@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/utils/format_price.dart';
