@@ -113,3 +113,5 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     }); //^
   }
 }
+
+///태그 데이터 뿌려주는작업?
