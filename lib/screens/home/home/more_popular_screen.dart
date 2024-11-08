@@ -210,14 +210,17 @@ class MorePopularScreen extends StatelessWidget {
           // 좋아요와 장바구니 버튼
           Row(
             children: [
+              //^ 기존 코드를 아래와 같이 수정
               FutureBuilder<String>(
                 future: OnlyYouSharedPreference().getCurrentUserId(),
                 builder: (context, snapshot) {
                   final userId = snapshot.data ?? 'temp_user_id';
+                  final isFavorite = product.favoriteList.contains(userId);
+
                   return GestureDetector(
                     onTap: () async {
-                      final prefs = OnlyYouSharedPreference();
-                      final currentUserId = await prefs.getCurrentUserId();
+                      final currentUserId =
+                          await OnlyYouSharedPreference().getCurrentUserId();
                       context
                           .read<HomeBloc>()
                           .add(ToggleProductFavorite(product, currentUserId));
@@ -226,13 +229,9 @@ class MorePopularScreen extends StatelessWidget {
                       width: 20,
                       height: 20,
                       child: Icon(
-                        product.favoriteList.contains(userId)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
                         size: 18,
-                        color: product.favoriteList.contains(userId)
-                            ? Colors.red
-                            : Colors.grey,
+                        color: isFavorite ? Colors.red : Colors.grey,
                       ),
                     ),
                   );
