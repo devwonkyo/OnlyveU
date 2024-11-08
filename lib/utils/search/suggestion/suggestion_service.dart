@@ -48,4 +48,39 @@ class SuggestionService {
       print('Error adding brand names to suggestions: $e');
     }
   }
+
+  Future<void> addCategoriesToSuggestions() async {
+    try {
+      final querySnapshot = await _firestore.collection('categories').get();
+
+      // 각 문서에서 name 값을 추출하고 SuggestionModel 형식으로 변환합니다.
+      for (final doc in querySnapshot.docs) {
+        final data = doc.data();
+        final name = data['name'] as String;
+
+        // Firestore에서 이미 존재하는 문서를 확인합니다.
+        final existingDoc =
+            await _firestore.collection('suggestions').doc(name).get();
+
+        if (!existingDoc.exists) {
+          final suggestion = SuggestionModel(
+            term: name,
+            popularity: 0,
+            trendScore: 0.0,
+            sourceCollection: 'category', // sourceCollection 필드 설정
+          );
+
+          // 변환된 SuggestionModel 객체를 suggestions 컬렉션에 추가합니다.
+          await _firestore
+              .collection('suggestions')
+              .doc(suggestion.term)
+              .set(suggestion.toFirestore());
+        }
+      }
+
+      print('Categories added to suggestions successfully.');
+    } catch (e) {
+      print('Error adding categories to suggestions: $e');
+    }
+  }
 }
