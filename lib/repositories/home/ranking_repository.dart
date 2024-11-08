@@ -107,4 +107,29 @@ class RankingRepository {
       throw Exception('좋아요 처리에 실패했습니다.');
     }
   }
+
+  Future<void> addToCart(String productId, String userId) async {
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
+
+        List<String> cartItems = List<String>.from(
+            userSnapshot.exists ? userSnapshot.get('cartItems') ?? [] : []);
+
+        if (!cartItems.contains(productId)) {
+          cartItems.add(productId);
+
+          if (!userSnapshot.exists) {
+            transaction.set(userDoc, {'cartItems': cartItems});
+          } else {
+            transaction.update(userDoc, {'cartItems': cartItems});
+          }
+        }
+      });
+    } catch (e) {
+      print('Error adding to cart: $e');
+      throw Exception('장바구니 추가에 실패했습니다.');
+    }
+  }
 }
