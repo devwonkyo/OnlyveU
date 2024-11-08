@@ -141,31 +141,18 @@ class HomeRepository {
   Future<void> addToCart(String productId, String userId) async {
     try {
       await _firestore.runTransaction((transaction) async {
-        final productDoc = _firestore.collection('products').doc(productId);
         final userDoc = _firestore.collection('users').doc(userId);
-
-        final productSnapshot = await transaction.get(productDoc);
         final userSnapshot = await transaction.get(userDoc);
 
-        if (!productSnapshot.exists) {
-          throw Exception('상품을 찾을 수 없습니다.');
-        }
-
-        // cartList와 cartItems 업데이트
-        List<Map<String, dynamic>> cartList = List<Map<String, dynamic>>.from(
-            productSnapshot.get('cartList') ?? []);
+        // cartItems 업데이트
         List<String> cartItems = List<String>.from(
             userSnapshot.exists ? userSnapshot.get('cartItems') ?? [] : []);
 
         // 이미 장바구니에 있는지 확인
         if (!cartItems.contains(productId)) {
           cartItems.add(productId);
-          cartList.add({
-            'productId': productId, // userId가 아닌 productId로 수정  //^
-            'quantity': 1
-          });
 
-          transaction.update(productDoc, {'cartList': cartList});
+          // users 컬렉션만 업데이트
           if (!userSnapshot.exists) {
             transaction.set(userDoc, {'cartItems': cartItems});
           } else {

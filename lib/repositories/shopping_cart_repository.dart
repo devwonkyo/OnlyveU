@@ -61,21 +61,15 @@ class ShoppingCartRepository {
 
       await _firestore.runTransaction((transaction) async {
         // 상품과 유저 문서 참조
-        final productDoc = _firestore.collection('products').doc(productId);
+
         final userDoc = _firestore.collection('users').doc(userId);
 
         // 현재 상태 가져오기
-        final productSnapshot = await transaction.get(productDoc);
         final userSnapshot = await transaction.get(userDoc);
 
-        if (!productSnapshot.exists || !userSnapshot.exists) {
+        if (!userSnapshot.exists || !userSnapshot.exists) {
           throw Exception('상품 또는 사용자 정보를 찾을 수 없습니다.');
         }
-
-        // cartList에서 현재 유저 제거
-        List<Map<String, dynamic>> cartList = List<Map<String, dynamic>>.from(
-            productSnapshot.get('cartList') ?? []);
-        cartList.removeWhere((item) => item['productId'] == productId);
 
         // cartItems에서 현재 상품 제거
         List<String> cartItems =
@@ -83,7 +77,7 @@ class ShoppingCartRepository {
         cartItems.remove(productId);
 
         // 두 컬렉션 모두 업데이트
-        transaction.update(productDoc, {'cartList': cartList});
+
         transaction.update(userDoc, {'cartItems': cartItems});
       });
     } catch (e) {
@@ -122,44 +116,24 @@ class ShoppingCartRepository {
   // 선택된 상품들 삭제
   Future<void> removeSelectedProducts(List<String> productIds) async {
     try {
-      final userId = await OnlyYouSharedPreference().getCurrentUserId(); //^
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
 
       await _firestore.runTransaction((transaction) async {
-        //^
-        final userDoc = _firestore.collection('users').doc(userId); //^
-        final userSnapshot = await transaction.get(userDoc); //^
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
 
         if (!userSnapshot.exists) {
-          //^
-          throw Exception('사용자 정보를 찾을 수 없습니다.'); //^
-        } //^
+          throw Exception('사용자 정보를 찾을 수 없습니다.');
+        }
 
+        // cartItems에서 선택된 상품들 제거
         List<String> cartItems =
-            List<String>.from(userSnapshot.get('cartItems') ?? []); //^
+            List<String>.from(userSnapshot.get('cartItems') ?? []);
+        cartItems.removeWhere((productId) => productIds.contains(productId));
 
-        for (var productId in productIds) {
-          //^
-          // products 컬렉션 업데이트  //^
-          final productDoc =
-              _firestore.collection('products').doc(productId); //^
-          final productSnapshot = await transaction.get(productDoc); //^
-
-          if (productSnapshot.exists) {
-            //^
-            List<Map<String, dynamic>> cartList =
-                List<Map<String, dynamic>>.from(//^
-                    productSnapshot.get('cartList') ?? []); //^
-            cartList.removeWhere((item) => item['userId'] == userId); //^
-            transaction.update(productDoc, {'cartList': cartList}); //^
-          } //^
-
-          // cartItems에서 제거  //^
-          cartItems.remove(productId); //^
-        } //^
-
-        // users 컬렉션 업데이트  //^
-        transaction.update(userDoc, {'cartItems': cartItems}); //^
-      }); //^
+        // users 컬렉션만 업데이트
+        transaction.update(userDoc, {'cartItems': cartItems});
+      });
     } catch (e) {
       print('Error removing selected products: $e');
       throw Exception('선택된 상품 삭제에 실패했습니다.');
@@ -179,3 +153,4 @@ class ShoppingCartRepository {
     }
   }
 }
+//일단 프로덕트 컬렉션에 연동한거 다 삭제하기
