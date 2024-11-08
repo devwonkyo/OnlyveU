@@ -349,10 +349,25 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                   },
                                 ),
                                 SizedBox(height: 25.h),
-                                Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 24.sp,
-                                  color: Colors.grey,
+                                GestureDetector(
+                                  onTap: () async {
+                                    final currentUserId =
+                                        await OnlyYouSharedPreference()
+                                            .getCurrentUserId();
+                                    context.read<TodaySaleBloc>().add(
+                                          AddToCart(
+                                              product.productId, currentUserId),
+                                        );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('장바구니에 추가되었습니다.')),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.shopping_bag_outlined,
+                                    size: 24.sp,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),

@@ -20,6 +20,13 @@ class ToggleProductFavorite extends TodaySaleEvent {
   ToggleProductFavorite(this.product, this.userId);
 }
 
+//장바구니 담기
+class AddToCart extends TodaySaleEvent {
+  final String productId;
+  final String userId;
+  AddToCart(this.productId, this.userId);
+}
+
 // TodaySaleState: 특가 상품 로딩의 상태 정의
 abstract class TodaySaleState {}
 
@@ -95,6 +102,14 @@ class TodaySaleBloc extends Bloc<TodaySaleEvent, TodaySaleState> {
         } catch (e) {
           print('Error toggling favorite in TodaySaleBloc: $e');
         }
+      }
+    });
+    //장바구니 추가
+    on<AddToCart>((event, emit) async {
+      try {
+        await repository.addToCart(event.productId, event.userId);
+      } catch (e) {
+        print('Error adding to cart: $e');
       }
     });
   }
