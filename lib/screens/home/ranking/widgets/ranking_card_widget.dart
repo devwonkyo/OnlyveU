@@ -177,8 +177,15 @@ class RankingCardWidget extends StatelessWidget {
                       ),
                       SizedBox(width: 16.w),
                       GestureDetector(
-                        onTap: () {
-                          // TODO: 장바구니 추가 기능 구현
+                        onTap: () async {
+                          final currentUserId = await OnlyYouSharedPreference()
+                              .getCurrentUserId();
+                          context.read<RankingBloc>().add(
+                                AddToCart(product.productId, currentUserId),
+                              );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('장바구니에 추가되었습니다.')),
+                          );
                         },
                         child: Icon(
                           Icons.shopping_bag_outlined,
