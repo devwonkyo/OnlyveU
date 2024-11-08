@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:onlyveyou/models/product_model.dart'; // import 경로 수정
+import 'package:onlyveyou/models/product_model.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // import 경로 수정
 
 class ProductRepository {
   final FirebaseFirestore _firestore;
@@ -96,22 +99,17 @@ class ProductRepository {
         .orderBy('brandName')
         .get();
 
-    final tagListSnapshot = await _firestore
-        .collection('products')
-        .where('tagList', arrayContains: term)
-        .get();
-
     final allDocs = [
       ...querySnapshot.docs,
       ...categorySnapshot.docs,
       ...brandNameSnapshot.docs,
-      ...tagListSnapshot.docs,
     ];
 
     final uniqueDocs = allDocs.toSet().toList();
 
     return uniqueDocs.map((doc) => ProductModel.fromMap(doc.data())).toList();
   }
+
 
   Future<ProductModel?> fetchProductById(String productId) async {
     try {
@@ -124,5 +122,68 @@ class ProductRepository {
       print("Error fetching product data: $e");
     }
     return null;
+
+  Future<void> fetchAndStoreAllProducts() async {
+    try {
+      final querySnapshot = await _firestore.collection('products').get();
+      final products = querySnapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data()))
+          .toList();
+
+      await _clearStoredProducts();
+
+      await _storeProductsLocally(products);
+    } catch (e) {
+      print('Error fetching products: $e');
+    }
+  }
+
+  Future<void> _clearStoredProducts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('products');
+    } catch (e) {
+      print('Error clearing stored products: $e');
+    }
+  }
+
+  Future<void> _storeProductsLocally(List<ProductModel> products) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final productJson = products.map((product) => product.toMap()).toList();
+      final productString = jsonEncode(productJson);
+      await prefs.setString('products', productString);
+    } catch (e) {
+      print('Error storing products locally: $e');
+    }
+  }
+
+  Future<List<ProductModel>> getStoredProducts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final productString = prefs.getString('products');
+      if (productString != null) {
+        final List<dynamic> productJson = jsonDecode(productString);
+        return productJson.map((json) => ProductModel.fromMap(json)).toList();
+      }
+    } catch (e) {
+      print('Error getting stored products: $e');
+    }
+    return [];
+  }
+
+  Future<List<ProductModel>> searchLocal(String term) async {
+    final storedProducts = await getStoredProducts();
+    if (term.isNotEmpty) {
+      return storedProducts.where((product) {
+        return product.name.contains(term) ||
+            product.categoryId.contains(term) ||
+            product.brandName.contains(term) ||
+            product.tagList.any((tag) => tag.contains(term));
+      }).toList();
+    } else {
+      return [];
+    }
+
   }
 }

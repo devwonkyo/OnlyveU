@@ -85,7 +85,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     });
 
-    // ToggleProductFavorite 이벤트 핸들러
+    // 좋아요 부분
     on<ToggleProductFavorite>((event, emit) async {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
@@ -93,7 +93,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           await _homeRepository.toggleProductFavorite(
               event.product.productId, event.userId);
 
-          // 상태 업데이트 (추천 상품 목록)
+          // 추천 상품 목록 업데이트
           final updatedRecommended =
               currentState.recommendedProducts.map((product) {
             if (product.productId == event.product.productId) {
@@ -109,7 +109,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             return product;
           }).toList();
 
-          // 상태 업데이트 (인기 상품 목록)
+          // 인기 상품 목록 업데이트
           final updatedPopular = currentState.popularProducts.map((product) {
             if (product.productId == event.product.productId) {
               List<String> updatedFavoriteList =
@@ -134,7 +134,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         }
       }
     });
-
     // RefreshHomeData 이벤트 핸들러
     on<RefreshHomeData>((event, emit) async {
       if (state is HomeLoaded) {

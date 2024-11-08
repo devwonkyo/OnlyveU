@@ -37,10 +37,10 @@ packages:
     dependency: transitive
     description:
       name: asn1lib
-      sha256: "4bae5ae63e6d6dd17c4aac8086f3dec26c0236f6a0f03416c6c19d830c367cf5"
+      sha256: "6b151826fcc95ff246cd219a0bf4c753ea14f4081ad71c61939becf3aba27f70"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.8"
+    version: "1.5.5"
   async:
     dependency: transitive
     description:
@@ -449,10 +449,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: ce89c5a993ca5eea74535f798478502c30a625ecb10a1de4d7fef5cd1bcac2a4
+      sha256: "6f1b756f6e863259a99135ff3c95026c3cdca17d10ebef2bba2261a25ddc8bbc"
       url: "https://pub.dev"
     source: hosted
-    version: "14.4.1"
+    version: "14.3.0"
   google_identity_services_web:
     dependency: transitive
     description:
