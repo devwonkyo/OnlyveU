@@ -122,7 +122,7 @@ class ProductRepository {
       print("Error fetching product data: $e");
     }
     return null;
-
+  }
   Future<void> fetchAndStoreAllProducts() async {
     try {
       final querySnapshot = await _firestore.collection('products').get();
