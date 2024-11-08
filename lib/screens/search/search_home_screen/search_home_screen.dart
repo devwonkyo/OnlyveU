@@ -20,11 +20,10 @@ class SearchHomeScreen extends StatelessWidget {
           context.read<RecentSearchBloc>().add(AddSearchTerm(state.text));
         }
       },
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(top: 20.h),
+      child: Padding(
+        padding: EdgeInsets.only(top: 20.h),
+        child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 로컬 데이터
               BlocBuilder<RecentSearchBloc, RecentSearchState>(
