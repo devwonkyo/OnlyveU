@@ -74,8 +74,7 @@ class SearchPage extends StatelessWidget {
               ),
               BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
                 listener: (context, state) {
-                  if (state is SearchTextFieldEmpty) {
-                  } else if (state is SearchTextFieldTyping) {
+                  if (state is SearchTextFieldTyping) {
                     context
                         .read<SearchSuggestionBloc>()
                         .add(FetchSearchSuggestions(state.text));
