@@ -5,16 +5,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/screens/Product/widgets/product_description_tab.dart';
-import 'package:onlyveyou/screens/Product/widgets/product_info_tab.dart';
-import 'package:onlyveyou/screens/Product/widgets/review_tab.dart';
 import 'package:onlyveyou/screens/Product/widgets/sticky_tabbar_delegate.dart';
 import 'package:onlyveyou/utils/dummy_data.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/widgets/small_promotion_banner.dart';
 
+/*
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
 
@@ -62,52 +60,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: BlocConsumer<ProductDetailBloc, ProductDetailState>(
-          listener: (context, state) {
-            if (state is ProductDetailError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
-            }
-          },
-          builder: (context, state) {
-            if (state is ProductDetailLoading) {
-              return Center(child: CircularProgressIndicator());
-            }
+      body: BlocConsumer<ProductDetailBloc, ProductDetailState>(
+        listener: (context, state) {
+          if (state is ProductDetailError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is ProductDetailLoading) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-            if (state is ProductDetailLoaded) {
-              return DefaultTabController(
-                length: 2,
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 100.h),
-                      child: NestedScrollView(
-                        headerSliverBuilder: (context, innerBoxIsScrolled) {
-                          return [
-                            _buildAppBar(),
-                            _buildProductHeader(state.product),
-                            _buildTabBar(),
-                          ];
-                        },
-                        body: _buildTabBarView(state.product),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: ExpandableBottomSheet(productModel: state.product),
-                    ),
-                  ],
-                ),
-              );
-            }
+          if (state is ProductDetailLoaded) {
+            return DefaultTabController(
+              length: 2,
+              child: Stack(
+                children: [
+                  NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return [
+                        _buildAppBar(),
+                        _buildProductHeader(state.product),
+                        _buildTabBar(),
+                      ];
+                    },
+                    body: _buildTabBarView(state.product),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: ExpandableBottomSheet(productModel: state.product),
+                  ),
+                ],
+              ),
+            );
+          }
 
-            return SizedBox.shrink();
-          },
-        ),
+          return SizedBox.shrink();
+        },
       ),
     );
   }
@@ -411,20 +404,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget _buildTabBarView(ProductModel product) {
     return TabBarView(
       children: [
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              ProductDescriptionTab(product: product),
-              Container(
-                padding: EdgeInsets.all(16.w),
-                child: Text('추가 컨텐츠'),
-              ),
-            ],
-          ),
-        ),
+        ProductDescriptionTab(product: product),
         Text('review'),
         // ReviewTab(reviews: product.reviews),
       ],
     );
   }
-}
+}*/

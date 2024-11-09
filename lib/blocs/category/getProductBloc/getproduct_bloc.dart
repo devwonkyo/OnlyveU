@@ -26,6 +26,7 @@ class GetProductBloc extends Bloc<GetProductEvent, GetProductState> {
       }
     } catch (e) {
       emit(GetProductError(e.toString()));
+      print("categroy list error : ${e.toString()}");
     }
   }
 }

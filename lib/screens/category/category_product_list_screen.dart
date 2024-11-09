@@ -6,6 +6,7 @@ import 'package:onlyveyou/blocs/category/getProductBloc/getproduct_bloc.dart';
 import 'package:onlyveyou/models/category_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/category/widgets/filter_item.dart';
+import 'package:onlyveyou/utils/dummy_data.dart';
 import 'package:onlyveyou/widgets/main_promotion_banner.dart';
 import 'package:onlyveyou/widgets/product_widgets/vertical_product_card.dart';
 import 'package:onlyveyou/widgets/small_promotion_banner.dart';
@@ -167,13 +168,13 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                       slivers: [
                         // 배너 영역
                         if (isMainCategory)
-                          const SliverToBoxAdapter(
+                          SliverToBoxAdapter(
                             child: Column(
                               children: [
-                                MainPromotionBanner(),
-                                SizedBox(height: 16),
-                                SmallPromotionBanner(),
-                                SizedBox(height: 16),
+                                const MainPromotionBanner(),
+                                const SizedBox(height: 16),
+                                SmallPromotionBanner(promotions: getMultiBannerData()),
+                                const SizedBox(height: 16),
                               ],
                             ),
                           ),
@@ -209,7 +210,7 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                               (context, index) {
                                 return VerticalProductCard(
                                   productModel: products[index],
-                                  onTap: () => context.push("/product-detail", extra: products[index].productId)
+                                  onTap: () => context.push("/product-detail", extra: "1_4_1")
                                 );
                               },
                               childCount: products.length,

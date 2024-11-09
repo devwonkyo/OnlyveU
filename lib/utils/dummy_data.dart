@@ -251,7 +251,6 @@ List<ProductModel> generateDummyProducts() {
             if (random.nextBool()) 'BEST',
             if (random.nextBool()) 'SALE'
           ],
-          cartList: [],
           visitCount: 100 + random.nextInt(900),
           rating: rating,
           registrationDate:
@@ -279,4 +278,46 @@ List<ProductModel> generateDummyProducts() {
   }
 
   return products;
+}
+
+
+final List<Map<String, String>> promotions = [
+  {
+    'image': 'assets/image/banner4.png',
+    'title': '퍼셀 HOT신상 글루타치온앰플',
+  },
+  {
+    'image': 'assets/image/banner4.png',
+    'title': '퍼셀 HOT신상 글루타치온앰플',
+  },
+  {
+    'image': 'assets/image/banner5.png',
+    'title': '퍼셀 HOT신상 글루타치온앰플',
+  },
+];
+
+List<Map<String,String>> getOneBannerData(){
+  return [
+    {
+      'image': 'assets/image/banner4.png',
+      'title': '퍼셀 HOT신상 글루타치온앰플',
+    },
+  ];
+}
+
+List<Map<String,String>> getMultiBannerData(){
+  return [
+    {
+      'image': 'assets/image/banner4.png',
+      'title': '퍼셀 HOT신상 글루타치온앰플',
+    },
+    {
+      'image': 'assets/image/banner4.png',
+      'title': '퍼셀 HOT신상 글루타치온앰플',
+    },
+    {
+      'image': 'assets/image/banner5.png',
+      'title': '퍼셀 HOT신상 글루타치온앰플',
+    },
+  ];
 }
