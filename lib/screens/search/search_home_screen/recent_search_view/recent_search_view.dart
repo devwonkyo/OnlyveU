@@ -17,18 +17,21 @@ class RecentSearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 15.w),
-      scrollDirection: Axis.horizontal,
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 5.w),
-          child: RecentlySearchButton(
-            title: titleList[index],
-          ),
-        );
-      },
+    return SizedBox(
+      height: 40.h,
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 15.w),
+        scrollDirection: Axis.horizontal,
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.w),
+            child: RecentlySearchButton(
+              title: titleList[index],
+            ),
+          );
+        },
+      ),
     );
   }
 }

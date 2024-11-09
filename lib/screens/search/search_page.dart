@@ -61,42 +61,41 @@ class SearchPage extends StatelessWidget {
           body: Column(
             children: [
               Container(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(color: Colors.grey[200]!, width: 1.w),
                   ),
                 ),
-                child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                  child: const SearchTextField(),
-                ),
+                child: const SearchTextField(),
               ),
-              BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
-                listener: (context, state) {
-                  if (state is SearchTextFieldTyping) {
-                    context
-                        .read<SearchSuggestionBloc>()
-                        .add(FetchSearchSuggestions(state.text));
-                  } else if (state is SearchTextFieldSubmitted) {
-                    context
-                        .read<SearchResultBloc>()
-                        .add(FetchSearchResults(state.text));
-                  }
-                },
-                child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
-                  builder: (context, state) {
-                    print('$state');
-                    if (state is SearchTextFieldEmpty) {
-                      return const SearchHomeScreen();
-                    } else if (state is SearchTextFieldTyping) {
-                      return const SearchSuggestionScreen();
+              Expanded(
+                child: BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
+                  listener: (context, state) {
+                    if (state is SearchTextFieldTyping) {
+                      context
+                          .read<SearchSuggestionBloc>()
+                          .add(FetchSearchSuggestions(state.text));
                     } else if (state is SearchTextFieldSubmitted) {
-                      return const SearchResultScreen();
-                    } else {
-                      return const SizedBox();
+                      context
+                          .read<SearchResultBloc>()
+                          .add(FetchSearchResults(state.text));
                     }
                   },
+                  child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
+                    builder: (context, state) {
+                      print('$state');
+                      if (state is SearchTextFieldEmpty) {
+                        return const SearchHomeScreen();
+                      } else if (state is SearchTextFieldTyping) {
+                        return const SearchSuggestionScreen();
+                      } else if (state is SearchTextFieldSubmitted) {
+                        return const SearchResultScreen();
+                      } else {
+                        return const SizedBox();
+                      }
+                    },
+                  ),
                 ),
               ),
             ],

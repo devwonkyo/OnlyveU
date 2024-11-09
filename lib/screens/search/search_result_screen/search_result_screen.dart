@@ -30,49 +30,47 @@ class SearchResultScreen extends StatelessWidget {
           } else if (state is SearchResultLoading) {
             return const Center(child: Text('로딩화면 구현 예정'));
           } else if (state is SearchResultLoaded) {
-            return Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.w),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 60.h,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '총 ${state.products.length}개',
-                            style: TextStyle(fontSize: 15.sp),
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.tune),
-                              SizedBox(width: 20.w),
-                              Text(
-                                '인기순',
-                                style: TextStyle(fontSize: 15.sp),
-                              ),
-                              const Icon(Icons.keyboard_arrow_down)
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10.w,
-                          childAspectRatio: 0.45.r,
-                          mainAxisExtent: 350.h,
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 60.h,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '총 ${state.products.length}개',
+                          style: TextStyle(fontSize: 15.sp),
                         ),
-                        itemCount: state.products.length,
-                        itemBuilder: (context, index) =>
-                            ProductCard(item: state.products[index]),
-                      ),
+                        Row(
+                          children: [
+                            const Icon(Icons.tune),
+                            SizedBox(width: 20.w),
+                            Text(
+                              '인기순',
+                              style: TextStyle(fontSize: 15.sp),
+                            ),
+                            const Icon(Icons.keyboard_arrow_down)
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10.w,
+                        childAspectRatio: 0.45.r,
+                        mainAxisExtent: 350.h,
+                      ),
+                      itemCount: state.products.length,
+                      itemBuilder: (context, index) =>
+                          ProductCard(item: state.products[index]),
+                    ),
+                  ),
+                ],
               ),
             );
           } else if (state is SearchResultError) {

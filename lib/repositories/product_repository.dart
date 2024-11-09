@@ -162,11 +162,11 @@ class ProductRepository {
   Future<List<ProductModel>> searchLocal(String term) async {
     final storedProducts = await getStoredProducts();
     if (term.isNotEmpty) {
+      final lowerCaseTerm = term.toLowerCase();
       return storedProducts.where((product) {
-        return product.name.contains(term) ||
-            product.categoryId.contains(term) ||
-            product.brandName.contains(term) ||
-            product.tagList.any((tag) => tag.contains(term));
+        return product.name.toLowerCase().contains(lowerCaseTerm) ||
+            product.categoryId.toLowerCase().contains(lowerCaseTerm) ||
+            product.brandName.toLowerCase().contains(lowerCaseTerm);
       }).toList();
     } else {
       return [];
