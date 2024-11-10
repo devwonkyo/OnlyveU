@@ -19,7 +19,7 @@ class TrendUpdater {
     final querySnapshot = await _firestore.collection('suggestions').get();
 
     for (final doc in querySnapshot.docs) {
-      final suggestion = SuggestionModel.fromFirestore(doc);
+      final suggestion = SuggestionModel.fromMap(doc.data());
       final trendScore =
           await trendCalculator.calculateTrendScore(suggestion.term);
 
@@ -32,7 +32,7 @@ class TrendUpdater {
       await _firestore
           .collection('suggestions')
           .doc(suggestion.term)
-          .set(updatedSuggestion.toFirestore());
+          .set(updatedSuggestion.toMap());
     }
   }
 }
