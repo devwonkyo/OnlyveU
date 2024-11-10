@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/utils/format_price.dart';
@@ -95,16 +97,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           // 하단 고정 버튼
           BlocConsumer<ProductDetailBloc, ProductDetailState>(
-            listener: (context, state) {
-
-            },
+            listener: (context, state) {},
             builder: (context, state) {
               if (state is ProductDetailLoaded) {
                 return ExpandableBottomSheet(productModel: state.product);
-              }else{
+              } else {
                 return const SizedBox.shrink();
               }
-              },
+            },
           ),
         ],
       ),
@@ -127,7 +127,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
-          onPressed: () {},
+          onPressed: () {
+            context.push('/search');
+          },
           iconSize: 24.sp,
         ),
         IconButton(
@@ -332,7 +334,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        Divider(thickness: 1,color: Colors.grey,),
+        Divider(
+          thickness: 1,
+          color: Colors.grey,
+        ),
 
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
@@ -369,9 +374,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
 
         SmallPromotionBanner(),
-
-
-
       ],
     );
   }
