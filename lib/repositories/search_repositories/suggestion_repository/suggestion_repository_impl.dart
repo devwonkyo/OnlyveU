@@ -93,4 +93,23 @@ class SuggestionRepositoryImpl implements SuggestionRepository {
       return [];
     }
   }
+
+  @override
+  Future<void> incrementPopularity(String term, int currentPopularity) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('suggestions')
+          .where('term', isEqualTo: term)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final suggestionRef = querySnapshot.docs.first.reference;
+        await suggestionRef.update({
+          'popularity': currentPopularity + 1,
+        });
+      }
+    } catch (e) {
+      print('Error incrementing popularity: $e');
+    }
+  }
 }
