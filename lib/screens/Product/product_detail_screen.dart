@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
-import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/utils/format_price.dart';
@@ -96,16 +96,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           // 하단 고정 버튼
           BlocConsumer<ProductDetailBloc, ProductDetailState>(
-            listener: (context, state) {
-
-            },
+            listener: (context, state) {},
             builder: (context, state) {
               if (state is ProductDetailLoaded) {
                 return ExpandableBottomSheet(productModel: state.product);
-              }else{
+              } else {
                 return const SizedBox.shrink();
               }
-              },
+            },
           ),
         ],
       ),
@@ -128,7 +126,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.search),
-          onPressed: () {},
+          onPressed: () {
+            context.push('/search');
+          },
           iconSize: 24.sp,
         ),
         IconButton(
@@ -333,15 +333,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        Divider(thickness: 1,color: Colors.grey,),
+        const Divider(
+          thickness: 1,
+          color: Colors.grey,
+        ),
 
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("일반배송"),
-              Text("2,500원 (20,000원 이상 무료배송 \n 평균 3일 이내 도착"),
+              const Text("일반배송"),
+              const Text("2,500원 (20,000원 이상 무료배송 \n 평균 3일 이내 도착"),
               Icon(Icons.chevron_right, size: 18.sp),
             ],
           ),
@@ -369,10 +372,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ),
 
-        SmallPromotionBanner(),
-
-
-
+        const SmallPromotionBanner(),
       ],
     );
   }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/screens/search/search_home_screen/recent_search_view/recent_search_view.dart';
+import 'package:onlyveyou/screens/search/search_home/recent_search/recent_search_view.dart';
 
 import '../search_text_field/bloc/search_text_field_bloc.dart';
-import 'recent_search_view/bloc/recent_search_bloc.dart';
+import 'recent_search/bloc/recent_search_bloc.dart';
 import '../../../utils/search/suggestion/suggestion_button.dart';
 
 class SearchHomeScreen extends StatelessWidget {
@@ -20,11 +20,10 @@ class SearchHomeScreen extends StatelessWidget {
           context.read<RecentSearchBloc>().add(AddSearchTerm(state.text));
         }
       },
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(top: 20.h),
+      child: Padding(
+        padding: EdgeInsets.only(top: 20.h),
+        child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 로컬 데이터
               BlocBuilder<RecentSearchBloc, RecentSearchState>(
@@ -74,14 +73,13 @@ class SearchHomeScreen extends StatelessWidget {
               // 서버 데이터
               SearchMainContainer(
                 title: '급상승 검색어',
-                child:
-                    // const SizedBox(),
-                    Column(
-                  children: [
-                    BrandSuggestionUpdateButton(),
-                    CategorySuggestionUpdateButton(),
-                  ],
-                ),
+                child: const SizedBox(),
+                // Column(
+                // children: [
+                //   BrandSuggestionUpdateButton(),
+                //   CategorySuggestionUpdateButton(),
+                // ],
+                // ),
               ),
             ],
           ),
