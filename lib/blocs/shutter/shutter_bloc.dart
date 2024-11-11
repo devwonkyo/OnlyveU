@@ -1,48 +1,25 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'shutter_event.dart';
 import 'shutter_state.dart';
+import 'package:onlyveyou/screens/shutter/firestore_service.dart';
 
 class ShutterBloc extends Bloc<ShutterEvent, ShutterState> {
-  ShutterBloc()
-      : super(const ShutterState(selectedTag: '#데일리메이크업', images: [])) {
-    on<TagSelected>((event, emit) {
-      List<String> images = _getImagesForTag(event.tag);
-      emit(state.copyWith(selectedTag: event.tag, images: images));
-    });
-  }
+  final FirestoreService _firestoreService;
 
-  List<String> _getImagesForTag(String tag) {
-    switch (tag) {
-      case '#데일리메이크업':
-        return [
-          'assets/image/shutter/daily1.jpeg',
-          'assets/image/shutter/daily2.jpeg',
-          'assets/image/shutter/daily3.jpeg',
-          'assets/image/shutter/daily4.jpeg',
-        ];
-      case '#틴트':
-        return [
-          'assets/image/shutter/tint1.jpeg',
-          'assets/image/shutter/tint2.jpeg',
-          'assets/image/shutter/tint3.jpeg',
-          'assets/image/shutter/tint4.jpeg',
-        ];
-      case '#홈케어':
-        return [
-          'assets/image/shutter/homecare1.jpeg',
-          'assets/image/shutter/homecare2.jpeg',
-          'assets/image/shutter/homecare3.jpeg',
-          'assets/image/shutter/homecare4.jpeg',
-        ];
-      case '#건강관리':
-        return [
-          'assets/image/shutter/health1.jpeg',
-          'assets/image/shutter/health2.jpeg',
-          'assets/image/shutter/health3.jpeg',
-          'assets/image/shutter/health4.jpeg',
-        ];
-      default:
-        return [];
-    }
+  ShutterBloc(this._firestoreService) : super(ShutterState()) {
+    // FetchPosts 이벤트에 대한 핸들러를 on 메서드를 통해 등록
+    on<FetchPosts>((event, emit) async {
+      try {
+        final posts = await _firestoreService.fetchPosts();
+        emit(state.copyWith(posts: posts));
+      } catch (e) {
+        // 에러 상태 처리
+      }
+    });
+
+    // TagSelected 이벤트에 대한 핸들러 추가 (선택된 태그 업데이트)
+    on<TagSelected>((event, emit) {
+      emit(state.copyWith(selectedTag: event.tag));
+    });
   }
 }

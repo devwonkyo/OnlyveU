@@ -6,14 +6,18 @@ import 'package:onlyveyou/blocs/shutter/shutter_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutter_event.dart';
 import 'package:onlyveyou/blocs/shutter/shutter_state.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
+import 'package:onlyveyou/screens/shutter/firestore_service.dart';
+import 'package:onlyveyou/models/post_model.dart';
 
+// shutter_screen.dart
 class ShutterScreen extends StatelessWidget {
   const ShutterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ShutterBloc(),
+      create: (context) => ShutterBloc(FirestoreService())
+        ..add(FetchPosts()), // Trigger FetchPosts event here
       child: Scaffold(
         appBar: DefaultAppBar(mainColor: const Color(0xFFC9C138)),
         body: SingleChildScrollView(
@@ -23,7 +27,7 @@ class ShutterScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 기존 UI: 헤더와 태그 버튼들
+                // Existing UI: header and tag buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -71,51 +75,28 @@ class ShutterScreen extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 20),
+                // Fetch and display posts
                 BlocBuilder<ShutterBloc, ShutterState>(
                   builder: (context, state) {
-                    return GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
+                    if (state.posts.isEmpty) {
+                      return const Center(child: Text('No posts available.'));
+                    }
+                    return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      children: List.generate(state.images.length,
-                          (index) => _buildProfileCard(state.images[index])),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: state.posts.length,
+                      itemBuilder: (context, index) {
+                        final post = state.posts[index];
+                        return _buildPostFromModel(post);
+                      },
                     );
                   },
-                ),
-
-                // 새로운 게시물 섹션 추가
-                const SizedBox(height: 40),
-                const Text(
-                  '게시물',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Column(
-                  children: [
-                    _buildPost(
-                      imagePath: 'assets/image/shutter/sample1.jpeg',
-                      username: 'user123',
-                      description: '오늘의 뷰티 팁!',
-                      likes: 125,
-                      comments: 12,
-                    ),
-                    _buildPost(
-                      imagePath: 'assets/image/shutter/sample2.jpeg',
-                      username: 'beauty_queen',
-                      description: '새로 산 립스틱 색상!',
-                      likes: 80,
-                      comments: 5,
-                    ),
-                    _buildPost(
-                      imagePath: 'assets/images/shutter/sample3.jpeg',
-                      username: 'makeup_lover',
-                      description: '간단한 데일리 메이크업!',
-                      likes: 200,
-                      comments: 20,
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -125,60 +106,8 @@ class ShutterScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTagButton(BuildContext context, String tag, String selectedTag) {
-    bool isSelected = tag == selectedTag;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: ElevatedButton(
-        onPressed: () {
-          context.read<ShutterBloc>().add(TagSelected(tag));
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? Colors.black : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Colors.black),
-          ),
-        ),
-        child: Text(
-          tag,
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileCard(String imagePath) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            print('이미지를 클릭했습니다!');
-          },
-          child: Container(
-            width: 165,
-            height: 165,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(imagePath),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
-  // 게시물 UI 구성
-  Widget _buildPost({
-    required String imagePath,
-    required String username,
-    required String description,
-    required int likes,
-    required int comments,
-  }) {
+  // Method to display the post from the model
+  Widget _buildPostFromModel(PostModel post) {
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
       shape: RoundedRectangleBorder(
@@ -187,37 +116,65 @@ class ShutterScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 게시물 이미지
-          Image.asset(imagePath),
+          // Displaying images if available
+          if (post.imageUrls.isNotEmpty)
+            Image.network(
+                post.imageUrls[0]), // You can use a list of images if needed
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 사용자명과 설명
-                Text(
-                  username,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                // User information (for now, username is static)
+                const Text(
+                  'username', // Use dynamic username from Firebase if available
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
-                Text(description),
+                Text(post.text),
                 const SizedBox(height: 10),
-                // 좋아요, 댓글
-                Row(
-                  children: [
-                    const Icon(Icons.thumb_up, size: 16, color: Colors.grey),
-                    const SizedBox(width: 5),
-                    Text('$likes likes'),
-                    const SizedBox(width: 10),
-                    const Icon(Icons.comment, size: 16, color: Colors.grey),
-                    const SizedBox(width: 5),
-                    Text('$comments comments'),
-                  ],
-                ),
+                // Displaying tags
+                if (post.tags.isNotEmpty)
+                  Row(
+                    children: post.tags
+                        .map((tag) => Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Chip(label: Text(tag)),
+                            ))
+                        .toList(),
+                  ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // shutter_screen.dart의 하단에 추가
+
+  Widget _buildTagButton(
+      BuildContext context, String tag, String? selectedTag) {
+    final isSelected = tag == selectedTag;
+
+    return GestureDetector(
+      onTap: () {
+        context.read<ShutterBloc>().add(TagSelected(tag));
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.only(right: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue : Colors.grey[300],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          tag,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
