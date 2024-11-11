@@ -7,6 +7,7 @@ import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
+import 'package:onlyveyou/screens/Product/widgets/explain_product.dart';
 import 'package:onlyveyou/screens/Product/widgets/product_description_tab.dart';
 import 'package:onlyveyou/screens/Product/widgets/product_info_tab.dart';
 import 'package:onlyveyou/screens/Product/widgets/review_tab.dart';
@@ -415,10 +416,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           child: Column(
             children: [
               ProductDescriptionTab(product: product),
-              Container(
-                padding: EdgeInsets.all(16.w),
-                child: Text('추가 컨텐츠'),
-              ),
+              Container(height: 8.h, color: Colors.grey[200]),
+              ExpansionTileWidget()
             ],
           ),
         ),
