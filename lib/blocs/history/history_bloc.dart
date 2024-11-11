@@ -24,8 +24,7 @@ class ClearHistory extends HistoryEvent {}
 //장바구니 담기
 class AddToCart extends HistoryEvent {
   final String productId;
-  final String userId;
-  AddToCart(this.productId, this.userId);
+  AddToCart(this.productId);
 }
 
 // State
@@ -121,9 +120,12 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
 //장바구니
     on<AddToCart>((event, emit) async {
       try {
-        await _historyRepository.addToCart(event.productId, event.userId);
+        await _historyRepository.addToCart(event.productId);
+        print('Successfully added to cart in bloc'); // 디버깅용
       } catch (e) {
-        print('Error adding to cart: $e');
+        print('Error adding to cart in bloc: $e');
+        // 에러 상태 처리
+        // emit(state.copyWith(error: e.toString())); // 필요한 경우 상태 업데이트
       }
     });
   }
