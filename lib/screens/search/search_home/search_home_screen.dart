@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/screens/search/search_home_screen/recent_search_view/recent_search_view.dart';
+import 'package:onlyveyou/screens/search/search_home/recent_search/recent_search_view.dart';
 
 import '../search_text_field/bloc/search_text_field_bloc.dart';
-import 'recent_search_view/bloc/recent_search_bloc.dart';
+import 'recent_search/bloc/recent_search_bloc.dart';
 import '../../../utils/search/suggestion/suggestion_button.dart';
 
 class SearchHomeScreen extends StatelessWidget {
