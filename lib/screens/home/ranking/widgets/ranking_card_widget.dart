@@ -178,41 +178,26 @@ class RankingCardWidget extends StatelessWidget {
                       SizedBox(width: 16.w),
                       GestureDetector(
                         onTap: () async {
-                          try {
-                            final currentUserId =
-                                await OnlyYouSharedPreference()
-                                    .getCurrentUserId();
-                            bool isErrorShown = false;
+                          context
+                              .read<RankingBloc>()
+                              .add(AddToCart(product.productId));
 
-                            context
-                                .read<RankingBloc>()
-                                .add(AddToCart(product.productId));
-                            context.read<RankingBloc>().stream.listen((state) {
-                              if (state is RankingError && !isErrorShown) {
-                                isErrorShown = true;
+                          context.read<RankingBloc>().stream.listen(
+                            (state) {
+                              if (state is RankingError ||
+                                  state is RankingSuccess) {
+                                ScaffoldMessenger.of(context).clearSnackBars();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    duration: Duration(milliseconds: 200),
-                                    content: Text(state.message),
-                                  ),
-                                );
-                              } else if (!isErrorShown) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    duration: Duration(milliseconds: 200),
-                                    content: Text('장바구니에 추가되었습니다.'),
+                                    content: Text(state is RankingSuccess
+                                        ? state.message
+                                        : (state as RankingError).message),
+                                    duration: Duration(milliseconds: 1000),
                                   ),
                                 );
                               }
-                            });
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                duration: Duration(milliseconds: 200),
-                                content: Text(e.toString()),
-                              ),
-                            );
-                          }
+                            },
+                          );
                         },
                         child: Container(
                           width: 22,

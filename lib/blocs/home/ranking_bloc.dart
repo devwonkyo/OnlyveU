@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/home/ranking_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
 // import 변경
 //event
@@ -49,19 +50,28 @@ class RankingLoaded extends RankingState {
   RankingLoaded(this.products);
 }
 
-// 오류 상태: 상품 로드 중 오류가 발생한 경우 표시되는 상태
+//RankingState에 성공 상태 추가: 장바구니 추가
+class RankingSuccess extends RankingState {
+  final String message;
+  RankingSuccess(this.message);
+} //장바구니 중복 처리
+
 class RankingError extends RankingState {
+  // 추가
   final String message;
   RankingError(this.message);
 }
 
-// RankingBloc: 랭킹 상품 로드 및 상태 관리를 위한 Bloc 클래스
+// 오류 상태: 상품 로드 중 오류가 발생한 경우 표시되는 상태
 class RankingBloc extends Bloc<RankingEvent, RankingState> {
-  final RankingRepository
-      _rankingRepository; // 랭킹 상품 데이터를 가져오는 데 사용할 리포지토리 인스턴스
+  final RankingRepository _rankingRepository;
+  final ShoppingCartRepository _cartRepository; // 추가
 
-  RankingBloc({required RankingRepository rankingRepository}) // 생성자 수정
-      : _rankingRepository = rankingRepository,
+  RankingBloc({
+    required RankingRepository rankingRepository,
+    required ShoppingCartRepository cartRepository, // 추가
+  })  : _rankingRepository = rankingRepository,
+        _cartRepository = cartRepository, // 추가
         super(RankingInitial()) {
     // LoadRankingProducts 이벤트 처리
     on<LoadRankingProducts>((event, emit) async {
@@ -119,14 +129,12 @@ class RankingBloc extends Bloc<RankingEvent, RankingState> {
       if (state is RankingLoaded) {
         final currentState = state as RankingLoaded;
         try {
-          await _rankingRepository.addToCart(event.productId);
+          await _cartRepository.addToCart(event.productId);
+          emit(RankingSuccess('장바구니에 담겼습니다.')); // 성공 메시지
+          emit(currentState);
         } catch (e) {
-          if (e.toString().contains('이미 장바구니에 담겨 있습니다')) {
-            emit(RankingError('이미 장바구니에 담겨 있습니다.'));
-          } else {
-            emit(RankingError('장바구니 추가에 실패했습니다.'));
-          }
-          emit(currentState); // 원래 상태로 복원
+          emit(RankingError(e.toString()));
+          emit(currentState);
         }
       }
     });
