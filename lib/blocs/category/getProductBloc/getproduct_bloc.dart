@@ -15,13 +15,22 @@ class GetProductBloc extends Bloc<GetProductEvent, GetProductState> {
     emit(GetProductLoading());
 
     try {
-      final querySnapshot = await FirebaseFirestore.instance.collection('products').get();
-      final products = querySnapshot.docs.map((doc) => ProductModel.fromMap(doc.data())).toList();
-
       //fillter id로 조회 //ismain카테고리 확인해서
       if (event.isMainCategory!) {
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('products')
+            .where('categoryId', isEqualTo: event.filter)  // categoryId가 event.filter와 같은 것만
+            .get();
+
+        final products = querySnapshot.docs.map((doc) => ProductModel.fromMap(doc.data())).toList();
         emit(GetProductLoaded(products));
       } else {
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('products')
+            .where('subcategoryId', isEqualTo: event.filter)  // categoryId가 event.filter와 같은 것만
+            .get();
+
+        final products = querySnapshot.docs.map((doc) => ProductModel.fromMap(doc.data())).toList();
         emit(GetProductLoaded(products));
       }
     } catch (e) {

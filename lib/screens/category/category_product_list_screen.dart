@@ -32,7 +32,6 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _categoryBloc = GetProductBloc()..add(const GetProducts());
     _selectedFilterIndex = getIndex()!;
     _filterOptions = [
       Subcategory(id: widget.categorySelection.category.id, name: "전체"),
@@ -41,6 +40,13 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
     //서브카테고리 없으면 메인카테고리
     if (widget.categorySelection.selectedSubcategoryId == null) {
       isMainCategory = true;
+    }
+
+
+    if(isMainCategory){
+      _categoryBloc = GetProductBloc()..add(GetProducts(filter: widget.categorySelection.category.id,isMainCategory: true));
+    }else{
+      _categoryBloc = GetProductBloc()..add(GetProducts(filter: widget.categorySelection.selectedSubcategoryId));
     }
 
     // 초기 스크롤 위치를 설정
