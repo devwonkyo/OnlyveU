@@ -47,9 +47,9 @@ class SearchPage extends StatelessWidget {
         },
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.white,
             elevation: 0,
             scrolledUnderElevation: 0,
+            toolbarHeight: 50.h,
             actions: [
               IconButton(
                 icon: const Icon(Icons.shopping_bag_outlined,
@@ -61,7 +61,7 @@ class SearchPage extends StatelessWidget {
           body: Column(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(color: Colors.grey[200]!, width: 1.w),
