@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
+import 'package:onlyveyou/screens/product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/widgets/small_promotion_banner.dart';
 
