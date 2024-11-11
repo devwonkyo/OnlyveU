@@ -5,7 +5,7 @@ import 'package:onlyveyou/screens/search/search_home/recent_search/recent_search
 
 import '../search_text_field/bloc/search_text_field_bloc.dart';
 import 'recent_search/bloc/recent_search_bloc.dart';
-import '../../../utils/search/suggestion/suggestion_button.dart';
+// import '../../../utils/search/suggestion/suggestion_button.dart';
 
 class SearchHomeScreen extends StatelessWidget {
   const SearchHomeScreen({
