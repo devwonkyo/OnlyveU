@@ -55,14 +55,14 @@ void main() async {
   print("hash key ${await KakaoSdk.origin}");
 
 // 모든 제품 로컬 저장 (검색용)
-//   try {
-//     final productRepository = ProductRepository();
-//     await productRepository.fetchAndStoreAllProducts();
-//     final storedProducts = await productRepository.getStoredProducts();
-//     print('Stored products: ${storedProducts.length}');
-//   } catch (e) {
-//     print('Error fetching and storing products: $e');
-//   }
+  try {
+    final productRepository = ProductRepository();
+    await productRepository.fetchAndStoreAllProducts();
+    final storedProducts = await productRepository.getStoredProducts();
+    print('Stored products: ${storedProducts.length}');
+  } catch (e) {
+    print('Error fetching and storing products: $e');
+  }
 
   // 모든 검색어 로컬 저장 (검색용)
   try {

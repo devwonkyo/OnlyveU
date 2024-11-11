@@ -38,6 +38,9 @@ class SearchSuggestionScreen extends StatelessWidget {
                     context
                         .read<SearchTextFieldBloc>()
                         .add(TextSubmitted(state.suggestions[index].term));
+                    context.read<SearchSuggestionBloc>().add(
+                        IncrementPopularity(state.suggestions[index].term,
+                            state.suggestions[index].popularity));
                   },
                 );
               },
