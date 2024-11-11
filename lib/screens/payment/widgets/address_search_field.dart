@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/utils/styles.dart';
-import 'package:remedi_kopo/remedi_kopo.dart';
+
+import 'package:kpostal/kpostal.dart';
 
 class AddressSearchField extends StatefulWidget {
   const AddressSearchField({super.key});
@@ -66,21 +67,26 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
               child: ElevatedButton(
                 onPressed: () async {
                   // 주소 검색 기능
-                  print("주소 검색");
+                  // print("주소 검색");
 
-                  KopoModel? model = await Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                      builder: (context) => RemediKopo(),
-                    ),
-                  );
+                  // KopoModel model = await Navigator.push(
+                  //   context,
+                  //   CupertinoPageRoute(
+                  //     builder: (context) => RemediKopo(),
+                  //   ),
+                  // );
+                  // _AddressController.text =
+                  //     '${model.address!} ${model.buildingName!}';
+                  // print(_AddressController.text);
 
-                  // null 체크
-                  if (model != null) {
-                    _AddressController.text =
-                        '${model.address!} ${model.buildingName ?? ''}';
-                    print(_AddressController.text);
-                  }
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return KpostalView(
+                      callback: (Kpostal result) {
+                        _AddressController.text = result.address;
+                      },
+                    );
+                  }));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
