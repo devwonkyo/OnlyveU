@@ -62,6 +62,9 @@ class OrderModel {
   /// 픽업 예정 시간 (픽업 주문인 경우)
   final DateTime? pickupTime;
 
+  /// 픽업 매장 정보 (픽업 주문인 경우)
+  final String? pickStore;
+
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
 
@@ -72,13 +75,14 @@ class OrderModel {
     required this.orderType,
     this.status = OrderStatus.pending,
     this.pickupTime,
+    this.pickStore,
     this.deliveryInfo,
     DateTime? createdAt,
   })  : createdAt = createdAt ?? DateTime.now(),
         totalPrice = items.fold(
             0,
-            (sum, item) =>
-                sum + (item.productPrice * item.quantity)); // items의 합으로 초기화
+                (sum, item) =>
+            sum + (item.productPrice * item.quantity)); // items의 합으로 초기화
 
   Map<String, dynamic> toMap() {
     return {
@@ -88,8 +92,10 @@ class OrderModel {
       'orderType': orderType.name,
       'totalPrice': totalPrice,
       'createdAt': createdAt.toIso8601String(),
-      if (orderType == OrderType.pickup)
+      if (orderType == OrderType.pickup) ...{
         'pickupTime': pickupTime?.toIso8601String(),
+        'pickStore': pickStore, // 변경된 필드명
+      },
       if (orderType == OrderType.delivery)
         'deliveryInfo': deliveryInfo?.toMap(),
     };
@@ -97,7 +103,7 @@ class OrderModel {
 
   factory OrderModel.fromMap(String id, Map<String, dynamic> map) {
     final orderType =
-        OrderType.values.firstWhere((e) => e.name == map['orderType']);
+    OrderType.values.firstWhere((e) => e.name == map['orderType']);
 
     return OrderModel(
       id: id,
@@ -107,7 +113,8 @@ class OrderModel {
       status: OrderStatus.values.firstWhere((e) => e.name == map['status']),
       orderType: orderType,
       pickupTime:
-          map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
+      map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
+      pickStore: map['pickStore'], // 변경된 필드명
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
           : null,
