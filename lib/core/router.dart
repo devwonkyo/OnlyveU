@@ -76,10 +76,6 @@ final GoRouter router = GoRouter(
               _buildPageWithTransition(state, const MyPageScreen()),
         ),
         GoRoute(
-          path: '/search',
-          builder: (context, state) => const SearchPage(),
-        ),
-        GoRoute(
           path: '/order-status',
           pageBuilder: (context, state) =>
               _buildPageWithTransition(state, const OrderStatusScreen()),
@@ -176,7 +172,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final productId = state.extra as String;
         return ProductDetailScreen(
-          productId: productId ?? '',
+          productId: productId,
         );
       },
     ),
@@ -193,6 +189,10 @@ final GoRouter router = GoRouter(
         state,
         const NewDeliveryAddressScreen(),
       ),
+    ),
+    GoRoute(
+      path: '/search',
+      builder: (context, state) => const SearchPage(),
     ),
   ],
 );
