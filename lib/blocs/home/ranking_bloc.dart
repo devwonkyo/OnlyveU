@@ -30,8 +30,7 @@ class ToggleProductFavorite extends RankingEvent {
 //장바구니집어넣기
 class AddToCart extends RankingEvent {
   final String productId;
-  final String userId;
-  AddToCart(this.productId, this.userId);
+  AddToCart(this.productId); // userId 제거 (HomeBloc과 동일하게)
 }
 
 /////stste
@@ -58,9 +57,12 @@ class RankingError extends RankingState {
 
 // RankingBloc: 랭킹 상품 로드 및 상태 관리를 위한 Bloc 클래스
 class RankingBloc extends Bloc<RankingEvent, RankingState> {
-  final RankingRepository rankingRepository; // 랭킹 상품 데이터를 가져오는 데 사용할 리포지토리 인스턴스
+  final RankingRepository
+      _rankingRepository; // 랭킹 상품 데이터를 가져오는 데 사용할 리포지토리 인스턴스
 
-  RankingBloc({required this.rankingRepository}) : super(RankingInitial()) {
+  RankingBloc({required RankingRepository rankingRepository}) // 생성자 수정
+      : _rankingRepository = rankingRepository,
+        super(RankingInitial()) {
     // LoadRankingProducts 이벤트 처리
     on<LoadRankingProducts>((event, emit) async {
       emit(RankingLoading()); // 로딩 상태로 전환
@@ -114,10 +116,18 @@ class RankingBloc extends Bloc<RankingEvent, RankingState> {
     }); //^
     // 장바구니 넣기
     on<AddToCart>((event, emit) async {
-      try {
-        await rankingRepository.addToCart(event.productId, event.userId);
-      } catch (e) {
-        print('Error adding to cart: $e');
+      if (state is RankingLoaded) {
+        final currentState = state as RankingLoaded;
+        try {
+          await _rankingRepository.addToCart(event.productId);
+        } catch (e) {
+          if (e.toString().contains('이미 장바구니에 담겨 있습니다')) {
+            emit(RankingError('이미 장바구니에 담겨 있습니다.'));
+          } else {
+            emit(RankingError('장바구니 추가에 실패했습니다.'));
+          }
+          emit(currentState); // 원래 상태로 복원
+        }
       }
     });
   }
