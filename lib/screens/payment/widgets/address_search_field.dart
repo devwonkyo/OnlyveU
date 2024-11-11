@@ -5,20 +5,22 @@ import 'package:onlyveyou/utils/styles.dart';
 import 'package:kpostal/kpostal.dart';
 
 class AddressSearchField extends StatefulWidget {
-  const AddressSearchField({super.key});
+   final TextEditingController addressController; // 외부에서 전달받는 컨트롤러
+  final TextEditingController detailedAddressController; // 외부에서 전달받는 컨트롤러
+
+  const AddressSearchField({
+    super.key,
+    required this.addressController,
+    required this.detailedAddressController,
+  });
 
   @override
   State<AddressSearchField> createState() => _AddressSearchFieldState();
 }
 
 class _AddressSearchFieldState extends State<AddressSearchField> {
-  final TextEditingController _AddressController = TextEditingController();
 
-  @override
-  void dispose() {
-    _AddressController.dispose();
-    super.dispose();
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +44,7 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
           children: [
             Expanded(
               child: TextField(
-                controller: _AddressController,
+                controller: widget.addressController,
                 decoration: InputDecoration(
                   hintText: '주소를 검색해주세요',
                   hintStyle: const TextStyle(color: Colors.grey),
@@ -83,7 +85,7 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
                       .push(MaterialPageRoute(builder: (context) {
                     return KpostalView(
                       callback: (Kpostal result) {
-                        _AddressController.text = result.address;
+                     widget.addressController.text = result.address;
                       },
                     );
                   }));
@@ -108,6 +110,7 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
         ),
         const SizedBox(height: 10),
         TextField(
+          controller: widget.detailedAddressController,
           decoration: InputDecoration(
             hintText: '상세주소를 입력해주세요',
             hintStyle: const TextStyle(color: Colors.grey),
