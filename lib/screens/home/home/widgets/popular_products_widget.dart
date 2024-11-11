@@ -246,16 +246,38 @@ class PopularProductsWidget extends StatelessWidget {
               SizedBox(width: 25),
               GestureDetector(
                 onTap: () async {
-                  final currentUserId =
-                      await OnlyYouSharedPreference().getCurrentUserId();
-                  context.read<HomeBloc>().add(AddToCart(product.productId));
+                  try {
+                    final currentUserId =
+                        await OnlyYouSharedPreference().getCurrentUserId();
+                    bool isErrorShown = false; // 에러 메시지 표시 여부 추적
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      duration: Duration(seconds: 1),
-                      content: Text('장바구니에 추가되었습니다.'),
-                    ),
-                  );
+                    context.read<HomeBloc>().add(AddToCart(product.productId));
+                    context.read<HomeBloc>().stream.listen((state) {
+                      if (state is HomeError && !isErrorShown) {
+                        isErrorShown = true; // 에러 메시지가 표시됨을 표시
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            duration: Duration(milliseconds: 200),
+                            content: Text(state.message),
+                          ),
+                        );
+                      } else if (!isErrorShown) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            duration: Duration(milliseconds: 200),
+                            content: Text('장바구니에 추가되었습니다.'),
+                          ),
+                        );
+                      }
+                    });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        duration: Duration(milliseconds: 200),
+                        content: Text(e.toString()),
+                      ),
+                    );
+                  }
                 },
                 child: Container(
                   width: 22,

@@ -180,10 +180,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
     on<AddToCart>((event, emit) async {
       if (state is HomeLoaded) {
+        final currentState = state as HomeLoaded;
         try {
-          await _homeRepository.addToCart(event.productId); // userId 파라미터 제거
+          await _homeRepository.addToCart(event.productId);
         } catch (e) {
-          print('Error adding to cart: $e');
+          if (e.toString().contains('이 상품은 이미 장바구니에 담겨 있습니다')) {
+            emit(HomeError('이 상품은 이미 장바구니에 담겨 있습니다.'));
+          } else {
+            emit(HomeError('이 상품은 이미 장바구니에 담겨 있습니다.'));
+          }
+          emit(currentState); // 원래 상태로 복원
         }
       }
     });

@@ -15,14 +15,40 @@ class ShoppingCartRepository {
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
 
       await _firestore.runTransaction((transaction) async {
-        // 1. 상품 정보 가져오기
         final productDoc =
             await _firestore.collection('products').doc(productId).get();
         if (!productDoc.exists) {
           throw Exception('상품을 찾을 수 없습니다.');
         }
 
-        // 2. CartModel 형태의 데이터 생성
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
+
+        // 장바구니 아이템 확인
+        List<Map<String, dynamic>> cartItems = [];
+        if (userSnapshot.exists &&
+            userSnapshot.data()!.containsKey('cartItems')) {
+          cartItems =
+              List<Map<String, dynamic>>.from(userSnapshot.get('cartItems'));
+        }
+
+        // 픽업 아이템 확인
+        List<Map<String, dynamic>> pickupItems = [];
+        if (userSnapshot.exists &&
+            userSnapshot.data()!.containsKey('pickupItems')) {
+          pickupItems =
+              List<Map<String, dynamic>>.from(userSnapshot.get('pickupItems'));
+        }
+
+        // 일반 배송과 픽업 모두에서 중복 체크
+        bool isDuplicate =
+            cartItems.any((item) => item['productId'] == productId) ||
+                pickupItems.any((item) => item['productId'] == productId);
+
+        if (isDuplicate) {
+          throw Exception('duplicate_item');
+        }
+
         final cartItem = {
           'productId': productId,
           'productName': productDoc.get('name'),
@@ -32,31 +58,8 @@ class ShoppingCartRepository {
           'quantity': 1,
         };
 
-        // 3. 사용자 문서 가져오기
-        final userDoc = _firestore.collection('users').doc(userId);
-        final userSnapshot = await transaction.get(userDoc);
+        cartItems.add(cartItem);
 
-        // 4. 현재 장바구니 아이템 목록 가져오기
-        List<Map<String, dynamic>> cartItems = [];
-        if (userSnapshot.exists &&
-            userSnapshot.data()!.containsKey('cartItems')) {
-          cartItems =
-              List<Map<String, dynamic>>.from(userSnapshot.get('cartItems'));
-        }
-
-        // 5. 이미 존재하는 상품인지 확인
-        final existingItemIndex =
-            cartItems.indexWhere((item) => item['productId'] == productId);
-        if (existingItemIndex >= 0) {
-          // 이미 있으면 수량만 증가
-          cartItems[existingItemIndex]['quantity'] =
-              (cartItems[existingItemIndex]['quantity'] ?? 1) + 1;
-        } else {
-          // 없으면 새로 추가
-          cartItems.add(cartItem);
-        }
-
-        // 6. Firestore 업데이트
         if (!userSnapshot.exists) {
           transaction.set(userDoc, {'cartItems': cartItems});
         } else {
@@ -64,7 +67,9 @@ class ShoppingCartRepository {
         }
       });
     } catch (e) {
-      print('Error adding to cart: $e');
+      if (e is Exception && e.toString().contains('duplicate_item')) {
+        throw Exception('이 상품은 이미 장바구니에 담겨 있습니다.');
+      }
       throw Exception('장바구니 추가에 실패했습니다.');
     }
   }

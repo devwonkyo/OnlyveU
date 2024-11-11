@@ -138,7 +138,7 @@ class HomeRepository {
       await _cartRepository.addToCart(productId);
     } catch (e) {
       print('Error adding to cart: $e');
-      throw Exception('장바구니 추가에 실패했습니다.');
+      throw Exception('이 상품은 이미 장바구니에 담겨 있습니다');
     }
   }
 }
