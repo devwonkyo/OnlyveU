@@ -56,28 +56,25 @@ class _ExpandableBottomSheetState extends State<ExpandableBottomSheet> with Sing
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.r),
-            topRight: Radius.circular(20.r),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, -2),
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.r),
+          topRight: Radius.circular(24.r),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            spreadRadius: 0,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
             IconButton(
               padding: EdgeInsets.zero,
               color: Colors.grey,
@@ -215,7 +212,6 @@ class _ExpandableBottomSheetState extends State<ExpandableBottomSheet> with Sing
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
