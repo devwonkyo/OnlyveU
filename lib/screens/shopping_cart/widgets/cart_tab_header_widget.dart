@@ -23,7 +23,7 @@ class CartTabHeaderWidget extends StatelessWidget {
   final TabController tabController; // 일반 배송과 픽업을 전환할 수 있는 탭 컨트롤러
 
   const CartTabHeaderWidget({
-    Key? key,
+    super.key,
     required this.regularDeliveryItems,
     required this.pickupItems,
     required this.selectedItems,
@@ -37,7 +37,7 @@ class CartTabHeaderWidget extends StatelessWidget {
     required this.moveToPickup,
     required this.moveToRegularDelivery,
     required this.tabController,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +105,7 @@ class CartTabHeaderWidget extends StatelessWidget {
   // 픽업 탭에 표시될 콘텐츠 빌드 함수
   Widget _buildPickupTab(BuildContext context) {
     return pickupItems.isEmpty
-        ? Center(child: Text('픽업 상품이 없습니다.')) // 픽업 상품이 없을 때 메시지 표시
+        ? const Center(child: Text('픽업 상품이 없습니다.')) // 픽업 상품이 없을 때 메시지 표시
         : SingleChildScrollView(
             child: Column(
               children: [
@@ -134,7 +134,7 @@ class CartTabHeaderWidget extends StatelessWidget {
   // 장바구니 상단의 전체 선택, 삭제, 배송 방법 변경 기능을 제공하는 헤더
   Widget _buildCartHeader(BuildContext context, bool isRegularDelivery) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(color: Colors.grey[300]!),
@@ -152,7 +152,7 @@ class CartTabHeaderWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              Text('전체'), // '전체' 텍스트
+              const Text('전체'), // '전체' 텍스트
             ],
           ),
           Text(' | ', style: TextStyle(color: Colors.grey[300])), // 구분자
@@ -168,7 +168,7 @@ class CartTabHeaderWidget extends StatelessWidget {
                 }
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('변경할 상품을 선택해주세요')),
+                  const SnackBar(content: Text('변경할 상품을 선택해주세요')),
                 );
               }
             },
@@ -178,20 +178,21 @@ class CartTabHeaderWidget extends StatelessWidget {
                   tabController.index == 0
                       ? '픽업으로 변경'
                       : '일반배송으로 변경', // 탭에 따라 텍스트 변경
-                  style: TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: Colors.black87),
                 ),
-                Icon(Icons.chevron_right, size: 20, color: Colors.black87),
+                const Icon(Icons.chevron_right,
+                    size: 20, color: Colors.black87),
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           // 선택 삭제 버튼
           TextButton(
             onPressed: () {
               // 선택된 상품 삭제 시 현재 탭 정보 전달
               onDeleteSelected();
             },
-            child: Text(
+            child: const Text(
               '선택삭제',
               style: TextStyle(color: Colors.black87),
             ),

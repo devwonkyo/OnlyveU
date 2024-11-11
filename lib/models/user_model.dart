@@ -9,11 +9,14 @@ class UserModel {
   List<String> cartItems; // 장바구니 아이템
   List<String> pickupItems; // 픽업 예약 아이템
   List<String> viewHistory; // 조회 히스토리
+  String profileImageUrl; // 프로필 이미지 URL
+
 
   UserModel({
     required this.uid,
     required this.email,
     required this.nickname,
+    this.profileImageUrl = '',
     this.phone = '',    // 기본값 추가
     this.gender = '',   // 기본값 추가
     this.recentSearches = const [],
@@ -28,6 +31,7 @@ class UserModel {
       'uid': uid,
       'email': email,
       'nickname': nickname,
+      'profileImageUrl': profileImageUrl,
       'phone': phone,     // 추가
       'gender': gender,   // 추가
       'recentSearches': recentSearches,
@@ -35,6 +39,7 @@ class UserModel {
       'cartItems': cartItems,
       'pickupItems': pickupItems,
       'viewHistory': viewHistory,
+  
     };
   }
 
@@ -43,6 +48,7 @@ class UserModel {
       uid: map['uid'] ?? '',
       email: map['email'] ?? '',
       nickname: map['nickname'] ?? '',
+      profileImageUrl: map['profileImageUrl'] ?? '',
       phone: map['phone'] ?? '',     // 추가
       gender: map['gender'] ?? '',    // 추가
       recentSearches: List<String>.from(map['recentSearches'] ?? []),

@@ -245,7 +245,20 @@ class PopularProductsWidget extends StatelessWidget {
               ),
               SizedBox(width: 25),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  final currentUserId =
+                      await OnlyYouSharedPreference().getCurrentUserId();
+                  context
+                      .read<HomeBloc>()
+                      .add(AddToCart(product.productId, currentUserId));
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      duration: Duration(seconds: 1),
+                      content: Text('장바구니에 추가되었습니다.'),
+                    ),
+                  );
+                },
                 child: Container(
                   width: 22,
                   height: 22,
