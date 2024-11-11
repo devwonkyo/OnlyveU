@@ -7,7 +7,7 @@ import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import '../../../blocs/home/home_bloc.dart';
 import '../../../models/product_model.dart';
 import '../../../utils/styles.dart';
-import '../search_home_screen/recent_search_view/bloc/recent_search_bloc.dart';
+import '../search_home/recent_search/bloc/recent_search_bloc.dart';
 import '../search_text_field/bloc/search_text_field_bloc.dart';
 import 'bloc/search_result_bloc.dart';
 
