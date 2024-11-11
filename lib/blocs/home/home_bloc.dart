@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/home_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
 // 이벤트 정의
 abstract class HomeEvent {}
@@ -35,6 +36,11 @@ class HomeError extends HomeState {
   HomeError(this.message);
 }
 
+class HomeSuccess extends HomeState {
+  final String message;
+  HomeSuccess(this.message);
+}
+
 class HomeLoaded extends HomeState {
   final List<BannerItem> bannerItems;
   final List<ProductModel> recommendedProducts;
@@ -66,9 +72,13 @@ class HomeLoaded extends HomeState {
 // HomeBloc 구현
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final HomeRepository _homeRepository;
+  final ShoppingCartRepository _cartRepository;
 
-  HomeBloc({required HomeRepository homeRepository})
-      : _homeRepository = homeRepository,
+  HomeBloc({
+    required HomeRepository homeRepository,
+    required ShoppingCartRepository cartRepository, // 추가
+  })  : _homeRepository = homeRepository,
+        _cartRepository = cartRepository, // 추가
         super(HomeInitial()) {
     // LoadHomeData 이벤트 핸들러
     on<LoadHomeData>((event, emit) async {
@@ -182,14 +192,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (state is HomeLoaded) {
         final currentState = state as HomeLoaded;
         try {
-          await _homeRepository.addToCart(event.productId);
+          await _cartRepository.addToCart(event.productId);
+          emit(HomeSuccess('장바구니에 담겼습니다.')); // 성공 상태 추가
+          emit(currentState);
         } catch (e) {
-          if (e.toString().contains('이 상품은 이미 장바구니에 담겨 있습니다')) {
-            emit(HomeError('이 상품은 이미 장바구니에 담겨 있습니다.'));
-          } else {
-            emit(HomeError('이 상품은 이미 장바구니에 담겨 있습니다.'));
-          }
-          emit(currentState); // 원래 상태로 복원
+          emit(HomeError(e.toString()));
+          emit(currentState);
         }
       }
     });

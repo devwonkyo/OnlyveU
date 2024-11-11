@@ -15,16 +15,18 @@ class ShoppingCartRepository {
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
 
       await _firestore.runTransaction((transaction) async {
+        // 1. 상품 문서 확인
         final productDoc =
             await _firestore.collection('products').doc(productId).get();
         if (!productDoc.exists) {
           throw Exception('상품을 찾을 수 없습니다.');
         }
 
+        // 2. 사용자 문서 가져오기
         final userDoc = _firestore.collection('users').doc(userId);
         final userSnapshot = await transaction.get(userDoc);
 
-        // 장바구니 아이템 확인
+        // 3. 장바구니 아이템 확인 (일반 배송)
         List<Map<String, dynamic>> cartItems = [];
         if (userSnapshot.exists &&
             userSnapshot.data()!.containsKey('cartItems')) {
@@ -32,7 +34,7 @@ class ShoppingCartRepository {
               List<Map<String, dynamic>>.from(userSnapshot.get('cartItems'));
         }
 
-        // 픽업 아이템 확인
+        // 4. 픽업 아이템 확인
         List<Map<String, dynamic>> pickupItems = [];
         if (userSnapshot.exists &&
             userSnapshot.data()!.containsKey('pickupItems')) {
@@ -40,15 +42,16 @@ class ShoppingCartRepository {
               List<Map<String, dynamic>>.from(userSnapshot.get('pickupItems'));
         }
 
-        // 일반 배송과 픽업 모두에서 중복 체크
+        // 5. 중복 체크 (둘 다에서 확인)
         bool isDuplicate =
             cartItems.any((item) => item['productId'] == productId) ||
                 pickupItems.any((item) => item['productId'] == productId);
 
         if (isDuplicate) {
-          throw Exception('duplicate_item');
+          throw '이 상품은 이미 장바구니에 담겨 있습니다.';
         }
 
+        // 6. 새 아이템 생성
         final cartItem = {
           'productId': productId,
           'productName': productDoc.get('name'),
@@ -58,19 +61,21 @@ class ShoppingCartRepository {
           'quantity': 1,
         };
 
+        // 7. 장바구니에 추가
         cartItems.add(cartItem);
 
+        // 8. Firestore 업데이트
         if (!userSnapshot.exists) {
-          transaction.set(userDoc, {'cartItems': cartItems});
+          transaction.set(userDoc, {'cartItems': cartItems, 'pickupItems': []});
         } else {
           transaction.update(userDoc, {'cartItems': cartItems});
         }
       });
     } catch (e) {
-      if (e is Exception && e.toString().contains('duplicate_item')) {
-        throw Exception('이 상품은 이미 장바구니에 담겨 있습니다.');
+      if (e is Exception && e.toString().contains('이 상품은 이미 장바구니에 담겨 있습니다')) {
+        rethrow; // 중복 에러는 그대로 전파
       }
-      throw Exception('장바구니 추가에 실패했습니다.');
+      throw '이 상품은 이미 장바구니에 담겨 있습니다.'; // 기타 에러는 일반화된 메시지로
     }
   }
 
