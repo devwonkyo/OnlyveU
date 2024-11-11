@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:onlyveyou/models/product_model.dart'; //^ ProductModel 임포트 추가
+import 'package:onlyveyou/models/cart_model.dart';
 
 import '../utils/shared_preference_util.dart';
 
@@ -9,130 +9,145 @@ class ShoppingCartRepository {
   ShoppingCartRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  // 장바구니 데이터 로드 메서드 추가 //^
-  Future<List<ProductModel>> loadCartItems() async {
-    //^
+  // 장바구니 데이터 로드
+  Future<Map<String, List<CartModel>>> loadCartItems() async {
     try {
-      // 1. 현재 유저의 cartItems 가져오기
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
       final userDoc = await _firestore.collection('users').doc(userId).get();
 
       if (!userDoc.exists) {
-        print('User document not found');
-        return [];
+        return {'regular': [], 'pickup': []};
       }
 
-      // 2. cartItems에서 상품 ID 목록 가져오기
-      List<String> cartItems =
+      // 일반 배송 상품 ID 목록
+      List<String> regularIds =
           List<String>.from(userDoc.get('cartItems') ?? []);
-      print('Found ${cartItems.length} items in cart');
+      // 픽업 상품 ID 목록
+      List<String> pickupIds =
+          List<String>.from(userDoc.get('pickupItems') ?? []);
 
-      if (cartItems.isEmpty) {
-        return [];
-      }
+      // 상품 정보 가져오기
+      final regularItems = await _loadCartItemsByIds(regularIds);
+      final pickupItems = await _loadCartItemsByIds(pickupIds);
 
-      // 3. 각 상품의 정보 가져오기
-      final products = await Future.wait(cartItems.map((productId) async {
-        final doc =
-            await _firestore.collection('products').doc(productId).get();
-        if (!doc.exists) {
-          print('Product $productId not found');
-          return null;
-        }
-        return doc;
-      }));
-
-      // 4. 존재하는 상품들만 ProductModel로 변환
-      return products.where((doc) => doc != null).map((doc) {
-        final data = doc!.data() as Map<String, dynamic>;
-        data['productId'] = doc.id;
-        return ProductModel.fromMap(data);
-      }).toList();
+      return {
+        'regular': regularItems,
+        'pickup': pickupItems,
+      };
     } catch (e) {
       print('Error loading cart items: $e');
       throw Exception('장바구니 상품을 불러오는데 실패했습니다.');
     }
   }
 
-  // 상품 제거 메서드 (중복된 메서드 정리)
-  Future<void> removeProduct(String productId) async {
+  // ID 목록으로 상품 정보 가져오기
+  Future<List<CartModel>> _loadCartItemsByIds(List<String> productIds) async {
+    if (productIds.isEmpty) return [];
+
+    final productSnapshots = await Future.wait(productIds
+        .map((id) => _firestore.collection('products').doc(id).get()));
+
+    return productSnapshots.where((doc) => doc.exists).map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return CartModel(
+        productId: doc.id,
+        productName: data['name'] ?? '',
+        productImageUrl:
+            (data['productImageList'] as List<dynamic>).first.toString(),
+        productPrice: int.parse(data['price'] ?? '0'),
+        quantity: 1, // 기본 수량은 1
+      );
+    }).toList();
+  }
+
+  // 배송 방식 변경 (일반 -> 픽업)
+  Future<void> moveToPickup(List<String> productIds) async {
     try {
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
 
       await _firestore.runTransaction((transaction) async {
-        // 상품과 유저 문서 참조
-
         final userDoc = _firestore.collection('users').doc(userId);
-
-        // 현재 상태 가져오기
         final userSnapshot = await transaction.get(userDoc);
 
-        if (!userSnapshot.exists || !userSnapshot.exists) {
-          throw Exception('상품 또는 사용자 정보를 찾을 수 없습니다.');
-        }
-
-        // cartItems에서 현재 상품 제거
         List<String> cartItems =
             List<String>.from(userSnapshot.get('cartItems') ?? []);
-        cartItems.remove(productId);
+        List<String> pickupItems =
+            List<String>.from(userSnapshot.get('pickupItems') ?? []);
 
-        // 두 컬렉션 모두 업데이트
+        cartItems.removeWhere((id) => productIds.contains(id));
+        pickupItems.addAll(productIds);
 
-        transaction.update(userDoc, {'cartItems': cartItems});
+        transaction.update(userDoc, {
+          'cartItems': cartItems,
+          'pickupItems': pickupItems,
+        });
       });
     } catch (e) {
-      print('Error removing product from cart: $e');
-      throw Exception('장바구니에서 상품 제거에 실패했습니다.');
+      print('Error moving items to pickup: $e');
+      throw Exception('배송 방식 변경에 실패했습니다.');
     }
   }
 
-  // 상품 좋아요 상태 업데이트
-  Future<void> updateProductFavorite(
-      String productId, List<String> favoriteList) async {
+  // 배송 방식 변경 (픽업 -> 일반)
+  Future<void> moveToRegularDelivery(List<String> productIds) async {
     try {
-      await _firestore
-          .collection('products')
-          .doc(productId)
-          .update({'favoriteList': favoriteList});
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+
+      await _firestore.runTransaction((transaction) async {
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
+
+        List<String> cartItems =
+            List<String>.from(userSnapshot.get('cartItems') ?? []);
+        List<String> pickupItems =
+            List<String>.from(userSnapshot.get('pickupItems') ?? []);
+
+        pickupItems.removeWhere((id) => productIds.contains(id));
+        cartItems.addAll(productIds);
+
+        transaction.update(userDoc, {
+          'cartItems': cartItems,
+          'pickupItems': pickupItems,
+        });
+      });
     } catch (e) {
-      print('Error updating product favorite: $e');
-      throw Exception('상품 좋아요 상태 업데이트에 실패했습니다.');
+      print('Error moving items to regular delivery: $e');
+      throw Exception('배송 방식 변경에 실패했습니다.');
     }
   }
 
-  // 상품 수량 업데이트
-  Future<void> updateProductQuantity(String productId, int quantity) async {
+  // 상품 삭제
+  Future<void> removeProduct(String productId, bool isPickup) async {
     try {
-      await _firestore
-          .collection('products')
-          .doc(productId)
-          .update({'quantity': quantity});
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+      final userDoc = _firestore.collection('users').doc(userId);
+      final field = isPickup ? 'pickupItems' : 'cartItems';
+
+      await _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(userDoc);
+        List<String> items = List<String>.from(snapshot.get(field) ?? []);
+        items.remove(productId);
+        transaction.update(userDoc, {field: items});
+      });
     } catch (e) {
-      print('Error updating product quantity: $e');
-      throw Exception('상품 수량 업데이트에 실패했습니다.');
+      print('Error removing product: $e');
+      throw Exception('상품 삭제에 실패했습니다.');
     }
   }
 
   // 선택된 상품들 삭제
-  Future<void> removeSelectedProducts(List<String> productIds) async {
+  Future<void> removeSelectedProducts(
+      List<String> productIds, bool isPickup) async {
     try {
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
+      final userDoc = _firestore.collection('users').doc(userId);
+      final field = isPickup ? 'pickupItems' : 'cartItems';
 
       await _firestore.runTransaction((transaction) async {
-        final userDoc = _firestore.collection('users').doc(userId);
-        final userSnapshot = await transaction.get(userDoc);
-
-        if (!userSnapshot.exists) {
-          throw Exception('사용자 정보를 찾을 수 없습니다.');
-        }
-
-        // cartItems에서 선택된 상품들 제거
-        List<String> cartItems =
-            List<String>.from(userSnapshot.get('cartItems') ?? []);
-        cartItems.removeWhere((productId) => productIds.contains(productId));
-
-        // users 컬렉션만 업데이트
-        transaction.update(userDoc, {'cartItems': cartItems});
+        final snapshot = await transaction.get(userDoc);
+        List<String> items = List<String>.from(snapshot.get(field) ?? []);
+        items.removeWhere((id) => productIds.contains(id));
+        transaction.update(userDoc, {field: items});
       });
     } catch (e) {
       print('Error removing selected products: $e');
@@ -140,17 +155,19 @@ class ShoppingCartRepository {
     }
   }
 
-  // 상품 배송 방식 업데이트 (일반배송 <-> 픽업)
-  Future<void> updateDeliveryMethod(String productId, bool isPickup) async {
+  // 상품 수량 업데이트
+  Future<void> updateProductQuantity(String productId, int quantity) async {
     try {
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
       await _firestore
-          .collection('products')
+          .collection('users')
+          .doc(userId)
+          .collection('cartQuantities')
           .doc(productId)
-          .update({'isPickup': isPickup});
+          .set({'quantity': quantity});
     } catch (e) {
-      print('Error updating delivery method: $e');
-      throw Exception('배송 방식 변경에 실패했습니다.');
+      print('Error updating product quantity: $e');
+      throw Exception('상품 수량 업데이트에 실패했습니다.');
     }
   }
 }
-//일단 프로덕트 컬렉션에 연동한거 다 삭제하기
