@@ -3,6 +3,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/home/today_sale_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
 // TodaySaleEvent: 특가 상품 로딩 및 섞기 이벤트 정의
 abstract class TodaySaleEvent {}
@@ -47,12 +48,22 @@ class TodaySaleError extends TodaySaleState {
   TodaySaleError(this.message);
 }
 
+class TodaySaleSuccess extends TodaySaleState {
+  //장바구니 추가
+  final String message;
+  TodaySaleSuccess(this.message);
+}
+
 // TodaySaleBloc: 특가 상품 로딩 및 섞기 기능을 위한 Bloc 클래스
 class TodaySaleBloc extends Bloc<TodaySaleEvent, TodaySaleState> {
-  final TodaySaleRepository _repository; // 데이터 로딩에 사용할 리포지토리 인스턴스
+  final TodaySaleRepository _repository;
+  final ShoppingCartRepository _cartRepository; // 추가
 
-  TodaySaleBloc({required TodaySaleRepository repository}) // 생성자 수정
-      : _repository = repository,
+  TodaySaleBloc({
+    required TodaySaleRepository repository,
+    required ShoppingCartRepository cartRepository, // 추가
+  })  : _repository = repository,
+        _cartRepository = cartRepository, // 추가
         super(TodaySaleInitial()) {
     // 특가 상품 로딩 이벤트 처리
     on<LoadTodaySaleProducts>((event, emit) async {
@@ -110,13 +121,11 @@ class TodaySaleBloc extends Bloc<TodaySaleEvent, TodaySaleState> {
       if (state is TodaySaleLoaded) {
         final currentState = state as TodaySaleLoaded;
         try {
-          await _repository.addToCart(event.productId);
+          await _cartRepository.addToCart(event.productId);
+          emit(TodaySaleSuccess('장바구니에 담겼습니다.')); // 성공 메시지
+          emit(currentState);
         } catch (e) {
-          if (e.toString().contains('이미 장바구니에 담겨 있습니다')) {
-            emit(TodaySaleError('이미 장바구니에 담겨 있습니다.'));
-          } else {
-            emit(TodaySaleError('장바구니 추가에 실패했습니다.'));
-          }
+          emit(TodaySaleError(e.toString()));
           emit(currentState);
         }
       }
