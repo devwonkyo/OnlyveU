@@ -73,14 +73,13 @@ class SearchHomeScreen extends StatelessWidget {
               // 서버 데이터
               SearchMainContainer(
                 title: '급상승 검색어',
-                child:
-                    // const SizedBox(),
-                    Column(
-                  children: [
-                    BrandSuggestionUpdateButton(),
-                    CategorySuggestionUpdateButton(),
-                  ],
-                ),
+                child: const SizedBox(),
+                // Column(
+                // children: [
+                //   BrandSuggestionUpdateButton(),
+                //   CategorySuggestionUpdateButton(),
+                // ],
+                // ),
               ),
             ],
           ),
