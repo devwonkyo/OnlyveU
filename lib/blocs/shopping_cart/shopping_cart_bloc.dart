@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/models/cart_model.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
 // Events
@@ -23,35 +23,48 @@ class UpdateItemSelection extends CartEvent {
 class UpdateItemQuantity extends CartEvent {
   final String productId;
   final bool increment;
-  const UpdateItemQuantity(this.productId, this.increment);
+  final bool isPickup;
+  const UpdateItemQuantity(this.productId, this.increment, this.isPickup);
   @override
-  List<Object> get props => [productId, increment];
+  List<Object> get props => [productId, increment, isPickup];
 }
 
 class RemoveItem extends CartEvent {
-  final ProductModel item;
-  const RemoveItem(this.item);
+  final String productId;
+  final bool isPickup;
+  const RemoveItem(this.productId, this.isPickup);
   @override
-  List<Object> get props => [item];
+  List<Object> get props => [productId, isPickup];
 }
 
 class SelectAllItems extends CartEvent {
   final bool value;
-  const SelectAllItems(this.value);
+  final bool isPickup;
+  const SelectAllItems(this.value, this.isPickup);
   @override
-  List<Object> get props => [value];
+  List<Object> get props => [value, isPickup];
 }
 
 class DeleteSelectedItems extends CartEvent {
-  final bool isRegularDelivery;
-  const DeleteSelectedItems(this.isRegularDelivery);
+  final bool isPickup;
+  const DeleteSelectedItems(this.isPickup);
   @override
-  List<Object> get props => [isRegularDelivery];
+  List<Object> get props => [isPickup];
 }
 
-class MoveToPickup extends CartEvent {}
+class MoveToPickup extends CartEvent {
+  final List<String> productIds;
+  const MoveToPickup(this.productIds);
+  @override
+  List<Object> get props => [productIds];
+}
 
-class MoveToRegularDelivery extends CartEvent {}
+class MoveToRegularDelivery extends CartEvent {
+  final List<String> productIds;
+  const MoveToRegularDelivery(this.productIds);
+  @override
+  List<Object> get props => [productIds];
+}
 
 class UpdateCurrentTab extends CartEvent {
   final bool isRegularDelivery;
@@ -62,8 +75,8 @@ class UpdateCurrentTab extends CartEvent {
 
 // State
 class CartState extends Equatable {
-  final List<ProductModel> regularDeliveryItems;
-  final List<ProductModel> pickupItems;
+  final List<CartModel> regularDeliveryItems;
+  final List<CartModel> pickupItems;
   final Map<String, bool> selectedItems;
   final Map<String, int> itemQuantities;
   final bool isAllSelected;
@@ -83,8 +96,8 @@ class CartState extends Equatable {
   });
 
   CartState copyWith({
-    List<ProductModel>? regularDeliveryItems,
-    List<ProductModel>? pickupItems,
+    List<CartModel>? regularDeliveryItems,
+    List<CartModel>? pickupItems,
     Map<String, bool>? selectedItems,
     Map<String, int>? itemQuantities,
     bool? isAllSelected,
@@ -138,20 +151,25 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onLoadCart(LoadCart event, Emitter<CartState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
-      final items = await _cartRepository.loadCartItems();
+      final cartData = await _cartRepository.loadCartItems();
 
       final initialSelectedItems = Map.fromEntries(
-        items.map((item) => MapEntry(item.productId, true)),
+        [...cartData['regular']!, ...cartData['pickup']!]
+            .map((item) => MapEntry(item.productId, true)),
       );
+
       final initialQuantities = Map.fromEntries(
-        items.map((item) => MapEntry(item.productId, 1)),
+        [...cartData['regular']!, ...cartData['pickup']!]
+            .map((item) => MapEntry(item.productId, item.quantity)),
       );
 
       emit(state.copyWith(
-        regularDeliveryItems: items,
+        regularDeliveryItems: cartData['regular'],
+        pickupItems: cartData['pickup'],
         selectedItems: initialSelectedItems,
         itemQuantities: initialQuantities,
         isLoading: false,
+        isAllSelected: true,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -185,39 +203,61 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final updatedQuantities = Map<String, int>.from(state.itemQuantities);
     final currentQuantity = updatedQuantities[event.productId] ?? 1;
 
+    bool quantityUpdated = false;
     if (event.increment && currentQuantity < 99) {
       updatedQuantities[event.productId] = currentQuantity + 1;
-      await _cartRepository.updateProductQuantity(
-          event.productId, currentQuantity + 1);
+      quantityUpdated = true;
     } else if (!event.increment && currentQuantity > 1) {
       updatedQuantities[event.productId] = currentQuantity - 1;
-      await _cartRepository.updateProductQuantity(
-          event.productId, currentQuantity - 1);
+      quantityUpdated = true;
     }
 
-    emit(state.copyWith(itemQuantities: updatedQuantities));
+    if (quantityUpdated) {
+      try {
+        await _cartRepository.updateProductQuantity(
+          event.productId,
+          updatedQuantities[event.productId]!,
+        );
+        emit(state.copyWith(itemQuantities: updatedQuantities));
+      } catch (e) {
+        emit(state.copyWith(error: e.toString()));
+      }
+    }
   }
 
   Future<void> _onRemoveItem(RemoveItem event, Emitter<CartState> emit) async {
     try {
-      await _cartRepository.removeProduct(event.item.productId);
+      await _cartRepository.removeProduct(event.productId, event.isPickup);
 
-      final updatedRegularItems =
-          List<ProductModel>.from(state.regularDeliveryItems)
-            ..removeWhere((item) => item.productId == event.item.productId);
-      final updatedPickupItems = List<ProductModel>.from(state.pickupItems)
-        ..removeWhere((item) => item.productId == event.item.productId);
+      List<CartModel> updatedRegularItems =
+          List.from(state.regularDeliveryItems);
+      List<CartModel> updatedPickupItems = List.from(state.pickupItems);
+
+      if (event.isPickup) {
+        updatedPickupItems
+            .removeWhere((item) => item.productId == event.productId);
+      } else {
+        updatedRegularItems
+            .removeWhere((item) => item.productId == event.productId);
+      }
 
       final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-        ..remove(event.item.productId);
+        ..remove(event.productId);
       final updatedQuantities = Map<String, int>.from(state.itemQuantities)
-        ..remove(event.item.productId);
+        ..remove(event.productId);
+
+      final currentItems =
+          event.isPickup ? updatedPickupItems : updatedRegularItems;
+      final isAllSelected = currentItems.isNotEmpty &&
+          currentItems
+              .every((item) => updatedSelectedItems[item.productId] == true);
 
       emit(state.copyWith(
         regularDeliveryItems: updatedRegularItems,
         pickupItems: updatedPickupItems,
         selectedItems: updatedSelectedItems,
         itemQuantities: updatedQuantities,
+        isAllSelected: isAllSelected,
       ));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
@@ -225,11 +265,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   void _onSelectAllItems(SelectAllItems event, Emitter<CartState> emit) {
-    final updatedSelectedItems = Map<String, bool>.from(state.selectedItems);
-    final currentItems = state.isRegularDeliveryTab
-        ? state.regularDeliveryItems
-        : state.pickupItems;
+    final currentItems =
+        event.isPickup ? state.pickupItems : state.regularDeliveryItems;
 
+    final updatedSelectedItems = Map<String, bool>.from(state.selectedItems);
     for (var item in currentItems) {
       updatedSelectedItems[item.productId] = event.value;
     }
@@ -243,55 +282,37 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onDeleteSelectedItems(
       DeleteSelectedItems event, Emitter<CartState> emit) async {
     try {
-      final itemsToDelete = event.isRegularDelivery
-          ? state.regularDeliveryItems
+      final selectedIds =
+          (event.isPickup ? state.pickupItems : state.regularDeliveryItems)
               .where((item) => state.selectedItems[item.productId] == true)
-          : state.pickupItems
-              .where((item) => state.selectedItems[item.productId] == true);
+              .map((item) => item.productId)
+              .toList();
 
-      final itemIds = itemsToDelete.map((e) => e.productId).toList();
-      await _cartRepository.removeSelectedProducts(itemIds);
+      if (selectedIds.isEmpty) return;
 
-      if (event.isRegularDelivery) {
-        final updatedRegularItems = state.regularDeliveryItems
-            .where((item) => !state.selectedItems[item.productId]!)
-            .toList();
+      await _cartRepository.removeSelectedProducts(selectedIds, event.isPickup);
 
-        final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-          ..removeWhere((key, value) =>
-              value &&
-              state.regularDeliveryItems.any((item) => item.productId == key));
+      final updatedRegularItems = event.isPickup
+          ? state.regularDeliveryItems
+          : state.regularDeliveryItems
+              .where((item) => !selectedIds.contains(item.productId))
+              .toList();
 
-        final updatedQuantities = Map<String, int>.from(state.itemQuantities)
-          ..removeWhere((key, _) => state.regularDeliveryItems.any((item) =>
-              item.productId == key && state.selectedItems[key] == true));
+      final updatedPickupItems = event.isPickup
+          ? state.pickupItems
+              .where((item) => !selectedIds.contains(item.productId))
+              .toList()
+          : state.pickupItems;
 
-        emit(state.copyWith(
-          regularDeliveryItems: updatedRegularItems,
-          selectedItems: updatedSelectedItems,
-          itemQuantities: updatedQuantities,
-          isAllSelected: false,
-        ));
-      } else {
-        final updatedPickupItems = state.pickupItems
-            .where((item) => !state.selectedItems[item.productId]!)
-            .toList();
-
-        final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-          ..removeWhere((key, value) =>
-              value && state.pickupItems.any((item) => item.productId == key));
-
-        final updatedQuantities = Map<String, int>.from(state.itemQuantities)
-          ..removeWhere((key, _) => state.pickupItems.any((item) =>
-              item.productId == key && state.selectedItems[key] == true));
-
-        emit(state.copyWith(
-          pickupItems: updatedPickupItems,
-          selectedItems: updatedSelectedItems,
-          itemQuantities: updatedQuantities,
-          isAllSelected: false,
-        ));
-      }
+      emit(state.copyWith(
+        regularDeliveryItems: updatedRegularItems,
+        pickupItems: updatedPickupItems,
+        selectedItems: Map.from(state.selectedItems)
+          ..removeWhere((key, _) => selectedIds.contains(key)),
+        itemQuantities: Map.from(state.itemQuantities)
+          ..removeWhere((key, _) => selectedIds.contains(key)),
+        isAllSelected: false,
+      ));
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
@@ -300,27 +321,23 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onMoveToPickup(
       MoveToPickup event, Emitter<CartState> emit) async {
     try {
+      await _cartRepository.moveToPickup(event.productIds);
+
       final itemsToMove = state.regularDeliveryItems
-          .where((item) => state.selectedItems[item.productId] == true)
+          .where((item) => event.productIds.contains(item.productId))
           .toList();
 
-      // Update delivery method in Firestore
-      for (var item in itemsToMove) {
-        await _cartRepository.updateDeliveryMethod(item.productId, true);
-      }
-
       final updatedRegularItems = state.regularDeliveryItems
-          .where((item) => state.selectedItems[item.productId] != true)
+          .where((item) => !event.productIds.contains(item.productId))
           .toList();
 
       final updatedPickupItems = [...state.pickupItems, ...itemsToMove];
-      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-        ..removeWhere((key, value) => value);
 
       emit(state.copyWith(
         regularDeliveryItems: updatedRegularItems,
         pickupItems: updatedPickupItems,
-        selectedItems: updatedSelectedItems,
+        selectedItems: Map.from(state.selectedItems)
+          ..removeWhere((key, _) => event.productIds.contains(key)),
         isAllSelected: false,
       ));
     } catch (e) {
@@ -331,30 +348,26 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onMoveToRegularDelivery(
       MoveToRegularDelivery event, Emitter<CartState> emit) async {
     try {
+      await _cartRepository.moveToRegularDelivery(event.productIds);
+
       final itemsToMove = state.pickupItems
-          .where((item) => state.selectedItems[item.productId] == true)
+          .where((item) => event.productIds.contains(item.productId))
           .toList();
 
-      // Update delivery method in Firestore
-      for (var item in itemsToMove) {
-        await _cartRepository.updateDeliveryMethod(item.productId, false);
-      }
-
       final updatedPickupItems = state.pickupItems
-          .where((item) => state.selectedItems[item.productId] != true)
+          .where((item) => !event.productIds.contains(item.productId))
           .toList();
 
       final updatedRegularItems = [
         ...state.regularDeliveryItems,
         ...itemsToMove
       ];
-      final updatedSelectedItems = Map<String, bool>.from(state.selectedItems)
-        ..removeWhere((key, value) => value);
 
       emit(state.copyWith(
         regularDeliveryItems: updatedRegularItems,
         pickupItems: updatedPickupItems,
-        selectedItems: updatedSelectedItems,
+        selectedItems: Map.from(state.selectedItems)
+          ..removeWhere((key, _) => event.productIds.contains(key)),
         isAllSelected: false,
       ));
     } catch (e) {
@@ -363,8 +376,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   void _onUpdateCurrentTab(UpdateCurrentTab event, Emitter<CartState> emit) {
-    emit(state.copyWith(isRegularDeliveryTab: event.isRegularDelivery));
-
     final currentItems = event.isRegularDelivery
         ? state.regularDeliveryItems
         : state.pickupItems;
@@ -375,8 +386,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
 
     emit(state.copyWith(
+      isRegularDeliveryTab: event.isRegularDelivery,
       selectedItems: updatedSelectedItems,
-      isAllSelected: true,
+      isAllSelected: currentItems.isNotEmpty,
     ));
   }
 }
