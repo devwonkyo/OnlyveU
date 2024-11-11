@@ -246,38 +246,23 @@ class PopularProductsWidget extends StatelessWidget {
               SizedBox(width: 25),
               GestureDetector(
                 onTap: () async {
-                  try {
-                    final currentUserId =
-                        await OnlyYouSharedPreference().getCurrentUserId();
-                    bool isErrorShown = false; // 에러 메시지 표시 여부 추적
+                  context.read<HomeBloc>().add(AddToCart(product.productId));
 
-                    context.read<HomeBloc>().add(AddToCart(product.productId));
-                    context.read<HomeBloc>().stream.listen((state) {
-                      if (state is HomeError && !isErrorShown) {
-                        isErrorShown = true; // 에러 메시지가 표시됨을 표시
+                  context.read<HomeBloc>().stream.listen(
+                    (state) {
+                      if (state is HomeError || state is HomeSuccess) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            duration: Duration(milliseconds: 200),
-                            content: Text(state.message),
-                          ),
-                        );
-                      } else if (!isErrorShown) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            duration: Duration(milliseconds: 200),
-                            content: Text('장바구니에 추가되었습니다.'),
+                            content: Text(state is HomeSuccess
+                                ? state.message
+                                : (state as HomeError).message),
+                            duration: Duration(milliseconds: 1000),
                           ),
                         );
                       }
-                    });
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        duration: Duration(milliseconds: 200),
-                        content: Text(e.toString()),
-                      ),
-                    );
-                  }
+                    },
+                  );
                 },
                 child: Container(
                   width: 22,

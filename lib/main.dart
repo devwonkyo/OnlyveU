@@ -34,7 +34,6 @@ import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
-import 'models/search_models/trend_updater.dart';
 import 'repositories/search_repositories/suggestion_repository/suggestion_repository_impl.dart';
 
 void main() async {
@@ -112,6 +111,7 @@ class MyApp extends StatelessWidget {
               BlocProvider(
                 create: (context) => HomeBloc(
                   homeRepository: HomeRepository(),
+                  cartRepository: ShoppingCartRepository(),
                 )..add(LoadHomeData()),
                 child: const Home(), // HomeScreen 대신 Home을 사용
               ),
