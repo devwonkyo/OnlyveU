@@ -57,6 +57,9 @@ dependencies:
   stream_transform: ^2.1.0
   google_sign_in: ^6.2.1
 
+  daum_postcode_search: ^0.0.3
+  kpostal: ^1.1.0
+
 
 dev_dependencies:
   flutter_test:

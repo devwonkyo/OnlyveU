@@ -27,6 +27,13 @@ class ToggleProductFavorite extends RankingEvent {
   ToggleProductFavorite(this.product, this.userId);
 }
 
+//장바구니집어넣기
+class AddToCart extends RankingEvent {
+  final String productId;
+  final String userId;
+  AddToCart(this.productId, this.userId);
+}
+
 /////stste
 // RankingState: 랭킹 상품 로드 상태 정의
 abstract class RankingState {}
@@ -105,5 +112,13 @@ class RankingBloc extends Bloc<RankingEvent, RankingState> {
         }
       }
     }); //^
+    // 장바구니 넣기
+    on<AddToCart>((event, emit) async {
+      try {
+        await rankingRepository.addToCart(event.productId, event.userId);
+      } catch (e) {
+        print('Error adding to cart: $e');
+      }
+    });
   }
 }
