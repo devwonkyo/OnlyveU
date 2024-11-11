@@ -23,8 +23,7 @@ class ToggleProductFavorite extends TodaySaleEvent {
 //장바구니 담기
 class AddToCart extends TodaySaleEvent {
   final String productId;
-  final String userId;
-  AddToCart(this.productId, this.userId);
+  AddToCart(this.productId); // userId 제거하고 HomeBloc과 동일하게
 }
 
 // TodaySaleState: 특가 상품 로딩의 상태 정의
@@ -50,9 +49,11 @@ class TodaySaleError extends TodaySaleState {
 
 // TodaySaleBloc: 특가 상품 로딩 및 섞기 기능을 위한 Bloc 클래스
 class TodaySaleBloc extends Bloc<TodaySaleEvent, TodaySaleState> {
-  final TodaySaleRepository repository; // 데이터 로딩에 사용할 리포지토리 인스턴스
+  final TodaySaleRepository _repository; // 데이터 로딩에 사용할 리포지토리 인스턴스
 
-  TodaySaleBloc({required this.repository}) : super(TodaySaleInitial()) {
+  TodaySaleBloc({required TodaySaleRepository repository}) // 생성자 수정
+      : _repository = repository,
+        super(TodaySaleInitial()) {
     // 특가 상품 로딩 이벤트 처리
     on<LoadTodaySaleProducts>((event, emit) async {
       emit(TodaySaleLoading()); // 로딩 상태로 전환
@@ -106,10 +107,18 @@ class TodaySaleBloc extends Bloc<TodaySaleEvent, TodaySaleState> {
     });
     //장바구니 추가
     on<AddToCart>((event, emit) async {
-      try {
-        await repository.addToCart(event.productId, event.userId);
-      } catch (e) {
-        print('Error adding to cart: $e');
+      if (state is TodaySaleLoaded) {
+        final currentState = state as TodaySaleLoaded;
+        try {
+          await _repository.addToCart(event.productId);
+        } catch (e) {
+          if (e.toString().contains('이미 장바구니에 담겨 있습니다')) {
+            emit(TodaySaleError('이미 장바구니에 담겨 있습니다.'));
+          } else {
+            emit(TodaySaleError('장바구니 추가에 실패했습니다.'));
+          }
+          emit(currentState);
+        }
       }
     });
   }

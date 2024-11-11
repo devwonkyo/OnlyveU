@@ -178,19 +178,50 @@ class RankingCardWidget extends StatelessWidget {
                       SizedBox(width: 16.w),
                       GestureDetector(
                         onTap: () async {
-                          final currentUserId = await OnlyYouSharedPreference()
-                              .getCurrentUserId();
-                          context.read<RankingBloc>().add(
-                                AddToCart(product.productId, currentUserId),
-                              );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('장바구니에 추가되었습니다.')),
-                          );
+                          try {
+                            final currentUserId =
+                                await OnlyYouSharedPreference()
+                                    .getCurrentUserId();
+                            bool isErrorShown = false;
+
+                            context
+                                .read<RankingBloc>()
+                                .add(AddToCart(product.productId));
+                            context.read<RankingBloc>().stream.listen((state) {
+                              if (state is RankingError && !isErrorShown) {
+                                isErrorShown = true;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    duration: Duration(milliseconds: 200),
+                                    content: Text(state.message),
+                                  ),
+                                );
+                              } else if (!isErrorShown) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    duration: Duration(milliseconds: 200),
+                                    content: Text('장바구니에 추가되었습니다.'),
+                                  ),
+                                );
+                              }
+                            });
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                duration: Duration(milliseconds: 200),
+                                content: Text(e.toString()),
+                              ),
+                            );
+                          }
                         },
-                        child: Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 20.sp,
-                          color: Colors.grey,
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          child: Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ],
