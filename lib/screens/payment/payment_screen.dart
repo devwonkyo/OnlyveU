@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
+import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -14,8 +15,7 @@ class PaymentScreen extends StatefulWidget {
     '그냥 문 앞에 놓아 주시면 돼요.',
     '직접 받을게요.(부재 시 문앞)',
     '벨을 누르지 말아주세요.',
-    '도착 후 전화주시면 직접 받으러 갈게요.',
-    '직접 입력하기'
+    '도착 후 전화주시면 직접 받으러 갈게요.'
   ];
   PaymentScreen({super.key});
 
@@ -51,29 +51,65 @@ class _PaymentScreenState extends State<PaymentScreen> {
               height: 1,
               color: Colors.grey[400],
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '배송지를 등록해 주세요',
-                    style: AppStyles.headingStyle,
+            BlocBuilder<PaymentBloc, PaymentState>(
+              builder: (context, state) {
+                final deliveryInfo = context.read<PaymentBloc>().deliveryInfo;
+                String displayText = '배송지를 등록해주세요';
+                String address = '';
+                String detailAddress = '';
+                String recipientName = '';
+                String recipientPhoneNumber = '';
+                if (deliveryInfo != null) {
+                  displayText = deliveryInfo.deliveryName;
+                  address = deliveryInfo.address;
+                  detailAddress = deliveryInfo.detailAddress;
+                  recipientName = deliveryInfo.recipientName;
+                  recipientPhoneNumber = deliveryInfo.recipientPhone;
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$displayText ($recipientName)',
+                            style: AppStyles.headingStyle,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            '$address $detailAddress',
+                            style: AppStyles.bodyTextStyle,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            recipientPhoneNumber,
+                            style: AppStyles.bodyTextStyle,
+                          )
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _showModalBottomSheet(context);
+                        },
+                        child: Text(
+                          '변경',
+                          style: AppStyles.bodyTextStyle,
+                        ),
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () {
-                      _showModalBottomSheet(context);
-                    },
-                    child: Text(
-                      '변경',
-                      style: AppStyles.bodyTextStyle,
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             Divider(
               height: 1,
               thickness: 6,
@@ -158,7 +194,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         return const Center(child: CircularProgressIndicator());
                       } else if (state is PaymentLoaded) {
                         orderItems = state.orderItems;
-                      } else if (state is PaymentMessageSelected) {
+                      } else if (state is PaymentMessageSelected ||
+                          state is DeliveryInfoUpdated) {
                         orderItems = state.orderItems; // 배송 메시지 선택 시 주문 상품 유지
                       } else if (state is PaymentError) {
                         return Center(child: Text(state.message));
@@ -207,11 +244,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: BlocBuilder<PaymentBloc, PaymentState>(
                 builder: (context, state) {
                   int totalAmount = 0;
-
-                  if (state is PaymentLoaded) {
+                  if (state is DeliveryInfoUpdated) {
                     totalAmount = state.totalAmount;
                   }
-
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
