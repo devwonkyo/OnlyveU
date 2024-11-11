@@ -2,12 +2,12 @@
 
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/todaysale_bloc.dart';
 import 'package:onlyveyou/repositories/home/today_sale_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -28,12 +28,13 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
   @override
   void initState() {
     super.initState();
-    _calculateRemainingTime(); // 초기 남은 시간 계산
-    _startTimer(); // 타이머 시작
-    // FirebaseFirestore 리포지토리를 주입하여 Bloc 초기화
     _todaySaleBloc = TodaySaleBloc(
-        repository: TodaySaleRepository(firestore: FirebaseFirestore.instance));
-    _todaySaleBloc.add(LoadTodaySaleProducts()); // 특가 상품 로드 이벤트 발생
+      repository: TodaySaleRepository(),
+      cartRepository: ShoppingCartRepository(), // 추가
+    );
+    _calculateRemainingTime();
+    _startTimer();
+    _todaySaleBloc.add(LoadTodaySaleProducts());
   }
 
   // 남은 시간을 자정 또는 다음 자정 기준으로 계산하는 메서드
@@ -351,47 +352,31 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                 SizedBox(height: 25.h),
                                 GestureDetector(
                                   onTap: () async {
-                                    try {
-                                      bool isErrorShown = false;
-                                      context
-                                          .read<TodaySaleBloc>()
-                                          .add(AddToCart(product.productId));
+                                    context
+                                        .read<TodaySaleBloc>()
+                                        .add(AddToCart(product.productId));
 
-                                      context
-                                          .read<TodaySaleBloc>()
-                                          .stream
-                                          .listen((state) {
-                                        if (state is TodaySaleError &&
-                                            !isErrorShown) {
-                                          isErrorShown = true;
+                                    context.read<TodaySaleBloc>().stream.listen(
+                                      (state) {
+                                        if (state is TodaySaleError ||
+                                            state is TodaySaleSuccess) {
+                                          ScaffoldMessenger.of(context)
+                                              .clearSnackBars();
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
+                                              content: Text(state
+                                                      is TodaySaleSuccess
+                                                  ? state.message
+                                                  : (state as TodaySaleError)
+                                                      .message),
                                               duration:
-                                                  Duration(milliseconds: 200),
-                                              content: Text(state.message),
-                                            ),
-                                          );
-                                        } else if (!isErrorShown) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              duration:
-                                                  Duration(milliseconds: 200),
-                                              content: Text('장바구니에 추가되었습니다.'),
+                                                  Duration(milliseconds: 1000),
                                             ),
                                           );
                                         }
-                                      });
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          duration: Duration(milliseconds: 200),
-                                          content: Text(e.toString()),
-                                        ),
-                                      );
-                                    }
+                                      },
+                                    );
                                   },
                                   child: Container(
                                     width: 22,
