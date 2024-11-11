@@ -15,14 +15,17 @@ class SearchSuggestionBloc
     on<FetchSearchSuggestions>(_onFetchSearchSuggestions);
   }
 
+// 로컬에 저장한 후 검색함
   Future<void> _onFetchSearchSuggestions(
     FetchSearchSuggestions event,
     Emitter<SearchSuggestionState> emit,
   ) async {
     emit(SearchSuggestionLoading());
     try {
+      final sanitizedText = event.query.replaceAll(
+          RegExp(r'[^\p{L}\p{N}\s]+', unicode: true), ''); // 특수문자 제거
       await Future.delayed(const Duration(seconds: 1));
-      final suggestions = await suggestionRepository.search(event.query);
+      final suggestions = await suggestionRepository.searchLocal(sanitizedText);
       emit(SearchSuggestionLoaded(suggestions));
     } catch (e) {
       emit(const SearchSuggestionError('Failed to fetch suggestions'));

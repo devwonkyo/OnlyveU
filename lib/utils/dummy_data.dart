@@ -237,8 +237,16 @@ List<ProductModel> generateDummyProducts() {
           productId: '${categoryId}_${subCategoryId}_$productNum',
           name: generateProductName(categoryId, subCategoryId, brand),
           brandName: brand,
-          productImageList: [imageUrls[randomIndex],imageUrls[randomIndex],imageUrls[randomIndex]],
-          descriptionImageList: [imageUrls[randomIndex],imageUrls[randomIndex],imageUrls[randomIndex]],
+          productImageList: [
+            imageUrls[randomIndex],
+            imageUrls[randomIndex],
+            imageUrls[randomIndex]
+          ],
+          descriptionImageList: [
+            imageUrls[randomIndex],
+            imageUrls[randomIndex],
+            imageUrls[randomIndex]
+          ],
           price: basePrice.toString(),
           discountPercent: (random.nextInt(10) + 1) * 5, // 5%부터 50%까지 5단위로 생성
           categoryId: categoryId.toString(),
@@ -251,6 +259,7 @@ List<ProductModel> generateDummyProducts() {
             if (random.nextBool()) 'BEST',
             if (random.nextBool()) 'SALE'
           ],
+
           visitCount: 100 + random.nextInt(900),
           rating: rating,
           registrationDate:

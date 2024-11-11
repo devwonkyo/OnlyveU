@@ -214,6 +214,7 @@ class PopularProductsWidget extends StatelessWidget {
           Row(
             children: [
               FutureBuilder<String>(
+                // SharedPreferences에서 userId를 가져오는 부분 추가
                 future: OnlyYouSharedPreference().getCurrentUserId(),
                 builder: (context, snapshot) {
                   final userId = snapshot.data ?? 'temp_user_id';
@@ -221,15 +222,16 @@ class PopularProductsWidget extends StatelessWidget {
                     onTap: () async {
                       final prefs = OnlyYouSharedPreference();
                       final currentUserId = await prefs.getCurrentUserId();
-                      context
-                          .read<HomeBloc>()
-                          .add(ToggleProductFavorite(product, currentUserId));
+                      context.read<HomeBloc>().add(
+                            ToggleProductFavorite(product, currentUserId),
+                          );
                     },
                     child: Container(
                       width: 20,
                       height: 20,
                       child: Icon(
-                        product.favoriteList.contains(userId)
+                        product.favoriteList
+                                .contains(userId) // 익스텐션 대신 직접 리스트 체크
                             ? Icons.favorite
                             : Icons.favorite_border,
                         size: 18,
@@ -243,7 +245,20 @@ class PopularProductsWidget extends StatelessWidget {
               ),
               SizedBox(width: 25),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  final currentUserId =
+                      await OnlyYouSharedPreference().getCurrentUserId();
+                  context
+                      .read<HomeBloc>()
+                      .add(AddToCart(product.productId, currentUserId));
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      duration: Duration(seconds: 1),
+                      content: Text('장바구니에 추가되었습니다.'),
+                    ),
+                  );
+                },
                 child: Container(
                   width: 22,
                   height: 22,

@@ -58,6 +58,9 @@ dependencies:
   google_sign_in: ^6.2.1
   sliver_tools: ^0.2.12
 
+  daum_postcode_search: ^0.0.3
+  kpostal: ^1.1.0
+
 
 dev_dependencies:
   flutter_test:

@@ -13,8 +13,8 @@ import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
-import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
@@ -22,6 +22,8 @@ import 'package:onlyveyou/repositories/auth_repository.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
+import 'package:onlyveyou/repositories/order/mock_order_repository.dart';
+import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
@@ -30,9 +32,10 @@ import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
-
 import 'core/router.dart';
 import 'firebase_options.dart';
+import 'models/search_models/trend_updater.dart';
+import 'repositories/search_repositories/suggestion_repository/suggestion_repository_impl.dart';
 
 void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
@@ -42,7 +45,7 @@ void main() async {
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
   // print("hash key ${await KakaoSdk.origin}");
-
+  final orderRepository = MockOrderRepository();
   KakaoSdk.init(
     nativeAppKey: '0236522723df3e1aa869fe36e25e6297',
     javaScriptAppKey: 'Ye8ebc7de132c8c4f0b6881be99e20f5e',
@@ -50,6 +53,32 @@ void main() async {
   final prefs = OnlyYouSharedPreference();
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
+
+// 모든 제품 로컬 저장 (검색용)
+//   try {
+//     final productRepository = ProductRepository();
+//     await productRepository.fetchAndStoreAllProducts();
+//     final storedProducts = await productRepository.getStoredProducts();
+//     print('Stored products: ${storedProducts.length}');
+//   } catch (e) {
+//     print('Error fetching and storing products: $e');
+//   }
+
+  // 모든 검색어 로컬 저장 (검색용)
+  try {
+    final suggestionRepository = SuggestionRepositoryImpl();
+    await suggestionRepository.fetchAndStoreAllSuggestions();
+    final storedSuggestions = await suggestionRepository.getStoredSuggestions();
+    print('Stored suggestions: ${storedSuggestions.length}');
+  } catch (e) {
+    print('Error fetching and storing suggestions: $e');
+  }
+
+  // 트렌드 점수 업데이트 시작
+  // final trendCalculator = TrendCalculator();
+  // final trendUpdater = TrendUpdater(trendCalculator: trendCalculator);
+  // trendUpdater.startUpdating();
+
   runApp(const MyApp());
 }
 
@@ -57,119 +86,92 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
+    final orderRepository = MockOrderRepository();
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-        return MultiBlocProvider(
+        return MultiRepositoryProvider(
           providers: [
-            BlocProvider(
-              create: (context) => CartBloc(
-                cartRepository: ShoppingCartRepository(),
-              )..add(LoadCart()),
-              child: ShoppingCartScreen(),
-            ),
-            BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(
-                  authRepository: AuthRepository(),
-                  sharedPreference: OnlyYouSharedPreference()),
-            ),
-            BlocProvider(
-              create: (context) => HomeBloc(
-                homeRepository: HomeRepository(),
-              )..add(LoadHomeData()),
-              child: Home(), // HomeScreen 대신 Home을 사용
-            ),
-            BlocProvider<HistoryBloc>(
-              create: (context) => HistoryBloc(
-                repository:
-                    HistoryRepository(), // HistoryRepository 인스턴스 전달// FirebaseFirestore.instance, // Firebase를 사용하는 경우
-              ),
-            ),
-            BlocProvider<ProfileEditBloc>(
-              create: (context) => ProfileEditBloc(),
-            ),
-            BlocProvider<CategoryCubit>(
-                create: (context) =>
-                    CategoryCubit(categoryRepository: CategoryRepository())
-                      ..loadCategories()),
-            BlocProvider<PasswordBloc>(
-              // PasswordBloc 추가
-              create: (context) => PasswordBloc(),
-            ),
-            BlocProvider<SetNewPasswordBloc>(
-              // PasswordBloc 추가
-              create: (context) => SetNewPasswordBloc(),
-            ),
-            BlocProvider<NicknameEditBloc>(
-              create: (context) => NicknameEditBloc(),
-            ),
-            BlocProvider<PhoneNumberBloc>(
-              create: (context) => PhoneNumberBloc(),
-            ),
-            BlocProvider<ThemeBloc>(
-              create: (context) => ThemeBloc(),
-            ),
-            BlocProvider<AuthBloc>(
-              create: (context) => AuthBloc(
-                authRepository: AuthRepository(),
-                sharedPreference: OnlyYouSharedPreference(),
-              ),
-            ),
-            BlocProvider<HomeBloc>(
-              create: (context) => HomeBloc(homeRepository: HomeRepository()),
-            ),
-            BlocProvider<HistoryBloc>(
-              create: (context) => HistoryBloc(
-                repository:
-                    HistoryRepository(), // HistoryRepository 인스턴스 전달// FirebaseFirestore.instance, // Firebase를 사용하는 경우
-              ),
-            ),
-            BlocProvider<ProfileEditBloc>(
-              create: (context) => ProfileEditBloc(),
-            ),
-            BlocProvider<CategoryCubit>(
-                create: (context) =>
-                    CategoryCubit(categoryRepository: CategoryRepository())
-                      ..loadCategories()),
-            BlocProvider<PasswordBloc>(
-              // PasswordBloc 추가
-              create: (context) => PasswordBloc(),
-            ),
-            BlocProvider<SetNewPasswordBloc>(
-              // PasswordBloc 추가
-              create: (context) => SetNewPasswordBloc(),
-            ),
-            BlocProvider<NicknameEditBloc>(
-              create: (context) => NicknameEditBloc(),
-            ),
-            BlocProvider<PhoneNumberBloc>(
-              create: (context) => PhoneNumberBloc(),
-            ),
-            BlocProvider<ThemeBloc>(
-              create: (context) => ThemeBloc()..add(LoadTheme()),
-            ),
-            BlocProvider<OrderStatusBloc>(
-              create: (context) => OrderStatusBloc(),
-            ),
-            BlocProvider<ProductDetailBloc>(
-              create: (context) => ProductDetailBloc(ProductRepository()),
-            ),
-            BlocProvider<PaymentBloc>(
-              create: (context) => PaymentBloc(),
-            ),
+            RepositoryProvider<OrderRepository>.value(value: orderRepository),
           ],
-          child: BlocBuilder<ThemeBloc, ThemeState>(
-            builder: (context, state) {
-              return MaterialApp.router(
-                debugShowCheckedModeBanner: false,
-                themeMode: state.themeMode,
-                theme: lightThemeData(),
-                darkTheme: darkThemeData(),
-                routerConfig: router,
-              );
-            },
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => CartBloc(
+                  cartRepository: ShoppingCartRepository(),
+                )..add(LoadCart()),
+                child: ShoppingCartScreen(),
+              ),
+              BlocProvider<AuthBloc>(
+                create: (context) => AuthBloc(
+                    authRepository: AuthRepository(),
+                    sharedPreference: OnlyYouSharedPreference()),
+              ),
+              BlocProvider(
+                create: (context) => HomeBloc(
+                  homeRepository: HomeRepository(),
+                )..add(LoadHomeData()),
+                child: const Home(), // HomeScreen 대신 Home을 사용
+              ),
+              BlocProvider(
+                create: (context) => HistoryBloc(
+                  historyRepository:
+                      HistoryRepository(), // ProductRepository 제거
+                )..add(LoadHistoryItems()),
+              ),
+              BlocProvider<ProfileEditBloc>(
+                create: (context) => ProfileEditBloc(),
+              ),
+              BlocProvider<CategoryCubit>(
+                  create: (context) =>
+                      CategoryCubit(categoryRepository: CategoryRepository())
+                        ..loadCategories()),
+              BlocProvider<PasswordBloc>(
+                // PasswordBloc 추가
+                create: (context) => PasswordBloc(),
+              ),
+              BlocProvider<SetNewPasswordBloc>(
+                // PasswordBloc 추가
+                create: (context) => SetNewPasswordBloc(),
+              ),
+              BlocProvider<NicknameEditBloc>(
+                create: (context) => NicknameEditBloc(),
+              ),
+              BlocProvider<PhoneNumberBloc>(
+                create: (context) => PhoneNumberBloc(),
+              ),
+              BlocProvider<ThemeBloc>(
+                create: (context) => ThemeBloc(),
+              ),
+              BlocProvider<OrderStatusBloc>(
+                create: (context) => OrderStatusBloc(),
+              ),
+              BlocProvider<ProductDetailBloc>(
+                create: (context) => ProductDetailBloc(ProductRepository()),
+              ),
+              BlocProvider<PaymentBloc>(
+                create: (context) => PaymentBloc(
+                  orderRepository:
+                      RepositoryProvider.of<OrderRepository>(context),
+                ),
+              ),
+              BlocProvider<PostBloc>(
+                create: (context) => PostBloc(),
+              ),
+            ],
+            child: BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, state) {
+                return MaterialApp.router(
+                  debugShowCheckedModeBanner: false,
+                  themeMode: state.themeMode,
+                  theme: lightThemeData(),
+                  darkTheme: darkThemeData(),
+                  routerConfig: router,
+                );
+              },
+            ),
           ),
         );
       },

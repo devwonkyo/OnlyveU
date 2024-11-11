@@ -15,16 +15,19 @@ class SearchTextField extends StatefulWidget {
 
 class _SearchTextFieldState extends State<SearchTextField> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _focusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -40,12 +43,13 @@ class _SearchTextFieldState extends State<SearchTextField> {
           }
         },
         child: TextField(
+          focusNode: _focusNode,
           controller: _controller,
           onChanged: (text) {
-            context.read<SearchTextFieldBloc>().add(TextChanged(text.trim()));
+            context.read<SearchTextFieldBloc>().add(TextChanged(text));
           },
           onSubmitted: (text) {
-            context.read<SearchTextFieldBloc>().add(TextSubmitted(text.trim()));
+            context.read<SearchTextFieldBloc>().add(TextSubmitted(text));
           },
           // 입력창
           decoration: InputDecoration(
@@ -71,7 +75,6 @@ class _SearchTextFieldState extends State<SearchTextField> {
             // 보내기 버튼
             suffixIcon: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
                 builder: (context, state) {
-              print('$state');
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -82,6 +85,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
                       onTap: () {
                         _controller.clear();
                         context.read<SearchTextFieldBloc>().add(TextDeleted());
+                        _focusNode.requestFocus();
                       },
                       child: SizedBox(
                         width: 40.w,
@@ -99,7 +103,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
                         FocusScope.of(context).unfocus();
                         context
                             .read<SearchTextFieldBloc>()
-                            .add(TextSubmitted(_controller.text.trim()));
+                            .add(TextSubmitted(_controller.text));
                       },
                       child: SizedBox(
                         width: 40.w,

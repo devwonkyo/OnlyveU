@@ -1,23 +1,29 @@
+import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
 
-abstract class PostEvent {}
+abstract class PostEvent extends Equatable {
+  const PostEvent();
+
+  @override
+  List<Object?> get props => [];
+}
 
 class AddImageEvent extends PostEvent {
   final XFile image;
 
-  AddImageEvent(this.image);
-}
+  const AddImageEvent(this.image);
 
-class RemoveImageEvent extends PostEvent {
-  final int index;
-
-  RemoveImageEvent(this.index);
+  @override
+  List<Object?> get props => [image];
 }
 
 class UpdateTextEvent extends PostEvent {
   final String text;
 
-  UpdateTextEvent(this.text);
+  const UpdateTextEvent(this.text);
+
+  @override
+  List<Object?> get props => [text];
 }
 
 class SubmitPostEvent extends PostEvent {
@@ -25,9 +31,12 @@ class SubmitPostEvent extends PostEvent {
   final List<XFile> images;
   final List<String> tags;
 
-  SubmitPostEvent({
+  const SubmitPostEvent({
     required this.text,
     required this.images,
     required this.tags,
   });
+
+  @override
+  List<Object?> get props => [text, images, tags];
 }
