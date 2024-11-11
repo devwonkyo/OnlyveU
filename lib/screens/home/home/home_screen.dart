@@ -87,6 +87,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ),
       child: TabBar(
         controller: _tabController,
+        dividerColor: Colors.transparent,
         isScrollable: true,
         padding: EdgeInsets.zero,
         indicatorPadding: EdgeInsets.zero,
