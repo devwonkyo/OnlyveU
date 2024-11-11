@@ -217,6 +217,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         await _cartRepository.updateProductQuantity(
           event.productId,
           updatedQuantities[event.productId]!,
+          event.isPickup, // 여기에 isPickup 파라미터 추가
         );
         emit(state.copyWith(itemQuantities: updatedQuantities));
       } catch (e) {

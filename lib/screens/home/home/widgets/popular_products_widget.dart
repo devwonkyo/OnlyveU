@@ -248,9 +248,7 @@ class PopularProductsWidget extends StatelessWidget {
                 onTap: () async {
                   final currentUserId =
                       await OnlyYouSharedPreference().getCurrentUserId();
-                  context
-                      .read<HomeBloc>()
-                      .add(AddToCart(product.productId, currentUserId));
+                  context.read<HomeBloc>().add(AddToCart(product.productId));
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
