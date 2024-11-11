@@ -249,9 +249,7 @@ class RecommendedProductsWidget extends StatelessWidget {
                 onTap: () async {
                   final currentUserId =
                       await OnlyYouSharedPreference().getCurrentUserId();
-                  context
-                      .read<HomeBloc>()
-                      .add(AddToCart(item.productId, currentUserId));
+                  context.read<HomeBloc>().add(AddToCart(item.productId));
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

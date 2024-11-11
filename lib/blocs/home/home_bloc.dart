@@ -20,8 +20,7 @@ class ToggleProductFavorite extends HomeEvent {
 
 class AddToCart extends HomeEvent {
   final String productId;
-  final String userId;
-  AddToCart(this.productId, this.userId);
+  AddToCart(this.productId); // userId 제거
 }
 
 // 상태 정의 (이전과 동일)
@@ -181,9 +180,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
     on<AddToCart>((event, emit) async {
       if (state is HomeLoaded) {
-        final currentState = state as HomeLoaded;
         try {
-          await _homeRepository.addToCart(event.productId, event.userId);
+          await _homeRepository.addToCart(event.productId); // userId 파라미터 제거
         } catch (e) {
           print('Error adding to cart: $e');
         }
