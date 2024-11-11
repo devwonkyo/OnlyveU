@@ -165,15 +165,21 @@ class HistoryItemCard extends StatelessWidget {
                         ),
                         GestureDetector(
                           onTap: () async {
-                            final currentUserId =
-                                await OnlyYouSharedPreference()
-                                    .getCurrentUserId();
-                            context.read<HistoryBloc>().add(
-                                  AddToCart(product.productId, currentUserId),
-                                );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('장바구니에 추가되었습니다.')),
-                            );
+                            try {
+                              context.read<HistoryBloc>().add(
+                                    AddToCart(product.productId),
+                                  );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('장바구니에 추가되었습니다')),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('장바구니 추가 실패: ${e.toString()}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
                           },
                           child: Container(
                             width: 22,
