@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart'; // 수정된 부분: ProductModel 임포트
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 // 추천 상품 목록을 보여주는 위젯
@@ -216,27 +217,49 @@ class RecommendedProductsWidget extends StatelessWidget {
           // 6. 좋아요와 장바구니 버튼
           Row(
             children: [
-              GestureDetector(
-                onTap: () {
-                  context
-                      .read<HomeBloc>()
-                      .add(ToggleProductFavorite(item, userId)); // userId 전달
+              FutureBuilder<String>(
+                future: OnlyYouSharedPreference().getCurrentUserId(),
+                builder: (context, snapshot) {
+                  final userId = snapshot.data ?? 'temp_user_id';
+                  return GestureDetector(
+                    onTap: () {
+                      print(
+                          'Recommended Product ID: ${item.productId}'); // I작업 유지
+                      context
+                          .read<HomeBloc>()
+                          .add(ToggleProductFavorite(item, userId)); // 수정된 부분
+                    },
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      child: Icon(
+                        item.isFavorite(userId)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        size: 18,
+                        color:
+                            item.isFavorite(userId) ? Colors.red : Colors.grey,
+                      ),
+                    ),
+                  );
                 },
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  child: Icon(
-                    item.isFavorite(userId)
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    size: 18,
-                    color: item.isFavorite(userId) ? Colors.red : Colors.grey,
-                  ),
-                ),
               ),
               SizedBox(width: 25),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  final currentUserId =
+                      await OnlyYouSharedPreference().getCurrentUserId();
+                  context
+                      .read<HomeBloc>()
+                      .add(AddToCart(item.productId, currentUserId));
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      duration: Duration(seconds: 1),
+                      content: Text('장바구니에 추가되었습니다.'),
+                    ),
+                  );
+                },
                 child: Container(
                   width: 22,
                   height: 22,

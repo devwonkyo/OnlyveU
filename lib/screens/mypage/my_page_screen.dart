@@ -360,7 +360,9 @@ class MyPageScreen extends StatelessWidget {
                     title: '이벤트·리서치',
                     items: [
                       buildListItem(Icons.event, '이벤트 참여 현황'),
-                      buildListItem(Icons.mic, '올리브 보이스'),
+                      buildListItem(Icons.mic, '올리브 보이스', onTap: () {
+                        context.push('/admin');
+                      }),
                     ],
                   ),
                   CustomSection(

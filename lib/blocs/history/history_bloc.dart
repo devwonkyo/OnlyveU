@@ -1,36 +1,37 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/repositories/history_repository.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
-import '../../models/history_item.dart';
-import '../../models/product_model.dart'; // ProductModel을 임포트
-import '../../repositories/history_repository.dart';
-
-// 1. 이벤트 정의 - 앱에서 발생할 수 있는 모든 액션들
+// Events
 abstract class HistoryEvent {}
 
-// Firestore에서 히스토리 아이템을 불러오는 이벤트
 class LoadHistoryItems extends HistoryEvent {}
 
-// 특정 히스토리 아이템을 삭제하는 이벤트
 class RemoveHistoryItem extends HistoryEvent {
-  final HistoryItem item; // 삭제할 아이템을 전달받음
-  RemoveHistoryItem(this.item); // 생성자에서 삭제할 아이템 설정
+  final ProductModel product;
+  RemoveHistoryItem(this.product);
 }
 
-// 좋아요 상태를 변경하는 이벤트
 class ToggleFavorite extends HistoryEvent {
-  final HistoryItem item; // 좋아요 상태를 변경할 아이템을 전달받음
-  ToggleFavorite(this.item); // 생성자에서 해당 아이템 설정
+  final ProductModel product;
+  final String userId;
+  ToggleFavorite(this.product, this.userId);
 }
 
-// 모든 히스토리 아이템을 삭제하는 이벤트
 class ClearHistory extends HistoryEvent {}
 
-// 2. 상태 정의 - 앱의 데이터 상태를 나타내는 클래스
+//장바구니 담기
+class AddToCart extends HistoryEvent {
+  final String productId;
+  final String userId;
+  AddToCart(this.productId, this.userId);
+}
+
+// State
 class HistoryState {
-  final List<HistoryItem> recentItems; // 최근 본 아이템 리스트
-  final List<HistoryItem> favoriteItems; // 좋아요한 아이템 리스트
+  final List<ProductModel> recentItems;
+  final List<ProductModel> favoriteItems;
 
   HistoryState({
     required this.recentItems,
@@ -38,111 +39,94 @@ class HistoryState {
   });
 }
 
-// 3. BLoC 구현 - 이벤트를 받아서 상태를 변경하는 로직
+// Bloc
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
-  final HistoryRepository _repository;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final _prefs = OnlyYouSharedPreference(); // Firebase와의 연동을 위한 repository
+  final HistoryRepository _historyRepository;
+  final _prefs = OnlyYouSharedPreference();
 
-  // BLoC 생성자
-  HistoryBloc({required HistoryRepository repository})
-      : _repository = repository, // repository 초기화
+  HistoryBloc(
+      {required HistoryRepository
+          historyRepository}) // 매개변수명을 historyRepository로 변경
+      : _historyRepository = historyRepository,
         super(HistoryState(recentItems: [], favoriteItems: [])) {
-    // 기본 상태 설정
-
-    // 3.1 LoadHistoryItems 이벤트를 처리하여 Firestore에서 데이터 불러오기
     on<LoadHistoryItems>((event, emit) async {
       try {
-        // Firestore에서 데이터를 불러와 최근 본 아이템 리스트 생성
-        final recentItems = await _repository.fetchHistoryItems();
-        // 좋아요가 설정된 아이템만 필터링하여 좋아요 리스트 생성
-        final favoriteItems =
-            recentItems.where((item) => item.isFavorite).toList();
-        // 새로운 상태로 emit하여 recentItems와 favoriteItems 업데이트
+        final userId = await _prefs.getCurrentUserId();
+        final allItems = await _historyRepository.fetchHistoryItems();
+
+        final favoriteItems = allItems
+            .where((product) => product.favoriteList.contains(userId))
+            .toList();
+
         emit(HistoryState(
-            recentItems: recentItems, favoriteItems: favoriteItems));
+          recentItems: allItems,
+          favoriteItems: favoriteItems,
+        ));
       } catch (e) {
-        // 에러 발생 시 콘솔에 출력하고 상태를 유지
         print('Error loading history items: $e');
-        emit(state); // 에러가 발생하면 기존 상태 유지
       }
     });
 
-    // 3.2 RemoveHistoryItem 이벤트를 처리하여 특정 아이템 삭제
-    on<RemoveHistoryItem>((event, emit) {
-      // recentItems 리스트에서 해당 아이템을 제외한 새로운 리스트 생성
-      final updatedRecentItems =
-          state.recentItems.where((item) => item.id != event.item.id).toList();
-      // favoriteItems 리스트에서도 해당 아이템을 제외한 새로운 리스트 생성
-      final updatedFavoriteItems = state.favoriteItems
-          .where((item) => item.id != event.item.id)
-          .toList();
-      // 새로운 상태로 emit하여 삭제 후의 리스트로 업데이트
-      emit(HistoryState(
-          recentItems: updatedRecentItems,
-          favoriteItems: updatedFavoriteItems));
-    });
-
-    // 3.3 ToggleFavorite 이벤트 핸들러 수정
     on<ToggleFavorite>((event, emit) async {
       try {
-        // 현재 사용자 ID 가져오기
-        final userId = await _prefs.getCurrentUserId();
+        await _historyRepository.toggleFavorite(
+          event.product.productId,
+          event.userId,
+        ); //^
 
-        // Firestore에서 해당 상품 문서 가져오기
-        final docRef = _firestore.collection('products').doc(event.item.id);
-        final doc = await docRef.get();
-
-        if (doc.exists) {
-          // Firestore 문서에서 ProductModel 객체 생성
-          final product =
-              ProductModel.fromMap(doc.data() as Map<String, dynamic>);
-          List<String> updatedFavoriteList =
-              List<String>.from(product.favoriteList);
-
-          // 좋아요 목록 업데이트
-          if (updatedFavoriteList.contains(userId)) {
-            updatedFavoriteList.remove(userId);
-          } else {
-            updatedFavoriteList.add(userId);
-          }
-
-          // Firestore 업데이트
-          await docRef.update({'favoriteList': updatedFavoriteList});
-
-          // 로컬 상태 업데이트
-          final updatedRecentItems = state.recentItems.map((item) {
-            if (item.id == event.item.id) {
-              return item.copyWith(isFavorite: !item.isFavorite);
-            }
-            return item;
-          }).toList();
-
-          // 좋아요 상태가 true인 아이템만 필터링하여 좋아요 리스트 생성
-          final updatedFavoriteItems =
-              updatedRecentItems.where((item) => item.isFavorite).toList();
-
-          // 새로운 상태로 emit하여 좋아요 상태 변경
-          emit(HistoryState(
-            recentItems: updatedRecentItems,
-            favoriteItems: updatedFavoriteItems,
-          ));
-        }
+        add(LoadHistoryItems()); // 상태 새로고침
       } catch (e) {
         print('Error toggling favorite: $e');
       }
     });
+    on<RemoveHistoryItem>((event, emit) async {
+      try {
+        final userId = await _prefs.getCurrentUserId();
+        await _historyRepository.toggleFavorite(
+          event.product.productId,
+          userId,
+        ); //^
 
-    // 3.4 ClearHistory 이벤트를 처리하여 모든 히스토리 삭제
-    on<ClearHistory>((event, emit) {
-      // 빈 리스트로 상태 초기화하여 모든 아이템 삭제
-      emit(HistoryState(recentItems: [], favoriteItems: []));
+        add(LoadHistoryItems());
+      } catch (e) {
+        print('Error removing history item: $e');
+      }
+    });
+
+    on<ClearHistory>((event, emit) async {
+      //^
+      try {
+        if (state is HistoryState) {
+          final currentState = state;
+          final userId = await _prefs.getCurrentUserId();
+
+          // 좋아요한 상품들 전체 삭제 처리
+          for (var product in currentState.favoriteItems) {
+            await _historyRepository.toggleFavorite(
+              //^ toggleFavorite로 변경
+              product.productId,
+              userId,
+            );
+          }
+
+          emit(HistoryState(
+            recentItems: currentState.recentItems,
+            favoriteItems: [], // 좋아요 목록 비우기
+          ));
+        }
+      } catch (e) {
+        print('Error clearing history: $e');
+      }
+    }); //^
+//장바구니
+    on<AddToCart>((event, emit) async {
+      try {
+        await _historyRepository.addToCart(event.productId, event.userId);
+      } catch (e) {
+        print('Error adding to cart: $e');
+      }
     });
   }
 }
-//////////////
-// 셔터쪽
-//  지희님 셔터님
-// 결제
-// 데이터 관리 매장 데이터
-//
+
+///태그 데이터 뿌려주는작업?

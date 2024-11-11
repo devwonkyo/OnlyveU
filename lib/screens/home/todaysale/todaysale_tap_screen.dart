@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/todaysale_bloc.dart';
 import 'package:onlyveyou/repositories/home/today_sale_repository.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class TodaySaleTabScreen extends StatefulWidget {
@@ -319,16 +320,54 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 SizedBox(height: 20.h),
-                                Icon(
-                                  Icons.favorite_border,
-                                  size: 24.sp,
-                                  color: Colors.grey,
+                                FutureBuilder<String>(
+                                  future: OnlyYouSharedPreference()
+                                      .getCurrentUserId(),
+                                  builder: (context, snapshot) {
+                                    final userId =
+                                        snapshot.data ?? 'temp_user_id';
+                                    return GestureDetector(
+                                      onTap: () {
+                                        print(
+                                            'TodaySale Product ID: ${product.productId}'); // I작업 추가
+                                        context.read<TodaySaleBloc>().add(
+                                              ToggleProductFavorite(
+                                                  product, userId),
+                                            );
+                                      },
+                                      child: Icon(
+                                        product.favoriteList.contains(userId)
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        size: 24.sp,
+                                        color: product.favoriteList
+                                                .contains(userId)
+                                            ? Colors.red
+                                            : Colors.grey,
+                                      ),
+                                    );
+                                  },
                                 ),
                                 SizedBox(height: 25.h),
-                                Icon(
-                                  Icons.shopping_bag_outlined,
-                                  size: 24.sp,
-                                  color: Colors.grey,
+                                GestureDetector(
+                                  onTap: () async {
+                                    final currentUserId =
+                                        await OnlyYouSharedPreference()
+                                            .getCurrentUserId();
+                                    context.read<TodaySaleBloc>().add(
+                                          AddToCart(
+                                              product.productId, currentUserId),
+                                        );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('장바구니에 추가되었습니다.')),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.shopping_bag_outlined,
+                                    size: 24.sp,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),

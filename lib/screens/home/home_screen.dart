@@ -5,7 +5,6 @@ import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/home/widgets/recommended_products_widget.dart';
-
 import 'package:onlyveyou/utils/firebase_data_uploader.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
@@ -186,7 +185,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           Tab(text: '매거진'),
         ],
         labelColor: AppStyles.mainColor,
-        unselectedLabelColor: AppStyles.greyColor,
+        // unselectedLabelColor: AppStyles.greyColor,
         indicatorColor: AppStyles.mainColor,
         indicatorSize: TabBarIndicatorSize.label,
         labelStyle: AppStyles.subHeadingStyle,

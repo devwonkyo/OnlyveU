@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
+import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -23,6 +24,13 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 주문 상품 가져오기 이벤트 추가
+    context.read<PaymentBloc>().add(const FetchOrderItems());
+  }
+
   String _selectedPaymentMethod = '빠른결제';
   bool _saveAsDefault = false;
   bool _agreeToAll = false;
@@ -133,16 +141,56 @@ class _PaymentScreenState extends State<PaymentScreen> {
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '주문 상품',
                     style: AppStyles.headingStyle,
                   ),
-                  const Text(
-                    '[1+1/모공탄력] 비플레인 녹두 모공',
-                  )
+                  const SizedBox(height: 10),
+                  // payment_screen.dart
+                  // payment_screen.dart
+                  BlocBuilder<PaymentBloc, PaymentState>(
+                    builder: (context, state) {
+                      List<OrderItemModel> orderItems = [];
+                      if (state is PaymentLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is PaymentLoaded) {
+                        orderItems = state.orderItems;
+                      } else if (state is PaymentMessageSelected) {
+                        orderItems = state.orderItems; // 배송 메시지 선택 시 주문 상품 유지
+                      } else if (state is PaymentError) {
+                        return Center(child: Text(state.message));
+                      }
+
+                      // 주문 상품 리스트 UI 표시
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: orderItems.length,
+                        itemBuilder: (context, index) {
+                          final item = orderItems[index];
+                          return ListTile(
+                            leading: SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: Image.network(
+                                item.productImageUrl,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            title: Text(item.productName),
+                            subtitle: Text('수량: ${item.quantity}'),
+                            trailing: Text(
+                              '${item.productPrice * item.quantity}원',
+                              style: AppStyles.bodyTextStyle,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -156,18 +204,28 @@ class _PaymentScreenState extends State<PaymentScreen> {
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '최종 결제금액',
-                    style: AppStyles.headingStyle,
-                  ),
-                  Text(
-                    '70,000원',
-                    style: AppStyles.headingStyle,
-                  ),
-                ],
+              child: BlocBuilder<PaymentBloc, PaymentState>(
+                builder: (context, state) {
+                  int totalAmount = 0;
+
+                  if (state is PaymentLoaded) {
+                    totalAmount = state.totalAmount;
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '최종 결제금액',
+                        style: AppStyles.headingStyle,
+                      ),
+                      Text(
+                        '$totalAmount원',
+                        style: AppStyles.headingStyle,
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 10),
@@ -333,31 +391,41 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const SizedBox(height: 20),
 
             // Total Price Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.05,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Handle payment action
-                    print("결제하기 버튼");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: const Text(
-                    '70,000원 결제하기',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+            BlocBuilder<PaymentBloc, PaymentState>(
+              builder: (context, state) {
+                int totalAmount = 0;
+
+                if (state is PaymentLoaded) {
+                  totalAmount = state.totalAmount;
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: MediaQuery.of(context).size.height * 0.05,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Handle payment action
+                        print("결제하기 버튼");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: Text(
+                        '$totalAmount원 결제하기',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
             const SizedBox(height: 100),
           ],

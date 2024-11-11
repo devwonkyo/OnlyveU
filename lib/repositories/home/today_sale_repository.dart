@@ -72,4 +72,70 @@ class TodaySaleRepository {
       throw TodaySaleException('카테고리별 특가 상품을 불러오는데 실패했습니다.', e);
     }
   }
+
+  // today_sale_repository.dart
+  Future<void> toggleProductFavorite(String productId, String userId) async {
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final productDoc = _firestore.collection('products').doc(productId);
+        final userDoc = _firestore.collection('users').doc(userId);
+
+        final productSnapshot = await transaction.get(productDoc);
+        final userSnapshot = await transaction.get(userDoc);
+
+        if (!productSnapshot.exists) {
+          throw Exception('상품을 찾을 수 없습니다.');
+        }
+
+        List<String> favoriteList =
+            List<String>.from(productSnapshot.get('favoriteList') ?? []);
+        List<String> likedItems = List<String>.from(
+            userSnapshot.exists ? userSnapshot.get('likedItems') ?? [] : []);
+
+        if (favoriteList.contains(userId)) {
+          favoriteList.remove(userId);
+          likedItems.remove(productId);
+        } else {
+          favoriteList.add(userId);
+          likedItems.add(productId);
+        }
+
+        transaction.update(productDoc, {'favoriteList': favoriteList});
+        if (!userSnapshot.exists) {
+          transaction.set(userDoc, {'likedItems': likedItems});
+        } else {
+          transaction.update(userDoc, {'likedItems': likedItems});
+        }
+      });
+    } catch (e) {
+      print('Error toggling favorite: $e');
+      throw Exception('좋아요 처리에 실패했습니다.');
+    }
+  }
+
+  // 장바구니 추가 메서드
+  Future<void> addToCart(String productId, String userId) async {
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
+
+        List<String> cartItems = List<String>.from(
+            userSnapshot.exists ? userSnapshot.get('cartItems') ?? [] : []);
+
+        if (!cartItems.contains(productId)) {
+          cartItems.add(productId);
+
+          if (!userSnapshot.exists) {
+            transaction.set(userDoc, {'cartItems': cartItems});
+          } else {
+            transaction.update(userDoc, {'cartItems': cartItems});
+          }
+        }
+      });
+    } catch (e) {
+      print('Error adding to cart: $e');
+      throw Exception('장바구니 추가에 실패했습니다.');
+    }
+  }
 }

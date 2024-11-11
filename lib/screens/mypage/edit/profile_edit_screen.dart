@@ -202,7 +202,9 @@ class ProfileEditScreen extends StatelessWidget {
                           return ProfileInfoTile(
                             title: "휴대폰 번호 확인",
                             trailingText: "번호 불러오는 중...",
-                            onTap: () {},
+                            onTap: () {
+                              context.push('/phone_number_edit');
+                            },
                           );
                         },
                       ),
