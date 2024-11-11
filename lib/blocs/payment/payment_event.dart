@@ -1,3 +1,4 @@
+// payment_event.dart
 import 'package:equatable/equatable.dart';
 
 abstract class PaymentEvent extends Equatable {
@@ -7,20 +8,56 @@ abstract class PaymentEvent extends Equatable {
   List<Object> get props => [];
 }
 
-/// 배송 메시지 선택 이벤트
 class SelectDeliveryMessage extends PaymentEvent {
-  final String message;
+  final String deliveryMessage;
 
-  const SelectDeliveryMessage(this.message);
+  const SelectDeliveryMessage(this.deliveryMessage);
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [deliveryMessage];
 }
 
-/// 주문 상품을 가져오는 이벤트 추가
 class FetchOrderItems extends PaymentEvent {
   const FetchOrderItems();
 
   @override
   List<Object> get props => [];
+}
+
+// UpdateDeliveryInfo 이벤트에서 각 필드 값을 개별적으로 전달
+class UpdateDeliveryInfo extends PaymentEvent {
+  final String deliveryName;
+  final String address;
+  final String detailAddress;
+  final String recipientName;
+  final String recipientPhone;
+  final String? deliveryRequest;
+
+  const UpdateDeliveryInfo({
+    required this.deliveryName,
+    required this.address,
+    required this.detailAddress,
+    required this.recipientName,
+    required this.recipientPhone,
+    this.deliveryRequest,
+  });
+
+  @override
+  List<Object> get props => [
+        deliveryName,
+        address,
+        detailAddress,
+        recipientName,
+        recipientPhone,
+        deliveryRequest!
+      ];
+}
+
+class UpdateDeliveryRequest extends PaymentEvent {
+  final String deliveryRequest;
+
+  const UpdateDeliveryRequest(this.deliveryRequest);
+
+  @override
+  List<Object> get props => [deliveryRequest];
 }
