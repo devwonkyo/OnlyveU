@@ -185,7 +185,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           Tab(text: '매거진'),
         ],
         labelColor: AppStyles.mainColor,
-        unselectedLabelColor: AppStyles.greyColor,
+        // unselectedLabelColor: AppStyles.greyColor,
         indicatorColor: AppStyles.mainColor,
         indicatorSize: TabBarIndicatorSize.label,
         labelStyle: AppStyles.subHeadingStyle,

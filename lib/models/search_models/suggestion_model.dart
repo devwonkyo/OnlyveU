@@ -24,17 +24,18 @@ class SuggestionModel extends Equatable {
   String toString() =>
       'SuggestionModel(term: $term, popularity: $popularity, trendScore: $trendScore, sourceCollection: $sourceCollection)';
 
-  factory SuggestionModel.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map;
+  factory SuggestionModel.fromMap(Map<String, dynamic> map) {
     return SuggestionModel(
-      term: data['term'] ?? '',
-      popularity: data['popularity'] ?? 0,
-      trendScore: data['trendScore'] ?? 0.0,
-      sourceCollection: data['sourceCollection'] ?? '', // 새로운 필드 추가
+      term: map['term'] ?? '',
+      popularity: map['popularity'] ?? 0,
+      trendScore: (map['trendScore'] is int)
+          ? (map['trendScore'] as int).toDouble()
+          : map['trendScore'] ?? 0.0,
+      sourceCollection: map['sourceCollection'] ?? '',
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
       'term': term,
       'popularity': popularity,
