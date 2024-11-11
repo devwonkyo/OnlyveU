@@ -166,17 +166,30 @@ class HistoryItemCard extends StatelessWidget {
                         GestureDetector(
                           onTap: () async {
                             try {
-                              context.read<HistoryBloc>().add(
-                                    AddToCart(product.productId),
-                                  );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('장바구니에 추가되었습니다')),
+                              context
+                                  .read<HistoryBloc>()
+                                  .add(AddToCart(product.productId));
+
+                              context.read<HistoryBloc>().stream.listen(
+                                (state) {
+                                  if (state is HistorySuccess) {
+                                    ScaffoldMessenger.of(context)
+                                        .clearSnackBars();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(state.message),
+                                        duration: Duration(milliseconds: 1000),
+                                      ),
+                                    );
+                                  }
+                                },
                               );
                             } catch (e) {
+                              ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('장바구니 추가 실패: ${e.toString()}'),
-                                  backgroundColor: Colors.red,
+                                  content: Text(e.toString()),
+                                  duration: Duration(milliseconds: 1000),
                                 ),
                               );
                             }
