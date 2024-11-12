@@ -1,6 +1,7 @@
 // payment_bloc.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
+import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'payment_event.dart';
 import 'payment_state.dart';
@@ -11,6 +12,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   List<OrderItemModel> _orderItems = [];
   int _totalAmount = 0; // 유지되는 totalAmount
   DeliveryInfoModel? _deliveryInfo;
+  OrderType _orderType = OrderType.delivery; // 기본값 설정
 
   PaymentBloc({required this.orderRepository}) : super(PaymentInitial()) {
     on<FetchOrderItems>((event, emit) async {
@@ -21,7 +23,10 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           0,
           (sum, item) => sum + (item.productPrice * item.quantity),
         );
-        emit(PaymentLoaded(_orderItems, _totalAmount));
+        _orderType = await orderRepository.getOrderType();
+        _deliveryInfo = await orderRepository.getDeliveryInfo();
+        emit(PaymentLoaded(_orderItems, _totalAmount, _orderType,
+            deliveryInfo: _deliveryInfo));
       } catch (e) {
         emit(const PaymentError('주문 상품을 불러오는데 실패했습니다.'));
       }
@@ -29,15 +34,22 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
     on<SelectDeliveryMessage>((event, emit) {
       if (_deliveryInfo != null) {
-        // 기존 deliveryInfo에 요청사항 업데이트
         _deliveryInfo =
             _deliveryInfo!.copyWith(deliveryRequest: event.deliveryMessage);
-        print(_deliveryInfo!.deliveryRequest);
         emit(DeliveryInfoUpdated(
-            _deliveryInfo!, _orderItems, _totalAmount)); // 유지된 totalAmount 사용
+          _deliveryInfo!,
+          _orderItems,
+          _totalAmount,
+          _orderType,
+        ));
       } else {
-        emit(PaymentMessageSelected(event.deliveryMessage, _orderItems,
-            _totalAmount)); // 유지된 totalAmount 사용
+        emit(PaymentMessageSelected(
+          event.deliveryMessage,
+          _orderItems,
+          _totalAmount,
+          _orderType,
+          deliveryInfo: _deliveryInfo,
+        ));
       }
     });
 
@@ -53,8 +65,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           deliveryRequest: _deliveryInfo?.deliveryRequest ??
               event.deliveryRequest, // 기존 요청사항 유지
         );
-        emit(DeliveryInfoUpdated(
-            _deliveryInfo!, _orderItems, _totalAmount)); // 유지된 totalAmount 사용
+        emit(DeliveryInfoUpdated(_deliveryInfo!, _orderItems, _totalAmount,
+            _orderType)); // 유지된 totalAmount 사용
       } catch (e) {
         emit(const PaymentError("배송지 정보를 업데이트하는 데 실패했습니다."));
       }
