@@ -283,21 +283,25 @@ class ShoppingCartRepository {
     }
   }
 
-  //1. 데이터 넘겨줄때 카트 모델에서 오더모델로 타입 전환
+  //(1) 데이터 넘겨줄때 카트 모델에서 오더모델로 타입 전환
   Future<List<OrderItemModel>> getSelectedOrderItems(
       bool isRegularDelivery) async {
     try {
       print(
           'Fetching ${isRegularDelivery ? "Regular Delivery" : "Pickup"} items');
+      // 1. 현재 로그인한 사용자 ID 가져오기
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
+      // 2. Firestore에서 사용자 문서 가져오기
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) {
         return [];
       }
+      // 3. 배송 타입에 따른 필드 선택 (cartItems or pickupItems)
       final field = isRegularDelivery ? 'cartItems' : 'pickupItems';
+      // 4. 선택된 필드의 아이템 리스트 가져오기
       final items = List<Map<String, dynamic>>.from(userDoc.get(field) ?? []);
       print('Found ${items.length} items to convert');
-
+      // 5. CartModel → OrderItemModel 변환
       return items
           .map((item) => OrderItemModel(
                 productId: item['productId'],
