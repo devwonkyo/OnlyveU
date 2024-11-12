@@ -1,5 +1,6 @@
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
+import 'package:onlyveyou/models/store_model.dart';
 
 /// 주문 유형 enum
 enum OrderType {
@@ -65,6 +66,8 @@ class OrderModel {
   /// 픽업 매장 정보 (픽업 주문인 경우)
   final String? pickStore;
 
+  final StoreModel? pickInfo;
+
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
 
@@ -77,12 +80,13 @@ class OrderModel {
     this.pickupTime,
     this.pickStore,
     this.deliveryInfo,
+    this.pickInfo,
     DateTime? createdAt,
   })  : createdAt = createdAt ?? DateTime.now(),
         totalPrice = items.fold(
             0,
-                (sum, item) =>
-            sum + (item.productPrice * item.quantity)); // items의 합으로 초기화
+            (sum, item) =>
+                sum + (item.productPrice * item.quantity)); // items의 합으로 초기화
 
   Map<String, dynamic> toMap() {
     return {
@@ -94,7 +98,8 @@ class OrderModel {
       'createdAt': createdAt.toIso8601String(),
       if (orderType == OrderType.pickup) ...{
         'pickupTime': pickupTime?.toIso8601String(),
-        'pickStore': pickStore, // 변경된 필드명
+        'pickStore': pickStore,
+        'pickInfo': pickInfo?.toMap(), // Added pickInfo
       },
       if (orderType == OrderType.delivery)
         'deliveryInfo': deliveryInfo?.toMap(),
@@ -103,7 +108,7 @@ class OrderModel {
 
   factory OrderModel.fromMap(String id, Map<String, dynamic> map) {
     final orderType =
-    OrderType.values.firstWhere((e) => e.name == map['orderType']);
+        OrderType.values.firstWhere((e) => e.name == map['orderType']);
 
     return OrderModel(
       id: id,
@@ -113,8 +118,11 @@ class OrderModel {
       status: OrderStatus.values.firstWhere((e) => e.name == map['status']),
       orderType: orderType,
       pickupTime:
-      map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
-      pickStore: map['pickStore'], // 변경된 필드명
+          map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
+      pickStore: map['pickStore'],
+      pickInfo: map['pickInfo'] != null
+          ? StoreModel.fromMap(map['pickInfo']) // Added pickInfo
+          : null,
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
           : null,
