@@ -6,6 +6,7 @@ import 'package:onlyveyou/blocs/category/getProductBloc/getproduct_bloc.dart';
 import 'package:onlyveyou/models/category_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/category/widgets/filter_item.dart';
+import 'package:onlyveyou/utils/dummy_data.dart';
 import 'package:onlyveyou/widgets/main_promotion_banner.dart';
 import 'package:onlyveyou/widgets/product_widgets/vertical_product_card.dart';
 import 'package:onlyveyou/widgets/small_promotion_banner.dart';
@@ -31,7 +32,6 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    _categoryBloc = GetProductBloc()..add(const GetProducts());
     _selectedFilterIndex = getIndex()!;
     _filterOptions = [
       Subcategory(id: widget.categorySelection.category.id, name: "전체"),
@@ -40,6 +40,13 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
     //서브카테고리 없으면 메인카테고리
     if (widget.categorySelection.selectedSubcategoryId == null) {
       isMainCategory = true;
+    }
+
+
+    if(isMainCategory){
+      _categoryBloc = GetProductBloc()..add(GetProducts(filter: widget.categorySelection.category.id,isMainCategory: true));
+    }else{
+      _categoryBloc = GetProductBloc()..add(GetProducts(filter: widget.categorySelection.selectedSubcategoryId));
     }
 
     // 초기 스크롤 위치를 설정
@@ -167,13 +174,13 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                       slivers: [
                         // 배너 영역
                         if (isMainCategory)
-                          const SliverToBoxAdapter(
+                          SliverToBoxAdapter(
                             child: Column(
                               children: [
-                                MainPromotionBanner(),
-                                SizedBox(height: 16),
-                                SmallPromotionBanner(),
-                                SizedBox(height: 16),
+                                const MainPromotionBanner(),
+                                const SizedBox(height: 16),
+                                SmallPromotionBanner(promotions: getMultiBannerData()),
+                                const SizedBox(height: 16),
                               ],
                             ),
                           ),
@@ -201,16 +208,16 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              childAspectRatio: 0.6,
+                              childAspectRatio: 0.5 ,
                               crossAxisSpacing: 16.w,
                               mainAxisSpacing: 24.h,
                             ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
                                 return VerticalProductCard(
-                                    productModel: products[index],
-                                    onTap: () => context.push("/product-detail",
-                                        extra: products[index].productId));
+                                  productModel: products[index],
+                                  onTap: () => context.push("/product-detail", extra: "1_4_1")
+                                );
                               },
                               childCount: products.length,
                             ),

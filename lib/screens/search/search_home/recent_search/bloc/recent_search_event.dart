@@ -26,3 +26,5 @@ final class RemoveSearchTerm extends RecentSearchEvent {
   @override
   List<Object> get props => [term];
 }
+
+final class ClearAllSearchTerms extends RecentSearchEvent {}

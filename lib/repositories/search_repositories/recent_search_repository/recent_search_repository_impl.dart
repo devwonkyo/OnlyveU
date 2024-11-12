@@ -33,4 +33,10 @@ class RecentSearchRepositoryImpl implements RecentSearchRepository {
 
     await prefs.setStringList(_key, recentSearches);
   }
+
+  @override
+  Future<void> clearAllSearchTerms() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_key);
+  }
 }

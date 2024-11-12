@@ -5,4 +5,5 @@ abstract class SuggestionRepository {
   Future<void> fetchAndStoreAllSuggestions();
   Future<List<SuggestionModel>> getStoredSuggestions();
   Future<List<SuggestionModel>> searchLocal(String term);
+  Future<void> incrementPopularity(String term, int currentPopularity);
 }

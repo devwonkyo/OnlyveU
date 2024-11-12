@@ -35,7 +35,6 @@ import 'blocs/history/history_bloc.dart';
 import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
-import 'models/search_models/trend_updater.dart';
 import 'repositories/search_repositories/suggestion_repository/suggestion_repository_impl.dart';
 
 void main() async {
@@ -56,14 +55,14 @@ void main() async {
   print("hash key ${await KakaoSdk.origin}");
 
 // 모든 제품 로컬 저장 (검색용)
-//   try {
-//     final productRepository = ProductRepository();
-//     await productRepository.fetchAndStoreAllProducts();
-//     final storedProducts = await productRepository.getStoredProducts();
-//     print('Stored products: ${storedProducts.length}');
-//   } catch (e) {
-//     print('Error fetching and storing products: $e');
-//   }
+  try {
+    final productRepository = ProductRepository();
+    await productRepository.fetchAndStoreAllProducts();
+    final storedProducts = await productRepository.getStoredProducts();
+    print('Stored products: ${storedProducts.length}');
+  } catch (e) {
+    print('Error fetching and storing products: $e');
+  }
 
   // 모든 검색어 로컬 저장 (검색용)
   try {
@@ -113,13 +112,15 @@ class MyApp extends StatelessWidget {
               BlocProvider(
                 create: (context) => HomeBloc(
                   homeRepository: HomeRepository(),
+                  cartRepository: ShoppingCartRepository(),
                 )..add(LoadHomeData()),
                 child: const Home(), // HomeScreen 대신 Home을 사용
               ),
               BlocProvider(
                 create: (context) => HistoryBloc(
-                  historyRepository:
-                      HistoryRepository(), // ProductRepository 제거
+                  historyRepository: HistoryRepository(),
+                  cartRepository:
+                      ShoppingCartRepository(), // ProductRepository 제거
                 )..add(LoadHistoryItems()),
               ),
               BlocProvider<ProfileEditBloc>(

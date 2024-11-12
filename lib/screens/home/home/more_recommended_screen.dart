@@ -233,7 +233,7 @@ class MoreRecommendedScreen extends StatelessWidget {
                       await OnlyYouSharedPreference().getCurrentUserId();
                   context
                       .read<HomeBloc>()
-                      .add(AddToCart(item.productId, currentUserId));
+                      .add(AddToCart(item.productId)); // product의 productId를 사용
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('장바구니에 추가되었습니다.')),

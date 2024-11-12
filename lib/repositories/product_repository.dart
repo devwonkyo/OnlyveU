@@ -110,7 +110,6 @@ class ProductRepository {
     return uniqueDocs.map((doc) => ProductModel.fromMap(doc.data())).toList();
   }
 
-
   Future<ProductModel?> fetchProductById(String productId) async {
     try {
       DocumentSnapshot doc =
@@ -123,6 +122,7 @@ class ProductRepository {
     }
     return null;
   }
+
   Future<void> fetchAndStoreAllProducts() async {
     try {
       final querySnapshot = await _firestore.collection('products').get();
@@ -178,12 +178,11 @@ class ProductRepository {
       final lowerCaseTerm = term.toLowerCase();
       return storedProducts.where((product) {
         return product.name.toLowerCase().contains(lowerCaseTerm) ||
-            product.categoryId.toLowerCase().contains(lowerCaseTerm) ||
+            // product.categoryId.contains(lowerCaseTerm) ||
             product.brandName.toLowerCase().contains(lowerCaseTerm);
       }).toList();
     } else {
       return [];
     }
-
   }
 }

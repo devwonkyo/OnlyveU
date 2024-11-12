@@ -15,3 +15,10 @@ final class FetchSearchSuggestions extends SearchSuggestionEvent {
   @override
   List<Object> get props => [query];
 }
+
+final class IncrementPopularity extends SearchSuggestionEvent {
+  final String term;
+  final int currentPopularity;
+
+  const IncrementPopularity(this.term, this.currentPopularity);
+}

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 class RankingRepository {
   final FirebaseFirestore _firestore;
@@ -108,28 +109,51 @@ class RankingRepository {
     }
   }
 
-  Future<void> addToCart(String productId, String userId) async {
+  Future<void> addToCart(String productId) async {
     try {
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+
       await _firestore.runTransaction((transaction) async {
+        final productDoc =
+            await _firestore.collection('products').doc(productId).get();
+        if (!productDoc.exists) {
+          throw Exception('상품을 찾을 수 없습니다.');
+        }
+
+        final cartItem = {
+          'productId': productId,
+          'productName': productDoc.get('name'),
+          'productImageUrl':
+              (productDoc.get('productImageList') as List<dynamic>).first,
+          'productPrice': int.parse(productDoc.get('price')),
+          'quantity': 1,
+        };
+
         final userDoc = _firestore.collection('users').doc(userId);
         final userSnapshot = await transaction.get(userDoc);
 
-        List<String> cartItems = List<String>.from(
-            userSnapshot.exists ? userSnapshot.get('cartItems') ?? [] : []);
+        List<Map<String, dynamic>> cartItems = [];
+        if (userSnapshot.exists &&
+            userSnapshot.data()!.containsKey('cartItems')) {
+          cartItems =
+              List<Map<String, dynamic>>.from(userSnapshot.get('cartItems'));
+        }
 
-        if (!cartItems.contains(productId)) {
-          cartItems.add(productId);
+        // 중복 상품 체크
+        if (cartItems.any((item) => item['productId'] == productId)) {
+          throw Exception('이미 장바구니에 담겨 있습니다.');
+        }
 
-          if (!userSnapshot.exists) {
-            transaction.set(userDoc, {'cartItems': cartItems});
-          } else {
-            transaction.update(userDoc, {'cartItems': cartItems});
-          }
+        cartItems.add(cartItem);
+
+        if (!userSnapshot.exists) {
+          transaction.set(userDoc, {'cartItems': cartItems, 'pickupItems': []});
+        } else {
+          transaction.update(userDoc, {'cartItems': cartItems});
         }
       });
     } catch (e) {
-      print('Error adding to cart: $e');
-      throw Exception('장바구니 추가에 실패했습니다.');
+      throw Exception(e.toString());
     }
   }
 }

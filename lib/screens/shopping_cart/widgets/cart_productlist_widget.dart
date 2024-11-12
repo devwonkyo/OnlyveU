@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:onlyveyou/models/extensions/product_model_extension.dart';
+import 'package:onlyveyou/models/cart_model.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 
-import '../../../models/product_model.dart';
-
-//이것도 탭 헤더에 물려있어서 따로 안해도 된다.// utils.dart 파일 임포트
-// 상품 리스트
 class CartProductListWidget extends StatelessWidget {
-  final List<ProductModel> items;
+  final List<CartModel> items;
   final bool isPickup;
   final Map<String, bool> selectedItems;
   final Map<String, int> itemQuantities;
-  final Function(String productId, bool increment) updateQuantity;
-  final Function(ProductModel item) onRemoveItem;
+  final Function(String productId, bool increment) onUpdateQuantity;
+  final Function(String productId) onRemoveItem;
   final Function(String productId, bool? value) onUpdateSelection;
 
   const CartProductListWidget({
@@ -21,7 +17,7 @@ class CartProductListWidget extends StatelessWidget {
     required this.isPickup,
     required this.selectedItems,
     required this.itemQuantities,
-    required this.updateQuantity,
+    required this.onUpdateQuantity,
     required this.onRemoveItem,
     required this.onUpdateSelection,
   });
@@ -41,12 +37,15 @@ class CartProductListWidget extends StatelessWidget {
               if (isPickup)
                 const Padding(
                   padding: EdgeInsets.only(bottom: 16),
-                  child: Text('픽업 매장: 거여역점',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(
+                    '픽업 매장: 거여역점',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 체크박스
                   Checkbox(
                     value: selectedItems[item.productId] ?? false,
                     onChanged: (value) =>
@@ -55,16 +54,16 @@ class CartProductListWidget extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
+                  // 상품 이미지
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      // .asset에서 .network로 변경
-                      item.productImageList.first,
+                      item.productImageUrl,
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        print('Error loading image: $error'); // 에러 로깅 추가
+                        print('Error loading image: $error');
                         return Container(
                           width: 80,
                           height: 80,
@@ -73,7 +72,6 @@ class CartProductListWidget extends StatelessWidget {
                         );
                       },
                       loadingBuilder: (context, child, loadingProgress) {
-                        // 로딩 상태 표시 추가
                         if (loadingProgress == null) return child;
                         return Container(
                           width: 80,
@@ -92,12 +90,13 @@ class CartProductListWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
+                  // 상품 정보
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item.name,
+                          item.productName,
                           style: const TextStyle(fontSize: 14),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -105,9 +104,10 @@ class CartProductListWidget extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // 삭제 버튼
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
-                    onPressed: () => onRemoveItem(item),
+                    onPressed: () => onRemoveItem(item.productId),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -119,27 +119,12 @@ class CartProductListWidget extends StatelessWidget {
                   const SizedBox(width: 50),
                   _buildQuantityControl(item),
                   const Spacer(),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '${formatPrice(item.price)}원',
-                        style: const TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${formatPrice(item.discountedPrice.toString())}원',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    '${formatPrice(item.productPrice.toString())}원',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -150,7 +135,7 @@ class CartProductListWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildQuantityControl(ProductModel item) {
+  Widget _buildQuantityControl(CartModel item) {
     return Container(
       height: 28,
       decoration: BoxDecoration(
@@ -165,7 +150,7 @@ class CartProductListWidget extends StatelessWidget {
             height: 28,
             child: IconButton(
               icon: const Icon(Icons.remove, size: 16),
-              onPressed: () => updateQuantity(item.productId, false),
+              onPressed: () => onUpdateQuantity(item.productId, false),
               padding: EdgeInsets.zero,
             ),
           ),
@@ -189,7 +174,7 @@ class CartProductListWidget extends StatelessWidget {
             height: 28,
             child: IconButton(
               icon: const Icon(Icons.add, size: 16),
-              onPressed: () => updateQuantity(item.productId, true),
+              onPressed: () => onUpdateQuantity(item.productId, true),
               padding: EdgeInsets.zero,
             ),
           ),
