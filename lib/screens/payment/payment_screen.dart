@@ -126,10 +126,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const SizedBox(height: 10),
             BlocBuilder<PaymentBloc, PaymentState>(
               builder: (context, state) {
-                String selectedMessage = '배송 메시지를 선택해주세요.';
+                String selectedMessage = '배송 메시지를 선택해주세요.'; // 기본 메시지 설정
+
+                // 상태에 따라 selectedMessage 값을 업데이트
                 if (state is PaymentMessageSelected) {
                   selectedMessage = state.selectedMessage;
+                } else if (state is DeliveryInfoUpdated &&
+                    state.deliveryInfo.deliveryRequest != null) {
+                  selectedMessage = state.deliveryInfo.deliveryRequest!;
                 }
+
                 return DropdownButtonHideUnderline(
                   child: DropdownButton2<String>(
                     isExpanded: true,
@@ -142,7 +148,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               ),
                             ))
                         .toList(),
-                    value: selectedMessage,
+                    value: selectedMessage, // 설정된 selectedMessage 사용
                     onChanged: (value) {
                       if (value != null) {
                         context
@@ -168,6 +174,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 );
               },
             ),
+
             const SizedBox(height: 20),
             Divider(
               height: 1,
@@ -190,6 +197,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   BlocBuilder<PaymentBloc, PaymentState>(
                     builder: (context, state) {
                       List<OrderItemModel> orderItems = [];
+
                       if (state is PaymentLoading) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (state is PaymentLoaded) {
@@ -244,9 +252,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: BlocBuilder<PaymentBloc, PaymentState>(
                 builder: (context, state) {
                   int totalAmount = 0;
-                  if (state is DeliveryInfoUpdated) {
+
+                  if (state is PaymentLoaded) {
+                    totalAmount = state.totalAmount;
+                  } else if (state is PaymentMessageSelected) {
+                    totalAmount = state.totalAmount;
+                  } else if (state is DeliveryInfoUpdated) {
                     totalAmount = state.totalAmount;
                   }
+
+                  //totalAmount 상태관리 수정해야 한다(0원으로 뜸 )
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -428,9 +443,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
             // Total Price Button
             BlocBuilder<PaymentBloc, PaymentState>(
               builder: (context, state) {
+                // default amount as 0 to avoid null issues
                 int totalAmount = 0;
 
                 if (state is PaymentLoaded) {
+                  totalAmount = state.totalAmount;
+                } else if (state is PaymentMessageSelected) {
+                  totalAmount = state.totalAmount;
+                } else if (state is DeliveryInfoUpdated) {
                   totalAmount = state.totalAmount;
                 }
 
@@ -441,13 +461,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     height: MediaQuery.of(context).size.height * 0.05,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle payment action
+                        // 결제 버튼 로직
                         print("결제하기 버튼");
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       child: Text(
                         '$totalAmount원 결제하기',
