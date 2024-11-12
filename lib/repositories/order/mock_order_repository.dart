@@ -27,7 +27,7 @@ class MockOrderRepository implements OrderRepository {
         ),
       ],
       status: OrderStatus.pending,
-      orderType: OrderType.delivery,
+      orderType: OrderType.pickup,
       createdAt: DateTime.now(),
       deliveryInfo: DeliveryInfoModel(
         //배송지 등록과 배송 요청사항을 여기다가 추가
