@@ -70,7 +70,6 @@ class OrderModel {
 
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
-
   OrderModel({
     required this.id,
     required this.userId,

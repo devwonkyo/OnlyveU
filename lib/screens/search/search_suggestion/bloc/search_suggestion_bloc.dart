@@ -13,6 +13,7 @@ class SearchSuggestionBloc
   SearchSuggestionBloc({required this.suggestionRepository})
       : super(SearchSuggestionInitial()) {
     on<FetchSearchSuggestions>(_onFetchSearchSuggestions);
+    on<IncrementPopularity>(_onIncrementPopularity);
   }
 
 // 로컬에 저장한 후 검색함
@@ -29,6 +30,18 @@ class SearchSuggestionBloc
       emit(SearchSuggestionLoaded(suggestions));
     } catch (e) {
       emit(const SearchSuggestionError('Failed to fetch suggestions'));
+    }
+  }
+
+  Future<void> _onIncrementPopularity(
+    IncrementPopularity event,
+    Emitter<SearchSuggestionState> emit,
+  ) async {
+    try {
+      await suggestionRepository.incrementPopularity(
+          event.term, event.currentPopularity);
+    } catch (e) {
+      emit(const SearchSuggestionError('Failed to increment popularity'));
     }
   }
 }
