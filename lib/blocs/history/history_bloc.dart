@@ -142,7 +142,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
         }
       } catch (e) {
         print('Error clearing history: $e');
-      }
+      } ////
     });
 //장바구니
     on<AddToCart>((event, emit) async {
