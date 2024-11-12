@@ -1,24 +1,15 @@
-import 'package:equatable/equatable.dart';
+import 'package:onlyveyou/models/post_model.dart';
 
-class ShutterState extends Equatable {
-  final String selectedTag;
-  final List<String> images;
+class ShutterState {
+  final List<PostModel> posts;
+  final String? selectedTag;
 
-  const ShutterState({
-    required this.selectedTag,
-    this.images = const [], // 기본값으로 빈 리스트 할당
-  });
+  ShutterState({this.posts = const [], this.selectedTag});
 
-  ShutterState copyWith({
-    String? selectedTag,
-    List<String>? images,
-  }) {
+  ShutterState copyWith({List<PostModel>? posts, String? selectedTag}) {
     return ShutterState(
+      posts: posts ?? this.posts,
       selectedTag: selectedTag ?? this.selectedTag,
-      images: images ?? this.images,
     );
   }
-
-  @override
-  List<Object> get props => [selectedTag, images];
 }

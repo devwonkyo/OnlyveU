@@ -1,8 +1,26 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
-class AddressSearchField extends StatelessWidget {
-  const AddressSearchField({super.key});
+import 'package:kpostal/kpostal.dart';
+
+class AddressSearchField extends StatefulWidget {
+   final TextEditingController addressController; // 외부에서 전달받는 컨트롤러
+  final TextEditingController detailedAddressController; // 외부에서 전달받는 컨트롤러
+
+  const AddressSearchField({
+    super.key,
+    required this.addressController,
+    required this.detailedAddressController,
+  });
+
+  @override
+  State<AddressSearchField> createState() => _AddressSearchFieldState();
+}
+
+class _AddressSearchFieldState extends State<AddressSearchField> {
+
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +44,7 @@ class AddressSearchField extends StatelessWidget {
           children: [
             Expanded(
               child: TextField(
+                controller: widget.addressController,
                 decoration: InputDecoration(
                   hintText: '주소를 검색해주세요',
                   hintStyle: const TextStyle(color: Colors.grey),
@@ -48,9 +67,28 @@ class AddressSearchField extends StatelessWidget {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.053,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // 주소 검색 기능
-                  print("주소 검색");
+                  // print("주소 검색");
+
+                  // KopoModel model = await Navigator.push(
+                  //   context,
+                  //   CupertinoPageRoute(
+                  //     builder: (context) => RemediKopo(),
+                  //   ),
+                  // );
+                  // _AddressController.text =
+                  //     '${model.address!} ${model.buildingName!}';
+                  // print(_AddressController.text);
+
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return KpostalView(
+                      callback: (Kpostal result) {
+                     widget.addressController.text = result.address;
+                      },
+                    );
+                  }));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
@@ -72,6 +110,7 @@ class AddressSearchField extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         TextField(
+          controller: widget.detailedAddressController,
           decoration: InputDecoration(
             hintText: '상세주소를 입력해주세요',
             hintStyle: const TextStyle(color: Colors.grey),

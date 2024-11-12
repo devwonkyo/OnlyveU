@@ -5,7 +5,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/screens/Product/widgets/expandable_bottom_sheet.dart';
+import 'package:onlyveyou/screens/product/widgets/expandable_bottom_sheet.dart';
+import 'package:onlyveyou/models/review_model.dart';
+import 'package:onlyveyou/screens/Product/widgets/explain_product.dart';
+import 'package:onlyveyou/screens/Product/widgets/product_description_tab.dart';
+import 'package:onlyveyou/screens/Product/widgets/product_info_tab.dart';
+import 'package:onlyveyou/screens/Product/widgets/review_tab.dart';
+import 'package:onlyveyou/screens/Product/widgets/sticky_tabbar_delegate.dart';
+import 'package:onlyveyou/utils/dummy_data.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/widgets/small_promotion_banner.dart';
 
@@ -27,12 +34,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
     _pageController = PageController();
+    _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    context.read<ProductDetailBloc>().add(
-          LoadProductDetail(widget.productId),
-        );
+    context.read<ProductDetailBloc>().add(LoadProductDetail(widget.productId));
   }
 
   @override
@@ -57,94 +62,99 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              // 앱바
-              _buildAppBar(),
-              // 상품 정보
-              SliverToBoxAdapter(
-                child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
-                  builder: (context, state) {
-                    if (state is ProductDetailLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (state is ProductDetailError) {
-                      return Center(child: Text(state.message));
-                    }
-                    if (state is ProductDetailLoaded) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildImageSection(state.product),
-                          _buildProductInfo(state.product),
-                          _buildImageSection(state.product),
-                          _buildImageSection(state.product),
-                          _buildImageSection(state.product),
-                          const SizedBox(height: 100), // 하단 버튼 공간
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ],
-          ),
-          // 하단 고정 버튼
-          BlocConsumer<ProductDetailBloc, ProductDetailState>(
-            listener: (context, state) {
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: BlocConsumer<ProductDetailBloc, ProductDetailState>(
+          listener: (context, state) {
+            if (state is ProductDetailError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is ProductDetailLoading) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-            },
-            builder: (context, state) {
-              if (state is ProductDetailLoaded) {
-                return ExpandableBottomSheet(productModel: state.product);
-              }else{
-                return const SizedBox.shrink();
-              }
-              },
-          ),
-        ],
+            if (state is ProductDetailLoaded) {
+              return DefaultTabController(
+                length: 2,
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 100.h),
+                      child: NestedScrollView(
+                        headerSliverBuilder: (context, innerBoxIsScrolled) {
+                          return [
+                            _buildAppBar(),
+                            _buildProductHeader(state.product),
+                            _buildTabBar(),
+                          ];
+                        },
+                        body: _buildTabBarView(state.product),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: ExpandableBottomSheet(productModel: state.product),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
 
   Widget _buildAppBar() {
     return SliverAppBar(
-      scrolledUnderElevation: 0,
       floating: true,
       snap: true,
-      pinned: false,
       elevation: 0,
+      scrolledUnderElevation: 0,
       backgroundColor: Colors.white,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(Icons.arrow_back, color: Colors.black),
         onPressed: () => Navigator.pop(context),
-        iconSize: 24.sp,
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.search),
+          icon: Icon(Icons.search, color: Colors.black),
           onPressed: () {},
-          iconSize: 24.sp,
         ),
         IconButton(
-          icon: const Icon(Icons.home_outlined),
+          icon: Icon(Icons.home_outlined, color: Colors.black),
           onPressed: () {},
-          iconSize: 24.sp,
         ),
         IconButton(
-          icon: const Icon(Icons.shopping_cart_outlined),
+          icon: Icon(Icons.shopping_cart_outlined, color: Colors.black),
           onPressed: () {},
-          iconSize: 24.sp,
         ),
       ],
     );
   }
 
-  Widget _buildImageSection(ProductModel product) {
+  Widget _buildProductHeader(ProductModel product) {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildImageCarousel(product.productImageList),
+          _buildProductInfo(product),
+          Container(height: 8.h, color: Colors.grey[200]),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageCarousel(List<String> images) {
     return Stack(
       children: [
         //이미지
@@ -152,7 +162,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           aspectRatio: 1,
           child: PageView.builder(
             controller: _pageController,
-            itemCount: product.productImageList.length,
+            itemCount: images.length,
             onPageChanged: (index) {
               setState(() {
                 _currentPage = index;
@@ -160,7 +170,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             },
             itemBuilder: (context, index) {
               return Image.network(
-                product.productImageList[index],
+                images[index],
                 fit: BoxFit.fill,
               );
             },
@@ -186,7 +196,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 Text(
-                  ' / ${product.productImageList.length}',
+                  ' / ${images.length}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
                   ),
@@ -332,22 +342,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        Divider(thickness: 1,color: Colors.grey,),
+        Divider(
+          thickness: 1,
+          color: AppsColor.lightGray,
+        ),
 
+        //배송정보 섹션
         Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+          padding: EdgeInsets.all(16.0.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("일반배송"),
-              Text("2,500원 (20,000원 이상 무료배송 \n 평균 3일 이내 도착"),
-              Icon(Icons.chevron_right, size: 18.sp),
+              Text(
+                "일반배송",
+                style: TextStyle(color: Colors.grey, fontSize: 13.sp),
+              ),
+              Text("2,500원 (20,000원 이상 무료배송 \n평균 3일 이내 도착",
+                  style: TextStyle(fontSize: 13.sp)),
+              Icon(Icons.chevron_right, size: 18.sp, color: Colors.grey),
             ],
           ),
         ),
 
         Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+          padding: EdgeInsets.all(16.0.w),
           child: OutlinedButton(
             onPressed: () {},
             style: OutlinedButton.styleFrom(
@@ -357,9 +375,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '구매 가능 올영매장 찾기',
+                  '구매 가능 매장 찾기',
                   style: TextStyle(fontSize: 14.sp),
                 ),
                 Icon(Icons.chevron_right, size: 18.sp),
@@ -368,10 +387,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ),
 
-        SmallPromotionBanner(),
+        SmallPromotionBanner(promotions: getOneBannerData()),
+      ],
+    );
+  }
 
+  Widget _buildTabBar() {
+    return SliverPersistentHeader(
+      delegate: StickyTabBarDelegate(
+        TabBar(
+          tabs: [Tab(text: '상품설명'), Tab(text: '리뷰')],
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.black,
+          labelStyle: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      pinned: true,
+    );
+  }
 
-
+  Widget _buildTabBarView(ProductModel product) {
+    return TabBarView(
+      children: [
+        SingleChildScrollView(
+          child: Column(
+            children: [
+              ProductDescriptionTab(product: product),
+              Container(height: 8.h, color: Colors.grey[200]),
+              ExpansionTileWidget()
+            ],
+          ),
+        ),
+        Text('review'),
+        // ReviewTab(reviews: product.reviews),
       ],
     );
   }

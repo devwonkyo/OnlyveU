@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 //UI -> Bloc -> Repository -> Firestore -> Repository -> Bloc -> UI
 // 커스텀 예외 클래스 정의: 특가 상품 로딩 중 발생하는 예외 처리
@@ -110,6 +111,55 @@ class TodaySaleRepository {
     } catch (e) {
       print('Error toggling favorite: $e');
       throw Exception('좋아요 처리에 실패했습니다.');
+    }
+  }
+
+  // 장바구니 추가 메서드
+  Future<void> addToCart(String productId) async {
+    try {
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+
+      await _firestore.runTransaction((transaction) async {
+        final productDoc =
+            await _firestore.collection('products').doc(productId).get();
+        if (!productDoc.exists) {
+          throw Exception('상품을 찾을 수 없습니다.');
+        }
+
+        final cartItem = {
+          'productId': productId,
+          'productName': productDoc.get('name'),
+          'productImageUrl':
+              (productDoc.get('productImageList') as List<dynamic>).first,
+          'productPrice': int.parse(productDoc.get('price')),
+          'quantity': 1,
+        };
+
+        final userDoc = _firestore.collection('users').doc(userId);
+        final userSnapshot = await transaction.get(userDoc);
+
+        List<Map<String, dynamic>> cartItems = [];
+        if (userSnapshot.exists &&
+            userSnapshot.data()!.containsKey('cartItems')) {
+          cartItems =
+              List<Map<String, dynamic>>.from(userSnapshot.get('cartItems'));
+        }
+
+        // 중복 상품 체크
+        if (cartItems.any((item) => item['productId'] == productId)) {
+          throw Exception('이미 장바구니에 담겨 있습니다.');
+        }
+
+        cartItems.add(cartItem);
+
+        if (!userSnapshot.exists) {
+          transaction.set(userDoc, {'cartItems': cartItems, 'pickupItems': []});
+        } else {
+          transaction.update(userDoc, {'cartItems': cartItems});
+        }
+      });
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

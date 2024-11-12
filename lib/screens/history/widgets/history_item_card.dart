@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/blocs/history/history_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
@@ -161,12 +163,46 @@ class HistoryItemCard extends StatelessWidget {
                           ),
                           onPressed: onToggleFavorite,
                         ),
-                        IconButton(
-                          icon: Icon(Icons.shopping_bag_outlined,
-                              color: Colors.grey),
-                          onPressed: () {
-                            // TODO: 장바구니 기능 구현
+                        GestureDetector(
+                          onTap: () async {
+                            try {
+                              context
+                                  .read<HistoryBloc>()
+                                  .add(AddToCart(product.productId));
+
+                              context.read<HistoryBloc>().stream.listen(
+                                (state) {
+                                  if (state is HistorySuccess) {
+                                    ScaffoldMessenger.of(context)
+                                        .clearSnackBars();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(state.message),
+                                        duration: Duration(milliseconds: 1000),
+                                      ),
+                                    );
+                                  }
+                                },
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString()),
+                                  duration: Duration(milliseconds: 1000),
+                                ),
+                              );
+                            }
                           },
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            child: Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                       ],
                     ),

@@ -110,6 +110,19 @@ class ProductRepository {
     return uniqueDocs.map((doc) => ProductModel.fromMap(doc.data())).toList();
   }
 
+  Future<ProductModel?> fetchProductById(String productId) async {
+    try {
+      DocumentSnapshot doc =
+          await _firestore.collection('products').doc(productId).get();
+      if (doc.exists) {
+        return ProductModel.fromMap(doc.data() as Map<String, dynamic>);
+      }
+    } catch (e) {
+      print("Error fetching product data: $e");
+    }
+    return null;
+  }
+
   Future<void> fetchAndStoreAllProducts() async {
     try {
       final querySnapshot = await _firestore.collection('products').get();
@@ -162,11 +175,11 @@ class ProductRepository {
   Future<List<ProductModel>> searchLocal(String term) async {
     final storedProducts = await getStoredProducts();
     if (term.isNotEmpty) {
+      final lowerCaseTerm = term.toLowerCase();
       return storedProducts.where((product) {
-        return product.name.contains(term) ||
-            product.categoryId.contains(term) ||
-            product.brandName.contains(term) ||
-            product.tagList.any((tag) => tag.contains(term));
+        return product.name.toLowerCase().contains(lowerCaseTerm) ||
+            // product.categoryId.contains(lowerCaseTerm) ||
+            product.brandName.toLowerCase().contains(lowerCaseTerm);
       }).toList();
     } else {
       return [];

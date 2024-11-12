@@ -257,13 +257,14 @@ class MorePopularScreen extends StatelessWidget {
     );
   }
 
-  void _handleAddToCart(BuildContext context, ProductModel product) {
-    // TODO: 장바구니 추가 기능 구현
+  void _handleAddToCart(BuildContext context, ProductModel product) async {
+    final currentUserId = await OnlyYouSharedPreference().getCurrentUserId();
+    context
+        .read<HomeBloc>()
+        .add(AddToCart(product.productId)); // product.productId로 수정
+
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('장바구니에 추가되었습니다.'),
-        duration: Duration(seconds: 2),
-      ),
+      const SnackBar(content: Text('장바구니에 추가되었습니다.')),
     );
   }
 }

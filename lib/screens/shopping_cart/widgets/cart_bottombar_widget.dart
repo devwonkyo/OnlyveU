@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/models/cart_model.dart';
 import 'package:onlyveyou/screens/shopping_cart/widgets/cart_pricesection_widget.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 
 class CartBottomBarWidget extends StatelessWidget {
-  final List<ProductModel> currentItems;
+  final List<CartModel> currentItems;
   final Map<String, bool> selectedItems;
   final Map<String, int> itemQuantities;
 
@@ -16,39 +16,43 @@ class CartBottomBarWidget extends StatelessWidget {
     required this.itemQuantities,
   });
 
+  // 선택된 상품 개수 계산
+  int _calculateSelectedCount() {
+    return currentItems
+        .where((item) => selectedItems[item.productId] == true)
+        .map((item) => itemQuantities[item.productId] ?? 1)
+        .fold(0, (sum, quantity) => sum + quantity);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 현재 탭의 선택된 아이템만 필터링하여 계산
+    // 현재 탭의 선택된 아이템의 총 금액 계산
     final totalPrice = CartPriceSectionWidget.calculateTotalPrice(
-      items: currentItems, // 현재 탭의 아이템만 전달
+      items: currentItems,
       selectedItems: selectedItems,
       itemQuantities: itemQuantities,
     );
 
-    final totalDiscount = CartPriceSectionWidget.calculateTotalDiscount(
-      items: currentItems, // 현재 탭의 아이템만 전달
-      selectedItems: selectedItems,
-      itemQuantities: itemQuantities,
-    );
-
-    final finalPrice = totalPrice - totalDiscount;
-
-    // 현재 탭의 선택된 아이템 수량 계산
-    final totalSelectedCount = currentItems
-        .where((item) => selectedItems[item.productId] == true)
-        .fold(0, (sum, item) => sum + (itemQuantities[item.productId] ?? 1));
+    // 선택된 총 상품 개수
+    final totalSelectedCount = _calculateSelectedCount();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Colors.grey[300]!),
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, -1),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // 상품 금액 정보 표시
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -59,7 +63,7 @@ class CartBottomBarWidget extends StatelessWidget {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   Text(
-                    '${formatPrice(finalPrice.toString())}원',
+                    '${formatPrice(totalPrice.toString())}원',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   Text(
@@ -73,7 +77,7 @@ class CartBottomBarWidget extends StatelessWidget {
                 ],
               ),
               Text(
-                '${formatPrice(finalPrice.toString())}원',
+                '${formatPrice(totalPrice.toString())}원',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -82,32 +86,62 @@ class CartBottomBarWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+
+          // 선물하기/구매하기 버튼
           Row(
             children: [
+              // 선물하기 버튼
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    side: BorderSide(color: Colors.grey[300]!),
+                child: OutlinedButton(
+                  onPressed: totalSelectedCount > 0
+                      ? () {
+                          // TODO: 선물하기 기능 구현
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('선물하기 기능 준비중입니다.'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        }
+                      : null,
+                  style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: BorderSide(color: Colors.grey[300]!),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
-                  child: const Text('선물하기'),
+                  child: const Text(
+                    '선물하기',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
+
+              // 구매하기 버튼
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    context.push('/payment');
-                  },
+                  onPressed: totalSelectedCount > 0
+                      ? () {
+                          // 선택된 상품이 있을 때만 결제 페이지로 이동
+                          context.push('/payment');
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
-                  child: const Text('구매하기'),
+                  child: Text(
+                    '구매하기 (${totalSelectedCount})',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],

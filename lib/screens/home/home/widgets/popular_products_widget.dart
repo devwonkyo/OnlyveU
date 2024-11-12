@@ -245,7 +245,25 @@ class PopularProductsWidget extends StatelessWidget {
               ),
               SizedBox(width: 25),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  context.read<HomeBloc>().add(AddToCart(product.productId));
+
+                  context.read<HomeBloc>().stream.listen(
+                    (state) {
+                      if (state is HomeError || state is HomeSuccess) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(state is HomeSuccess
+                                ? state.message
+                                : (state as HomeError).message),
+                            duration: Duration(milliseconds: 1000),
+                          ),
+                        );
+                      }
+                    },
+                  );
+                },
                 child: Container(
                   width: 22,
                   height: 22,

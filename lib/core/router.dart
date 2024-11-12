@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/category_selection.dart';
-import 'package:onlyveyou/screens/Product/product_detail_screen.dart';
+import 'package:onlyveyou/screens/product/product_detail_screen.dart';
+import 'package:onlyveyou/screens/Product/two.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -74,10 +75,6 @@ final GoRouter router = GoRouter(
           path: '/my',
           pageBuilder: (context, state) =>
               _buildPageWithTransition(state, const MyPageScreen()),
-        ),
-        GoRoute(
-          path: '/search',
-          builder: (context, state) => const SearchPage(),
         ),
         GoRoute(
           path: '/order-status',
@@ -176,7 +173,7 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final productId = state.extra as String;
         return ProductDetailScreen(
-          productId: productId ?? '',
+          productId: productId,
         );
       },
     ),
@@ -193,6 +190,10 @@ final GoRouter router = GoRouter(
         state,
         const NewDeliveryAddressScreen(),
       ),
+    ),
+    GoRoute(
+      path: '/search',
+      builder: (context, state) => const SearchPage(),
     ),
   ],
 );
