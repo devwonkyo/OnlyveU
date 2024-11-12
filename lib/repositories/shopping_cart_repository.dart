@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/cart_model.dart';
+import 'package:onlyveyou/models/order_item_model.dart';
 
 import '../utils/shared_preference_util.dart';
 
@@ -279,6 +280,47 @@ class ShoppingCartRepository {
     } catch (e) {
       print('Error updating product quantity: $e');
       throw Exception('상품 수량 업데이트에 실패했습니다.');
+    }
+  }
+
+  //1. 데이터 넘겨줄때 카트 모델에서 오더모델로 타입 전환
+  Future<List<OrderItemModel>> getSelectedOrderItems(
+      bool isRegularDelivery) async {
+    try {
+      // Debug: 어떤 타입의 아이템을 가져오는지 로그
+      print(
+          'Fetching ${isRegularDelivery ? "Regular Delivery" : "Pickup"} items');
+
+      // 1. 현재 로그인한 사용자 ID 가져오기
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+
+      // 2. Firestore에서 사용자 문서 가져오기
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        return [];
+      }
+
+      // 3. 배송 타입에 따른 필드 선택 (cartItems or pickupItems)
+      final field = isRegularDelivery ? 'cartItems' : 'pickupItems';
+
+      // 4. 선택된 필드의 아이템 리스트 가져오기
+      final items = List<Map<String, dynamic>>.from(userDoc.get(field) ?? []);
+      print('Found ${items.length} items to convert');
+
+      // 5. CartModel → OrderItemModel 변환
+      // 각 아이템을 OrderItemModel 형식으로 매핑
+      return items
+          .map((item) => OrderItemModel(
+                productId: item['productId'],
+                productName: item['productName'],
+                productImageUrl: item['productImageUrl'],
+                productPrice: item['productPrice'],
+                quantity: item['quantity'] ?? 1,
+              ))
+          .toList();
+    } catch (e) {
+      print('Error in getSelectedOrderItems: $e');
+      throw Exception('주문 상품 변환에 실패했습니다.');
     }
   }
 }
