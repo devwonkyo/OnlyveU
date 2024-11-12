@@ -5,11 +5,13 @@ class CustomTextField extends StatelessWidget {
   final String label;
   final String hintText;
   final int maxLength;
+  final TextEditingController controller;
 
   const CustomTextField({
     super.key,
     required this.label,
     required this.hintText,
+    required this.controller,
     this.maxLength = 100,
   });
 
@@ -34,6 +36,7 @@ class CustomTextField extends StatelessWidget {
         SizedBox(
           width: MediaQuery.of(context).size.width * 0.95,
           child: TextField(
+            controller: controller,
             maxLength: maxLength,
             decoration: InputDecoration(
               hintText: hintText,

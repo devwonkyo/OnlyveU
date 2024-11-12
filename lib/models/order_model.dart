@@ -62,9 +62,11 @@ class OrderModel {
   /// 픽업 예정 시간 (픽업 주문인 경우)
   final DateTime? pickupTime;
 
+  /// 픽업 매장 정보 (픽업 주문인 경우)
+  final String? pickStore;
+
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
-
   OrderModel({
     required this.id,
     required this.userId,
@@ -72,6 +74,7 @@ class OrderModel {
     required this.orderType,
     this.status = OrderStatus.pending,
     this.pickupTime,
+    this.pickStore,
     this.deliveryInfo,
     DateTime? createdAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -88,8 +91,10 @@ class OrderModel {
       'orderType': orderType.name,
       'totalPrice': totalPrice,
       'createdAt': createdAt.toIso8601String(),
-      if (orderType == OrderType.pickup)
+      if (orderType == OrderType.pickup) ...{
         'pickupTime': pickupTime?.toIso8601String(),
+        'pickStore': pickStore, // 변경된 필드명
+      },
       if (orderType == OrderType.delivery)
         'deliveryInfo': deliveryInfo?.toMap(),
     };
@@ -108,6 +113,7 @@ class OrderModel {
       orderType: orderType,
       pickupTime:
           map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
+      pickStore: map['pickStore'], // 변경된 필드명
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
           : null,
