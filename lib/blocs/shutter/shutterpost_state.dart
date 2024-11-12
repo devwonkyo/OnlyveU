@@ -2,11 +2,13 @@ import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PostState extends Equatable {
+  final String title;
   final String text;
   final List<XFile> images;
   final List<String> tags;
 
   const PostState({
+    required this.title,
     required this.text,
     required this.images,
     required this.tags,
@@ -14,6 +16,7 @@ class PostState extends Equatable {
 
   factory PostState.initial() {
     return const PostState(
+      title: '',
       text: '',
       images: [],
       tags: [],
@@ -21,11 +24,13 @@ class PostState extends Equatable {
   }
 
   PostState copyWith({
+    String? title,
     String? text,
     List<XFile>? images,
     List<String>? tags,
   }) {
     return PostState(
+      title: title ?? this.title,
       text: text ?? this.text,
       images: images ?? this.images,
       tags: tags ?? this.tags,
@@ -33,5 +38,5 @@ class PostState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [text, images, tags];
+  List<Object?> get props => [title, text, images, tags];
 }
