@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/ranking_bloc.dart';
 import 'package:onlyveyou/repositories/home/ranking_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/ranking/widgets/ranking_card_widget.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -47,9 +48,11 @@ class _RankingTabScreenState extends State<RankingTabScreen> {
   @override
   void initState() {
     super.initState();
-    _rankingBloc =
-        RankingBloc(rankingRepository: RankingRepository()); // Bloc 초기화
-    _rankingBloc.add(LoadRankingProducts()); // 전체 랭킹 상품 로드
+    _rankingBloc = RankingBloc(
+      rankingRepository: RankingRepository(),
+      cartRepository: ShoppingCartRepository(), // 추가
+    );
+    _rankingBloc.add(LoadRankingProducts());
   }
 
   @override
