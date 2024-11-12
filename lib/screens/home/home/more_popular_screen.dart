@@ -259,12 +259,23 @@ class MorePopularScreen extends StatelessWidget {
 
   void _handleAddToCart(BuildContext context, ProductModel product) async {
     final currentUserId = await OnlyYouSharedPreference().getCurrentUserId();
-    context
-        .read<HomeBloc>()
-        .add(AddToCart(product.productId)); // product.productId로 수정
+    context.read<HomeBloc>().add(AddToCart(product.productId));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('장바구니에 추가되었습니다.')),
+    // 성공/실패 상태에 따른 스낵바 표시
+    context.read<HomeBloc>().stream.listen(
+      (state) {
+        if (state is HomeError || state is HomeSuccess) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state is HomeSuccess
+                  ? state.message
+                  : (state as HomeError).message),
+              duration: Duration(milliseconds: 1000),
+            ),
+          );
+        }
+      },
     );
   }
 }
