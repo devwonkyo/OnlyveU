@@ -14,6 +14,7 @@ import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.da
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
+import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/theme.dart';
@@ -160,6 +161,9 @@ class MyApp extends StatelessWidget {
               ),
               BlocProvider<PostBloc>(
                 create: (context) => PostBloc(),
+              ),
+              BlocProvider<StoreBloc>(
+                create: (context) => StoreBloc(),
               ),
             ],
             child: BlocBuilder<ThemeBloc, ThemeState>(
