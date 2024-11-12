@@ -49,14 +49,16 @@ class RecentlySearchButton extends StatelessWidget {
           context.read<SearchTextFieldBloc>().add(TextSubmitted(title));
         },
         style: OutlinedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 4.h)),
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        ),
         child: Row(
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 15.sp),
+              style: TextStyle(fontSize: 13.sp),
             ),
-            SizedBox(width: 5.w),
+            SizedBox(width: 2.w),
             GestureDetector(
               onTap: () {
                 context.read<RecentSearchBloc>().add(RemoveSearchTerm(title));
@@ -65,6 +67,7 @@ class RecentlySearchButton extends StatelessWidget {
               child: Icon(
                 Icons.close,
                 size: 15.sp,
+                color: Colors.grey,
               ),
             ),
           ],

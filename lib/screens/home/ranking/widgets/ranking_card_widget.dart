@@ -177,13 +177,36 @@ class RankingCardWidget extends StatelessWidget {
                       ),
                       SizedBox(width: 16.w),
                       GestureDetector(
-                        onTap: () {
-                          // TODO: 장바구니 추가 기능 구현
+                        onTap: () async {
+                          context
+                              .read<RankingBloc>()
+                              .add(AddToCart(product.productId));
+
+                          context.read<RankingBloc>().stream.listen(
+                            (state) {
+                              if (state is RankingError ||
+                                  state is RankingSuccess) {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(state is RankingSuccess
+                                        ? state.message
+                                        : (state as RankingError).message),
+                                    duration: Duration(milliseconds: 1000),
+                                  ),
+                                );
+                              }
+                            },
+                          );
                         },
-                        child: Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 20.sp,
-                          color: Colors.grey,
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          child: Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ],

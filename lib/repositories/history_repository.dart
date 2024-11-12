@@ -1,13 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/utils/shared_preference_util.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
 class HistoryRepository {
   final FirebaseFirestore _firestore;
-  final _prefs = OnlyYouSharedPreference();
-
-  HistoryRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  final ShoppingCartRepository _cartRepository;
+  HistoryRepository(
+      {FirebaseFirestore? firestore,
+      ShoppingCartRepository? cartRepository // 추가
+      })
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _cartRepository = cartRepository ?? ShoppingCartRepository();
 
   Future<List<ProductModel>> fetchHistoryItems() async {
     try {
@@ -59,5 +62,15 @@ class HistoryRepository {
       throw Exception('좋아요 삭제 처리에 실패했습니다.');
     }
   } //^
+
+  //장바구니
+  Future<void> addToCart(String productId) async {
+    try {
+      await _cartRepository.addToCart(productId); // ShoppingCartRepository 사용
+    } catch (e) {
+      print('Error adding to cart: $e');
+      throw Exception('장바구니 추가에 실패했습니다.');
+    }
+  }
 }
 ////////

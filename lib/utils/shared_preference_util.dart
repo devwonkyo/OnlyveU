@@ -117,6 +117,7 @@ class OnlyYouSharedPreference {
 
   // 모든 데이터 프린트 - 로그아웃 전에 현재 데이터 확인
   Future<void> printAllData() async {
+    
     SharedPreferences preferences = await prefs;
     print('=== 현재 내부 저장소에 있는 데이터 ===');
     print('User ID: ${preferences.getString('userId') ?? '없음'}');

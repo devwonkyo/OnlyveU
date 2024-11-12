@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/home_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
 // 이벤트 정의
 abstract class HomeEvent {}
@@ -18,6 +19,11 @@ class ToggleProductFavorite extends HomeEvent {
   ToggleProductFavorite(this.product, this.userId);
 }
 
+class AddToCart extends HomeEvent {
+  final String productId;
+  AddToCart(this.productId); // userId 제거
+}
+
 // 상태 정의 (이전과 동일)
 abstract class HomeState {}
 
@@ -28,6 +34,11 @@ class HomeLoading extends HomeState {}
 class HomeError extends HomeState {
   final String message;
   HomeError(this.message);
+}
+
+class HomeSuccess extends HomeState {
+  final String message;
+  HomeSuccess(this.message);
 }
 
 class HomeLoaded extends HomeState {
@@ -61,9 +72,13 @@ class HomeLoaded extends HomeState {
 // HomeBloc 구현
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final HomeRepository _homeRepository;
+  final ShoppingCartRepository _cartRepository;
 
-  HomeBloc({required HomeRepository homeRepository})
-      : _homeRepository = homeRepository,
+  HomeBloc({
+    required HomeRepository homeRepository,
+    required ShoppingCartRepository cartRepository, // 추가
+  })  : _homeRepository = homeRepository,
+        _cartRepository = cartRepository, // 추가
         super(HomeInitial()) {
     // LoadHomeData 이벤트 핸들러
     on<LoadHomeData>((event, emit) async {
@@ -170,6 +185,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         } catch (e) {
           print('Error loading more products: $e');
           emit(currentState.copyWith(isLoading: false));
+        }
+      }
+    });
+    on<AddToCart>((event, emit) async {
+      if (state is HomeLoaded) {
+        final currentState = state as HomeLoaded;
+        try {
+          await _cartRepository.addToCart(event.productId);
+          emit(HomeSuccess('장바구니에 담겼습니다.')); // 성공 상태 추가
+          emit(currentState);
+        } catch (e) {
+          emit(HomeError(e.toString()));
+          emit(currentState);
         }
       }
     });

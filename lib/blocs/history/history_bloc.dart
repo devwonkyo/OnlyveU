@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 // Events
@@ -21,27 +22,59 @@ class ToggleFavorite extends HistoryEvent {
 
 class ClearHistory extends HistoryEvent {}
 
+//장바구니 담기
+class AddToCart extends HistoryEvent {
+  final String productId;
+  AddToCart(this.productId);
+}
+
 // State
-class HistoryState {
+abstract class HistoryState {
+  // HistoryState를 한 번만 정의
   final List<ProductModel> recentItems;
   final List<ProductModel> favoriteItems;
 
-  HistoryState({
+  const HistoryState({
     required this.recentItems,
     required this.favoriteItems,
   });
 }
 
+// 기본 상태 클래스 추가
+class HistoryInitial extends HistoryState {
+  HistoryInitial() : super(recentItems: [], favoriteItems: []);
+}
+
+// 로드된 상태 클래스 추가
+class HistoryLoaded extends HistoryState {
+  const HistoryLoaded({
+    required List<ProductModel> recentItems,
+    required List<ProductModel> favoriteItems,
+  }) : super(recentItems: recentItems, favoriteItems: favoriteItems);
+}
+
+class HistorySuccess extends HistoryState {
+  final String message;
+
+  const HistorySuccess({
+    required List<ProductModel> recentItems,
+    required List<ProductModel> favoriteItems,
+    required this.message,
+  }) : super(recentItems: recentItems, favoriteItems: favoriteItems);
+}
+
 // Bloc
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   final HistoryRepository _historyRepository;
-  final _prefs = OnlyYouSharedPreference();
+  final ShoppingCartRepository _cartRepository;
+  final _prefs = OnlyYouSharedPreference(); // _prefs 정의 추가
 
-  HistoryBloc(
-      {required HistoryRepository
-          historyRepository}) // 매개변수명을 historyRepository로 변경
-      : _historyRepository = historyRepository,
-        super(HistoryState(recentItems: [], favoriteItems: [])) {
+  HistoryBloc({
+    required HistoryRepository historyRepository,
+    required ShoppingCartRepository cartRepository,
+  })  : _historyRepository = historyRepository,
+        _cartRepository = cartRepository,
+        super(HistoryInitial()) {
     on<LoadHistoryItems>((event, emit) async {
       try {
         final userId = await _prefs.getCurrentUserId();
@@ -51,7 +84,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
             .where((product) => product.favoriteList.contains(userId))
             .toList();
 
-        emit(HistoryState(
+        emit(HistoryLoaded(
+          // HistoryState 대신 HistoryLoaded 사용
           recentItems: allItems,
           favoriteItems: favoriteItems,
         ));
@@ -87,7 +121,6 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     });
 
     on<ClearHistory>((event, emit) async {
-      //^
       try {
         if (state is HistoryState) {
           final currentState = state;
@@ -96,21 +129,37 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
           // 좋아요한 상품들 전체 삭제 처리
           for (var product in currentState.favoriteItems) {
             await _historyRepository.toggleFavorite(
-              //^ toggleFavorite로 변경
               product.productId,
               userId,
             );
           }
 
-          emit(HistoryState(
+          emit(HistoryLoaded(
+            // HistoryState 대신 HistoryLoaded 사용
             recentItems: currentState.recentItems,
             favoriteItems: [], // 좋아요 목록 비우기
           ));
         }
       } catch (e) {
         print('Error clearing history: $e');
+      } ////
+    });
+//장바구니
+    on<AddToCart>((event, emit) async {
+      try {
+        await _cartRepository.addToCart(event.productId);
+        emit(HistorySuccess(
+            recentItems: state.recentItems,
+            favoriteItems: state.favoriteItems,
+            message: '장바구니에 담겼습니다.'));
+      } catch (e) {
+        // 에러 상태도 HistorySuccess로 emit (메시지만 다르게)
+        emit(HistorySuccess(
+            recentItems: state.recentItems,
+            favoriteItems: state.favoriteItems,
+            message: e.toString()));
       }
-    }); //^
+    });
   }
 }
 

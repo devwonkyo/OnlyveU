@@ -1,20 +1,17 @@
-// 주로 데이터 소스와 관련된 비즈니스 로직을 포함하는 곳으로,
-// API 호출, Firebase 연동, 로컬 데이터베이스 처리
-// 등을 처리하는 클래스들을 배치합니다.
-//
-// repository를 사용하여 데이터 접근과 관련된 코드가 정리되어 있고,
-// BLoC이나 Provider와 같은 상태 관리 로직에서
-// 데이터를 깔끔하게 관리할 수 있도록 분리합니다.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/models/home_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 
 class HomeRepository {
   final FirebaseFirestore _firestore;
+  final ShoppingCartRepository _cartRepository;
 
-  HomeRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  HomeRepository(
+      {FirebaseFirestore? firestore, ShoppingCartRepository? cartRepository})
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _cartRepository = cartRepository ?? ShoppingCartRepository();
 
   // 배너 데이터 가져오기
   List<BannerItem> getBannerItems() {
@@ -99,7 +96,6 @@ class HomeRepository {
   Future<void> toggleProductFavorite(String productId, String userId) async {
     try {
       await _firestore.runTransaction((transaction) async {
-        // 1. 제품 문서 가져오기
         final productDoc = _firestore.collection('products').doc(productId);
         final userDoc = _firestore.collection('users').doc(userId);
 
@@ -110,7 +106,6 @@ class HomeRepository {
           throw Exception('상품을 찾을 수 없습니다.');
         }
 
-        // 2. favoriteList와 likedItems 업데이트
         List<String> favoriteList =
             List<String>.from(productSnapshot.get('favoriteList') ?? []);
         List<String> likedItems = List<String>.from(
@@ -124,7 +119,6 @@ class HomeRepository {
           likedItems.add(productId);
         }
 
-        // 3. 두 컬렉션 모두 업데이트
         transaction.update(productDoc, {'favoriteList': favoriteList});
         if (!userSnapshot.exists) {
           transaction.set(userDoc, {'likedItems': likedItems});
@@ -137,5 +131,14 @@ class HomeRepository {
       throw Exception('좋아요 처리에 실패했습니다.');
     }
   }
+
+  // 장바구니 추가 - ShoppingCartRepository 활용
+  Future<void> addToCart(String productId) async {
+    try {
+      await _cartRepository.addToCart(productId);
+    } catch (e) {
+      print('Error adding to cart: $e');
+      throw Exception('이 상품은 이미 장바구니에 담겨 있습니다');
+    }
+  }
 }
-// home_repository.dart의 toggleProductFavorite 메서드 수정

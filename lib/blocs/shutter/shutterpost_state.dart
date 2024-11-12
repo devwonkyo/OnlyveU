@@ -1,32 +1,37 @@
-// post_state.dart
+import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
 
-enum PostStatus { initial, submitting, success, failure }
-
-class PostState {
-  final List<XFile> images;
-  final List<String> imageUrls; // 이미지 URLs 리스트
+class PostState extends Equatable {
   final String text;
-  final PostStatus postStatus;
+  final List<XFile> images;
+  final List<String> tags;
 
-  PostState({
-    this.images = const [],
-    this.imageUrls = const [],
-    this.text = '',
-    this.postStatus = PostStatus.initial,
+  const PostState({
+    required this.text,
+    required this.images,
+    required this.tags,
   });
 
-  PostState copyWith({
-    List<XFile>? images,
-    List<String>? imageUrls,
-    String? text,
-    PostStatus? postStatus,
-  }) {
-    return PostState(
-      images: images ?? this.images,
-      imageUrls: imageUrls ?? this.imageUrls,
-      text: text ?? this.text,
-      postStatus: postStatus ?? this.postStatus,
+  factory PostState.initial() {
+    return const PostState(
+      text: '',
+      images: [],
+      tags: [],
     );
   }
+
+  PostState copyWith({
+    String? text,
+    List<XFile>? images,
+    List<String>? tags,
+  }) {
+    return PostState(
+      text: text ?? this.text,
+      images: images ?? this.images,
+      tags: tags ?? this.tags,
+    );
+  }
+
+  @override
+  List<Object?> get props => [text, images, tags];
 }

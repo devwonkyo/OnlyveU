@@ -5,6 +5,10 @@ abstract class ShutterEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class FetchPosts extends ShutterEvent {
+  FetchPosts();
+}
+
 class TagSelected extends ShutterEvent {
   final String tag;
 

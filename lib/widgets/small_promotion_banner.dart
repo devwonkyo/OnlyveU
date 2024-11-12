@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SmallPromotionBanner extends StatefulWidget {
-  const SmallPromotionBanner({Key? key}) : super(key: key);
+  final List<Map<String, String>> promotions;
+
+  const SmallPromotionBanner({Key? key, required this.promotions}) : super(key: key);
 
   @override
   State<SmallPromotionBanner> createState() => _SmallPromotionBannerState();
@@ -14,28 +16,18 @@ class SmallPromotionBanner extends StatefulWidget {
 class _SmallPromotionBannerState extends State<SmallPromotionBanner> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  late Timer _timer;
+  Timer? _timer;
+  late final List<Map<String, String>> promotions;
 
-  final List<Map<String, String>> promotions = [
-    {
-      'image': 'assets/image/banner4.png',
-      'title': '퍼셀 HOT신상 글루타치온앰플',
-    },
-    {
-      'image': 'assets/image/banner4.png',
-      'title': '퍼셀 HOT신상 글루타치온앰플',
-    },
-    {
-      'image': 'assets/image/banner5.png',
-      'title': '퍼셀 HOT신상 글루타치온앰플',
-    },
-    // 추가 프로모션 항목...
-  ];
 
   @override
   void initState() {
     super.initState();
-    _startAutoScroll();
+    promotions = widget.promotions;
+
+    if(promotions.length > 2){
+      _startAutoScroll();
+    }
   }
 
   void _startAutoScroll() {
@@ -59,7 +51,7 @@ class _SmallPromotionBannerState extends State<SmallPromotionBanner> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -93,6 +85,7 @@ class _SmallPromotionBannerState extends State<SmallPromotionBanner> {
         ),
         SizedBox(height: 8.h),
         // 도트 인디케이터
+        if(promotions.length > 2)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(

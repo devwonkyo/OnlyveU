@@ -38,7 +38,7 @@ class SuggestionService {
             await _firestore
                 .collection('suggestions')
                 .doc(suggestion.term)
-                .set(suggestion.toFirestore());
+                .set(suggestion.toMap());
           }
         }
       }
@@ -102,7 +102,7 @@ class SuggestionService {
       await _firestore
           .collection('suggestions')
           .doc(suggestion.term)
-          .set(suggestion.toFirestore());
+          .set(suggestion.toMap());
     }
   }
 }
