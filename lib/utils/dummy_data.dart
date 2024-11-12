@@ -221,7 +221,6 @@ List<ProductModel> generateDummyProducts() {
   final List<ProductModel> products = [];
 
   // 제품 생성 로직
-  // 제품 생성 로직
   for (int categoryId = 1; categoryId <= 9; categoryId++) {
     for (int subCategoryId = 1; subCategoryId <= 5; subCategoryId++) {
       for (int productNum = 1; productNum <= 5; productNum++) {
@@ -289,7 +288,6 @@ List<ProductModel> generateDummyProducts() {
   return products;
 }
 
-
 final List<Map<String, String>> promotions = [
   {
     'image': 'assets/image/banner4.png',
@@ -305,7 +303,7 @@ final List<Map<String, String>> promotions = [
   },
 ];
 
-List<Map<String,String>> getOneBannerData(){
+List<Map<String, String>> getOneBannerData() {
   return [
     {
       'image': 'assets/image/banner4.png',
@@ -314,7 +312,7 @@ List<Map<String,String>> getOneBannerData(){
   ];
 }
 
-List<Map<String,String>> getMultiBannerData(){
+List<Map<String, String>> getMultiBannerData() {
   return [
     {
       'image': 'assets/image/banner4.png',
