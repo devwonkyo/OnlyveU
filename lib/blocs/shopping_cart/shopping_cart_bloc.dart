@@ -395,16 +395,18 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     ));
   }
 
-// 2. 오더모델 담기. 오더모델 반환, 블럭에서 객체 생성
+// (2) 오더모델 담기. 오더모델 반환, 블럭에서 객체 생성
   Future<OrderModel> getSelectedOrderItems() async {
     print(
         'Getting seleted items from ${state.isRegularDeliveryTab ? "Regular Delivery" : "Pickup"}');
     try {
+      // 1. Repository에서 OrderItemModel 리스트 가져오기
       final orderItems = await _cartRepository
           .getSelectedOrderItems(state.isRegularDeliveryTab);
       print('Successfully got ${orderItems.length} order items');
+      // 2. 현재 로그인한 사용자 ID 가져오기
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
-
+      // 3. OrderModel 객체 생성
       final order = OrderModel(
         id: userId,
         userId: userId,

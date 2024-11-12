@@ -121,22 +121,24 @@ class CartBottomBarWidget extends StatelessWidget {
               ),
               const SizedBox(width: 12),
 
-              // 3. 구매하기 버튼 수정 - 데이터 넘겨주기
+              // (3). 구매하기 버튼 수정 - 데이터 넘겨주기
               Expanded(
                 child: ElevatedButton(
                   onPressed: totalSelectedCount > 0
                       ? () async {
                           try {
+                            // 1. CartBloc에서 OrderModel 가져오기
                             final cartBloc = context.read<CartBloc>();
                             final order =
                                 await cartBloc.getSelectedOrderItems();
+                            // 2. 주문 데이터가 있는 경우에만 결제 페이지로 이동
                             if (order.items.isNotEmpty) {
                               print('Navigating to payment with order:');
                               print('- User ID: ${order.userId}');
                               print('- Order Type: ${order.orderType}');
                               print('- Total Items: ${order.items.length}');
                               print('- Total Price: ${order.totalPrice}');
-
+                              // 3. 결제 페이지로 이동, OrderModel 전달
                               context.push(
                                 '/payment',
                                 extra: {'order': order},
