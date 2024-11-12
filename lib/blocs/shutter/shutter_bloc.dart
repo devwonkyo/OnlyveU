@@ -1,25 +1,87 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'shutter_event.dart';
-import 'shutter_state.dart';
+import 'package:onlyveyou/models/post_model.dart';
 import 'package:onlyveyou/screens/shutter/firestore_service.dart';
 
+// Events
+abstract class ShutterEvent {}
+
+class FetchPosts extends ShutterEvent {}
+
+// State
+class ShutterState {
+  final List<PostModel> posts;
+  final bool isLoading;
+  final String? error;
+
+  ShutterState({
+    required this.posts,
+    this.isLoading = false,
+    this.error,
+  });
+
+  ShutterState copyWith({
+    List<PostModel>? posts,
+    bool? isLoading,
+    String? error,
+  }) {
+    return ShutterState(
+      posts: posts ?? this.posts,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+// Bloc
 class ShutterBloc extends Bloc<ShutterEvent, ShutterState> {
   final FirestoreService _firestoreService;
+  StreamSubscription? _postsSubscription;
 
-  ShutterBloc(this._firestoreService) : super(ShutterState()) {
-    // FetchPosts 이벤트에 대한 핸들러를 on 메서드를 통해 등록
+  ShutterBloc(this._firestoreService)
+      : super(ShutterState(posts: [], isLoading: true)) {
     on<FetchPosts>((event, emit) async {
-      try {
-        final posts = await _firestoreService.fetchPosts();
-        emit(state.copyWith(posts: posts));
-      } catch (e) {
-        // 에러 상태 처리
-      }
+      emit(state.copyWith(isLoading: true));
+
+      await _postsSubscription?.cancel();
+      _postsSubscription = _firestoreService.getPosts().listen(
+        (posts) {
+          add(_UpdatePosts(posts));
+        },
+        onError: (error) {
+          add(_FetchError(error.toString()));
+        },
+      );
     });
 
-    // TagSelected 이벤트에 대한 핸들러 추가 (선택된 태그 업데이트)
-    on<TagSelected>((event, emit) {
-      emit(state.copyWith(selectedTag: event.tag));
+    on<_UpdatePosts>((event, emit) {
+      emit(state.copyWith(
+        posts: event.posts,
+        isLoading: false,
+      ));
+    });
+
+    on<_FetchError>((event, emit) {
+      emit(state.copyWith(
+        error: event.message,
+        isLoading: false,
+      ));
     });
   }
+
+  @override
+  Future<void> close() {
+    _postsSubscription?.cancel();
+    return super.close();
+  }
+}
+
+class _UpdatePosts extends ShutterEvent {
+  final List<PostModel> posts;
+  _UpdatePosts(this.posts);
+}
+
+class _FetchError extends ShutterEvent {
+  final String message;
+  _FetchError(this.message);
 }
