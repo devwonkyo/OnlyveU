@@ -408,8 +408,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
       // 3. OrderModel 객체 생성
       final order = OrderModel(
-        id: userId,
-        userId: userId,
+        id: '', // userId 대신 빈 문자열 사용 :제일 안정
+        userId: userId, // 실제 사용자 ID는 여기서 사용
         items: orderItems,
         orderType:
             state.isRegularDeliveryTab ? OrderType.delivery : OrderType.pickup,
