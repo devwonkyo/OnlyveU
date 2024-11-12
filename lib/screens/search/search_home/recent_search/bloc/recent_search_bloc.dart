@@ -12,6 +12,7 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
     on<AddSearchTerm>(_onAddSearchTerm);
     on<LoadRecentSearches>(_onLoadRecentSearches);
     on<RemoveSearchTerm>(_onRemoveSearchTerm);
+    on<ClearAllSearchTerms>(_onClearAllSearchTerms);
 
     add(LoadRecentSearches());
   }
@@ -45,5 +46,15 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
     await repository.removeSearchTerm(event.term);
     final recentSearches = await repository.loadRecentSearches();
     emit(RecentSearchLoaded(recentSearches));
+  }
+
+  void _onClearAllSearchTerms(
+      ClearAllSearchTerms event, Emitter<RecentSearchState> emit) async {
+    try {
+      await repository.clearAllSearchTerms();
+      emit(RecentSearchEmpty());
+    } catch (e) {
+      emit(RecentSearchError(e.toString()));
+    }
   }
 }
