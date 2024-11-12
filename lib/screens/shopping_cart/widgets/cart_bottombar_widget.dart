@@ -127,12 +127,9 @@ class CartBottomBarWidget extends StatelessWidget {
                   onPressed: totalSelectedCount > 0
                       ? () async {
                           try {
-                            // 1. CartBloc에서 OrderModel 가져오기
                             final cartBloc = context.read<CartBloc>();
                             final order =
                                 await cartBloc.getSelectedOrderItems();
-
-                            // 2. 주문 데이터가 있는 경우에만 결제 페이지로 이동
                             if (order.items.isNotEmpty) {
                               print('Navigating to payment with order:');
                               print('- User ID: ${order.userId}');
@@ -140,7 +137,6 @@ class CartBottomBarWidget extends StatelessWidget {
                               print('- Total Items: ${order.items.length}');
                               print('- Total Price: ${order.totalPrice}');
 
-                              // 3. 결제 페이지로 이동, OrderModel 전달
                               context.push(
                                 '/payment',
                                 extra: {'order': order},
@@ -157,12 +153,11 @@ class CartBottomBarWidget extends StatelessWidget {
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
+                      backgroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      )),
                   child: Text(
                     '구매하기 ($totalSelectedCount)',
                     style: const TextStyle(
@@ -179,3 +174,64 @@ class CartBottomBarWidget extends StatelessWidget {
     );
   }
 }
+/////
+// Expanded(
+// child: ElevatedButton(
+// // onPressed: 버튼 터치 시 실행될 콜백 함수
+// // totalSelectedCount > 0: 선택된 상품이 있는 경우에만 버튼 활성화
+// onPressed: totalSelectedCount > 0
+// ? () async {
+// try {
+// // 1. CartBloc에 접근하여 OrderModel 생성 요청
+// // context.read<CartBloc>(): 현재 위젯 트리에서 CartBloc 인스턴스를 가져옴
+// final cartBloc = context.read<CartBloc>();
+// // getSelectedOrderItems(): 선택된 카트 아이템으로 OrderModel을 생성하는 비동기 함수 호출
+// final order = await cartBloc.getSelectedOrderItems();
+//
+// // 2. 생성된 주문에 포함된 상품이 있는지 확인
+// if (order.items.isNotEmpty) {
+// // 디버깅을 위한 주문 정보 로그 출력
+// print('Navigating to payment with order:');
+// print('- User ID: ${order.userId}');          // 주문자 ID
+// print('- Order Type: ${order.orderType}');    // 배송/픽업 여부
+// print('- Total Items: ${order.items.length}'); // 주문 상품 개수
+// print('- Total Price: ${order.totalPrice}');   // 총 주문 금액
+//
+// // 3. go_router를 사용하여 결제 페이지로 네비게이션
+// context.push(
+// '/payment',           // 이동할 라우트 경로
+// extra: {'order': order}, // 라우트에 전달할 추가 데이터 (OrderModel)
+// );
+// }
+// } catch (e) {
+// // 에러 처리: 로그 출력 및 사용자 피드백
+// print('Error processing order: $e');
+// // ScaffoldMessenger: 스낵바를 표시하기 위한 Flutter의 위젯
+// ScaffoldMessenger.of(context).showSnackBar(
+// const SnackBar(
+// content: Text('주문 처리 중 오류가 발생했습니다.'),
+// ),
+// );
+// }
+// }
+//     : null, // 선택된 상품이 없으면 null을 할당하여 버튼 비활성화
+//
+// // 버튼의 스타일 설정
+// style: ElevatedButton.styleFrom(
+// backgroundColor: Colors.black,    // 버튼 배경색
+// padding: const EdgeInsets.symmetric(vertical: 16), // 상하 패딩
+// shape: RoundedRectangleBorder(    // 버튼 모양
+// borderRadius: BorderRadius.circular(4), // 모서리 둥글기
+// ),
+// ),
+//
+// // 버튼 내부 텍스트 위젯
+// child: Text(
+// '구매하기 ($totalSelectedCount)', // 선택된 상품 수를 포함한 텍스트
+// style: const TextStyle(
+// color: Colors.white,         // 텍스트 색상
+// fontWeight: FontWeight.bold, // 텍스트 두께
+// ),
+// ),
+// ),
+// );
