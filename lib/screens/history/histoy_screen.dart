@@ -22,7 +22,10 @@ class _HistoryScreenState extends State<HistoryScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    context.read<HistoryBloc>().add(LoadHistoryItems());
+    final historyBloc = context.read<HistoryBloc>();
+    if (historyBloc.state.recentItems.isEmpty) {
+      historyBloc.add(LoadHistoryItems());
+    }
   }
 
   @override

@@ -30,6 +30,7 @@ class MockOrderRepository implements OrderRepository {
       orderType: OrderType.delivery,
       createdAt: DateTime.now(),
       deliveryInfo: DeliveryInfoModel( //배송지 등록과 배송 요청사항을 여기다가 추가
+      deliveryName: '집',
         address: '서울특별시 강남구 테헤란로 123',
         detailAddress: '빌딩 101호',
         recipientName: '홍길동',
