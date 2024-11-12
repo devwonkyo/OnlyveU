@@ -38,11 +38,18 @@ class SearchHomeScreen extends StatelessWidget {
                   } else if (state is RecentSearchLoaded) {
                     return SearchMainContainer(
                       title: '최근 검색어',
-                      leading: Text(
-                        '전체 삭제',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: Colors.grey,
+                      leading: GestureDetector(
+                        onTap: () {
+                          context
+                              .read<RecentSearchBloc>()
+                              .add(ClearAllSearchTerms());
+                        },
+                        child: Text(
+                          '전체 삭제',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                       child: SizedBox(
