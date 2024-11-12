@@ -64,7 +64,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/shutter',
           pageBuilder: (context, state) =>
-              _buildPageWithTransition(state, const ShutterScreen()),
+              _buildPageWithTransition(state, ShutterScreen()),
         ),
         GoRoute(
           path: '/history',

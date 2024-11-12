@@ -3,178 +3,160 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/widgets/default_appbar.dart';
 import 'package:onlyveyou/blocs/shutter/shutter_bloc.dart';
-import 'package:onlyveyou/blocs/shutter/shutter_event.dart';
-import 'package:onlyveyou/blocs/shutter/shutter_state.dart';
-import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/firestore_service.dart';
 import 'package:onlyveyou/models/post_model.dart';
 
-// shutter_screen.dart
 class ShutterScreen extends StatelessWidget {
   const ShutterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ShutterBloc(FirestoreService())
-        ..add(FetchPosts()), // Trigger FetchPosts event here
+      create: (context) => ShutterBloc(FirestoreService())..add(FetchPosts()),
       child: Scaffold(
         appBar: DefaultAppBar(mainColor: const Color(0xFFC9C138)),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Existing UI: header and tag buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'SHUTTER',
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'SHUTTER',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      context.go('/shutterpost');
+                    },
+                    child: const Text(
+                      '글쓰기 >',
                       style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Color(0xFFC9C138),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        context.go('/shutterpost');
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '요즘 인기있는',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              BlocBuilder<ShutterBloc, ShutterState>(
+                builder: (context, state) {
+                  if (state.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (state.error != null) {
+                    return Center(child: Text('Error: ${state.error}'));
+                  }
+
+                  if (state.posts.isEmpty) {
+                    return const Center(
+                      child: Text('아직 게시물이 없습니다.'),
+                    );
+                  }
+
+                  return Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<ShutterBloc>().add(FetchPosts());
                       },
-                      child: const Text(
-                        '글쓰기 >',
-                        style: TextStyle(
-                          color: Color(0xFFC9C138),
-                        ),
+                      child: ListView.builder(
+                        itemCount: state.posts.length,
+                        itemBuilder: (context, index) {
+                          final post = state.posts[index];
+                          return _buildPostWithActions(post);
+                        },
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  '요즘 인기있는',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                BlocBuilder<ShutterBloc, ShutterState>(
-                  builder: (context, state) {
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildTagButton(
-                              context, '#데일리메이크업', state.selectedTag),
-                          _buildTagButton(context, '#틴트', state.selectedTag),
-                          _buildTagButton(context, '#홈케어', state.selectedTag),
-                          _buildTagButton(context, '#건강관리', state.selectedTag),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Fetch and display posts
-                BlocBuilder<ShutterBloc, ShutterState>(
-                  builder: (context, state) {
-                    if (state.posts.isEmpty) {
-                      return const Center(child: Text('No posts available.'));
-                    }
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: state.posts.length,
-                      itemBuilder: (context, index) {
-                        final post = state.posts[index];
-                        return _buildPostFromModel(post);
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Method to display the post from the model
-  Widget _buildPostFromModel(PostModel post) {
+  Widget _buildPostWithActions(PostModel post) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Displaying images if available
           if (post.imageUrls.isNotEmpty)
-            Image.network(
-                post.imageUrls[0]), // You can use a list of images if needed
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.network(
+                post.imageUrls[0],
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 200,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Icon(Icons.error),
+                  );
+                },
+              ),
+            ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User information (for now, username is static)
-                const Text(
-                  'username', // Use dynamic username from Firebase if available
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  post.text,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
                 ),
-                const SizedBox(height: 5),
-                Text(post.text),
-                const SizedBox(height: 10),
-                // Displaying tags
-                if (post.tags.isNotEmpty)
-                  Row(
+                const SizedBox(height: 8),
+                Text(
+                  '${post.createdAt.year}년 ${post.createdAt.month}월 ${post.createdAt.day}일',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                if (post.tags.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
                     children: post.tags
-                        .map((tag) => Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Chip(label: Text(tag)),
+                        .map((tag) => Chip(
+                              label: Text('#$tag'),
+                              backgroundColor:
+                                  const Color(0xFFC9C138).withOpacity(0.2),
                             ))
                         .toList(),
                   ),
+                ],
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // shutter_screen.dart의 하단에 추가
-
-  Widget _buildTagButton(
-      BuildContext context, String tag, String? selectedTag) {
-    final isSelected = tag == selectedTag;
-
-    return GestureDetector(
-      onTap: () {
-        context.read<ShutterBloc>().add(TagSelected(tag));
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue : Colors.grey[300],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          tag,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
     );
   }

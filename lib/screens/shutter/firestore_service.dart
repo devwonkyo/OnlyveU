@@ -1,16 +1,24 @@
-// firestore_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/post_model.dart';
 
 class FirestoreService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<List<PostModel>> fetchPosts() async {
+  Stream<List<PostModel>> getPosts() {
     try {
-      final snapshot = await _db.collection('posts').get();
-      return snapshot.docs.map((doc) => PostModel.fromMap(doc.data())).toList();
+      return _firestore
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((snapshot) {
+        return snapshot.docs.map((doc) {
+          final data = doc.data();
+          return PostModel.fromMap(data);
+        }).toList();
+      });
     } catch (e) {
-      throw Exception('Failed to fetch posts: $e');
+      print('Error in getPosts: $e');
+      rethrow;
     }
   }
 }
