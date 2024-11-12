@@ -247,17 +247,22 @@ class RecommendedProductsWidget extends StatelessWidget {
               SizedBox(width: 25),
               GestureDetector(
                 onTap: () async {
-                  final currentUserId =
-                      await OnlyYouSharedPreference().getCurrentUserId();
-                  context
-                      .read<HomeBloc>()
-                      .add(AddToCart(item.productId, currentUserId));
+                  context.read<HomeBloc>().add(AddToCart(item.productId));
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      duration: Duration(seconds: 1),
-                      content: Text('장바구니에 추가되었습니다.'),
-                    ),
+                  context.read<HomeBloc>().stream.listen(
+                    (state) {
+                      if (state is HomeError || state is HomeSuccess) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(state is HomeSuccess
+                                ? state.message
+                                : (state as HomeError).message),
+                            duration: Duration(milliseconds: 1000),
+                          ),
+                        );
+                      }
+                    },
                   );
                 },
                 child: Container(
