@@ -67,7 +67,6 @@ class OrderModel {
 
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
-
   OrderModel({
     required this.id,
     required this.userId,
@@ -81,8 +80,8 @@ class OrderModel {
   })  : createdAt = createdAt ?? DateTime.now(),
         totalPrice = items.fold(
             0,
-                (sum, item) =>
-            sum + (item.productPrice * item.quantity)); // items의 합으로 초기화
+            (sum, item) =>
+                sum + (item.productPrice * item.quantity)); // items의 합으로 초기화
 
   Map<String, dynamic> toMap() {
     return {
@@ -103,7 +102,7 @@ class OrderModel {
 
   factory OrderModel.fromMap(String id, Map<String, dynamic> map) {
     final orderType =
-    OrderType.values.firstWhere((e) => e.name == map['orderType']);
+        OrderType.values.firstWhere((e) => e.name == map['orderType']);
 
     return OrderModel(
       id: id,
@@ -113,7 +112,7 @@ class OrderModel {
       status: OrderStatus.values.firstWhere((e) => e.name == map['status']),
       orderType: orderType,
       pickupTime:
-      map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
+          map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
       pickStore: map['pickStore'], // 변경된 필드명
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
