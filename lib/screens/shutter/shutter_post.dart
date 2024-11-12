@@ -12,8 +12,10 @@ class PostScreen extends StatelessWidget {
 
   Future<void> _pickImage(BuildContext context) async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (pickedFile != null) {
       context.read<PostBloc>().add(AddImageEvent(pickedFile));
     }
@@ -26,7 +28,7 @@ class PostScreen extends StatelessWidget {
       child: BlocListener<PostBloc, PostState>(
         listener: (context, state) {
           if (state.text.isEmpty && state.images.isEmpty) {
-            GoRouter.of(context).go('/postscreen'); // 저장 성공 시 이동
+            GoRouter.of(context).go('/shutter');
           }
         },
         child: Scaffold(
@@ -42,109 +44,87 @@ class PostScreen extends StatelessWidget {
                   }
                 }),
             actions: [
-              TextButton(
-                onPressed: () {
-                  final text = _textController.text;
-                  final images = context.read<PostBloc>().state.images;
-
-                  context.read<PostBloc>().add(SubmitPostEvent(
-                        text: text,
-                        images: images,
-                        tags: [],
-                      ));
+              BlocBuilder<PostBloc, PostState>(
+                builder: (context, state) {
+                  return TextButton(
+                    onPressed: state.images.isEmpty
+                        ? null
+                        : () {
+                            context.read<PostBloc>().add(SubmitPostEvent(
+                                  text: _textController.text,
+                                  images: state.images,
+                                  tags: state.tags,
+                                ));
+                            _textController.clear();
+                          },
+                    child: Text(
+                      '올리기',
+                      style: TextStyle(
+                        color: state.images.isEmpty ? Colors.grey : Colors.blue,
+                      ),
+                    ),
+                  );
                 },
-                child: Text(
-                  '올리기',
-                  style: TextStyle(color: Colors.grey),
-                ),
               ),
             ],
           ),
-          body: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BlocBuilder<PostBloc, PostState>(
-                  builder: (context, state) {
-                    return GestureDetector(
-                      onTap: () => _pickImage(context),
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: state.images.isEmpty
-                              ? Icon(Icons.add, color: Colors.grey)
-                              : Stack(
-                                  children: state.images
-                                      .map(
-                                        (image) => Image.file(
-                                          File(image.path),
-                                          width: 100,
-                                          height: 100,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                      .toList(),
-                                ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(height: 10),
-                Text(
-                  '사용한 상품과 다양한 팁을 공유해 보세요.\n- 상품 추천, 사용 후기, 발색 비교 등',
-                  style: TextStyle(color: Colors.grey),
-                ),
-                SizedBox(height: 10),
-                BlocBuilder<PostBloc, PostState>(
-                  builder: (context, state) {
-                    _textController.text = state.text;
-                    return TextField(
-                      controller: _textController,
-                      maxLines: null,
-                      onChanged: (text) {
-                        context.read<PostBloc>().add(UpdateTextEvent(text));
-                      },
-                      decoration: InputDecoration(
-                        hintText: '내용을 입력하세요',
-                        border: InputBorder.none,
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    TextButton.icon(
-                      onPressed: () {
-                        // 태그 추가 로직 구현
-                      },
-                      icon: Icon(Icons.tag, color: Colors.grey),
-                      label: Text('# 태그 (선택)',
-                          style: TextStyle(color: Colors.grey)),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Divider(),
-                ListTile(
-                  leading: Icon(Icons.info_outline, color: Colors.grey),
-                  title: Text('게시물 리워드 안내'),
-                  subtitle: Column(
+          body: BlocBuilder<PostBloc, PostState>(
+            builder: (context, state) {
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('게시물을 등록하시면 다양한 리워드를 받을 수 있습니다.'),
+                      GestureDetector(
+                        onTap: () => _pickImage(context),
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: state.images.isEmpty
+                                ? Icon(Icons.add, color: Colors.grey)
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(state.images.first.path),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      if (state.images.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: Text(
+                            '${state.images.length}장의 사진이 선택됨',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      SizedBox(height: 16),
+                      TextField(
+                        controller: _textController,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          hintText: '게시물 내용을 입력하세요...',
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (text) {
+                          context.read<PostBloc>().add(UpdateTextEvent(text));
+                        },
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

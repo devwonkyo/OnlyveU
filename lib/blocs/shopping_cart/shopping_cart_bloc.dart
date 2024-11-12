@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/cart_model.dart';
+import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 // Events
 abstract class CartEvent extends Equatable {
@@ -392,4 +394,41 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       isAllSelected: currentItems.isNotEmpty,
     ));
   }
+
+// 2. 오더모델 담기. 오더모델 반환, 블럭에서 객체 생성
+  Future<OrderModel> getSelectedOrderItems() async {
+    print(
+        'Getting selected items from ${state.isRegularDeliveryTab ? "Regular Delivery" : "Pickup"}');
+
+    try {
+      // 1. Repository에서 OrderItemModel 리스트 가져오기
+      final orderItems = await _cartRepository
+          .getSelectedOrderItems(state.isRegularDeliveryTab);
+      print('Successfully got ${orderItems.length} order items');
+
+      // 2. 현재 로그인한 사용자 ID 가져오기
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+
+      // 3. OrderModel 객체 생성
+      final order = OrderModel(
+        id: userId,
+        userId: userId,
+        items: orderItems,
+        orderType:
+            state.isRegularDeliveryTab ? OrderType.delivery : OrderType.pickup,
+      );
+
+      print('Created order object for user: $userId');
+      print('Order type: ${order.orderType}');
+      print('Total items: ${order.items.length}');
+      print('Total price: ${order.totalPrice}');
+
+      return order;
+    } catch (e) {
+      print('Error creating order: $e');
+      rethrow; // 에러를 UI layer에서 처리할 수 있도록 전달
+    }
+  }
 }
+// 오더모델로 데이터 전달하는 과정이 없이
+//아이템즈만 리턴하는중
