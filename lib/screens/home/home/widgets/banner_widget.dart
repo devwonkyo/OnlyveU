@@ -1,6 +1,7 @@
 import 'dart:async'; // 주기적인 타이머를 위한 Timer 라이브러리 임포트
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/home_model.dart';
 
 // BannerItem 모델을 사용하기 위한 임포트
@@ -54,10 +55,24 @@ class _BannerWidgetState extends State<BannerWidget> {
     });
   }
 
+  void _handleBannerTap(int index) {
+    switch (index) {
+      case 0:
+        context.push('/banner1');
+        break;
+      case 1:
+        context.push('/banner2');
+        break;
+      case 2:
+        context.push('/banner3');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 315,
+      height: 320, // 배너 높이 조정
       child: Stack(
         children: [
           PageView.builder(
@@ -69,42 +84,16 @@ class _BannerWidgetState extends State<BannerWidget> {
             },
             itemCount: widget.bannerItems.length,
             itemBuilder: (context, index) {
-              return Stack(
-                children: [
-                  // 이미지
-                  Image.asset(
-                    widget.bannerItems[index].imageAsset,
-                    width: double.infinity,
-                    height: 315,
-                    fit: BoxFit.cover,
-                  ),
-                  // 텍스트 오버레이
-                  Positioned(
-                    bottom: 40,
-                    left: 16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.bannerItems[index].title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.bannerItems[index].subtitle,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              return GestureDetector(
+                onTap: () => _handleBannerTap(index),
+                child: Image.asset(
+                  widget.bannerItems[index].imageAsset,
+                  width: double.infinity,
+                  height: 320,
+                  fit: index == 1
+                      ? BoxFit.contain
+                      : BoxFit.cover, // 두 번째 이미지만 contain으로
+                ),
               );
             },
           ),
@@ -134,7 +123,6 @@ class _BannerWidgetState extends State<BannerWidget> {
     );
   }
 }
-
 // SliverToBoxAdapter(
 //   child: BlocBuilder<HomeBloc, HomeState>(
 //     buildWhen: (previous, current) =>
