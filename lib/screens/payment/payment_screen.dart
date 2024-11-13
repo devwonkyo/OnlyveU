@@ -20,7 +20,10 @@ class PaymentScreen extends StatefulWidget {
     '벨을 누르지 말아주세요.',
     '도착 후 전화주시면 직접 받으러 갈게요.'
   ];
-  PaymentScreen({super.key});
+  final OrderModel order;
+
+  // 생성자에서 order 데이터를 받도록 설정
+  PaymentScreen({super.key, required this.order});
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -31,7 +34,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void initState() {
     super.initState();
     // 주문 상품 가져오기 이벤트 추가
-    context.read<PaymentBloc>().add(const FetchOrderItems());
+    // 전달된 order 값 확인
+   context.read<PaymentBloc>().add(InitializePayment(widget.order));
+    print("Order details received:");
+    print("- User ID: ${widget.order.userId}");
+    print("- Order Type: ${widget.order.orderType}");
+    print("- Total Items: ${widget.order.items.length}");
+    print("- Total Price: ${widget.order.totalPrice}");
   }
 
   String _selectedPaymentMethod = '빠른결제';
@@ -59,23 +68,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
             // 주문 유형에 따른 UI 표시
             BlocBuilder<PaymentBloc, PaymentState>(
               builder: (context, state) {
-                if (state is PaymentLoaded ||
-                    state is PaymentMessageSelected ||
-                    state is DeliveryInfoUpdated) {
-                  if (state.orderType == OrderType.delivery) {
+                if (state is PaymentLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else {
+                  // 전달받은 orderType을 사용하여 화면에 표시
+                  if (widget.order.orderType == OrderType.delivery) {
                     return DeliveryOrderInfo(
-                      deliveryInfo: state.deliveryInfo,
+                      deliveryInfo:
+                          state.deliveryInfo ?? widget.order.deliveryInfo,
                       deliveryMessages: widget.deliveryMessages,
                     );
-                  } else if (state.orderType == OrderType.pickup) {
+                  } else if (widget.order.orderType == OrderType.pickup) {
                     return const PickupOrderInfo();
                   } else {
                     return Container();
                   }
-                } else if (state is PaymentLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else {
-                  return Container();
                 }
               },
             ),
@@ -98,45 +105,39 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   const SizedBox(height: 10),
                   // payment_screen.dart
                   // payment_screen.dart
-                  BlocBuilder<PaymentBloc, PaymentState>(
-                    builder: (context, state) {
-                      List<OrderItemModel> orderItems = [];
-
-                      if (state is PaymentLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is PaymentLoaded) {
-                        orderItems = state.orderItems;
-                      } else if (state is PaymentMessageSelected ||
-                          state is DeliveryInfoUpdated) {
-                        orderItems = state.orderItems; // 배송 메시지 선택 시 주문 상품 유지
-                      } else if (state is PaymentError) {
-                        return Center(child: Text(state.message));
-                      }
-
-                      // 주문 상품 리스트 UI 표시
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: orderItems.length,
-                        itemBuilder: (context, index) {
-                          final item = orderItems[index];
-                          return ListTile(
-                            leading: SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: Image.network(
-                                item.productImageUrl,
-                                fit: BoxFit.cover,
-                              ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: widget.order.items.length,
+                    itemBuilder: (context, index) {
+                      final item = widget.order.items[index];
+                      return ListTile(
+                        leading: SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: Image.network(item.productImageUrl,
+                              fit: BoxFit.cover),
+                        ),
+                        title: Text(item.productName),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 5,
                             ),
-                            title: Text(item.productName),
-                            subtitle: Text('수량: ${item.quantity}'),
-                            trailing: Text(
+                            Text(
+                              '수량: ${item.quantity}',
+                              style: AppStyles.smallTextStyle,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
                               '${item.productPrice * item.quantity}원',
-                              style: AppStyles.bodyTextStyle,
+                              style: AppStyles.priceTextStyle,
                             ),
-                          );
-                        },
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -155,15 +156,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: BlocBuilder<PaymentBloc, PaymentState>(
                 builder: (context, state) {
-                  int totalAmount = 0;
-
-                  if (state is PaymentLoaded) {
-                    totalAmount = state.totalAmount;
-                  } else if (state is PaymentMessageSelected) {
-                    totalAmount = state.totalAmount;
-                  } else if (state is DeliveryInfoUpdated) {
-                    totalAmount = state.totalAmount;
-                  }
+                  int totalAmount = widget.order.items.fold(0, (sum, item) {
+                    return sum + (item.productPrice * item.quantity);
+                  });
 
                   //totalAmount 상태관리 수정해야 한다(0원으로 뜸 )
                   return Row(
@@ -348,15 +343,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
             BlocBuilder<PaymentBloc, PaymentState>(
               builder: (context, state) {
                 // default amount as 0 to avoid null issues
-                int totalAmount = 0;
-
-                if (state is PaymentLoaded) {
-                  totalAmount = state.totalAmount;
-                } else if (state is PaymentMessageSelected) {
-                  totalAmount = state.totalAmount;
-                } else if (state is DeliveryInfoUpdated) {
-                  totalAmount = state.totalAmount;
-                }
+                int totalAmount = widget.order.items.fold(0, (sum, item) {
+                  return sum + (item.productPrice * item.quantity);
+                });
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -367,6 +356,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       onPressed: () {
                         // 결제 버튼 로직
                         print("결제하기 버튼");
+                        context
+                            .read<PaymentBloc>()
+                            .add(const CheckOrderDetails());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
