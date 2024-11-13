@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/todaysale_bloc.dart';
 import 'package:onlyveyou/repositories/home/today_sale_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
@@ -176,30 +177,44 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                     itemCount: state.products.length,
                     itemBuilder: (context, index) {
                       final product = state.products[index];
-                      return Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 16.w, vertical: 12.w),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey[200]!,
-                              width: 1,
+                      return GestureDetector(
+                        onTap: () => context.push('/product-detail',
+                            extra: product.productId),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.w, vertical: 12.w),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.grey[200]!,
+                                width: 1,
+                              ),
                             ),
                           ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 상품 이미지 표시 (비어있으면 기본 아이콘 표시)
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: product.productImageList.isNotEmpty
-                                  ? Image.network(
-                                      product.productImageList.first,
-                                      width: 120.w,
-                                      height: 120.w,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 상품 이미지 표시 (비어있으면 기본 아이콘 표시)
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: product.productImageList.isNotEmpty
+                                    ? Image.network(
+                                        product.productImageList.first,
+                                        width: 120.w,
+                                        height: 120.w,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
+                                          width: 120.w,
+                                          height: 120.w,
+                                          color: Colors.grey[200],
+                                          child: Icon(
+                                            Icons.image_not_supported,
+                                            size: 40.w,
+                                            color: Colors.grey[400],
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
                                         width: 120.w,
                                         height: 120.w,
                                         color: Colors.grey[200],
@@ -209,188 +224,182 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                           color: Colors.grey[400],
                                         ),
                                       ),
-                                    )
-                                  : Container(
-                                      width: 120.w,
-                                      height: 120.w,
-                                      color: Colors.grey[200],
-                                      child: Icon(
-                                        Icons.image_not_supported,
-                                        size: 40.w,
-                                        color: Colors.grey[400],
+                              ),
+                              SizedBox(width: 16.w),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // 상품명 표시
+                                    Text(
+                                      product.name,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    // 원래 가격 (취소선 표시)
+                                    Text(
+                                      '${product.price}원',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        decoration: TextDecoration.lineThrough,
+                                        fontSize: 12.sp,
                                       ),
                                     ),
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // 상품명 표시
-                                  Text(
-                                    product.name,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  // 원래 가격 (취소선 표시)
-                                  Text(
-                                    '${product.price}원',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      decoration: TextDecoration.lineThrough,
-                                      fontSize: 12.sp,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  // 할인된 가격 표시
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '${product.discountPercent}%',
-                                        style: TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.bold,
+                                    SizedBox(height: 4.h),
+                                    // 할인된 가격 표시
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${product.discountPercent}%',
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Text(
-                                        '${_calculateDiscountedPrice(product.price, product.discountPercent)}원',
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.bold,
+                                        SizedBox(width: 8.w),
+                                        Text(
+                                          '${_calculateDiscountedPrice(product.price, product.discountPercent)}원',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    // BEST 태그 표시
+                                    if (product.isBest) ...[
+                                      SizedBox(height: 4.h),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 6.w, vertical: 2.h),
+                                        decoration: BoxDecoration(
+                                          color: AppStyles.mainColor
+                                              .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          "BEST",
+                                          style: TextStyle(
+                                            color: AppStyles.mainColor,
+                                            fontSize: 10.sp,
+                                          ),
                                         ),
                                       ),
                                     ],
-                                  ),
-                                  // BEST 태그 표시
-                                  if (product.isBest) ...[
                                     SizedBox(height: 4.h),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 6.w, vertical: 2.h),
-                                      decoration: BoxDecoration(
-                                        color: AppStyles.mainColor
-                                            .withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        "BEST",
-                                        style: TextStyle(
-                                          color: AppStyles.mainColor,
-                                          fontSize: 10.sp,
+                                    // 평점 및 리뷰 수 표시
+                                    Row(
+                                      children: [
+                                        Icon(Icons.star,
+                                            size: 13.sp,
+                                            color: AppStyles.mainColor),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          product.rating.toStringAsFixed(1),
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          '(${product.reviewList.length})',
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
-                                  SizedBox(height: 4.h),
-                                  // 평점 및 리뷰 수 표시
-                                  Row(
-                                    children: [
-                                      Icon(Icons.star,
-                                          size: 13.sp,
-                                          color: AppStyles.mainColor),
-                                      SizedBox(width: 4.w),
-                                      Text(
-                                        product.rating.toStringAsFixed(1),
-                                        style: TextStyle(
-                                          fontSize: 11.sp,
-                                          fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              // 찜하기와 장바구니 아이콘 표시
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 20.h),
+                                  FutureBuilder<String>(
+                                    future: OnlyYouSharedPreference()
+                                        .getCurrentUserId(),
+                                    builder: (context, snapshot) {
+                                      final userId =
+                                          snapshot.data ?? 'temp_user_id';
+                                      return GestureDetector(
+                                        onTap: () {
+                                          print(
+                                              'TodaySale Product ID: ${product.productId}'); // I작업 추가
+                                          context.read<TodaySaleBloc>().add(
+                                                ToggleProductFavorite(
+                                                    product, userId),
+                                              );
+                                        },
+                                        child: Icon(
+                                          product.favoriteList.contains(userId)
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          size: 24.sp,
+                                          color: product.favoriteList
+                                                  .contains(userId)
+                                              ? Colors.red
+                                              : Colors.grey,
                                         ),
+                                      );
+                                    },
+                                  ),
+                                  SizedBox(height: 25.h),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      context
+                                          .read<TodaySaleBloc>()
+                                          .add(AddToCart(product.productId));
+
+                                      context
+                                          .read<TodaySaleBloc>()
+                                          .stream
+                                          .listen(
+                                        (state) {
+                                          if (state is TodaySaleError ||
+                                              state is TodaySaleSuccess) {
+                                            ScaffoldMessenger.of(context)
+                                                .clearSnackBars();
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(state
+                                                        is TodaySaleSuccess
+                                                    ? state.message
+                                                    : (state as TodaySaleError)
+                                                        .message),
+                                                duration: Duration(
+                                                    milliseconds: 1000),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      );
+                                    },
+                                    child: Container(
+                                      width: 22,
+                                      height: 22,
+                                      child: Icon(
+                                        Icons.shopping_bag_outlined,
+                                        size: 20,
+                                        color: Colors.grey,
                                       ),
-                                      SizedBox(width: 4.w),
-                                      Text(
-                                        '(${product.reviewList.length})',
-                                        style: TextStyle(
-                                          fontSize: 11.sp,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            // 찜하기와 장바구니 아이콘 표시
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 20.h),
-                                FutureBuilder<String>(
-                                  future: OnlyYouSharedPreference()
-                                      .getCurrentUserId(),
-                                  builder: (context, snapshot) {
-                                    final userId =
-                                        snapshot.data ?? 'temp_user_id';
-                                    return GestureDetector(
-                                      onTap: () {
-                                        print(
-                                            'TodaySale Product ID: ${product.productId}'); // I작업 추가
-                                        context.read<TodaySaleBloc>().add(
-                                              ToggleProductFavorite(
-                                                  product, userId),
-                                            );
-                                      },
-                                      child: Icon(
-                                        product.favoriteList.contains(userId)
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        size: 24.sp,
-                                        color: product.favoriteList
-                                                .contains(userId)
-                                            ? Colors.red
-                                            : Colors.grey,
-                                      ),
-                                    );
-                                  },
-                                ),
-                                SizedBox(height: 25.h),
-                                GestureDetector(
-                                  onTap: () async {
-                                    context
-                                        .read<TodaySaleBloc>()
-                                        .add(AddToCart(product.productId));
-
-                                    context.read<TodaySaleBloc>().stream.listen(
-                                      (state) {
-                                        if (state is TodaySaleError ||
-                                            state is TodaySaleSuccess) {
-                                          ScaffoldMessenger.of(context)
-                                              .clearSnackBars();
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                              content: Text(state
-                                                      is TodaySaleSuccess
-                                                  ? state.message
-                                                  : (state as TodaySaleError)
-                                                      .message),
-                                              duration:
-                                                  Duration(milliseconds: 1000),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    );
-                                  },
-                                  child: Container(
-                                    width: 22,
-                                    height: 22,
-                                    child: Icon(
-                                      Icons.shopping_bag_outlined,
-                                      size: 20,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
