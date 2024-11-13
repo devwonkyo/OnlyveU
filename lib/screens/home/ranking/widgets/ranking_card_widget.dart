@@ -124,6 +124,45 @@ class RankingCardWidget extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        if (product.isPopular)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '인기',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        if (product.isPopular && product.isBest)
+                          SizedBox(width: 6),
+                        if (product.isBest)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'BEST',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 6),
                     // 별점과 리뷰 수
                     Row(
                       children: [
@@ -147,9 +186,8 @@ class RankingCardWidget extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const Spacer(),
                     // 찜하기 및 장바구니 아이콘
-                    const Spacer(),
+
                     Row(
                       children: [
                         FutureBuilder<String>(
