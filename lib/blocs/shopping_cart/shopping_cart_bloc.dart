@@ -395,6 +395,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     ));
   }
 
+//
 // (2) 오더모델 담기. 오더모델 반환, 블럭에서 객체 생성
   Future<OrderModel> getSelectedOrderItems() async {
     print(
