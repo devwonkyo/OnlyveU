@@ -164,15 +164,12 @@ class ProfileEditScreen extends StatelessWidget {
                       BlocBuilder<ProfileEditBloc, ProfileEditState>(
                         builder: (context, state) {
                           if (state is EmailLoading) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
+                            return ProfileInfoTile(
+                              title: "이메일 확인",
+                              trailingText: "이메일을 불러오는 중...",
+                              onTap: () {}, // 빈 함수 전달
                             );
                           } else if (state is EmailLoaded) {
-                            print(
-                                "ProfileEditScreen - EmailLoaded 상태: ${state.email}");
                             return ProfileInfoTile(
                               title: "이메일 확인",
                               trailingText: state.email,
@@ -183,15 +180,20 @@ class ProfileEditScreen extends StatelessWidget {
                           } else if (state is ProfileEditError) {
                             return ProfileInfoTile(
                               title: "이메일 확인",
-                              trailingText: "오류: ${state.message}",
-                              onTap: () {},
+                              trailingText: "이메일 로드 실패",
+                              onTap: () {
+                                context
+                                    .read<ProfileEditBloc>()
+                                    .add(LoadEmail());
+                              },
                             );
                           }
-
                           return ProfileInfoTile(
                             title: "이메일 확인",
                             trailingText: "이메일을 불러오는 중...",
-                            onTap: () {},
+                            onTap: () {
+                              context.read<ProfileEditBloc>().add(LoadEmail());
+                            },
                           );
                         },
                       ),
