@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
@@ -67,7 +69,8 @@ class HistorySuccess extends HistoryState {
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   final HistoryRepository _historyRepository;
   final ShoppingCartRepository _cartRepository;
-  final _prefs = OnlyYouSharedPreference(); // _prefs 정의 추가
+  final _prefs = OnlyYouSharedPreference();
+  StreamSubscription? _historySubscription; // 스트림 구독을 위한 변수 추가
 
   HistoryBloc({
     required HistoryRepository historyRepository,
@@ -76,45 +79,51 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
         _cartRepository = cartRepository,
         super(HistoryInitial()) {
     on<LoadHistoryItems>((event, emit) async {
+      if (state is! HistoryInitial) return; // 이미 로드됐으면 스킵
+
       try {
         final userId = await _prefs.getCurrentUserId();
-        final allItems = await _historyRepository.fetchHistoryItems();
+        await _historySubscription?.cancel();
 
-        final favoriteItems = allItems
-            .where((product) => product.favoriteList.contains(userId))
-            .toList();
+        await emit.forEach(
+          _historyRepository.fetchHistoryItems().distinct(), // 중복 제거
+          onData: (List<ProductModel> items) {
+            final favoriteItems = items
+                .where((product) => product.favoriteList.contains(userId))
+                .toList();
 
-        emit(HistoryLoaded(
-          // HistoryState 대신 HistoryLoaded 사용
-          recentItems: allItems,
-          favoriteItems: favoriteItems,
-        ));
+            return HistoryLoaded(
+              recentItems: items,
+              favoriteItems: favoriteItems,
+            );
+          },
+        );
       } catch (e) {
         print('Error loading history items: $e');
       }
     });
 
+    // 나머지 이벤트 핸들러들은 그대로 유지
     on<ToggleFavorite>((event, emit) async {
       try {
         await _historyRepository.toggleFavorite(
           event.product.productId,
           event.userId,
-        ); //^
-
-        add(LoadHistoryItems()); // 상태 새로고침
+        );
+        // 상태는 스트림을 통해 자동으로 업데이트됨
       } catch (e) {
         print('Error toggling favorite: $e');
       }
     });
+
     on<RemoveHistoryItem>((event, emit) async {
       try {
         final userId = await _prefs.getCurrentUserId();
         await _historyRepository.toggleFavorite(
           event.product.productId,
           userId,
-        ); //^
-
-        add(LoadHistoryItems());
+        );
+        // 상태는 스트림을 통해 자동으로 업데이트됨
       } catch (e) {
         print('Error removing history item: $e');
       }
@@ -126,25 +135,18 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
           final currentState = state;
           final userId = await _prefs.getCurrentUserId();
 
-          // 좋아요한 상품들 전체 삭제 처리
           for (var product in currentState.favoriteItems) {
             await _historyRepository.toggleFavorite(
               product.productId,
               userId,
             );
           }
-
-          emit(HistoryLoaded(
-            // HistoryState 대신 HistoryLoaded 사용
-            recentItems: currentState.recentItems,
-            favoriteItems: [], // 좋아요 목록 비우기
-          ));
         }
       } catch (e) {
         print('Error clearing history: $e');
-      } ////
+      }
     });
-//장바구니
+
     on<AddToCart>((event, emit) async {
       try {
         await _cartRepository.addToCart(event.productId);
@@ -153,13 +155,19 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
             favoriteItems: state.favoriteItems,
             message: '장바구니에 담겼습니다.'));
       } catch (e) {
-        // 에러 상태도 HistorySuccess로 emit (메시지만 다르게)
         emit(HistorySuccess(
             recentItems: state.recentItems,
             favoriteItems: state.favoriteItems,
             message: e.toString()));
       }
     });
+  }
+
+  // 메모리 누수 방지를 위해 dispose 추가
+  @override
+  Future<void> close() async {
+    await _historySubscription?.cancel();
+    return super.close();
   }
 }
 

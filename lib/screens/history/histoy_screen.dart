@@ -23,19 +23,7 @@ class _HistoryScreenState extends State<HistoryScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(_handleTabChange);
-
-    final historyBloc = context.read<HistoryBloc>();
-    if (historyBloc.state.recentItems.isEmpty) {
-      historyBloc.add(LoadHistoryItems());
-    }
-  }
-
-  void _handleTabChange() async {
-    if (_tabController.index == 1) {
-      // 좋아요 탭으로 변경될 때
-      context.read<HistoryBloc>().add(LoadHistoryItems()); // 전체 데이터 새로고침
-    }
+    context.read<HistoryBloc>().add(LoadHistoryItems());
   }
 
   @override
@@ -125,7 +113,6 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   @override
   void dispose() {
-    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     super.dispose();
   }

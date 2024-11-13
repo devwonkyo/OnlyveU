@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 class HistoryRepository {
   final FirebaseFirestore _firestore;
   final ShoppingCartRepository _cartRepository;
+  final _prefs = OnlyYouSharedPreference(); // 추가
+  final Map<String, ProductModel> _productCache = {};
+
   HistoryRepository(
       {FirebaseFirestore? firestore,
       ShoppingCartRepository? cartRepository // 추가
@@ -12,21 +16,45 @@ class HistoryRepository {
       : _firestore = firestore ?? FirebaseFirestore.instance,
         _cartRepository = cartRepository ?? ShoppingCartRepository();
 
-  Future<List<ProductModel>> fetchHistoryItems() async {
+  Stream<List<ProductModel>> fetchHistoryItems() async* {
     try {
-      final QuerySnapshot snapshot = await _firestore
-          .collection('products')
-          .orderBy('registrationDate', descending: true)
-          .get();
+      final String currentUserId = await _prefs.getCurrentUserId();
 
-      return snapshot.docs.map((doc) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        data['productId'] = doc.id;
-        return ProductModel.fromMap(data);
-      }).toList();
+      yield* _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .snapshots()
+          .asyncMap((userSnapshot) async {
+        if (!userSnapshot.exists) return [];
+
+        final List<String> viewHistory =
+            List<String>.from(userSnapshot.data()?['viewHistory'] ?? []);
+
+        final List<ProductModel> products = [];
+        for (String productId in viewHistory) {
+          // 캐시된 제품이 있으면 사용
+          if (_productCache.containsKey(productId)) {
+            products.add(_productCache[productId]!);
+            continue;
+          }
+
+          // 캐시에 없으면 Firebase에서 가져옴
+          final productDoc =
+              await _firestore.collection('products').doc(productId).get();
+          if (productDoc.exists) {
+            Map<String, dynamic> data =
+                productDoc.data() as Map<String, dynamic>;
+            data['productId'] = productDoc.id;
+            final product = ProductModel.fromMap(data);
+            _productCache[productId] = product; // 캐시에 저장
+            products.add(product);
+          }
+        }
+        return products;
+      });
     } catch (e) {
       print('Error fetching history items: $e');
-      throw Exception('히스토리 아이템을 불러오는데 실패했습니다.');
+      throw Exception('최근 본 상품을 불러오는데 실패했습니다.');
     }
   }
 
