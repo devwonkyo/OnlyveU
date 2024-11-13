@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/screens/Product/widgets/review_summary_widget.dart';
+import 'package:onlyveyou/screens/Product/widgets/reviewlist_widget.dart';
 import 'package:onlyveyou/screens/product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/explain_product.dart';
@@ -38,6 +42,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
     context.read<ProductDetailBloc>().add(LoadProductDetail(widget.productId));
+    context.read<ProductDetailBloc>().add(InputProductHistoryEvent(widget.productId));
   }
 
   @override
@@ -64,50 +69,72 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: BlocConsumer<ProductDetailBloc, ProductDetailState>(
-          listener: (context, state) {
-            if (state is ProductDetailError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
-            }
-          },
-          builder: (context, state) {
-            if (state is ProductDetailLoading) {
-              return Center(child: CircularProgressIndicator());
-            }
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<ProductCartBloc, ProductCartState>(
+              listener: (context, state) {
+                if (state is AddCartSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+                }
 
-            if (state is ProductDetailLoaded) {
-              return DefaultTabController(
-                length: 2,
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 100.h),
-                      child: NestedScrollView(
-                        headerSliverBuilder: (context, innerBoxIsScrolled) {
-                          return [
-                            _buildAppBar(),
-                            _buildProductHeader(state.product),
-                            _buildTabBar(),
-                          ];
-                        },
-                        body: _buildTabBarView(state.product),
+                if (state is AddCartError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.message)),
+                  );
+                }
+              },
+            ),
+
+            BlocListener<ProductDetailBloc, ProductDetailState>(
+              listener: (context, state) {
+                if (state is ProductLikedSuccess) {
+                  if(state.likeState){ //좋아요 를 눌렀을 때
+                    showLikeAnimation(context);
+                  }
+                }
+              },
+            ),
+          ],
+          child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
+            builder: (context, state) {
+              if (state is ProductDetailLoading) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (state is ProductDetailLoaded) {
+                return DefaultTabController(
+                  length: 2,
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 100.h),
+                        child: NestedScrollView(
+                          headerSliverBuilder: (context, innerBoxIsScrolled) {
+                            return [
+                              _buildAppBar(),
+                              _buildProductHeader(state.product, state.userId),
+                              _buildTabBar(),
+                            ];
+                          },
+                          body: _buildTabBarView(state.product),
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: ExpandableBottomSheet(productModel: state.product),
-                    ),
-                  ],
-                ),
-              );
-            }
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: ExpandableBottomSheet(productModel: state.product, userId: state.userId)
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-            return SizedBox.shrink();
-          },
+              return SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -141,13 +168,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildProductHeader(ProductModel product) {
+  Widget _buildProductHeader(ProductModel product, String userId) {
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildImageCarousel(product.productImageList),
-          _buildProductInfo(product),
+          _buildProductInfo(product,userId),
           Container(height: 8.h, color: Colors.grey[200]),
         ],
       ),
@@ -209,7 +236,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildProductInfo(ProductModel product) {
+  Widget _buildProductInfo(ProductModel product, String userId) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -234,11 +261,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      // 버튼이 눌렸을 때의 동작
+                      context.read<ProductDetailBloc>().add(TouchProductLikeEvent(product.productId));
                     },
-                    child: Icon(
-                      Icons.favorite_border,
-                      size: 20.sp,
+                    child: Container(
+                      width: 20.w,
+                      height: 20.w,
+                      child: Icon(
+                        product.isFavorite(userId) ? Icons.favorite : Icons.favorite_border,
+                        size: 20.sp,
+                        color: product.isFavorite(userId) ? Colors.red : Colors.black,
+                      ),
                     ),
                   ),
                   SizedBox(width: 8.w),
@@ -422,9 +454,35 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        Text('review'),
-        // ReviewTab(reviews: product.reviews),
+        SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ReviewSummaryWidget(),
+              ReviewListWidget(),
+            ],
+          ),
+        ),
       ],
     );
+  }
+
+  void showLikeAnimation(BuildContext context) {
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned.fill(
+        child: Center(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+            child: Icon(Icons.favorite, color: Colors.red, size: 84.sp),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 1), () {
+      overlayEntry.remove();
+    });
   }
 }

@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/main.dart';
+import 'package:onlyveyou/models/order_item_model.dart';
+import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 
 class ExpandableBottomSheet extends StatefulWidget {
   final ProductModel productModel;
+  final String userId;
 
-  const ExpandableBottomSheet({Key? key, required this.productModel}) : super(key: key);
+  const ExpandableBottomSheet({super.key, required this.productModel, required this.userId});
 
   @override
   State<ExpandableBottomSheet> createState() => _ExpandableBottomSheetState();
@@ -173,7 +180,9 @@ class _ExpandableBottomSheetState extends State<ExpandableBottomSheet> with Sing
                   Expanded(
                     flex: 1,
                     child: OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.read<ProductCartBloc>().add(AddToCartEvent(widget.productModel, quantity: _quantity));
+                      },
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                         shape: RoundedRectangleBorder(
@@ -190,7 +199,21 @@ class _ExpandableBottomSheetState extends State<ExpandableBottomSheet> with Sing
                   Expanded(
                     flex: 1,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        final orderItem = OrderItemModel(
+                            productId: widget.productModel.productId,
+                            productName: widget.productModel.name,
+                            productImageUrl: widget.productModel.productImageList[0],
+                            productPrice: formatDiscountedPriceToInt(widget.productModel.price, widget.productModel.discountPercent.toDouble()),
+                            quantity: _quantity);
+
+                        final items = [orderItem];
+
+                        final order = OrderModel(userId: widget.userId, items: items, orderType: OrderType.delivery);
+                        context.push(
+                          '/payment', extra: {'order': order},
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         padding: EdgeInsets.symmetric(vertical: 16.h),
