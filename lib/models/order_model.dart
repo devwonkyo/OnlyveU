@@ -71,10 +71,10 @@ class OrderModel {
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
   OrderModel({
-    this.id,
     required this.userId,
     required this.items,
     required this.orderType,
+    this.id,
     this.status = OrderStatus.pending,
     this.pickupTime,
     this.pickStore,

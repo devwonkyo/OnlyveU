@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ExpansionTileWidget extends StatelessWidget {
   final List<Map<String, String>> items = [
@@ -14,35 +15,38 @@ class ExpansionTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        for (var item in items)
-          Card(
-            margin: EdgeInsets.symmetric(horizontal: 16.0,vertical: 8.0),
-            child: ExpansionTile(
-              title: Text(
-                item['title']!,
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-                side: BorderSide.none,
-              ),
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(4.0),
-                  child: Image.asset(
-                    item['content']!,
-                    fit: BoxFit.cover,
+    return Padding(
+      padding: EdgeInsets.only(bottom: 20.0.w),
+      child: Column(
+        children: [
+          for (var item in items)
+            Card(
+              margin: EdgeInsets.symmetric(horizontal: 16.0.w,vertical: 8.0.h),
+              child: ExpansionTile(
+                title: Text(
+                  item['title']!,
+                  style: TextStyle(
+                    fontSize: 16.0.sp,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0),
+                  side: BorderSide.none,
+                ),
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(4.0.w),
+                    child: Image.asset(
+                      item['content']!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
