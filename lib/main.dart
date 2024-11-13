@@ -157,6 +157,7 @@ class MyApp extends StatelessWidget {
             BlocProvider<StoreBloc>(
               create: (context) => StoreBloc(),
             ),
+            
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
