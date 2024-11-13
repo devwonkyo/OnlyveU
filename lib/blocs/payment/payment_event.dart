@@ -1,5 +1,7 @@
 // payment_event.dart
 import 'package:equatable/equatable.dart';
+import 'package:onlyveyou/models/delivery_info_model.dart';
+import 'package:onlyveyou/models/order_model.dart';
 
 abstract class PaymentEvent extends Equatable {
   const PaymentEvent();
@@ -60,4 +62,32 @@ class UpdateDeliveryRequest extends PaymentEvent {
 
   @override
   List<Object> get props => [deliveryRequest];
+}
+
+class CheckOrderDetails extends PaymentEvent {
+  const CheckOrderDetails();
+
+  @override
+  List<Object> get props => [];
+}
+
+
+
+// payment_event.dart
+
+class SubmitOrder extends PaymentEvent {
+  const SubmitOrder();
+
+  @override
+  List<Object> get props => [];
+}
+
+
+class InitializePayment extends PaymentEvent {
+  final OrderModel order;
+
+  const InitializePayment(this.order);
+
+  @override
+  List<Object> get props => [order];
 }

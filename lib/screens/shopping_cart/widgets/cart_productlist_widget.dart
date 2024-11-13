@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/cart_model.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 
@@ -95,11 +96,15 @@ class CartProductListWidget extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          item.productName,
-                          style: const TextStyle(fontSize: 14),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        GestureDetector(
+                          onTap: () => context.push('/product-detail',
+                              extra: item.productId),
+                          child: Text(
+                            item.productName,
+                            style: const TextStyle(fontSize: 14),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),

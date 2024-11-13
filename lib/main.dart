@@ -49,7 +49,7 @@ void main() async {
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
   // print("hash key ${await KakaoSdk.origin}");
-  final orderRepository = MockOrderRepository();
+
   KakaoSdk.init(
     nativeAppKey: '0236522723df3e1aa869fe36e25e6297',
     javaScriptAppKey: 'Ye8ebc7de132c8c4f0b6881be99e20f5e',
@@ -90,18 +90,13 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    final orderRepository = MockOrderRepository();
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-        return MultiRepositoryProvider(
+        return MultiBlocProvider(
           providers: [
-            RepositoryProvider<OrderRepository>.value(value: orderRepository),
-          ],
-          child: MultiBlocProvider(
-            providers: [
               BlocProvider(
                 create: (context) => CartBloc(
                   cartRepository: ShoppingCartRepository(),
@@ -157,12 +152,9 @@ class MyApp extends StatelessWidget {
               BlocProvider<ProductDetailBloc>(
                 create: (context) => ProductDetailBloc(ProductDetailRepository()),
               ),
-              BlocProvider<PaymentBloc>(
-                create: (context) => PaymentBloc(
-                  orderRepository:
-                      RepositoryProvider.of<OrderRepository>(context),
-                ),
-              ),
+               BlocProvider<PaymentBloc>(
+              create: (context) => PaymentBloc(),
+            ),
               BlocProvider<PostBloc>(
                 create: (context) => PostBloc(),
               ),
@@ -192,7 +184,6 @@ class MyApp extends StatelessWidget {
                   routerConfig: router,
                 );
               },
-            ),
           ),
         );
       },
