@@ -7,15 +7,12 @@ import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
-import 'package:onlyveyou/screens/Product/widgets/review_summary_widget.dart';
-import 'package:onlyveyou/screens/Product/widgets/reviewlist_widget.dart';
-import 'package:onlyveyou/screens/product/widgets/expandable_bottom_sheet.dart';
-import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/explain_product.dart';
 import 'package:onlyveyou/screens/Product/widgets/product_description_tab.dart';
-import 'package:onlyveyou/screens/Product/widgets/product_info_tab.dart';
-import 'package:onlyveyou/screens/Product/widgets/review_tab.dart';
+import 'package:onlyveyou/screens/Product/widgets/review_summary_widget.dart';
+import 'package:onlyveyou/screens/Product/widgets/reviewlist_widget.dart';
 import 'package:onlyveyou/screens/Product/widgets/sticky_tabbar_delegate.dart';
+import 'package:onlyveyou/screens/product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/utils/dummy_data.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/widgets/small_promotion_banner.dart';
@@ -42,7 +39,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
     context.read<ProductDetailBloc>().add(LoadProductDetail(widget.productId));
-    context.read<ProductDetailBloc>().add(InputProductHistoryEvent(widget.productId));
+    context
+        .read<ProductDetailBloc>()
+        .add(InputProductHistoryEvent(widget.productId));
   }
 
   @override
@@ -86,11 +85,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 }
               },
             ),
-
             BlocListener<ProductDetailBloc, ProductDetailState>(
               listener: (context, state) {
                 if (state is ProductLikedSuccess) {
-                  if(state.likeState){ //좋아요 를 눌렀을 때
+                  if (state.likeState) {
+                    //좋아요 를 눌렀을 때
                     showLikeAnimation(context);
                   }
                 }
@@ -122,11 +121,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ),
                       Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: ExpandableBottomSheet(productModel: state.product, userId: state.userId)
-                      ),
+                          bottom: 0,
+                          left: 0,
+                          right: 0, //껏다키면 해결됨
+                          child: ExpandableBottomSheet(
+                              productModel: state.product,
+                              userId: state.userId)),
                     ],
                   ),
                 );
@@ -174,7 +174,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildImageCarousel(product.productImageList),
-          _buildProductInfo(product,userId),
+          _buildProductInfo(product, userId),
           Container(height: 8.h, color: Colors.grey[200]),
         ],
       ),
@@ -261,15 +261,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      context.read<ProductDetailBloc>().add(TouchProductLikeEvent(product.productId));
+                      context
+                          .read<ProductDetailBloc>()
+                          .add(TouchProductLikeEvent(product.productId));
                     },
                     child: Container(
                       width: 20.w,
                       height: 20.w,
                       child: Icon(
-                        product.isFavorite(userId) ? Icons.favorite : Icons.favorite_border,
+                        product.isFavorite(userId)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
                         size: 20.sp,
-                        color: product.isFavorite(userId) ? Colors.red : Colors.black,
+                        color: product.isFavorite(userId)
+                            ? Colors.red
+                            : Colors.black,
                       ),
                     ),
                   ),
