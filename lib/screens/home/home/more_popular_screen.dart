@@ -150,7 +150,7 @@ class MorePopularScreen extends StatelessWidget {
             // 태그 - 가격과 별점 사이에 위치하도록 이동
             Row(
               children: [
-                if (product.tagList.contains('popular'))
+                if (product.isPopular)
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
@@ -165,8 +165,8 @@ class MorePopularScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (product.tagList.contains('popular')) SizedBox(width: 4),
-                if (product.tagList.contains('BEST'))
+                if (product.isPopular && product.isBest) SizedBox(width: 6),
+                if (product.isBest)
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(

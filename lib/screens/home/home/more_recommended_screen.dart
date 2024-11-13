@@ -139,7 +139,7 @@ class MoreRecommendedScreen extends StatelessWidget {
             // 태그 (인기, BEST 등)
             Row(
               children: [
-                if (item.tagList.contains('popular'))
+                if (item.isPopular)
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
@@ -154,8 +154,8 @@ class MoreRecommendedScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (item.tagList.contains('popular')) SizedBox(width: 4),
-                if (item.tagList.contains('BEST'))
+                if (item.isPopular && item.isBest) SizedBox(width: 6),
+                if (item.isBest)
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(

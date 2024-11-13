@@ -178,7 +178,7 @@ class _RankingTabScreenState extends State<RankingTabScreen> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 24.h,
                 crossAxisSpacing: 16.w,
-                mainAxisExtent: 340.h,
+                mainAxisExtent: 380.h,
               ),
               itemCount: state.products.length,
               itemBuilder: (context, index) => RankingCardWidget(
