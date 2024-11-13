@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'nickname_edit_event.dart';
 import 'nickname_edit_state.dart';
 
@@ -23,21 +24,21 @@ class NicknameEditBloc extends Bloc<NicknameEditEvent, NicknameEditState> {
       SubmitNicknameChange event, Emitter<NicknameEditState> emit) async {
     emit(NicknameEditInProgress());
     try {
-      // Firebase Auth의 사용자 정보 가져오기
       User? user = _firebaseAuth.currentUser;
       if (user != null) {
-        // Firestore에 닉네임 업데이트
-        await _firestore.collection('users').doc(user.email).update({
+        // uid를 document ID로 사용
+        await _firestore.collection('users').doc(user.uid).update({
           'nickname': event.nickname,
         });
 
         print("닉네임 변경 완료: ${event.nickname}");
-        emit(NicknameEditSuccess()); // 닉네임 변경 성공 상태 전환
-        emit(NicknameLoaded(event.nickname)); // 변경된 닉네임 바로 로드
+        emit(NicknameEditSuccess());
+        emit(NicknameLoaded(event.nickname));
       } else {
         emit(const NicknameEditFailure("사용자가 로그인되어 있지 않습니다."));
       }
     } catch (error) {
+      print("닉네임 변경 실패: $error"); // 디버깅용 로그 추가
       emit(const NicknameEditFailure("닉네임 변경에 실패했습니다."));
     }
   }
@@ -48,14 +49,24 @@ class NicknameEditBloc extends Bloc<NicknameEditEvent, NicknameEditState> {
     try {
       User? user = _firebaseAuth.currentUser;
       if (user != null) {
+        // email을 document ID로 사용하는 대신 user.uid를 사용
         DocumentSnapshot userDoc =
-            await _firestore.collection('users').doc(user.email).get();
-        String currentNickname = userDoc['nickname'];
-        emit(NicknameLoaded(currentNickname));
+            await _firestore.collection('users').doc(user.uid).get();
+
+        if (userDoc.exists) {
+          String currentNickname = userDoc.get('nickname') ?? '';
+          print("Loaded nickname: $currentNickname"); // 디버깅용 로그
+          emit(NicknameLoaded(currentNickname));
+        } else {
+          print("User document does not exist"); // 디버깅용 로그
+          emit(const NicknameEditFailure("사용자 정보를 찾을 수 없습니다."));
+        }
       } else {
+        print("No user logged in"); // 디버깅용 로그
         emit(const NicknameEditFailure("사용자가 로그인되어 있지 않습니다."));
       }
     } catch (e) {
+      print("Error loading nickname: $e"); // 디버깅용 로그
       emit(const NicknameEditFailure("닉네임을 불러오는 데 실패했습니다."));
     }
   }
