@@ -118,27 +118,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // SliverToBoxAdapter(
-          //   child: BlocBuilder<HomeBloc, HomeState>(
-          //     buildWhen: (previous, current) =>
-          //         current is HomeLoaded || current is HomeLoading,
-          //     builder: (context, state) {
-          //       if (state is HomeLoading) {
-          //         return Center(child: CircularProgressIndicator());
-          //       } else if (state is HomeLoaded) {
-          //         return BannerWidget(
-          //           pageController: _pageController,
-          //           bannerItems: state.bannerItems,
-          //         );
-          //       }
-          //       return SizedBox.shrink();
-          //     },
-          //   ),
-          // ),
           SliverToBoxAdapter(
             child: BlocBuilder<HomeBloc, HomeState>(
               buildWhen: (previous, current) =>
-              current is HomeLoaded || current is HomeLoading,
+                  current is HomeLoaded || current is HomeLoading,
               builder: (context, state) {
                 if (state is HomeLoading) {
                   return Center(child: CircularProgressIndicator());
