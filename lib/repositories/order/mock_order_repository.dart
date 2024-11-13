@@ -29,13 +29,13 @@ class MockOrderRepository implements OrderRepository {
       status: OrderStatus.pending,
       orderType: OrderType.delivery,
       createdAt: DateTime.now(),
-      deliveryInfo: DeliveryInfoModel( //배송지 등록과 배송 요청사항을 여기다가 추가
-      deliveryName: '집',
-        address: '서울특별시 강남구 테헤란로 123',
-        detailAddress: '빌딩 101호',
-        recipientName: '홍길동',
-        recipientPhone: '010-1234-5678',
-        deliveryRequest: '부재 시 경비실에 맡겨주세요.',
+      deliveryInfo: DeliveryInfoModel(
+        //배송지 등록과 배송 요청사항을 여기다가 추가
+        deliveryName: '',
+        address: '',
+        detailAddress: '',
+        recipientName: '',
+        recipientPhone: '',
       ),
     ),
   ];
@@ -66,5 +66,19 @@ class MockOrderRepository implements OrderRepository {
   Future<List<OrderItemModel>> fetchOrderItems() async {
     // 첫 번째 OrderModel 안의 OrderItemModel 데이터를 반환
     return _orders.isNotEmpty ? _orders[0].items : [];
+  }
+
+  @override
+  Future<OrderType> getOrderType() async {
+    return _orders.isNotEmpty ? _orders[0].orderType : OrderType.delivery;
+  }
+
+  @override
+  Future<DeliveryInfoModel?> getDeliveryInfo() async {
+    if (_orders.isNotEmpty && _orders[0].orderType == OrderType.delivery) {
+      return _orders[0].deliveryInfo;
+    } else {
+      return null;
+    }
   }
 }
