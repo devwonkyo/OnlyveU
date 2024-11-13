@@ -15,3 +15,22 @@ class LoadProductDetail extends ProductDetailEvent {
   @override
   List<Object?> get props => [productId];
 }
+
+class InputProductHistoryEvent extends ProductDetailEvent {
+  final String productId;
+
+  const InputProductHistoryEvent(this.productId);
+
+  @override
+  List<Object?> get props => [productId];
+}
+
+
+class TouchProductLikeEvent extends ProductDetailEvent {
+  final String productId;
+
+  const TouchProductLikeEvent(this.productId);
+
+  @override
+  List<Object?> get props => [productId];
+}

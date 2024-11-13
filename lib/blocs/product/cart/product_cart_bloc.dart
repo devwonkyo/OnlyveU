@@ -16,7 +16,7 @@ class ProductCartBloc extends Bloc<ProductCartEvent, ProductCartState> {
 
   Future<void> _addToCart(AddToCartEvent event, Emitter<ProductCartState> emit) async {
     try {
-      final result = await repository.addToCart(event.productModel);
+      final result = await repository.addToCart(event.productModel, event.quantity);
       if(result.isSuccess){
         emit(AddCartSuccess(result.message ?? "상품이 장바구니에 추가되었습니다."));
       }else{
