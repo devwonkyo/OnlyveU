@@ -1,13 +1,18 @@
 // 세로 리스트 상품 카드
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/category/category_product_bloc.dart';
+import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
+import 'package:onlyveyou/blocs/product/like/product_like_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 
-class VerticalProductCard extends StatelessWidget {
+class VerticalProductCard extends StatefulWidget {
   final ProductModel productModel;
+  final String userId;
   final VoidCallback? onTap;
   final bool isBest;
 
@@ -16,12 +21,26 @@ class VerticalProductCard extends StatelessWidget {
     required this.productModel,
     this.onTap,
     this.isBest = false,
+    required this.userId,
   }) : super(key: key);
+
+  @override
+  State<VerticalProductCard> createState() => _VerticalProductCardState();
+}
+
+class _VerticalProductCardState extends State<VerticalProductCard> {
+  late bool isLiked;
+
+  @override
+  void initState() {
+    super.initState();
+    isLiked = widget.productModel.isFavorite(widget.userId);
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
         width: 150.w,
         margin: EdgeInsets.only(right: 12.w),
@@ -34,29 +53,29 @@ class VerticalProductCard extends StatelessWidget {
               height: 150.w,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.r),
-                child: productModel.productImageList.isNotEmpty
+                child: widget.productModel.productImageList.isNotEmpty
                     ? Image.network(
-                  productModel.productImageList.first,
-                  width: 150.w,
-                  height: 150.w,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Center(child: Icon(Icons.error, size: 24.sp));
-                  },
-                )
+                        widget.productModel.productImageList.first,
+                        width: 150.w,
+                        height: 150.w,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(child: Icon(Icons.error, size: 24.sp));
+                        },
+                      )
                     : Image.asset(
-                  'assets/default_image.png',
-                  width: 150.w,
-                  height: 150.w,
-                  fit: BoxFit.cover,
-                ),
+                        'assets/default_image.png',
+                        width: 150.w,
+                        height: 150.w,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
             SizedBox(height: 8.h),
 
             // 2. 상품명
             Text(
-              productModel.name,
+              widget.productModel.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -67,9 +86,9 @@ class VerticalProductCard extends StatelessWidget {
             SizedBox(height: 4.h),
 
             // 3. 가격 정보
-            if (productModel.discountPercent > 0)
+            if (widget.productModel.discountPercent > 0)
               Text(
-                '${productModel.price}원',
+                '${widget.productModel.price}원',
                 style: TextStyle(
                   decoration: TextDecoration.lineThrough,
                   color: Colors.grey,
@@ -79,9 +98,9 @@ class VerticalProductCard extends StatelessWidget {
             SizedBox(height: 2.h),
             Row(
               children: [
-                if (productModel.discountPercent > 0)
+                if (widget.productModel.discountPercent > 0)
                   Text(
-                    '${productModel.discountPercent}%',
+                    '${widget.productModel.discountPercent}%',
                     style: TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
@@ -90,7 +109,7 @@ class VerticalProductCard extends StatelessWidget {
                   ),
                 SizedBox(width: 4.w),
                 Text(
-                  '${formatDiscountedPriceToString(productModel.price,productModel.discountPercent.toDouble())}원',
+                  '${formatDiscountedPriceToString(widget.productModel.price, widget.productModel.discountPercent.toDouble())}원',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14.sp,
@@ -103,9 +122,10 @@ class VerticalProductCard extends StatelessWidget {
             // 4. 태그들
             Row(
               children: [
-                if (productModel.isPopular)
+                if (widget.productModel.isPopular)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(4.r),
@@ -119,9 +139,10 @@ class VerticalProductCard extends StatelessWidget {
                     ),
                   ),
                 SizedBox(width: 4.w),
-                if (productModel.isBest)
+                if (widget.productModel.isBest)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(4.r),
@@ -148,7 +169,7 @@ class VerticalProductCard extends StatelessWidget {
                 ),
                 SizedBox(width: 2.w),
                 Text(
-                  productModel.rating.toStringAsFixed(1),
+                  widget.productModel.rating.toStringAsFixed(1),
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -156,7 +177,7 @@ class VerticalProductCard extends StatelessWidget {
                 ),
                 SizedBox(width: 2.w),
                 Text(
-                  '(${productModel.reviewList.length})',
+                  '(${widget.productModel.reviewList.length})',
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: Colors.grey,
@@ -170,22 +191,34 @@ class VerticalProductCard extends StatelessWidget {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    // 좋아요 상태 전환 이벤트 디스패치
+                    setState(() {
+                      isLiked = !isLiked;
+                    });
+                    BlocProvider.of<ProductLikeBloc>(context).add(
+                        AddToLikeEvent(
+                            userId: widget.userId,
+                            productId: widget.productModel.productId,
+                        ));
+                  },
                   child: Container(
                     width: 20.w,
                     height: 20.w,
                     child: Icon(
-                      productModel.isFavorite("userId")
-                          ? Icons.favorite
-                          : Icons.favorite_border,
+                      isLiked ? Icons.favorite : Icons.favorite_border,
                       size: 18.sp,
-                      color: productModel.isFavorite("userId") ? Colors.red : Colors.grey,
+                      color: isLiked ? Colors.red : Colors.grey,
                     ),
                   ),
                 ),
                 SizedBox(width: 25.w),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    context
+                        .read<ProductCartBloc>()
+                        .add(AddToCartEvent(widget.productModel));
+                  },
                   child: Container(
                     width: 22.w,
                     height: 22.w,
