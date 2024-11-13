@@ -209,11 +209,13 @@ class ProfileEditScreen extends StatelessWidget {
                       BlocBuilder<PhoneNumberBloc, PhoneNumberState>(
                         builder: (context, state) {
                           if (state is PhoneNumberLoading) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: CircularProgressIndicator(),
-                              ),
+                            return ProfileInfoTile(
+                              title: "휴대폰 번호 변경",
+                              trailingText: "번호를 불러오는 중...",
+                              onTap: () {
+                                // 로딩 중에도 전화번호 수정 화면으로 이동 가능
+                                context.push('/phone_number_edit');
+                              },
                             );
                           } else if (state is PhoneNumberLoaded) {
                             return ProfileInfoTile(
@@ -224,11 +226,27 @@ class ProfileEditScreen extends StatelessWidget {
                                 context.push('/phone_number_edit');
                               },
                             );
+                          } else if (state is PhoneNumberError) {
+                            return ProfileInfoTile(
+                              title: "휴대폰 번호 변경",
+                              trailingText: "번호 로드 실패",
+                              onTap: () {
+                                // 다시 로드 시도
+                                context
+                                    .read<PhoneNumberBloc>()
+                                    .add(LoadPhoneNumber());
+                                context.push('/phone_number_edit');
+                              },
+                            );
                           }
                           return ProfileInfoTile(
-                            title: "휴대폰 번호 확인",
-                            trailingText: "번호 불러오는 중...",
+                            title: "휴대폰 번호 변경",
+                            trailingText: "번호를 불러오는 중...",
                             onTap: () {
+                              // 초기 상태에서 로드 시도
+                              context
+                                  .read<PhoneNumberBloc>()
+                                  .add(LoadPhoneNumber());
                               context.push('/phone_number_edit');
                             },
                           );
