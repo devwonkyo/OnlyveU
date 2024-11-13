@@ -38,7 +38,7 @@ class CartProductListWidget extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.only(bottom: 16),
                   child: Text(
-                    '픽업 매장: 거여역점',
+                    '',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
