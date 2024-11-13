@@ -40,7 +40,7 @@ enum OrderStatus {
 
 class OrderModel {
   /// 주문 ID
-  final String id;
+  final String? id;
 
   /// 주문한 사용자 ID
   final String userId;
@@ -71,10 +71,10 @@ class OrderModel {
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
   OrderModel({
-    required this.id,
     required this.userId,
     required this.items,
     required this.orderType,
+    this.id,
     this.status = OrderStatus.pending,
     this.pickupTime,
     this.pickStore,
@@ -89,6 +89,7 @@ class OrderModel {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id ?? "",
       'userId': userId,
       'items': items.map((item) => item.toMap()).toList(),
       'status': status.name,
