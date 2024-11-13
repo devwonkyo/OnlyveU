@@ -97,62 +97,62 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return MultiBlocProvider(
           providers: [
-              BlocProvider(
-                create: (context) => CartBloc(
-                  cartRepository: ShoppingCartRepository(),
-                )..add(LoadCart()),
-                child: ShoppingCartScreen(),
-              ),
-              BlocProvider<AuthBloc>(
-                create: (context) => AuthBloc(
-                    authRepository: AuthRepository(),
-                    sharedPreference: OnlyYouSharedPreference()),
-              ),
-              BlocProvider(
-                create: (context) => HomeBloc(
-                  homeRepository: HomeRepository(),
-                  cartRepository: ShoppingCartRepository(),
-                )..add(LoadHomeData()),
-                child: const Home(), // HomeScreen 대신 Home을 사용
-              ),
-              BlocProvider(
-                create: (context) => HistoryBloc(
-                  historyRepository: HistoryRepository(),
-                  cartRepository:
-                      ShoppingCartRepository(), // ProductRepository 제거
-                )..add(LoadHistoryItems()),
-              ),
-              BlocProvider<ProfileEditBloc>(
-                create: (context) => ProfileEditBloc(),
-              ),
-              BlocProvider<CategoryCubit>(
-                  create: (context) =>
-                      CategoryCubit(categoryRepository: CategoryRepository())
-                        ..loadCategories()),
-              BlocProvider<PasswordBloc>(
-                // PasswordBloc 추가
-                create: (context) => PasswordBloc(),
-              ),
-              BlocProvider<SetNewPasswordBloc>(
-                // PasswordBloc 추가
-                create: (context) => SetNewPasswordBloc(),
-              ),
-              BlocProvider<NicknameEditBloc>(
-                create: (context) => NicknameEditBloc(),
-              ),
-              BlocProvider<PhoneNumberBloc>(
-                create: (context) => PhoneNumberBloc(),
-              ),
-              BlocProvider<ThemeBloc>(
-                create: (context) => ThemeBloc(),
-              ),
-              BlocProvider<OrderStatusBloc>(
-                create: (context) => OrderStatusBloc(),
-              ),
-              BlocProvider<ProductDetailBloc>(
-                create: (context) => ProductDetailBloc(ProductDetailRepository()),
-              ),
-               BlocProvider<PaymentBloc>(
+            BlocProvider(
+              create: (context) => CartBloc(
+                cartRepository: ShoppingCartRepository(),
+              )..add(LoadCart()),
+              child: ShoppingCartScreen(),
+            ),
+            BlocProvider<AuthBloc>(
+              create: (context) => AuthBloc(
+                  authRepository: AuthRepository(),
+                  sharedPreference: OnlyYouSharedPreference()),
+            ),
+            BlocProvider(
+              create: (context) => HomeBloc(
+                homeRepository: HomeRepository(),
+                cartRepository: ShoppingCartRepository(),
+              )..add(LoadHomeData()),
+              child: const Home(), // HomeScreen 대신 Home을 사용
+            ),
+            BlocProvider(
+              create: (context) => HistoryBloc(
+                historyRepository: HistoryRepository(),
+                cartRepository:
+                    ShoppingCartRepository(), // ProductRepository 제거
+              )..add(LoadHistoryItems()),
+            ),
+            BlocProvider<ProfileEditBloc>(
+              create: (context) => ProfileEditBloc(),
+            ),
+            BlocProvider<CategoryCubit>(
+                create: (context) =>
+                    CategoryCubit(categoryRepository: CategoryRepository())
+                      ..loadCategories()),
+            BlocProvider<PasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => PasswordBloc(),
+            ),
+            BlocProvider<SetNewPasswordBloc>(
+              // PasswordBloc 추가
+              create: (context) => SetNewPasswordBloc(),
+            ),
+            BlocProvider<NicknameEditBloc>(
+              create: (context) => NicknameEditBloc(),
+            ),
+            BlocProvider<PhoneNumberBloc>(
+              create: (context) => PhoneNumberBloc(),
+            ),
+            BlocProvider<ThemeBloc>(
+              create: (context) => ThemeBloc(),
+            ),
+            BlocProvider<OrderStatusBloc>(
+              create: (context) => OrderStatusBloc(),
+            ),
+            BlocProvider<ProductDetailBloc>(
+              create: (context) => ProductDetailBloc(ProductDetailRepository()),
+            ),
+            BlocProvider<PaymentBloc>(
               create: (context) => PaymentBloc(),
             ),
             BlocProvider<PostBloc>(
