@@ -273,26 +273,47 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                       ],
                                     ),
                                     // BEST 태그 표시
-                                    if (product.isBest) ...[
-                                      SizedBox(height: 4.h),
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 6.w, vertical: 2.h),
-                                        decoration: BoxDecoration(
-                                          color: AppStyles.mainColor
-                                              .withOpacity(0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          "BEST",
-                                          style: TextStyle(
-                                            color: AppStyles.mainColor,
-                                            fontSize: 10.sp,
+                                    SizedBox(height: 4.h),
+                                    Row(
+                                      children: [
+                                        if (product.isPopular)
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 6.w, vertical: 2.h),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[200],
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              '인기',
+                                              style: TextStyle(
+                                                fontSize: 10.sp,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ],
+                                        if (product.isPopular && product.isBest)
+                                          SizedBox(width: 6.w),
+                                        if (product.isBest)
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 6.w, vertical: 2.h),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[200],
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              'BEST',
+                                              style: TextStyle(
+                                                fontSize: 10.sp,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                     SizedBox(height: 4.h),
                                     // 평점 및 리뷰 수 표시
                                     Row(
