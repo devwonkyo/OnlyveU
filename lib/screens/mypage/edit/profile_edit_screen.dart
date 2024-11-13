@@ -4,16 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/auth/auth_event.dart';
 import 'package:onlyveyou/blocs/auth/auth_state.dart';
-import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_event.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_event.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_state.dart';
+import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_event.dart';
+import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_state.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_event.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_state.dart';
-import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
-
-import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/screens/mypage/widgets/profile_info_tile.dart';
 import 'package:onlyveyou/utils/styles.dart';
@@ -23,14 +22,16 @@ class ProfileEditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("ProfileEditScreen - build() 호출");
-    context.read<NicknameEditBloc>().add(LoadCurrentNickname());
-    context.read<ProfileEditBloc>().add(LoadEmail());
-    context.read<PhoneNumberBloc>().add(LoadPhoneNumber());
+    // initState와 같은 효과를 위해 build 메서드 시작 부분에서 한 번만 호출
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        context.read<NicknameEditBloc>().add(LoadCurrentNickname());
+        context.read<ProfileEditBloc>().add(LoadEmail());
+        context.read<PhoneNumberBloc>().add(LoadPhoneNumber());
+      }
+    });
 
-    print("빌드 됨");
     return BlocListener<AuthBloc, AuthState>(
-      //일회성 이벤트이기 때문에 bloclistener사용
       listener: (context, state) {
         if (state is LogoutSuccess || state is DeleteAccountSuccess) {
           context.go('/login');
@@ -120,24 +121,38 @@ class ProfileEditScreen extends StatelessWidget {
                       // 닉네임 로드 상태 관리
                       BlocBuilder<NicknameEditBloc, NicknameEditState>(
                         builder: (context, state) {
-                          String nickname = '닉네임을 불러오는 중...';
-                          if (state is NicknameLoaded) {
-                            nickname = state.nickname;
-                            print(
-                                "ProfileEditScreen - NicknameLoaded 상태: $nickname");
-                          } else if (state is NicknameEditInProgress ||
-                              state is NicknameLoading) {
+                          if (state is NicknameLoading) {
                             return const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(16.0),
                                 child: CircularProgressIndicator(),
                               ),
                             );
+                          } else if (state is NicknameLoaded) {
+                            print(
+                                "ProfileEditScreen - NicknameLoaded 상태: ${state.nickname}");
+                            return ProfileInfoTile(
+                              title: "닉네임",
+                              trailingText: state.nickname,
+                              onTap: () {
+                                print("ProfileEditScreen - 닉네임 수정 화면으로 이동");
+                                context.push('/nickname_edit');
+                              },
+                            );
+                          } else if (state is NicknameEditFailure) {
+                            return ProfileInfoTile(
+                              title: "닉네임",
+                              trailingText: "오류: ${state.errorMessage}",
+                              onTap: () {
+                                print("ProfileEditScreen - 닉네임 수정 화면으로 이동");
+                                context.push('/nickname_edit');
+                              },
+                            );
                           }
 
                           return ProfileInfoTile(
                             title: "닉네임",
-                            trailingText: nickname,
+                            trailingText: "닉네임을 불러오는 중...",
                             onTap: () {
                               print("ProfileEditScreen - 닉네임 수정 화면으로 이동");
                               context.push('/nickname_edit');
@@ -156,6 +171,8 @@ class ProfileEditScreen extends StatelessWidget {
                               ),
                             );
                           } else if (state is EmailLoaded) {
+                            print(
+                                "ProfileEditScreen - EmailLoaded 상태: ${state.email}");
                             return ProfileInfoTile(
                               title: "이메일 확인",
                               trailingText: state.email,
@@ -163,7 +180,14 @@ class ProfileEditScreen extends StatelessWidget {
                                 print("ProfileEditScreen - 이메일 확인 클릭");
                               },
                             );
+                          } else if (state is ProfileEditError) {
+                            return ProfileInfoTile(
+                              title: "이메일 확인",
+                              trailingText: "오류: ${state.message}",
+                              onTap: () {},
+                            );
                           }
+
                           return ProfileInfoTile(
                             title: "이메일 확인",
                             trailingText: "이메일을 불러오는 중...",
