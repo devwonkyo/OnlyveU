@@ -2,14 +2,13 @@ import 'dart:async'; // 주기적인 타이머를 위한 Timer 라이브러리 �
 
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/models/home_model.dart';
-import 'package:onlyveyou/utils/styles.dart';
 
 // BannerItem 모델을 사용하기 위한 임포트
 
 // 배너 위젯 클래스 정의 (자동 슬라이드 기능 포함)
 class BannerWidget extends StatefulWidget {
-  final PageController pageController; // 배너의 페이지 전환을 제어하는 컨트롤러
-  final List<BannerItem> bannerItems; // 배너에 표시할 데이터 리스트
+  final PageController pageController;
+  final List<BannerItem> bannerItems;
 
   const BannerWidget({
     required this.pageController,
@@ -22,37 +21,34 @@ class BannerWidget extends StatefulWidget {
 }
 
 class _BannerWidgetState extends State<BannerWidget> {
-  int _currentBanner = 0; // 현재 표시 중인 배너 인덱스
-  Timer? _bannerTimer; // 배너 자동 전환 타이머
+  int _currentBanner = 0;
+  Timer? _bannerTimer;
 
   @override
   void initState() {
     super.initState();
-    _startBannerTimer(); // 초기화 시 배너 타이머 시작
+    _startBannerTimer();
   }
 
   @override
   void dispose() {
-    _bannerTimer?.cancel(); // 위젯 종료 시 타이머 취소
+    _bannerTimer?.cancel();
     super.dispose();
   }
 
-  // 배너 자동 전환을 위한 타이머 시작 함수
   void _startBannerTimer() {
     _bannerTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      // 타이머가 매 3초마다 호출됨
       if (_currentBanner < widget.bannerItems.length - 1) {
-        _currentBanner++; // 다음 배너로 이동
+        _currentBanner++;
       } else {
-        _currentBanner = 0; // 마지막 배너 이후 첫 번째 배너로 이동
+        _currentBanner = 0;
       }
 
-      // 페이지 컨트롤러가 클라이언트 연결을 유지하고 있는 경우에만 배너 전환 실행
       if (widget.pageController.hasClients) {
         widget.pageController.animateToPage(
           _currentBanner,
-          duration: const Duration(milliseconds: 350), // 전환 애니메이션 시간
-          curve: Curves.easeInOut, // 전환 애니메이션 곡선
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
         );
       }
     });
@@ -61,63 +57,70 @@ class _BannerWidgetState extends State<BannerWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200, // 배너 영역 높이
+      height: 315,
       child: Stack(
         children: [
-          // 배너 슬라이드 영역
           PageView.builder(
-            controller: widget.pageController, // 전달받은 페이지 컨트롤러
+            controller: widget.pageController,
             onPageChanged: (index) {
-              // 사용자가 슬라이드를 직접 전환할 때 호출
               setState(() {
-                _currentBanner = index; // 현재 배너 인덱스 업데이트
+                _currentBanner = index;
               });
             },
-            itemCount: widget.bannerItems.length, // 배너의 총 개수
+            itemCount: widget.bannerItems.length,
             itemBuilder: (context, index) {
-              return Container(
-                color: widget.bannerItems[index].backgroundColor, // 배경 색상 설정
-                padding: AppStyles.defaultPadding, // 스타일 패딩 적용
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 배너 제목 텍스트
-                    Text(
-                      widget.bannerItems[index].title, // 배너 제목
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+              return Stack(
+                children: [
+                  // 이미지
+                  Image.asset(
+                    widget.bannerItems[index].imageAsset,
+                    width: double.infinity,
+                    height: 315,
+                    fit: BoxFit.cover,
+                  ),
+                  // 텍스트 오버레이
+                  Positioned(
+                    bottom: 40,
+                    left: 16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.bannerItems[index].title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.bannerItems[index].subtitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8), // 제목과 부제목 사이 간격
-                    // 배너 부제목 텍스트
-                    Text(
-                      widget.bannerItems[index].subtitle, // 배너 부제목
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               );
             },
           ),
-          // 배너 인디케이터 (현재 배너 위치를 나타내는 작은 점들)
+          // 인디케이터
           Positioned(
-            bottom: 16, // 화면 하단에서의 위치
-            right: 16, // 화면 오른쪽에서의 위치
+            bottom: 16,
+            right: 16,
             child: Row(
               children: List.generate(
-                widget.bannerItems.length, // 배너의 총 개수만큼 인디케이터 생성
+                widget.bannerItems.length,
                 (index) => Container(
                   width: 8,
                   height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4), // 점 사이 간격
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    // 현재 배너에 해당하는 점만 불투명하게 표시하여 강조
                     color: _currentBanner == index
                         ? Colors.white
                         : Colors.white.withOpacity(0.5),
@@ -131,6 +134,7 @@ class _BannerWidgetState extends State<BannerWidget> {
     );
   }
 }
+
 // SliverToBoxAdapter(
 //   child: BlocBuilder<HomeBloc, HomeState>(
 //     buildWhen: (previous, current) =>
