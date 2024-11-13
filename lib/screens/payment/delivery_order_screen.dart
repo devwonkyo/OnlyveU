@@ -192,7 +192,7 @@ class DeliveryOrderInfo extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.close, size: 20),
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        context.pop();
                       },
                     ),
                   ],

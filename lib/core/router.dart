@@ -1,7 +1,12 @@
 // lib/config/routes/app_router.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
+import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/category_selection.dart';
+import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/Product/two.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
@@ -64,7 +69,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/shutter',
           pageBuilder: (context, state) =>
-              _buildPageWithTransition(state, ShutterScreen()),
+              _buildPageWithTransition(state, const ShutterScreen()),
         ),
         GoRoute(
           path: '/history',
@@ -179,10 +184,16 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/payment',
-      pageBuilder: (context, state) => _buildPageWithTransition(
-        state,
-        PaymentScreen(),
-      ),
+      pageBuilder: (context, state) {
+        final order = state.extra as OrderModel;
+        return _buildPageWithTransition(
+          state,
+          BlocProvider(
+            create: (context) => PaymentBloc(),
+            child: PaymentScreen(order: order),
+          ),
+        );
+      },
     ),
     GoRoute(
       path: '/new_delivery_address',

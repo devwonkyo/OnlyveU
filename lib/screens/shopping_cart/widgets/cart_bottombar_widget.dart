@@ -141,10 +141,8 @@ class CartBottomBarWidget extends StatelessWidget {
                               print('- Total Price: ${order.totalPrice}');
 
                               // 3. 결제 페이지로 이동, OrderModel 전달
-                              context.push(
-                                '/payment',
-                                extra: {'order': order},
-                              );
+                              // Payment 화면으로 이동 시 order 객체만 전달하기 위해 수정
+                              context.push('/payment', extra: order);
                             }
                           } catch (e) {
                             print('Error processing order: $e');

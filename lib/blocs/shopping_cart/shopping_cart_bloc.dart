@@ -411,7 +411,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       // 3. OrderModel 객체 생성
       final order = OrderModel(
-        id: userId,
+        id: DateTime.now()
+            .millisecondsSinceEpoch
+            .toString(), //userId -> ' ' id는 order_model을 생성할 때 firebase에서 랜덤으로 생성해준다
         userId: userId,
         items: orderItems,
         orderType:
