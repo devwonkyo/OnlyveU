@@ -10,7 +10,7 @@ class ShoppingCartRepository {
   ShoppingCartRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  // 장바구니에 상품 추가
+  //1. 장바구니에 상품 추가
   Future<void> addToCart(String productId) async {
     try {
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
@@ -283,32 +283,25 @@ class ShoppingCartRepository {
     }
   }
 
-  //1. 데이터 넘겨줄때 카트 모델에서 오더모델로 타입 전환
+  //(1) 데이터 넘겨줄때 카트 모델에서 오더모델로 타입 전환
   Future<List<OrderItemModel>> getSelectedOrderItems(
       bool isRegularDelivery) async {
     try {
-      // Debug: 어떤 타입의 아이템을 가져오는지 로그
       print(
           'Fetching ${isRegularDelivery ? "Regular Delivery" : "Pickup"} items');
-
       // 1. 현재 로그인한 사용자 ID 가져오기
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
-
       // 2. Firestore에서 사용자 문서 가져오기
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) {
         return [];
       }
-
       // 3. 배송 타입에 따른 필드 선택 (cartItems or pickupItems)
       final field = isRegularDelivery ? 'cartItems' : 'pickupItems';
-
       // 4. 선택된 필드의 아이템 리스트 가져오기
       final items = List<Map<String, dynamic>>.from(userDoc.get(field) ?? []);
       print('Found ${items.length} items to convert');
-
       // 5. CartModel → OrderItemModel 변환
-      // 각 아이템을 OrderItemModel 형식으로 매핑
       return items
           .map((item) => OrderItemModel(
                 productId: item['productId'],
@@ -324,4 +317,51 @@ class ShoppingCartRepository {
     }
   }
 }
-/////////////
+///////////////
+// Future<List<OrderItemModel>> getSelectedOrderItems(bool isRegularDelivery) async {
+//   try {
+//     // isRegularDelivery: true면 일반배송, false면 픽업배송을 의미하는 boolean 매개변수
+//     // 현재 어떤 배송 타입의 아이템을 가져오는지 디버깅용 로그 출력
+//     print('Fetching ${isRegularDelivery ? "Regular Delivery" : "Pickup"} items');
+//
+//     // 1. SharedPreferences에서 현재 로그인한 사용자의 고유 ID를 비동기로 가져옴
+//     final userId = await OnlyYouSharedPreference().getCurrentUserId();
+//
+//     // 2. Firestore 데이터베이스에서 users 컬렉션의 해당 userId 문서를 가져옴
+//     // get(): Firestore에서 문서를 한 번만 읽어오는 비동기 메서드
+//     final userDoc = await _firestore.collection('users').doc(userId).get();
+//     if (!userDoc.exists) {
+//       // 해당 사용자의 문서가 존재하지 않으면 빈 리스트를 반환
+//       return [];
+//     }
+
+//     // 3. isRegularDelivery 값에 따라 가져올 필드명을 결정
+//     // field: Firestore 문서 내의 특정 필드(속성)를 지정하는 문자열
+//     final field = isRegularDelivery ? 'cartItems' : 'pickupItems';
+//
+//     // 4. Firestore 문서에서 해당 필드의 데이터를 List<Map<String, dynamic>> 형태로 변환
+//     // List.from(): 기존 컬렉션으로부터 새로운 List를 생성
+//     // userDoc.get(field): 문서에서 특정 필드의 값을 가져옴
+//     // ?? []: null일 경우 빈 리스트를 기본값으로 사용
+//     final items = List<Map<String, dynamic>>.from(userDoc.get(field) ?? []);
+//     print('Found ${items.length} items to convert'); // 변환할 아이템 수 로그 출력
+//
+//     // 5. CartModel 데이터를 OrderItemModel 객체로 변환
+//     // map(): 리스트의 각 요소를 변환하여 새로운 리스트 생성
+//     // toList(): Iterable을 List로 변환
+//     return items
+//         .map((item) => OrderItemModel(
+//       // Map의 각 키-값 쌍을 OrderItemModel의 필드로 매핑
+//       productId: item['productId'],        // 상품 고유 ID
+//       productName: item['productName'],    // 상품명
+//       productImageUrl: item['productImageUrl'], // 상품 이미지 URL
+//       productPrice: item['productPrice'],  // 상품 가격
+//       quantity: item['quantity'] ?? 1,     // 수량(없으면 기본값 1)
+//     ))
+//         .toList();
+//   } catch (e) {
+//     // 예외 처리: 변환 과정에서 발생하는 모든 에러를 잡아서 처리
+//     print('Error in getSelectedOrderItems: $e'); // 에러 내용 로그 출력
+//     throw Exception('주문 상품 변환에 실패했습니다.'); // 사용자에게 보여줄 에러 메시지
+//   }
+// }
