@@ -7,6 +7,8 @@ import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/screens/Product/widgets/review_summary_widget.dart';
+import 'package:onlyveyou/screens/Product/widgets/reviewlist_widget.dart';
 import 'package:onlyveyou/screens/product/widgets/expandable_bottom_sheet.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/explain_product.dart';
@@ -452,8 +454,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        Text('review'),
-        // ReviewTab(reviews: product.reviews),
+        SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ReviewSummaryWidget(),
+              ReviewListWidget(),
+            ],
+          ),
+        ),
       ],
     );
   }
