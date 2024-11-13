@@ -231,12 +231,22 @@ class MoreRecommendedScreen extends StatelessWidget {
                 onTap: () async {
                   final currentUserId =
                       await OnlyYouSharedPreference().getCurrentUserId();
-                  context
-                      .read<HomeBloc>()
-                      .add(AddToCart(item.productId)); // product의 productId를 사용
+                  context.read<HomeBloc>().add(AddToCart(item.productId));
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('장바구니에 추가되었습니다.')),
+                  context.read<HomeBloc>().stream.listen(
+                    (state) {
+                      if (state is HomeError || state is HomeSuccess) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(state is HomeSuccess
+                                ? state.message
+                                : (state as HomeError).message),
+                            duration: Duration(milliseconds: 1000),
+                          ),
+                        );
+                      }
+                    },
                   );
                 },
                 child: Container(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'package:onlyveyou/models/cart_model.dart';
 import 'package:onlyveyou/screens/shopping_cart/widgets/cart_pricesection_widget.dart';
 import 'package:onlyveyou/utils/format_price.dart';
@@ -119,13 +121,39 @@ class CartBottomBarWidget extends StatelessWidget {
               ),
               const SizedBox(width: 12),
 
-              // 구매하기 버튼
+              // 3. 구매하기 버튼 수정 - 데이터 넘겨주기
               Expanded(
                 child: ElevatedButton(
                   onPressed: totalSelectedCount > 0
-                      ? () {
-                          // 선택된 상품이 있을 때만 결제 페이지로 이동
-                          context.push('/payment');
+                      ? () async {
+                          try {
+                            // 1. CartBloc에서 OrderModel 가져오기
+                            final cartBloc = context.read<CartBloc>();
+                            final order =
+                                await cartBloc.getSelectedOrderItems();
+
+                            // 2. 주문 데이터가 있는 경우에만 결제 페이지로 이동
+                            if (order.items.isNotEmpty) {
+                              print('Navigating to payment with order:');
+                              print('- User ID: ${order.userId}');
+                              print('- Order Type: ${order.orderType}');
+                              print('- Total Items: ${order.items.length}');
+                              print('- Total Price: ${order.totalPrice}');
+
+                              // 3. 결제 페이지로 이동, OrderModel 전달
+                              context.push(
+                                '/payment',
+                                extra: {'order': order},
+                              );
+                            }
+                          } catch (e) {
+                            print('Error processing order: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('주문 처리 중 오류가 발생했습니다.'),
+                              ),
+                            );
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -136,7 +164,7 @@ class CartBottomBarWidget extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    '구매하기 (${totalSelectedCount})',
+                    '구매하기 ($totalSelectedCount)',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
