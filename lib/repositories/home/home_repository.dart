@@ -17,19 +17,22 @@ class HomeRepository {
   List<BannerItem> getBannerItems() {
     return [
       BannerItem(
-        title: '럭키 럭스에디트\n최대 2만원 혜택',
-        subtitle: '쿠폰부터 100% 리워드까지',
-        backgroundColor: Colors.black,
+        imageAsset: 'assets/image/banner/b1.jpg',
+        title: '', // 빈 문자열로 설정
+        subtitle: '', // 빈 문자열로 설정
+        backgroundColor: Colors.transparent, // 배경색 투명하게
       ),
       BannerItem(
-        title: '가을 준비하기\n최대 50% 할인',
-        subtitle: '시즌 프리뷰 특가전',
-        backgroundColor: Color(0xFF8B4513),
+        imageAsset: 'assets/image/banner/c1.jpg',
+        title: '',
+        subtitle: '',
+        backgroundColor: Colors.transparent,
       ),
       BannerItem(
-        title: '이달의 브랜드\n특별 기획전',
-        subtitle: '인기 브랜드 혜택 모음',
-        backgroundColor: Color(0xFF4A90E2),
+        imageAsset: 'assets/image/banner/d1.png',
+        title: '',
+        subtitle: '',
+        backgroundColor: Colors.transparent,
       ),
     ];
   }
