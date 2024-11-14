@@ -87,7 +87,9 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                   // 추천하기 버튼 추가
                   ElevatedButton(
                     onPressed: () {
-                      _aiRecommendBloc.add(LoadAIRecommendations());
+                      context
+                          .read<AIRecommendBloc>()
+                          .add(LoadAIRecommendations());
                     },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
@@ -368,9 +370,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                     ),
                     SizedBox(height: 16.h),
                     ElevatedButton(
-                      onPressed: () {
-                        _aiRecommendBloc.add(LoadAIRecommendations());
-                      },
+                      onPressed: () {},
                       child: Text('다시 시도'),
                     ),
                   ],
