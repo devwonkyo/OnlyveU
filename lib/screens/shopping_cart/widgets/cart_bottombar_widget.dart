@@ -101,7 +101,7 @@ class CartBottomBarWidget extends StatelessWidget {
                           style: TextStyle(
                             color: Colors.red[700],
                             fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
