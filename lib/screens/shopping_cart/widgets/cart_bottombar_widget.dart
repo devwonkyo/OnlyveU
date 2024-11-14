@@ -28,12 +28,23 @@ class CartBottomBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 현재 탭의 선택된 아이템의 총 금액 계산
-    final totalPrice = CartPriceSectionWidget.calculateTotalPrice(
+    // 할인 전 총 금액 계산
+    final originalPrice = CartPriceSectionWidget.calculateTotalOriginalPrice(
       items: currentItems,
       selectedItems: selectedItems,
       itemQuantities: itemQuantities,
     );
+
+    // 할인 후 총 금액 계산
+    final discountedPrice =
+        CartPriceSectionWidget.calculateTotalDiscountedPrice(
+      items: currentItems,
+      selectedItems: selectedItems,
+      itemQuantities: itemQuantities,
+    );
+
+    // 총 할인 금액 계산
+    final totalDiscount = originalPrice - discountedPrice;
 
     // 선택된 총 상품 개수
     final totalSelectedCount = _calculateSelectedCount();
@@ -58,31 +69,51 @@ class CartBottomBarWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '총 $totalSelectedCount건 ',
-                    style: TextStyle(color: Colors.grey[600]),
+                  Row(
+                    children: [
+                      Text(
+                        '총 $totalSelectedCount건',
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    '${formatPrice(totalPrice.toString())}원',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  Text(
-                    ' + ',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  Text(
-                    '배송비 0원',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
+                  if (totalDiscount > 0) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          '${formatPrice(originalPrice.toString())}원',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            decoration: TextDecoration.lineThrough,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '-${formatPrice(totalDiscount.toString())}원',
+                          style: TextStyle(
+                            color: Colors.red[700],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
               Text(
-                '${formatPrice(totalPrice.toString())}원',
+                '${formatPrice(discountedPrice.toString())}원',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 18,
                 ),
               ),
             ],
@@ -97,7 +128,6 @@ class CartBottomBarWidget extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: totalSelectedCount > 0
                       ? () {
-                          // TODO: 선물하기 기능 구현
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('선물하기 기능 준비중입니다.'),
@@ -121,25 +151,21 @@ class CartBottomBarWidget extends StatelessWidget {
               ),
               const SizedBox(width: 12),
 
-              // (3). 구매하기 버튼 수정 - 데이터 넘겨주기
+              // 구매하기 버튼
               Expanded(
                 child: ElevatedButton(
                   onPressed: totalSelectedCount > 0
                       ? () async {
                           try {
-                            // 1. CartBloc에서 OrderModel 가져오기
                             final cartBloc = context.read<CartBloc>();
                             final order =
                                 await cartBloc.getSelectedOrderItems();
-                            // 2. 주문 데이터가 있는 경우에만 결제 페이지로 이동
                             if (order.items.isNotEmpty) {
                               print('Navigating to payment with order:');
                               print('- User ID: ${order.userId}');
                               print('- Order Type: ${order.orderType}');
                               print('- Total Items: ${order.items.length}');
                               print('- Total Price: ${order.totalPrice}');
-                              // 3. 결제 페이지로 이동, OrderModel 전달
-                              // Payment 화면으로 이동 시 order 객체만 전달하기 위해 수정
                               context.push('/payment', extra: order);
                             }
                           } catch (e) {
@@ -153,11 +179,12 @@ class CartBottomBarWidget extends StatelessWidget {
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      )),
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   child: Text(
                     '구매하기 ($totalSelectedCount)',
                     style: const TextStyle(
