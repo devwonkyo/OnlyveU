@@ -198,13 +198,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         _buildQuickMenuItem('AR가상', Icons.medication, () {
           print('픽업 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('날씨추천', Icons.live_tv, () {
+        _buildQuickMenuItem('운명 화장품', Icons.live_tv, () {
           _uploadDummyData(context);
         }),
-        _buildQuickMenuItem('GTP추천', Icons.card_giftcard, () {
+        _buildQuickMenuItem('날씨추천', Icons.card_giftcard, () {
           print('선물하기 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('내 주변', Icons.local_offer, () {
+        _buildQuickMenuItem('GTP추천', Icons.local_offer, () {
           print('세일 버튼 클릭됨');
         }),
       ],
