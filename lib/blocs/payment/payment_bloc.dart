@@ -87,6 +87,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           deliveryRequest: _deliveryInfo?.deliveryRequest ??
               event.deliveryRequest, // 기존 요청사항 유지
         );
+        
         emit(DeliveryInfoUpdated(_deliveryInfo!, _orderItems, _totalAmount,
             _orderType)); // 유지된 totalAmount 사용
       } catch (e) {
