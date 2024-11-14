@@ -35,7 +35,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
     super.initState();
     // 주문 상품 가져오기 이벤트 추가
     // 전달된 order 값 확인
-   context.read<PaymentBloc>().add(InitializePayment(widget.order));
+    context.read<PaymentBloc>().add(InitializePayment(widget.order));
+
+    //  context.read<PaymentBloc>().add(UpdateDeliveryInfo(  //배송지 정보 업데이트 하기 위해서
+    //     deliveryName: deliveryName,
+    //     address: address,
+    //     detailAddress: detailAddress,
+    //     recipientName: recipientName,
+    //     recipientPhone: recipientPhone));
     print("Order details received:");
     print("- User ID: ${widget.order.userId}");
     print("- Order Type: ${widget.order.orderType}");
@@ -68,24 +75,28 @@ class _PaymentScreenState extends State<PaymentScreen> {
             // 주문 유형에 따른 UI 표시
             BlocBuilder<PaymentBloc, PaymentState>(
               builder: (context, state) {
+                print('Current State: $state');
+                print('DeliveryInfo in State: ${state.deliveryInfo}');
                 if (state is PaymentLoading) {
                   return const Center(child: CircularProgressIndicator());
-                } else {
-                  // 전달받은 orderType을 사용하여 화면에 표시
-                  if (widget.order.orderType == OrderType.delivery) {
+                } else if (state is PaymentLoaded) {
+                  if (state.orderType == OrderType.delivery) {
                     return DeliveryOrderInfo(
-                      deliveryInfo:
-                          state.deliveryInfo ?? widget.order.deliveryInfo,
+                      deliveryInfo: state.deliveryInfo,
                       deliveryMessages: widget.deliveryMessages,
                     );
-                  } else if (widget.order.orderType == OrderType.pickup) {
+                  } else if (state.orderType == OrderType.pickup) {
                     return const PickupOrderInfo();
                   } else {
                     return Container();
                   }
+                } else {
+                  // 기타 상태에 대한 처리
+                  return Container();
                 }
               },
             ),
+
             const SizedBox(height: 20),
             Divider(
               height: 1,
