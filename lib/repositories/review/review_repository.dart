@@ -8,7 +8,63 @@ class ReviewRepository{
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Future<List<ReviewModel>> findProductReview(String productId) async {
+    try {
+      // reviews 컬렉션에서 productId가 일치하는 문서들을 가져옴
+      final querySnapshot = await _firestore
+          .collection('reviews')
+          .where('productId', isEqualTo: productId)
+          // .orderBy('createdAt', descending: true) // 최신순 정렬
+          .get();
 
-    return [];
+      // 문서들을 ReviewModel 리스트로 변환
+      final reviews = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return ReviewModel(
+          reviewId: doc.id,
+          productId: data['productId'],
+          userId: data['userId'],
+          userName: data['userName'],
+          rating: (data['rating'] as num).toDouble(),
+          content: data['content'],
+          imageUrls: List<String>.from(data['imageUrls'] ?? []),
+          likedUserIds: List<String>.from(data['likedUserIds'] ?? []),
+          createdAt: DateTime.parse(data['createdAt']),
+        );
+      }).toList();
+
+      return reviews;
+    } catch (e) {
+      print('리뷰 데이터 가져오기 실패: $e');
+      return []; // 에러 발생 시 빈 리스트 반환
+    }
   }
+
+  Future<void> addLikeReview(String reviewId, String userId) async {
+    try {
+      // 파이어베이스에서 해당 reviewId의 문서 가져오기
+      final reviewRef = FirebaseFirestore.instance
+          .collection('reviews')
+          .doc(reviewId);
+
+      // 현재 문서의 likedUserIds 확인
+      final doc = await reviewRef.get();
+      List<String> likedUserIds = List<String>.from(doc.data()?['likedUserIds'] ?? []);
+
+      // userId가 있으면 제거, 없으면 추가
+      if (likedUserIds.contains(userId)) {
+        await reviewRef.update({
+          'likedUserIds': FieldValue.arrayRemove([userId])
+        });
+      } else {
+        await reviewRef.update({
+          'likedUserIds': FieldValue.arrayUnion([userId])
+        });
+      }
+    } catch(e) {
+      print('리뷰 데이터 가져오기 실패: $e');
+    }
+  }
+
+
+
 }

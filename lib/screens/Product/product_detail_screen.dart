@@ -436,7 +436,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         TabBar(
           onTap: (index) {
             if (index == 1) {
-              // context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
+              context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
             }
           },
           tabs: [Tab(text: '상품설명'), Tab(text: '리뷰')],
@@ -467,17 +467,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ),
         BlocBuilder<ReviewBloc, ReviewState>(
+          buildWhen: (previous, current) {
+            // LoadedReviewState 상태일 때만 리빌드
+            return current is LoadedReviewState;
+          },
           builder: (context, state) {
-
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ReviewSummaryWidget(),
-                  ReviewListWidget(),
-                ],
-              ),
-            );
+            if(state is LoadedReviewState){
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ReviewSummaryWidget(reviewList: state.reviewList, ratingAverage: state.reviewAverageRating, ratingPercentAge: state.reviewRatingPercentAge,),
+                    Container(height: 8.h, color: Colors.grey[200]),
+                    ReviewListWidget(reviewList: state.reviewList, userId: userId,),
+                  ],
+                ),
+              );
+            }
+            return Text("review road error");
             },
         ),
       ],

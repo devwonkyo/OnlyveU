@@ -11,18 +11,28 @@ final class ReviewInitial extends ReviewState {
 
 class LoadedReviewState extends ReviewState {
   final List<ReviewModel> reviewList;
+  final double reviewAverageRating;
+  final Map<int, double> reviewRatingPercentAge;
 
-  const LoadedReviewState(this.reviewList);
+  const LoadedReviewState(this.reviewList, this.reviewAverageRating, this.reviewRatingPercentAge);
 
   @override
-  List<Object> get props => [reviewList];
+  List<Object> get props => [reviewList, reviewAverageRating, reviewRatingPercentAge];
 }
-
 
 class LoadErrorReviewState extends ReviewState {
   final String message;
 
   const LoadErrorReviewState(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AddReviewLikeState extends ReviewState {
+  final String message;
+
+  const AddReviewLikeState(this.message);
 
   @override
   List<Object> get props => [message];
