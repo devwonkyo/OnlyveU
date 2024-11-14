@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
+import 'package:onlyveyou/blocs/category/category_product_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
@@ -12,8 +13,12 @@ import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
+import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
+import 'package:onlyveyou/blocs/product/like/product_like_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
+import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/theme.dart';
@@ -24,7 +29,9 @@ import 'package:onlyveyou/repositories/history_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
 import 'package:onlyveyou/repositories/order/mock_order_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
+import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
+import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
@@ -44,7 +51,7 @@ void main() async {
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
   // print("hash key ${await KakaoSdk.origin}");
-  final orderRepository = MockOrderRepository();
+
   KakaoSdk.init(
     nativeAppKey: '0236522723df3e1aa869fe36e25e6297',
     javaScriptAppKey: 'Ye8ebc7de132c8c4f0b6881be99e20f5e',
@@ -80,18 +87,13 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    final orderRepository = MockOrderRepository();
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-        return MultiRepositoryProvider(
+        return MultiBlocProvider(
           providers: [
-            RepositoryProvider<OrderRepository>.value(value: orderRepository),
-          ],
-          child: MultiBlocProvider(
-            providers: [
               BlocProvider(
                 create: (context) => CartBloc(
                   cartRepository: ShoppingCartRepository(),
@@ -145,29 +147,45 @@ class MyApp extends StatelessWidget {
                 create: (context) => OrderStatusBloc(),
               ),
               BlocProvider<ProductDetailBloc>(
-                create: (context) => ProductDetailBloc(ProductRepository()),
+                create: (context) => ProductDetailBloc(ProductDetailRepository()),
               ),
-              BlocProvider<PaymentBloc>(
-                create: (context) => PaymentBloc(
-                  orderRepository:
-                      RepositoryProvider.of<OrderRepository>(context),
-                ),
-              ),
+               BlocProvider<PaymentBloc>(
+              create: (context) => PaymentBloc(),
+            ),
               BlocProvider<PostBloc>(
                 create: (context) => PostBloc(),
               ),
+              BlocProvider<CategoryProductBloc>(
+                // CategoryProductBloc 추가
+                create: (context) => CategoryProductBloc(repository: ProductDetailRepository()),
+              ),
+              BlocProvider<ProductCartBloc>(
+                // CategoryProductBloc 추가
+                create: (context) => ProductCartBloc(repository: ProductDetailRepository()),
+              ),
+              BlocProvider<ProductLikeBloc>(
+                // CategoryProductBloc 추가
+                create: (context) => ProductLikeBloc(repository: ProductDetailRepository()),
+              ),
+              BlocProvider<StoreBloc>(
+                create: (context) => StoreBloc(),
+              ),
+            BlocProvider<ReviewBloc>(
+              // CategoryProductBloc 추가
+              create: (context) => ReviewBloc(repository: ReviewRepository()),
+            ),
             ],
             child: BlocBuilder<ThemeBloc, ThemeState>(
               builder: (context, state) {
                 return MaterialApp.router(
                   debugShowCheckedModeBanner: false,
-                  themeMode: state.themeMode,
+                  // themeMode: state.themeMode,
+                  themeMode: ThemeMode.light, //todo
                   theme: lightThemeData(),
                   darkTheme: darkThemeData(),
                   routerConfig: router,
                 );
               },
-            ),
           ),
         );
       },

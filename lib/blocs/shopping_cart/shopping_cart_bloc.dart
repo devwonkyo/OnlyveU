@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/models/cart_model.dart';
+import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 // Events
 abstract class CartEvent extends Equatable {
@@ -392,4 +394,80 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       isAllSelected: currentItems.isNotEmpty,
     ));
   }
+
+//
+// (2) 오더모델 담기. 오더모델 반환, 블럭에서 객체 생성
+  Future<OrderModel> getSelectedOrderItems() async {
+    print(
+        'Getting seleted items from ${state.isRegularDeliveryTab ? "Regular Delivery" : "Pickup"}');
+    try {
+      // 1. Repository에서 OrderItemModel 리스트 가져오기
+      final orderItems = await _cartRepository
+          .getSelectedOrderItems(state.isRegularDeliveryTab);
+      print('Successfully got ${orderItems.length} order items');
+      // 2. 현재 로그인한 사용자 ID 가져오기
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+      // 3. OrderModel 객체 생성
+      final order = OrderModel(
+        id: '', // userId 대신 빈 문자열 사용 :제일 안정
+        userId: userId, // 실제 사용자 ID는 여기서 사용
+        items: orderItems,
+        orderType:
+            state.isRegularDeliveryTab ? OrderType.delivery : OrderType.pickup,
+      );
+      print('Created order object for user: $userId');
+      print('Order type: ${order.orderType}');
+      print('Total items: ${order.items.length}');
+      print('Total price: ${order.totalPrice}');
+
+      return order;
+    } catch (e) {
+      print('Error creating order: $e');
+      rethrow;
+    }
+  }
 }
+// 오더모델로 데이터 전달하는 과정이 없이
+//아이템즈만 리턴하는중
+// OrderModel 객체를 생성하고 반환하는 비동기 함수
+// CartBloc 내에 위치하며, 선택된 카트 아이템을 주문 형태로 변환
+// Future<OrderModel> getSelectedOrderItems() async {
+//   // state.isRegularDeliveryTab: CartBloc의 현재 상태에서 일반배송 탭인지 여부를 확인
+//   // 디버깅을 위해 현재 처리 중인 배송 타입을 로그로 출력
+//   print(
+//       'Getting selected items from ${state.isRegularDeliveryTab ? "Regular Delivery" : "Pickup"}');
+//
+//   try {
+//     // 1. ShoppingCartRepository의 메서드를 호출하여 선택된 상품들의 OrderItemModel 리스트를 가져옴
+//     // _cartRepository: CartBloc에 주입된 ShoppingCartRepository 인스턴스
+//     final orderItems = await _cartRepository
+//         .getSelectedOrderItems(state.isRegularDeliveryTab);
+//     print('Successfully got ${orderItems.length} order items'); // 변환된 아이템 수 확인
+//
+//     // 2. SharedPreferences에서 현재 로그인한 사용자의 고유 ID를 비동기로 가져옴
+//     final userId = await OnlyYouSharedPreference().getCurrentUserId();
+//
+//     // 3. 가져온 정보를 바탕으로 완전한 OrderModel 객체를 생성
+//     final order = OrderModel(
+//       id: userId, // 주문의 고유 식별자로 현재 사용자 ID를 사용
+//       userId: userId, // 주문을 생성한 사용자의 ID
+//       items: orderItems, // Repository에서 변환된 주문 상품 리스트
+//       orderType: // 현재 탭 상태에 따라 배송 타입을 결정
+//       state.isRegularDeliveryTab ? OrderType.delivery : OrderType.pickup,
+//     );
+//
+//     // 생성된 주문 객체의 상세 정보를 디버깅용으로 로그에 출력
+//     print('Created order object for user: $userId');
+//     print('Order type: ${order.orderType}'); // delivery 또는 pickup
+//     print('Total items: ${order.items.length}'); // 주문에 포함된 총 상품 수
+//     print('Total price: ${order.totalPrice}'); // 총 주문 금액 (자동 계산됨)
+//
+//     // 생성된 OrderModel 객체를 호출자에게 반환
+//     return order;
+//   } catch (e) {
+//     // 주문 객체 생성 과정에서 발생한 모든 예외를 로그로 출력
+//     print('Error creating order: $e');
+//     // rethrow: 발생한 예외를 상위 계층(UI)으로 전파하여 적절한 에러 처리가 가능하도록 함
+//     rethrow;
+//   }
+// }

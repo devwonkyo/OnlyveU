@@ -7,6 +7,9 @@ import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
+import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/screens/payment/delivery_order_screen.dart';
+import 'package:onlyveyou/screens/payment/pickup_order_screen.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -17,7 +20,10 @@ class PaymentScreen extends StatefulWidget {
     '벨을 누르지 말아주세요.',
     '도착 후 전화주시면 직접 받으러 갈게요.'
   ];
-  PaymentScreen({super.key});
+  final OrderModel order;
+
+  // 생성자에서 order 데이터를 받도록 설정
+  PaymentScreen({super.key, required this.order});
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -28,7 +34,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void initState() {
     super.initState();
     // 주문 상품 가져오기 이벤트 추가
-    context.read<PaymentBloc>().add(const FetchOrderItems());
+    // 전달된 order 값 확인
+    context.read<PaymentBloc>().add(InitializePayment(widget.order));
+    //  context.read<PaymentBloc>().add(UpdateDeliveryInfo(  //배송지 정보 업데이트 하기 위해서 
+    //     deliveryName: deliveryName,
+    //     address: address,
+    //     detailAddress: detailAddress,
+    //     recipientName: recipientName,
+    //     recipientPhone: recipientPhone));
+    print("Order details received:");
+    print("- User ID: ${widget.order.userId}");
+    print("- Order Type: ${widget.order.orderType}");
+    print("- Total Items: ${widget.order.items.length}");
+    print("- Total Price: ${widget.order.totalPrice}");
   }
 
   String _selectedPaymentMethod = '빠른결제';
@@ -39,8 +57,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '주문/결제',
+          style: AppStyles.headingStyle,
         ),
       ),
       body: SingleChildScrollView(
@@ -51,130 +70,36 @@ class _PaymentScreenState extends State<PaymentScreen> {
               height: 1,
               color: Colors.grey[400],
             ),
+            // 주문 유형에 따른 UI 표시
+            // 주문 유형에 따른 UI 표시
             BlocBuilder<PaymentBloc, PaymentState>(
               builder: (context, state) {
-                final deliveryInfo = context.read<PaymentBloc>().deliveryInfo;
-                String displayText = '배송지를 등록해주세요';
-                String address = '';
-                String detailAddress = '';
-                String recipientName = '';
-                String recipientPhoneNumber = '';
-                if (deliveryInfo != null) {
-                  displayText = deliveryInfo.deliveryName;
-                  address = deliveryInfo.address;
-                  detailAddress = deliveryInfo.detailAddress;
-                  recipientName = deliveryInfo.recipientName;
-                  recipientPhoneNumber = deliveryInfo.recipientPhone;
+                if (state is PaymentLoading) {
+                  return const Center(child: CircularProgressIndicator());
+
+                } 
+          
+              //state가 orderdeliveryupdated일 때로 따로? 
+
+                else {
+                  // 전달받은 orderType을 사용하여 화면에 표시
+                  if (widget.order.orderType == OrderType.delivery) {
+   
+
+                 
+                    return DeliveryOrderInfo(
+                      deliveryInfo:
+                          state.deliveryInfo ?? widget.order.deliveryInfo,
+                      deliveryMessages: widget.deliveryMessages,
+                    );
+                  } else if (widget.order.orderType == OrderType.pickup) {
+                    return const PickupOrderInfo();
+                  } else {
+                    return Container();
+                  }
                 }
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '$displayText ($recipientName)',
-                            style: AppStyles.headingStyle,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            '$address $detailAddress',
-                            style: AppStyles.bodyTextStyle,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text(
-                            recipientPhoneNumber,
-                            style: AppStyles.bodyTextStyle,
-                          )
-                        ],
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          _showModalBottomSheet(context);
-                        },
-                        child: Text(
-                          '변경',
-                          style: AppStyles.bodyTextStyle,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
               },
             ),
-            const SizedBox(height: 20),
-            Divider(
-              height: 1,
-              thickness: 6,
-              color: Colors.grey[200],
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-              child: Text(
-                '배송 요청사항',
-                style: AppStyles.headingStyle,
-              ),
-            ),
-            const SizedBox(height: 10),
-            BlocBuilder<PaymentBloc, PaymentState>(
-              builder: (context, state) {
-                String selectedMessage = '배송 메시지를 선택해주세요.'; // 기본 메시지 설정
-
-                // 상태에 따라 selectedMessage 값을 업데이트
-                if (state is PaymentMessageSelected) {
-                  selectedMessage = state.selectedMessage;
-                } else if (state is DeliveryInfoUpdated &&
-                    state.deliveryInfo.deliveryRequest != null) {
-                  selectedMessage = state.deliveryInfo.deliveryRequest!;
-                }
-
-                return DropdownButtonHideUnderline(
-                  child: DropdownButton2<String>(
-                    isExpanded: true,
-                    items: widget.deliveryMessages
-                        .map((message) => DropdownMenuItem<String>(
-                              value: message,
-                              child: Text(
-                                message,
-                                style: AppStyles.subHeadingStyle,
-                              ),
-                            ))
-                        .toList(),
-                    value: selectedMessage, // 설정된 selectedMessage 사용
-                    onChanged: (value) {
-                      if (value != null) {
-                        context
-                            .read<PaymentBloc>()
-                            .add(SelectDeliveryMessage(value));
-                      }
-                    },
-                    buttonStyleData: const ButtonStyleData(
-                      height: 50,
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                    ),
-                    dropdownStyleData: DropdownStyleData(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.grey,
-                          width: 1.0,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-
             const SizedBox(height: 20),
             Divider(
               height: 1,
@@ -194,45 +119,39 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   const SizedBox(height: 10),
                   // payment_screen.dart
                   // payment_screen.dart
-                  BlocBuilder<PaymentBloc, PaymentState>(
-                    builder: (context, state) {
-                      List<OrderItemModel> orderItems = [];
-
-                      if (state is PaymentLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is PaymentLoaded) {
-                        orderItems = state.orderItems;
-                      } else if (state is PaymentMessageSelected ||
-                          state is DeliveryInfoUpdated) {
-                        orderItems = state.orderItems; // 배송 메시지 선택 시 주문 상품 유지
-                      } else if (state is PaymentError) {
-                        return Center(child: Text(state.message));
-                      }
-
-                      // 주문 상품 리스트 UI 표시
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: orderItems.length,
-                        itemBuilder: (context, index) {
-                          final item = orderItems[index];
-                          return ListTile(
-                            leading: SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: Image.network(
-                                item.productImageUrl,
-                                fit: BoxFit.cover,
-                              ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: widget.order.items.length,
+                    itemBuilder: (context, index) {
+                      final item = widget.order.items[index];
+                      return ListTile(
+                        leading: SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: Image.network(item.productImageUrl,
+                              fit: BoxFit.cover),
+                        ),
+                        title: Text(item.productName),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 5,
                             ),
-                            title: Text(item.productName),
-                            subtitle: Text('수량: ${item.quantity}'),
-                            trailing: Text(
+                            Text(
+                              '수량: ${item.quantity}',
+                              style: AppStyles.smallTextStyle,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
                               '${item.productPrice * item.quantity}원',
-                              style: AppStyles.bodyTextStyle,
+                              style: AppStyles.priceTextStyle,
                             ),
-                          );
-                        },
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -251,15 +170,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: BlocBuilder<PaymentBloc, PaymentState>(
                 builder: (context, state) {
-                  int totalAmount = 0;
-
-                  if (state is PaymentLoaded) {
-                    totalAmount = state.totalAmount;
-                  } else if (state is PaymentMessageSelected) {
-                    totalAmount = state.totalAmount;
-                  } else if (state is DeliveryInfoUpdated) {
-                    totalAmount = state.totalAmount;
-                  }
+                  int totalAmount = widget.order.items.fold(0, (sum, item) {
+                    return sum + (item.productPrice * item.quantity);
+                  });
 
                   //totalAmount 상태관리 수정해야 한다(0원으로 뜸 )
                   return Row(
@@ -444,15 +357,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
             BlocBuilder<PaymentBloc, PaymentState>(
               builder: (context, state) {
                 // default amount as 0 to avoid null issues
-                int totalAmount = 0;
-
-                if (state is PaymentLoaded) {
-                  totalAmount = state.totalAmount;
-                } else if (state is PaymentMessageSelected) {
-                  totalAmount = state.totalAmount;
-                } else if (state is DeliveryInfoUpdated) {
-                  totalAmount = state.totalAmount;
-                }
+                int totalAmount = widget.order.items.fold(0, (sum, item) {
+                  return sum + (item.productPrice * item.quantity);
+                });
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -463,6 +370,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       onPressed: () {
                         // 결제 버튼 로직
                         print("결제하기 버튼");
+                        context
+                            .read<PaymentBloc>()
+                            .add(const CheckOrderDetails());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
@@ -489,80 +399,4 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
     );
   }
-}
-
-void _showModalBottomSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    builder: (BuildContext context) {
-      return Container(
-        height: MediaQuery.of(context).size.height * 0.2,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 20,
-                  right: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('배송지 변경', style: AppStyles.headingStyle),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.close,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        context.pop();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.black12)),
-              ),
-            ),
-            const SizedBox(
-              height: 50,
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black26),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  //새 배송지 추가 화면
-                  context.pop();
-                  context.push('/new_delivery_address');
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black54,
-                  padding: const EdgeInsets.all(10.0),
-                  textStyle: const TextStyle(fontSize: 12),
-                ),
-                child: Text(
-                  '새 배송지 추가',
-                  style: AppStyles.bodyTextStyle,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
 }

@@ -1,9 +1,10 @@
 // lib/config/routes/app_router.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/models/category_selection.dart';
-import 'package:onlyveyou/screens/product/product_detail_screen.dart';
-import 'package:onlyveyou/screens/Product/two.dart';
+import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -13,6 +14,9 @@ import 'package:onlyveyou/screens/history/histoy_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/home/home/more_popular_screen.dart';
 import 'package:onlyveyou/screens/home/home/more_recommended_screen.dart';
+import 'package:onlyveyou/screens/home/home/widgets/banner1.dart';
+import 'package:onlyveyou/screens/home/home/widgets/banner2.dart';
+import 'package:onlyveyou/screens/home/home/widgets/banner3.dart';
 import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
 import 'package:onlyveyou/screens/mypage/admin_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
@@ -26,6 +30,7 @@ import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/search/search_result/search_result_screen.dart';
+import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
@@ -41,6 +46,27 @@ final GoRouter router = GoRouter(
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/banner1',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const Banner1Screen(),
+          ),
+        ),
+        GoRoute(
+          path: '/banner2',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const Banner2Screen(),
+          ),
+        ),
+        GoRoute(
+          path: '/banner3',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const Banner3Screen(),
+          ),
+        ),
         GoRoute(
           path: '/admin',
           pageBuilder: (context, state) => _buildPageWithTransition(
@@ -180,10 +206,16 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/payment',
-      pageBuilder: (context, state) => _buildPageWithTransition(
-        state,
-        PaymentScreen(),
-      ),
+      pageBuilder: (context, state) {
+        final order = state.extra as OrderModel;
+        return _buildPageWithTransition(
+          state,
+          BlocProvider(
+            create: (context) => PaymentBloc(),
+            child: PaymentScreen(order: order),
+          ),
+        );
+      },
     ),
     GoRoute(
       path: '/new_delivery_address',

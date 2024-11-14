@@ -1,5 +1,6 @@
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
+import 'package:onlyveyou/models/store_model.dart';
 
 /// 주문 유형 enum
 enum OrderType {
@@ -39,7 +40,7 @@ enum OrderStatus {
 
 class OrderModel {
   /// 주문 ID
-  final String id;
+  final String? id;
 
   /// 주문한 사용자 ID
   final String userId;
@@ -65,17 +66,20 @@ class OrderModel {
   /// 픽업 매장 정보 (픽업 주문인 경우)
   final String? pickStore;
 
+  final StoreModel? pickInfo;
+
   /// 배송 정보 (배송 주문인 경우)
   final DeliveryInfoModel? deliveryInfo;
   OrderModel({
-    required this.id,
     required this.userId,
     required this.items,
     required this.orderType,
+    this.id,
     this.status = OrderStatus.pending,
     this.pickupTime,
     this.pickStore,
     this.deliveryInfo,
+    this.pickInfo,
     DateTime? createdAt,
   })  : createdAt = createdAt ?? DateTime.now(),
         totalPrice = items.fold(
@@ -85,6 +89,7 @@ class OrderModel {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id ?? "",
       'userId': userId,
       'items': items.map((item) => item.toMap()).toList(),
       'status': status.name,
@@ -93,7 +98,8 @@ class OrderModel {
       'createdAt': createdAt.toIso8601String(),
       if (orderType == OrderType.pickup) ...{
         'pickupTime': pickupTime?.toIso8601String(),
-        'pickStore': pickStore, // 변경된 필드명
+        'pickStore': pickStore,
+        'pickInfo': pickInfo?.toMap(), // Added pickInfo
       },
       if (orderType == OrderType.delivery)
         'deliveryInfo': deliveryInfo?.toMap(),
@@ -113,7 +119,10 @@ class OrderModel {
       orderType: orderType,
       pickupTime:
           map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
-      pickStore: map['pickStore'], // 변경된 필드명
+      pickStore: map['pickStore'],
+      pickInfo: map['pickInfo'] != null
+          ? StoreModel.fromMap(map['pickInfo']) // Added pickInfo
+          : null,
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
           : null,

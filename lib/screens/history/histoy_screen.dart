@@ -17,15 +17,13 @@ class _HistoryScreenState extends State<HistoryScreen>
   late TabController _tabController;
   bool isEditing = false;
   final _prefs = OnlyYouSharedPreference();
+  final GlobalKey _favoriteKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    final historyBloc = context.read<HistoryBloc>();
-    if (historyBloc.state.recentItems.isEmpty) {
-      historyBloc.add(LoadHistoryItems());
-    }
+    context.read<HistoryBloc>().add(LoadHistoryItems());
   }
 
   @override

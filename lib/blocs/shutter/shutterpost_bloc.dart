@@ -9,11 +9,13 @@ import 'package:onlyveyou/models/post_model.dart';
 
 class PostBloc extends Bloc<PostEvent, PostState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   PostBloc() : super(PostState.initial()) {
     on<AddImageEvent>((event, emit) {
       final updatedImages = List<XFile>.from(state.images)..add(event.image);
+      print('Adding image: ${event.image.path}');
+      print('Current images count: ${updatedImages.length}');
       emit(state.copyWith(images: updatedImages));
     });
 
@@ -23,29 +25,70 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
     on<SubmitPostEvent>((event, emit) async {
       try {
-        // 이미지 업로드 및 URL 수집
-        final imageUrls = await Future.wait(event.images.map((imageFile) async {
-          final ref = _firebaseStorage
-              .ref()
-              .child('post_images/${DateTime.now().millisecondsSinceEpoch}');
-          final uploadTask = await ref.putFile(File(imageFile.path));
-          return await uploadTask.ref.getDownloadURL();
-        }));
+        // Use state.images instead of event.images
+        if (state.images.isEmpty) {
+          print('No images in state');
+          return;
+        }
 
-        // Firestore에 저장할 데이터 생성
+        print('Starting to upload ${state.images.length} images');
+        List<String> imageUrls = [];
+
+        // Upload images to Firebase Storage
+        for (XFile imageFile in state.images) {
+          print('Processing image: ${imageFile.path}');
+          File file = File(imageFile.path);
+
+          if (!await file.exists()) {
+            print('File does not exist: ${imageFile.path}');
+            continue;
+          }
+
+          // Generate unique filename
+          String fileName =
+              'post_images/${DateTime.now().millisecondsSinceEpoch}_${imageUrls.length}.jpg';
+          Reference storageRef = _storage.ref().child(fileName);
+
+          print('Uploading to Firebase Storage: $fileName');
+
+          // Upload file
+          try {
+            await storageRef.putFile(
+              file,
+              SettableMetadata(contentType: 'image/jpeg'),
+            );
+
+            // Get download URL
+            String downloadUrl = await storageRef.getDownloadURL();
+            imageUrls.add(downloadUrl);
+            print('Successfully uploaded image: $downloadUrl');
+          } catch (e) {
+            print('Error uploading image: $e');
+          }
+        }
+
+        if (imageUrls.isEmpty) {
+          print('No images were successfully uploaded');
+          return;
+        }
+
+        // Create post document in Firestore
         final post = PostModel(
-          text: event.text,
+          text: state.text, // Use state.text instead of event.text
           imageUrls: imageUrls,
-          tags: event.tags,
+          tags: state.tags,
+          createdAt: DateTime.now(), // Use state.tags
         );
 
-        // Firestore에 데이터 저장
+        // Save to Firestore
         await _firestore.collection('posts').add(post.toMap());
+        print(
+            'Successfully saved post to Firestore with ${imageUrls.length} images');
 
-        // 저장 성공 후 초기화
-        emit(state.copyWith(text: '', images: []));
+        // Clear state after successful upload
+        emit(PostState.initial());
       } catch (e) {
-        print('Error saving post: $e');
+        print('Error during post submission: $e');
       }
     });
   }

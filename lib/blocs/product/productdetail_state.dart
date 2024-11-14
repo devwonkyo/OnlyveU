@@ -11,13 +11,24 @@ class ProductDetailInitial extends ProductDetailState {}
 
 class ProductDetailLoading extends ProductDetailState {}
 
-class ProductDetailLoaded extends ProductDetailState {
-  final ProductModel product;
+//좋아요 눌렀을 때
+class ProductLikedSuccess extends ProductDetailState {
+  final bool likeState;
 
-  const ProductDetailLoaded(this.product);
+  const ProductLikedSuccess(this.likeState);
 
   @override
-  List<Object?> get props => [product];
+  List<Object?> get props => [likeState];
+}
+
+class ProductDetailLoaded extends ProductDetailState {
+  final ProductModel product;
+  final String userId;
+
+  const ProductDetailLoaded(this.product, this.userId);
+
+  @override
+  List<Object?> get props => [product, userId];
 }
 
 class ProductDetailError extends ProductDetailState {
