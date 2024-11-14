@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:onlyveyou/models/product_model.dart';
@@ -69,7 +70,8 @@ class AIRecommendError extends AIRecommendState {
 
 // Bloc
 class AIRecommendBloc extends Bloc<AIRecommendEvent, AIRecommendState> {
-  final String openAIApiKey = 'your-api-key-here';
+  final String openAIApiKey =
+      FirebaseRemoteConfig.instance.getString('openai_api_key');
   final sharedPreference = OnlyYouSharedPreference();
 
   AIRecommendBloc() : super(AIRecommendInitial()) {
