@@ -91,3 +91,4 @@ class InitializePayment extends PaymentEvent {
   @override
   List<Object> get props => [order];
 }
+
