@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+
 import 'profile_edit_event.dart';
 import 'profile_edit_state.dart';
 
@@ -22,21 +24,31 @@ class ProfileEditBloc extends Bloc<ProfileEditEvent, ProfileEditState> {
     emit(EmailLoading());
     try {
       final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        emit(ProfileEditError("로그인이 필요합니다."));
-        return;
-      }
-      final userDoc =
-          await _firestore.collection('users').doc(currentUser.email).get();
-      print("Email Data: ${userDoc.data()}"); // Firestore에서 데이터를 가져오는지 확인
-      if (userDoc.exists) {
-        final email = userDoc.get('email') as String;
-        emit(EmailLoaded(email));
+      if (currentUser != null) {
+        // 1. 먼저 현재 인증된 사용자의 이메일을 시도
+        if (currentUser.email != null) {
+          emit(EmailLoaded(currentUser.email!));
+          return;
+        }
+
+        // 2. Firestore에서 추가 확인
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(currentUser.uid) // uid를 사용하여 문서 참조
+            .get();
+
+        if (userDoc.exists && userDoc.data()?['email'] != null) {
+          final email = userDoc.data()!['email'] as String;
+          emit(EmailLoaded(email));
+        } else {
+          emit(ProfileEditError("이메일을 찾을 수 없습니다."));
+        }
       } else {
-        emit(ProfileEditError("이메일을 찾을 수 없습니다."));
+        emit(ProfileEditError("로그인이 필요합니다."));
       }
     } catch (e) {
-      emit(ProfileEditError("이메일 로드에 실패했습니다: $e"));
+      print("이메일 로드 에러: $e");
+      emit(ProfileEditError("이메일을 불러오는데 실패했습니다."));
     }
   }
 

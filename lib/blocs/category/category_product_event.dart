@@ -1,15 +1,14 @@
-part of 'getproduct_bloc.dart';
+part of 'category_product_bloc.dart';
 
-// get_product_event.dart
-abstract class GetProductEvent extends Equatable {
-  const GetProductEvent();
+abstract class CategoryProductEvent extends Equatable {
+  const CategoryProductEvent();
 
   @override
   List<Object> get props => [];
 }
 
-//main카테고리일 경우에만 true
-class GetProducts extends GetProductEvent {
+// main 카테 고리 일 경우 에만 true
+class GetProducts extends CategoryProductEvent {
   final String? filter;
   final bool? isMainCategory;
 
@@ -18,3 +17,6 @@ class GetProducts extends GetProductEvent {
   @override
   List<Object> get props => [filter ?? '', isMainCategory ?? false];
 }
+
+
+

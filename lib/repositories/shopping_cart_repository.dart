@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/cart_model.dart';
+import 'package:onlyveyou/models/order_item_model.dart';
 
 import '../utils/shared_preference_util.dart';
 
@@ -9,7 +10,7 @@ class ShoppingCartRepository {
   ShoppingCartRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  // 장바구니에 상품 추가
+  //1. 장바구니에 상품 추가
   Future<void> addToCart(String productId) async {
     try {
       final userId = await OnlyYouSharedPreference().getCurrentUserId();
@@ -42,7 +43,7 @@ class ShoppingCartRepository {
               List<Map<String, dynamic>>.from(userSnapshot.get('pickupItems'));
         }
 
-        // 5. 중복 체크 (둘 다에서 확인)
+        // 5. 중복 체크
         bool isDuplicate =
             cartItems.any((item) => item['productId'] == productId) ||
                 pickupItems.any((item) => item['productId'] == productId);
@@ -51,13 +52,14 @@ class ShoppingCartRepository {
           throw '이 상품은 이미 장바구니에 담겨 있습니다.';
         }
 
-        // 6. 새 아이템 생성
+        // 6. 새 아이템 생성 (할인 정보 포함)
         final cartItem = {
           'productId': productId,
           'productName': productDoc.get('name'),
           'productImageUrl':
               (productDoc.get('productImageList') as List<dynamic>).first,
           'productPrice': int.parse(productDoc.get('price')),
+          'discountPercent': productDoc.get('discountPercent') ?? 0, // 할인율 추가
           'quantity': 1,
         };
 
@@ -73,9 +75,9 @@ class ShoppingCartRepository {
       });
     } catch (e) {
       if (e is Exception && e.toString().contains('이 상품은 이미 장바구니에 담겨 있습니다')) {
-        rethrow; // 중복 에러는 그대로 전파
+        rethrow;
       }
-      throw '이 상품은 이미 장바구니에 담겨 있습니다.'; // 기타 에러는 일반화된 메시지로
+      throw '장바구니에 상품을 추가하는데 실패했습니다.';
     }
   }
 
@@ -89,26 +91,53 @@ class ShoppingCartRepository {
         return {'regular': [], 'pickup': []};
       }
 
-      // cartItems가 있으면 가져오고, 없으면 빈 배열 반환
       List<Map<String, dynamic>> regularCartItems = [];
       if (userDoc.data()!.containsKey('cartItems')) {
         regularCartItems =
             List<Map<String, dynamic>>.from(userDoc.get('cartItems'));
       }
 
-      // pickupItems가 있으면 가져오고, 없으면 빈 배열 반환
       List<Map<String, dynamic>> pickupItems = [];
       if (userDoc.data()!.containsKey('pickupItems')) {
         pickupItems =
             List<Map<String, dynamic>>.from(userDoc.get('pickupItems'));
       }
 
+      // products collection에서 각 상품의 현재 할인 정보 가져오기
+      List<CartModel> updatedRegularItems = await Future.wait(
+        regularCartItems.map((item) async {
+          final productDoc = await _firestore
+              .collection('products')
+              .doc(item['productId'])
+              .get();
+          final discountPercent = productDoc.get('discountPercent') ?? 0;
+          return CartModel.fromMap({
+            ...item,
+            'discountPercent': discountPercent,
+          });
+        }),
+      );
+
+      List<CartModel> updatedPickupItems = await Future.wait(
+        pickupItems.map((item) async {
+          final productDoc = await _firestore
+              .collection('products')
+              .doc(item['productId'])
+              .get();
+          final discountPercent = productDoc.get('discountPercent') ?? 0;
+          return CartModel.fromMap({
+            ...item,
+            'discountPercent': discountPercent,
+          });
+        }),
+      );
+
       return {
-        'regular':
-            regularCartItems.map((item) => CartModel.fromMap(item)).toList(),
-        'pickup': pickupItems.map((item) => CartModel.fromMap(item)).toList(),
+        'regular': updatedRegularItems,
+        'pickup': updatedPickupItems,
       };
     } catch (e) {
+      print('Error loading cart items: $e');
       throw Exception('장바구니 상품을 불러오는데 실패했습니다.');
     }
   }
@@ -281,4 +310,99 @@ class ShoppingCartRepository {
       throw Exception('상품 수량 업데이트에 실패했습니다.');
     }
   }
+
+  //(1) 데이터 넘겨줄때 카트 모델에서 오더모델로 타입 전환
+  Future<List<OrderItemModel>> getSelectedOrderItems(
+      bool isRegularDelivery) async {
+    try {
+      print(
+          'Fetching ${isRegularDelivery ? "Regular Delivery" : "Pickup"} items');
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      if (!userDoc.exists) {
+        return [];
+      }
+      final field = isRegularDelivery ? 'cartItems' : 'pickupItems';
+      final items = List<Map<String, dynamic>>.from(userDoc.get(field) ?? []);
+      print('Found ${items.length} items to convert');
+
+      // items의 각 아이템의 productPrice를 할인된 가격으로 업데이트
+      items.forEach((item) {
+        final originalPrice = item['productPrice'];
+        final discountPercent = item['discountPercent'] ?? 0;
+        final discountedPrice =
+            (originalPrice * (100 - discountPercent) / 100).round();
+
+        print('Converting item: ${item['productName']}');
+        print('Original price: $originalPrice');
+        print('Discount percent: $discountPercent%');
+        print('Discounted price: $discountedPrice');
+
+        item['productPrice'] =
+            discountedPrice; // CartModel의 productPrice를 할인가격으로 업데이트
+      });
+
+      return items
+          .map((item) => OrderItemModel(
+                productId: item['productId'],
+                productName: item['productName'],
+                productImageUrl: item['productImageUrl'],
+                productPrice:
+                    item['productPrice'], // 할인된 가격이 OrderItemModel로 전달
+                quantity: item['quantity'] ?? 1,
+              ))
+          .toList();
+    } catch (e) {
+      print('Error in getSelectedOrderItems: $e');
+      throw Exception('주문 상품 변환에 실패했습니다.');
+    }
+  }
 }
+///////////////
+// Future<List<OrderItemModel>> getSelectedOrderItems(bool isRegularDelivery) async {
+//   try {
+//     // isRegularDelivery: true면 일반배송, false면 픽업배송을 의미하는 boolean 매개변수
+//     // 현재 어떤 배송 타입의 아이템을 가져오는지 디버깅용 로그 출력
+//     print('Fetching ${isRegularDelivery ? "Regular Delivery" : "Pickup"} items');
+//
+//     // 1. SharedPreferences에서 현재 로그인한 사용자의 고유 ID를 비동기로 가져옴
+//     final userId = await OnlyYouSharedPreference().getCurrentUserId();
+//
+//     // 2. Firestore 데이터베이스에서 users 컬렉션의 해당 userId 문서를 가져옴
+//     // get(): Firestore에서 문서를 한 번만 읽어오는 비동기 메서드
+//     final userDoc = await _firestore.collection('users').doc(userId).get();
+//     if (!userDoc.exists) {
+//       // 해당 사용자의 문서가 존재하지 않으면 빈 리스트를 반환
+//       return [];
+//     }
+
+//     // 3. isRegularDelivery 값에 따라 가져올 필드명을 결정
+//     // field: Firestore 문서 내의 특정 필드(속성)를 지정하는 문자열
+//     final field = isRegularDelivery ? 'cartItems' : 'pickupItems';
+//
+//     // 4. Firestore 문서에서 해당 필드의 데이터를 List<Map<String, dynamic>> 형태로 변환
+//     // List.from(): 기존 컬렉션으로부터 새로운 List를 생성
+//     // userDoc.get(field): 문서에서 특정 필드의 값을 가져옴
+//     // ?? []: null일 경우 빈 리스트를 기본값으로 사용
+//     final items = List<Map<String, dynamic>>.from(userDoc.get(field) ?? []);
+//     print('Found ${items.length} items to convert'); // 변환할 아이템 수 로그 출력
+//
+//     // 5. CartModel 데이터를 OrderItemModel 객체로 변환
+//     // map(): 리스트의 각 요소를 변환하여 새로운 리스트 생성
+//     // toList(): Iterable을 List로 변환
+//     return items
+//         .map((item) => OrderItemModel(
+//       // Map의 각 키-값 쌍을 OrderItemModel의 필드로 매핑
+//       productId: item['productId'],        // 상품 고유 ID
+//       productName: item['productName'],    // 상품명
+//       productImageUrl: item['productImageUrl'], // 상품 이미지 URL
+//       productPrice: item['productPrice'],  // 상품 가격
+//       quantity: item['quantity'] ?? 1,     // 수량(없으면 기본값 1)
+//     ))
+//         .toList();
+//   } catch (e) {
+//     // 예외 처리: 변환 과정에서 발생하는 모든 에러를 잡아서 처리
+//     print('Error in getSelectedOrderItems: $e'); // 에러 내용 로그 출력
+//     throw Exception('주문 상품 변환에 실패했습니다.'); // 사용자에게 보여줄 에러 메시지
+//   }
+// }
