@@ -1,16 +1,17 @@
-import 'dart:ui'; // 색상 처리를 위한 Color 클래스 사용
-
 // 배너 아이템 모델 클래스
-class BannerItem {
-  final String title; // 배너의 주요 제목
-  final String subtitle; // 배너의 부제목
-  final Color backgroundColor; // 배너의 배경 색상
+import 'dart:ui';
 
-  // 배너 아이템 생성자
+class BannerItem {
+  final String imageAsset; // 이미지 에셋 경로 추가
+  final String title;
+  final String subtitle;
+  final Color backgroundColor;
+
   BannerItem({
-    required this.title, // 제목 필수 입력
-    required this.subtitle, // 부제목 필수 입력
-    required this.backgroundColor, // 배경 색상 필수 입력
+    required this.imageAsset, // 이미지 에셋 필드 추가
+    required this.title,
+    required this.subtitle,
+    required this.backgroundColor,
   });
 }
 ///////////////////////////////////////////

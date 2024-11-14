@@ -93,6 +93,7 @@ flutter:
     - assets/image/mypage/
     - assets/image/mypage/coupon_image.jpeg
     - assets/image/shutter/
+    - assets/image/banner/
 
   #   - images/a_dot_ham.jpeg
 
