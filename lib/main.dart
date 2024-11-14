@@ -34,6 +34,7 @@ import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
+import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
@@ -106,10 +107,11 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider<AIRecommendBloc>(
+            BlocProvider(
               create: (context) => AIRecommendBloc(
                 repository: AIRecommendRepository(),
               ),
+              child: AIRecommendScreen(),
             ),
             BlocProvider(
               create: (context) => CartBloc(
