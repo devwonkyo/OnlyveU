@@ -217,20 +217,17 @@ class _ExpandableBottomSheetState extends State<ExpandableBottomSheet>
 
                       final items = [orderItem];
 
-                      final order = OrderModel(
-                          userId: widget.userId,
-                          items: items,
-                          orderType: OrderType.delivery);
-                      context.push(
-                        '/payment',
-                        extra: order,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
+                        final order = OrderModel(userId: widget.userId, items: items, orderType: OrderType.delivery);
+                        context.push(
+                          '/payment', extra: order,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
                       ),
                     ),
                     child: Text(

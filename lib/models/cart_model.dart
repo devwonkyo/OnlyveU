@@ -4,6 +4,7 @@ class CartModel {
   final String productName;
   final String productImageUrl;
   final int productPrice;
+  final int discountPercent; // 할인율 추가
 
   /// 해당 상품의 장바구니 수량
   final int quantity;
@@ -13,6 +14,7 @@ class CartModel {
     required this.productName,
     required this.productImageUrl,
     required this.productPrice,
+    required this.discountPercent, // 필수 파라미터로 추가
     this.quantity = 1,
   });
 
@@ -22,6 +24,7 @@ class CartModel {
       'productName': productName,
       'productImageUrl': productImageUrl,
       'productPrice': productPrice,
+      'discountPercent': discountPercent, // toMap에 추가
       'quantity': quantity,
     };
   }
@@ -32,7 +35,9 @@ class CartModel {
       productName: map['productName'],
       productImageUrl: map['productImageUrl'],
       productPrice: map['productPrice'],
+      discountPercent: map['discountPercent'] ?? 0, // fromMap에 추가, 기본값 0
       quantity: map['quantity'] ?? 1,
     );
   }
+
 }

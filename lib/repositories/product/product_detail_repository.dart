@@ -76,6 +76,7 @@ class ProductDetailRepository {
         productId: productModel.productId,
         productName: productModel.name,
         productImageUrl: productModel.productImageList[0],
+        discountPercent: productModel.discountPercent,
         productPrice: formatDiscountedPriceToInt(
             productModel.price, productModel.discountPercent.toDouble()),
         quantity: quantity
