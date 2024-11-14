@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
-import 'package:onlyveyou/utils/shared_preference_util.dart';
+import 'package:onlyveyou/screens/home/ai_recommend/widgets/ai_recommend_empty_state.dart';
+
+import '../../../repositories/home/ai_recommend_repository.dart';
 
 class AIRecommendScreen extends StatefulWidget {
   const AIRecommendScreen({Key? key}) : super(key: key);
@@ -21,10 +23,9 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _aiRecommendBloc = context.read<AIRecommendBloc>();
-      _aiRecommendBloc.add(LoadAIRecommendations());
-    });
+    _aiRecommendBloc = AIRecommendBloc(
+      repository: AIRecommendRepository(),
+    );
   }
 
   @override
@@ -74,7 +75,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          '회원님의 취향을 분석한 맞춤 상품',
+                          '회원님의 취향을 분석한\n맞춤 상품',
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Colors.white.withOpacity(0.9),
@@ -86,31 +87,33 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                   // 추천하기 버튼 추가
                   ElevatedButton(
                     onPressed: () {
-                      // 추후 추천 로직 API 호출
                       _aiRecommendBloc.add(LoadAIRecommendations());
                     },
                     style: ElevatedButton.styleFrom(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 10.h),
                       backgroundColor: Colors.white,
+                      elevation: 2,
+                      shadowColor: Colors.black.withOpacity(0.1),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.refresh,
+                          Icons.auto_awesome,
                           color: Color(0xFF2575FC),
                           size: 18.sp,
                         ),
-                        SizedBox(width: 4.w),
+                        SizedBox(width: 8.w),
                         Text(
-                          '추천하기',
+                          'AI 추천받기',
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Color(0xFF2575FC),
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -150,70 +153,58 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
         // 추천 상품 리스트
         Expanded(
           child: BlocBuilder<AIRecommendBloc, AIRecommendState>(
-            builder: (context, state) {
-              if (state is AIRecommendLoading) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'AI가 맞춤 상품을 분석중입니다...',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[600],
+              builder: (context, state) {
+            if (state is AIRecommendLoading) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'AI가 맞춤 상품을 분석중입니다...',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else if (state is AIRecommendLoaded) {
+              return ListView.builder(
+                padding: EdgeInsets.zero,
+                controller: _scrollController,
+                itemCount: min(state.products.length, 10),
+                itemBuilder: (context, index) {
+                  final product = state.products[index];
+                  return GestureDetector(
+                    onTap: () => context.push('/product-detail',
+                        extra: product.productId),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 12.w),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom:
+                              BorderSide(color: Colors.grey[200]!, width: 1),
                         ),
                       ),
-                    ],
-                  ),
-                );
-              } else if (state is AIRecommendLoaded) {
-                return ListView.builder(
-                  padding: EdgeInsets.zero,
-                  controller: _scrollController,
-                  itemCount: min(state.products.length, 10),
-                  itemBuilder: (context, index) {
-                    final product = state.products[index];
-                    return GestureDetector(
-                      onTap: () => context.push('/product-detail',
-                          extra: product.productId),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 16.w, vertical: 12.w),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom:
-                                BorderSide(color: Colors.grey[200]!, width: 1),
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 상품 이미지
-                            Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: product.productImageList.isNotEmpty
-                                      ? Image.network(
-                                          product.productImageList.first,
-                                          width: 120.w,
-                                          height: 120.w,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
-                                              Container(
-                                            width: 120.w,
-                                            height: 120.w,
-                                            color: Colors.grey[200],
-                                            child: Icon(
-                                              Icons.image_not_supported,
-                                              size: 40.w,
-                                              color: Colors.grey[400],
-                                            ),
-                                          ),
-                                        )
-                                      : Container(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 상품 이미지
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: product.productImageList.isNotEmpty
+                                    ? Image.network(
+                                        product.productImageList.first,
+                                        width: 120.w,
+                                        height: 120.w,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
                                           width: 120.w,
                                           height: 120.w,
                                           color: Colors.grey[200],
@@ -223,209 +214,173 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                                             color: Colors.grey[400],
                                           ),
                                         ),
-                                ),
-                                // AI 추천 뱃지
-                                Positioned(
-                                  top: 8,
-                                  left: 8,
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8.w, vertical: 4.h),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.7),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          Icons.auto_awesome,
-                                          size: 12.sp,
-                                          color: Colors.white,
-                                        ),
-                                        SizedBox(width: 4.w),
-                                        Text(
-                                          'AI Pick',
-                                          style: TextStyle(
-                                            fontSize: 10.sp,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: 16.w),
-                            // 상품 정보
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    product.name,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Text(
-                                    '${product.price}원',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      decoration: TextDecoration.lineThrough,
-                                      fontSize: 12.sp,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '${product.discountPercent}%',
-                                        style: TextStyle(
-                                          color: Colors.red,
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.bold,
+                                      )
+                                    : Container(
+                                        width: 120.w,
+                                        height: 120.w,
+                                        color: Colors.grey[200],
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          size: 40.w,
+                                          color: Colors.grey[400],
                                         ),
                                       ),
-                                      SizedBox(width: 8.w),
+                              ),
+                              // AI 추천 뱃지
+                              Positioned(
+                                top: 8,
+                                left: 8,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w, vertical: 4.h),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.auto_awesome,
+                                        size: 12.sp,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 4.w),
                                       Text(
-                                        '${_calculateDiscountedPrice(product.price, product.discountPercent)}원',
+                                        'AI Pick',
                                         style: TextStyle(
-                                          fontSize: 14.sp,
+                                          fontSize: 10.sp,
+                                          color: Colors.white,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 8.h),
-                                  // AI 추천 이유 태그
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8.w, vertical: 4.h),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue[50],
-                                      borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 16.w),
+                          // 상품 정보
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.name,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  '${product.price}원',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    decoration: TextDecoration.lineThrough,
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${product.discountPercent}%',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                    child: BlocBuilder<AIRecommendBloc,
-                                        AIRecommendState>(
-                                      builder: (context, state) {
-                                        if (state is AIRecommendLoaded) {
-                                          return Text(
-                                            state.getRecommendReason(
-                                                product.productId),
-                                            style: TextStyle(
-                                              fontSize: 11.sp,
-                                              color: Colors.blue[700],
-                                            ),
-                                          );
-                                        }
+                                    SizedBox(width: 8.w),
+                                    Text(
+                                      '${_calculateDiscountedPrice(product.price, product.discountPercent)}원',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8.h),
+                                // AI 추천 이유 태그
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w, vertical: 4.h),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue[50],
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: BlocBuilder<AIRecommendBloc,
+                                      AIRecommendState>(
+                                    builder: (context, state) {
+                                      if (state is AIRecommendLoaded) {
                                         return Text(
-                                          '회원님 취향과 일치',
+                                          state.getRecommendReason(
+                                              product.productId),
                                           style: TextStyle(
                                             fontSize: 11.sp,
                                             color: Colors.blue[700],
                                           ),
                                         );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // 좋아요 및 장바구니 아이콘
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 20.h),
-                                FutureBuilder<String>(
-                                  future: OnlyYouSharedPreference()
-                                      .getCurrentUserId(),
-                                  builder: (context, snapshot) {
-                                    final userId =
-                                        snapshot.data ?? 'temp_user_id';
-                                    return GestureDetector(
-                                      onTap: () {
-                                        _aiRecommendBloc.add(
-                                          ToggleProductFavorite(
-                                              product, userId),
-                                        );
-                                      },
-                                      child: Icon(
-                                        product.favoriteList.contains(userId)
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        size: 24.sp,
-                                        color: product.favoriteList
-                                                .contains(userId)
-                                            ? Colors.red
-                                            : Colors.grey,
-                                      ),
-                                    );
-                                  },
-                                ),
-                                SizedBox(height: 25.h),
-                                GestureDetector(
-                                  onTap: () {
-                                    _aiRecommendBloc
-                                        .add(AddToCart(product.productId));
-                                  },
-                                  child: Container(
-                                    width: 22,
-                                    height: 22,
-                                    child: Icon(
-                                      Icons.shopping_bag_outlined,
-                                      size: 20,
-                                      color: Colors.grey,
-                                    ),
+                                      }
+                                      return Text(
+                                        '회원님 취향과 일치',
+                                        style: TextStyle(
+                                          fontSize: 11.sp,
+                                          color: Colors.blue[700],
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                          // 좋아요 및 장바구니 아이콘
+                        ],
                       ),
-                    );
-                  },
-                );
-              } else if (state is AIRecommendError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 48.sp,
-                        color: Colors.grey,
+                    ),
+                  );
+                },
+              );
+            } else if (state is AIRecommendError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 48.sp,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      state.message,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.grey[600],
                       ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        state.message,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 16.h),
-                      ElevatedButton(
-                        onPressed: () {
-                          _aiRecommendBloc.add(LoadAIRecommendations());
-                        },
-                        child: Text('다시 시도'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return Container();
-            },
-          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 16.h),
+                    ElevatedButton(
+                      onPressed: () {
+                        _aiRecommendBloc.add(LoadAIRecommendations());
+                      },
+                      child: Text('다시 시도'),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return const AIRecommendEmptyState();
+            }
+            return Container();
+          }),
         ),
       ],
     );
