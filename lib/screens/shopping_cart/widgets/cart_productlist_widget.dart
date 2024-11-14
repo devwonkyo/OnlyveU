@@ -23,10 +23,25 @@ class CartProductListWidget extends StatelessWidget {
     required this.onUpdateSelection,
   });
 
+  // 할인된 가격 계산 (수량 반영)
+  int calculateDiscountedPrice(CartModel item, int quantity) {
+    return ((item.productPrice * (100 - item.discountPercent) / 100) * quantity)
+        .round();
+  }
+
+  // 원래 가격 계산 (수량 반영)
+  int calculateOriginalPrice(CartModel item, int quantity) {
+    return item.productPrice * quantity;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: items.map((item) {
+        final quantity = itemQuantities[item.productId] ?? 1;
+        final discountedPrice = calculateDiscountedPrice(item, quantity);
+        final originalPrice = calculateOriginalPrice(item, quantity);
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -35,14 +50,6 @@ class CartProductListWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isPickup)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    '',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -93,20 +100,15 @@ class CartProductListWidget extends StatelessWidget {
                   const SizedBox(width: 12),
                   // 상품 정보
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () => context.push('/product-detail',
-                              extra: item.productId),
-                          child: Text(
-                            item.productName,
-                            style: const TextStyle(fontSize: 14),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    child: GestureDetector(
+                      onTap: () => context.push('/product-detail',
+                          extra: item.productId),
+                      child: Text(
+                        item.productName,
+                        style: const TextStyle(fontSize: 14),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                   // 삭제 버튼
@@ -124,12 +126,29 @@ class CartProductListWidget extends StatelessWidget {
                   const SizedBox(width: 50),
                   _buildQuantityControl(item),
                   const Spacer(),
-                  Text(
-                    '${formatPrice(item.productPrice.toString())}원',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  // 가격 표시 부분
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (item.discountPercent > 0) ...[
+                        Text(
+                          '${formatPrice(originalPrice.toString())}원',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        '${formatPrice(discountedPrice.toString())}원',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
