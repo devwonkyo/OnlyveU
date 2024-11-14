@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
@@ -42,9 +43,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
     context.read<ProductDetailBloc>().add(LoadProductDetail(widget.productId));
-    context
-        .read<ProductDetailBloc>()
-        .add(InputProductHistoryEvent(widget.productId));
+    context.read<ProductDetailBloc>().add(InputProductHistoryEvent(widget.productId));
+    context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
   }
 
   @override
@@ -88,11 +88,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 }
               },
             ),
+
             BlocListener<ProductDetailBloc, ProductDetailState>(
               listener: (context, state) {
                 if (state is ProductLikedSuccess) {
-                  if (state.likeState) {
-                    //좋아요 를 눌렀을 때
+                  if(state.likeState){ //좋아요 를 눌렀을 때
                     showLikeAnimation(context);
                   }
                 }
@@ -102,7 +102,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
             builder: (context, state) {
               if (state is ProductDetailLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child: CircularProgressIndicator());
               }
 
               if (state is ProductDetailLoaded) {
@@ -120,22 +120,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               _buildTabBar(),
                             ];
                           },
-                          body: _buildTabBarView(state.product),
+                          body: _buildTabBarView(state.product, state.userId),
                         ),
                       ),
                       Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: ExpandableBottomSheet(
-                              productModel: state.product,
-                              userId: state.userId)),
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: ExpandableBottomSheet(productModel: state.product, userId: state.userId)
+                      ),
                     ],
                   ),
                 );
               }
 
-              return const SizedBox.shrink();
+              return SizedBox.shrink();
             },
           ),
         ),
@@ -151,20 +150,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       scrolledUnderElevation: 0,
       backgroundColor: Colors.white,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: Icon(Icons.arrow_back, color: Colors.black),
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.search, color: Colors.black),
+          icon: Icon(Icons.search, color: Colors.black),
           onPressed: () {},
         ),
         IconButton(
-          icon: const Icon(Icons.home_outlined, color: Colors.black),
+          icon: Icon(Icons.home_outlined, color: Colors.black),
           onPressed: () {},
         ),
         IconButton(
-          icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black),
+          icon: Icon(Icons.shopping_cart_outlined, color: Colors.black),
           onPressed: () {},
         ),
       ],
@@ -177,7 +176,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildImageCarousel(product.productImageList),
-          _buildProductInfo(product, userId),
+          _buildProductInfo(product,userId),
           Container(height: 8.h, color: Colors.grey[200]),
         ],
       ),
@@ -264,21 +263,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      context
-                          .read<ProductDetailBloc>()
-                          .add(TouchProductLikeEvent(product.productId));
+                      context.read<ProductDetailBloc>().add(TouchProductLikeEvent(product.productId));
                     },
-                    child: SizedBox(
+                    child: Container(
                       width: 20.w,
                       height: 20.w,
                       child: Icon(
-                        product.isFavorite(userId)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
+                        product.isFavorite(userId) ? Icons.favorite : Icons.favorite_border,
                         size: 20.sp,
-                        color: product.isFavorite(userId)
-                            ? Colors.red
-                            : Colors.black,
+                        color: product.isFavorite(userId) ? Colors.red : Colors.black,
                       ),
                     ),
                   ),
@@ -383,7 +376,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        const Divider(
+        Divider(
           thickness: 1,
           color: AppsColor.lightGray,
         ),
@@ -437,7 +430,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return SliverPersistentHeader(
       delegate: StickyTabBarDelegate(
         TabBar(
-          tabs: const [Tab(text: '상품설명'), Tab(text: '리뷰')],
+          onTap: (index) {
+            if (index == 1) {
+              // context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
+            }
+          },
+          tabs: [Tab(text: '상품설명'), Tab(text: '리뷰')],
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
           indicatorColor: Colors.black,
@@ -451,8 +449,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildTabBarView(ProductModel product) {
+  Widget _buildTabBarView(ProductModel product, String userId) {
     return TabBarView(
+      physics: NeverScrollableScrollPhysics(),
       children: [
         SingleChildScrollView(
           child: Column(
@@ -463,14 +462,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ReviewSummaryWidget(),
-              ReviewListWidget(),
-            ],
-          ),
+        BlocBuilder<ReviewBloc, ReviewState>(
+          builder: (context, state) {
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ReviewSummaryWidget(),
+                  ReviewListWidget(),
+                ],
+              ),
+            );
+            },
         ),
       ],
     );
