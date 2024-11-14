@@ -7,8 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/widgets/ai_recommend_empty_state.dart';
 
-import '../../../repositories/home/ai_recommend_repository.dart';
-
 class AIRecommendScreen extends StatefulWidget {
   const AIRecommendScreen({Key? key}) : super(key: key);
 
@@ -23,9 +21,11 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
   @override
   void initState() {
     super.initState();
-    _aiRecommendBloc = AIRecommendBloc(
-      repository: AIRecommendRepository(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _aiRecommendBloc = context.read<AIRecommendBloc>();
+      // 초기 데이터 로드
+      _aiRecommendBloc.add(const LoadAIRecommendations());
+    });
   }
 
   @override
@@ -84,7 +84,6 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                       ],
                     ),
                   ),
-                  // 추천하기 버튼 추가
                   ElevatedButton(
                     onPressed: () {
                       context
@@ -124,30 +123,34 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                 ],
               ),
               SizedBox(height: 16.h),
-              // AI 분석 요약 카드들
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildAnalysisCard(
-                      icon: Icons.remove_red_eye,
-                      title: '최근 본 상품',
-                      value: '32개',
+              // AI 분석 요약 카드들 - BlocBuilder로 실시간 데이터 표시
+              BlocBuilder<AIRecommendBloc, AIRecommendState>(
+                builder: (context, state) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildAnalysisCard(
+                          icon: Icons.remove_red_eye,
+                          title: '최근 본 상품',
+                          value: '${state.activityCounts['viewCount']}개',
+                        ),
+                        SizedBox(width: 12.w),
+                        _buildAnalysisCard(
+                          icon: Icons.favorite,
+                          title: '관심 상품',
+                          value: '${state.activityCounts['likeCount']}개',
+                        ),
+                        SizedBox(width: 12.w),
+                        _buildAnalysisCard(
+                          icon: Icons.shopping_cart,
+                          title: '장바구니',
+                          value: '${state.activityCounts['cartCount']}개',
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 12.w),
-                    _buildAnalysisCard(
-                      icon: Icons.favorite,
-                      title: '관심 상품',
-                      value: '12개',
-                    ),
-                    SizedBox(width: 12.w),
-                    _buildAnalysisCard(
-                      icon: Icons.shopping_cart,
-                      title: '장바구니',
-                      value: '3개',
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),

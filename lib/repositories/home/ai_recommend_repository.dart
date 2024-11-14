@@ -215,4 +215,53 @@ class AIRecommendRepository {
       throw Exception('추천 상품 로드 실패: $e');
     }
   }
+
+  // 새로 추가된 실시간 사용자 활동 데이터 구독 메서드
+  Stream<Map<String, int>> getUserActivityCountsStream(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .snapshots()
+        .map((snapshot) {
+      if (!snapshot.exists) {
+        return {
+          'viewCount': 0,
+          'likeCount': 0,
+          'cartCount': 0,
+        };
+      }
+
+      try {
+        final userData = UserModel.fromMap(snapshot.data()!);
+
+        return {
+          'viewCount': userData.viewHistory.length,
+          'likeCount': userData.likedItems.length,
+          'cartCount': userData.cartItems.length,
+        };
+      } catch (e) {
+        print('Error parsing user activity counts: $e');
+        return {
+          'viewCount': 0,
+          'likeCount': 0,
+          'cartCount': 0,
+        };
+      }
+    });
+  }
+
+  // 현재 로그인된 사용자의 활동 데이터 구독
+  Stream<Map<String, int>> getCurrentUserActivityCountsStream() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      // 로그인되지 않은 경우 빈 데이터 반환
+      return Stream.value({
+        'viewCount': 0,
+        'likeCount': 0,
+        'cartCount': 0,
+      });
+    }
+
+    return getUserActivityCountsStream(currentUser.uid);
+  }
 }
