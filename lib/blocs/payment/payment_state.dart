@@ -75,7 +75,7 @@ class DeliveryInfoUpdated extends PaymentState {
     this.totalAmount,
     this.orderType,
   );
-
+  
   @override
   List<Object> get props => [deliveryInfo, orderItems, totalAmount, orderType];
 }
