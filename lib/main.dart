@@ -58,9 +58,9 @@ void main() async {
     final productRepository = ProductRepository();
     await productRepository.fetchAndStoreAllProducts();
     final storedProducts = await productRepository.getStoredProducts();
-    print('Stored products: ${storedProducts.length}');
+    debugPrint('Stored products: ${storedProducts.length}');
   } catch (e) {
-    print('Error fetching and storing products: $e');
+    debugPrint('Error fetching and storing products: $e');
   }
 
   // 모든 검색어 로컬 저장 (검색용)
@@ -68,15 +68,10 @@ void main() async {
     final suggestionRepository = SuggestionRepositoryImpl();
     await suggestionRepository.fetchAndStoreAllSuggestions();
     final storedSuggestions = await suggestionRepository.getStoredSuggestions();
-    print('Stored suggestions: ${storedSuggestions.length}');
+    debugPrint('Stored suggestions: ${storedSuggestions.length}');
   } catch (e) {
-    print('Error fetching and storing suggestions: $e');
+    debugPrint('Error fetching and storing suggestions: $e');
   }
-
-  // 트렌드 점수 업데이트 시작
-  // final trendCalculator = TrendCalculator();
-  // final trendUpdater = TrendUpdater(trendCalculator: trendCalculator);
-  // trendUpdater.startUpdating();
 
   runApp(const MyApp());
 }

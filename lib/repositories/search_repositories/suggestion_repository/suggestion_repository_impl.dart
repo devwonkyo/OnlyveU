@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:onlyveyou/models/search_models/search_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,7 +39,7 @@ class SuggestionRepositoryImpl implements SuggestionRepository {
       await _clearStoredSuggestions();
       await _storeSuggestionsLocally(suggestions);
     } catch (e) {
-      print('Error fetching suggestions: $e');
+      debugPrint('Error fetching suggestions: $e');
     }
   }
 
@@ -47,7 +48,7 @@ class SuggestionRepositoryImpl implements SuggestionRepository {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('suggestions');
     } catch (e) {
-      print('Error clearing stored suggestions: $e');
+      debugPrint('Error clearing stored suggestions: $e');
     }
   }
 
@@ -60,7 +61,7 @@ class SuggestionRepositoryImpl implements SuggestionRepository {
       final suggestionString = jsonEncode(suggestionJson);
       await prefs.setString('suggestions', suggestionString);
     } catch (e) {
-      print('Error storing suggestions locally: $e');
+      debugPrint('Error storing suggestions locally: $e');
     }
   }
 
@@ -76,7 +77,7 @@ class SuggestionRepositoryImpl implements SuggestionRepository {
             .toList();
       }
     } catch (e) {
-      print('Error getting stored suggestions: $e');
+      debugPrint('Error getting stored suggestions: $e');
     }
     return [];
   }
@@ -109,7 +110,20 @@ class SuggestionRepositoryImpl implements SuggestionRepository {
         });
       }
     } catch (e) {
-      print('Error incrementing popularity: $e');
+      debugPrint('Error incrementing popularity: $e');
     }
+  }
+
+  @override
+  Future<List<SuggestionModel>> getTrendSearches() async {
+    final querySnapshot = await _firestore
+        .collection('suggestions')
+        .orderBy('popularity', descending: true)
+        .limit(10)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => SuggestionModel.fromMap(doc.data()))
+        .toList();
   }
 }

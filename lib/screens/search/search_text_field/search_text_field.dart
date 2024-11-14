@@ -38,7 +38,9 @@ class _SearchTextFieldState extends State<SearchTextField> {
       height: 40.h,
       child: BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
         listener: (context, state) {
-          if (state is SearchTextFieldSubmitted) {
+          if (state is SearchTextFieldEmpty) {
+            _controller.clear();
+          } else if (state is SearchTextFieldSubmitted) {
             _controller.text = state.text;
           }
         },
@@ -83,7 +85,6 @@ class _SearchTextFieldState extends State<SearchTextField> {
                     visible: state is! SearchTextFieldEmpty,
                     child: GestureDetector(
                       onTap: () {
-                        _controller.clear();
                         context.read<SearchTextFieldBloc>().add(TextDeleted());
                         _focusNode.requestFocus();
                       },

@@ -6,7 +6,7 @@ import 'package:onlyveyou/screens/search/search_home/trend_search/trend_search_v
 
 import '../search_text_field/bloc/search_text_field_bloc.dart';
 import 'recent_search/bloc/recent_search_bloc.dart';
-// import '../../../utils/search/suggestion/suggestion_button.dart';
+import 'trend_search/bloc/trend_search_bloc.dart';
 
 class SearchHomeScreen extends StatelessWidget {
   const SearchHomeScreen({
@@ -30,7 +30,7 @@ class SearchHomeScreen extends StatelessWidget {
               // 로컬 데이터
               BlocBuilder<RecentSearchBloc, RecentSearchState>(
                 builder: (context, state) {
-                  print(state);
+                  debugPrint(state.toString());
                   if (state is RecentSearchInitial) {
                     return const SizedBox();
                   } else if (state is RecentSearchLoading) {
@@ -126,22 +126,29 @@ class SearchHomeScreen extends StatelessWidget {
                 ),
               ),
               // 서버 데이터
-              SearchMainContainer(
-                title: '급상승 검색어',
-                leading: Text(
-                  '22:40 기준',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.grey,
-                  ),
-                ),
-                child: const TreandSearchView(),
-                // Column(
-                // children: [
-                //   BrandSuggestionUpdateButton(),
-                //   CategorySuggestionUpdateButton(),
-                // ],
-                // ),
+              BlocBuilder<TrendSearchBloc, TrendSearchState>(
+                builder: (context, state) {
+                  if (state is TrendSearchInitial) {
+                    return const SizedBox();
+                  } else if (state is TrendSearchLoading) {
+                    return const Center(child: Text('나중에 로딩화면'));
+                  } else if (state is TrendSearchLoaded) {
+                    return SearchMainContainer(
+                      title: '인기 검색어',
+                      leading: Text(
+                        '${state.updateTime} 기준',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      child:
+                          TreandSearchView(trendSearches: state.trendSearches),
+                    );
+                  } else {
+                    return const SizedBox();
+                  }
+                },
               ),
             ],
           ),
