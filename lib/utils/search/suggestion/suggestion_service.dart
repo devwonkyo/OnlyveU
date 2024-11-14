@@ -30,7 +30,6 @@ class SuggestionService {
             final suggestion = SuggestionModel(
               term: brandName,
               popularity: 0,
-              trendScore: 0.0,
               sourceCollection: 'brandName', // sourceCollection 필드 설정
             );
 
@@ -95,7 +94,6 @@ class SuggestionService {
       SuggestionModel suggestion = SuggestionModel(
         term: term,
         popularity: 0,
-        trendScore: 0.0,
         sourceCollection: sourceCollection,
       );
 
@@ -103,6 +101,20 @@ class SuggestionService {
           .collection('suggestions')
           .doc(suggestion.term)
           .set(suggestion.toMap());
+    }
+  }
+
+  Future<void> deleteTrendScoreField() async {
+    try {
+      final querySnapshot = await _firestore.collection('suggestions').get();
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.update({
+          'trendScore': FieldValue.delete(),
+        });
+      }
+      print('trendScore field deleted successfully');
+    } catch (e) {
+      print('Error deleting trendScore field: $e');
     }
   }
 }

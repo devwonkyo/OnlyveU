@@ -34,3 +34,18 @@ class CategorySuggestionUpdateButton extends StatelessWidget {
     );
   }
 }
+
+// class DeleteTrendScoreButton extends StatelessWidget {
+//   final SuggestionService suggestionService = SuggestionService();
+//   DeleteTrendScoreButton({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ElevatedButton(
+//       onPressed: () async {
+//         await suggestionService.deleteTrendScoreField();
+//       },
+//       child: const Text('Delete Trend Score Suggestions'),
+//     );
+//   }
+// }

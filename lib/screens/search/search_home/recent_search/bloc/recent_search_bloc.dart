@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../../repositories/search_repositories/recent_search_repository/recent_search_repository.dart';
 
@@ -30,7 +31,7 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
     try {
       final recentSearches = await repository.loadRecentSearches();
       await Future.delayed(const Duration(seconds: 2));
-      print('onLoadRecentSearch: $recentSearches');
+      debugPrint('onLoadRecentSearch: $recentSearches');
       if (recentSearches.isEmpty) {
         emit(RecentSearchEmpty());
       } else {
