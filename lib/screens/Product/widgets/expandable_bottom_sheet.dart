@@ -211,7 +211,7 @@ class _ExpandableBottomSheetState extends State<ExpandableBottomSheet> with Sing
 
                         final order = OrderModel(userId: widget.userId, items: items, orderType: OrderType.delivery);
                         context.push(
-                          '/payment', extra: {'order': order},
+                          '/payment', extra: order,
                         );
                       },
                       style: ElevatedButton.styleFrom(
