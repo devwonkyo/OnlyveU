@@ -65,6 +65,32 @@ class ReviewRepository{
     }
   }
 
+  Future<void> addReview(ReviewModel reviewModel) async {
+    try {
+      // 1. 사용자 이름 가져오기
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(reviewModel.userId)
+          .get();
+      final userName = userDoc.data()?['nickname'] as String;
+
+      // 2. 리뷰 문서 생성하고 ID 받기
+      final reviewRef = _firestore.collection('reviews').doc();
+      final reviewId = reviewRef.id;
+
+      // 3. 최종 리뷰 모델 생성
+      final finalReview = reviewModel.copyWith(
+        reviewId: reviewId,
+        userName: userName,
+      );
+
+      // 4. 리뷰 저장
+      await reviewRef.set(finalReview.toMap());
+    } catch (e) {
+      throw Exception('리뷰 생성 실패: $e');
+    }
+  }
+
 
 
 }

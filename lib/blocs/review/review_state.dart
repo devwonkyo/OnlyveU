@@ -37,3 +37,30 @@ class AddReviewLikeState extends ReviewState {
   @override
   List<Object> get props => [message];
 }
+
+
+class LoadingAddReview extends ReviewState {
+
+  const LoadingAddReview();
+
+  @override
+  List<Object> get props => [];
+}
+
+class SuccessAddReview extends ReviewState {
+  final String message;
+
+  const SuccessAddReview(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class ErrorAddReview extends ReviewState {
+  final String message;
+
+  const ErrorAddReview(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
