@@ -32,7 +32,9 @@ import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
+
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/simple_bloc_observer.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
@@ -82,7 +84,8 @@ void main() async {
   // final trendCalculator = TrendCalculator();
   // final trendUpdater = TrendUpdater(trendCalculator: trendCalculator);
   // trendUpdater.startUpdating();
-
+  // BlocObserver 설정
+  Bloc.observer = SimpleBlocObserver();
   runApp(const MyApp());
 }
 
@@ -158,6 +161,21 @@ class MyApp extends StatelessWidget {
             BlocProvider<PostBloc>(
               create: (context) => PostBloc(),
             ),
+            BlocProvider<CategoryProductBloc>(
+              // CategoryProductBloc 추가
+              create: (context) =>
+                  CategoryProductBloc(repository: ProductDetailRepository()),
+            ),
+            BlocProvider<ProductCartBloc>(
+              // CategoryProductBloc 추가
+              create: (context) =>
+                  ProductCartBloc(repository: ProductDetailRepository()),
+            ),
+            BlocProvider<ProductLikeBloc>(
+              // CategoryProductBloc 추가
+              create: (context) =>
+                  ProductLikeBloc(repository: ProductDetailRepository()),
+            ),
             BlocProvider<StoreBloc>(
               create: (context) => StoreBloc(),
             ),
@@ -166,7 +184,7 @@ class MyApp extends StatelessWidget {
             builder: (context, state) {
               return MaterialApp.router(
                 debugShowCheckedModeBanner: false,
-                themeMode: state.themeMode,
+                themeMode: ThemeMode.light, //todo
                 theme: lightThemeData(),
                 darkTheme: darkThemeData(),
                 routerConfig: router,

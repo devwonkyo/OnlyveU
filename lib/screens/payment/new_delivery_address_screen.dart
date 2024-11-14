@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
@@ -129,6 +130,7 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_isFormFilled()) {
+                      print("배송지 추가 버튼 클릭");
                       context.read<PaymentBloc>().add(UpdateDeliveryInfo(
                             deliveryName: _deliveryNameController.text,
                             address: _addressController.text,
@@ -136,7 +138,7 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
                             recipientName: _recipientController.text,
                             recipientPhone: _phoneController.text,
                           ));
-                          
+
                       context.pop();
                     } else {
                       _showWarningPopup('모두 입력해주세요');
