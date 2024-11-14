@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
@@ -43,6 +44,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _scrollController.addListener(_scrollListener);
     context.read<ProductDetailBloc>().add(LoadProductDetail(widget.productId));
     context.read<ProductDetailBloc>().add(InputProductHistoryEvent(widget.productId));
+    context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
   }
 
   @override
@@ -118,7 +120,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               _buildTabBar(),
                             ];
                           },
-                          body: _buildTabBarView(state.product),
+                          body: _buildTabBarView(state.product, state.userId),
                         ),
                       ),
                       Positioned(
@@ -428,6 +430,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return SliverPersistentHeader(
       delegate: StickyTabBarDelegate(
         TabBar(
+          onTap: (index) {
+            if (index == 1) {
+              // context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
+            }
+          },
           tabs: [Tab(text: '상품설명'), Tab(text: '리뷰')],
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
@@ -442,8 +449,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildTabBarView(ProductModel product) {
+  Widget _buildTabBarView(ProductModel product, String userId) {
     return TabBarView(
+      physics: NeverScrollableScrollPhysics(),
       children: [
         SingleChildScrollView(
           child: Column(
@@ -454,14 +462,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ReviewSummaryWidget(),
-              ReviewListWidget(),
-            ],
-          ),
+        BlocBuilder<ReviewBloc, ReviewState>(
+          builder: (context, state) {
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ReviewSummaryWidget(),
+                  ReviewListWidget(),
+                ],
+              ),
+            );
+            },
         ),
       ],
     );
