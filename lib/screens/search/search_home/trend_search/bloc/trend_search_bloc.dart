@@ -24,7 +24,8 @@ class TrendSearchBloc extends Bloc<TrendSearchEvent, TrendSearchState> {
     try {
       final trendSearches = await repository.getTrendSearches();
       final now = DateTime.now();
-      emit(TrendSearchLoaded(trendSearches, '${now.hour}:${now.minute}'));
+      emit(TrendSearchLoaded(trendSearches,
+          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}'));
       debugPrint('급상승 검색어 업데이트');
     } catch (e) {
       emit(TrendSearchError(e.toString()));
