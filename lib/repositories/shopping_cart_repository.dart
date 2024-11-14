@@ -43,7 +43,7 @@ class ShoppingCartRepository {
               List<Map<String, dynamic>>.from(userSnapshot.get('pickupItems'));
         }
 
-        // 5. 중복 체크 (둘 다에서 확인)
+        // 5. 중복 체크
         bool isDuplicate =
             cartItems.any((item) => item['productId'] == productId) ||
                 pickupItems.any((item) => item['productId'] == productId);
@@ -52,13 +52,14 @@ class ShoppingCartRepository {
           throw '이 상품은 이미 장바구니에 담겨 있습니다.';
         }
 
-        // 6. 새 아이템 생성
+        // 6. 새 아이템 생성 (할인 정보 포함)
         final cartItem = {
           'productId': productId,
           'productName': productDoc.get('name'),
           'productImageUrl':
               (productDoc.get('productImageList') as List<dynamic>).first,
           'productPrice': int.parse(productDoc.get('price')),
+          'discountPercent': productDoc.get('discountPercent') ?? 0, // 할인율 추가
           'quantity': 1,
         };
 
@@ -74,9 +75,9 @@ class ShoppingCartRepository {
       });
     } catch (e) {
       if (e is Exception && e.toString().contains('이 상품은 이미 장바구니에 담겨 있습니다')) {
-        rethrow; // 중복 에러는 그대로 전파
+        rethrow;
       }
-      throw '이 상품은 이미 장바구니에 담겨 있습니다.'; // 기타 에러는 일반화된 메시지로
+      throw '장바구니에 상품을 추가하는데 실패했습니다.';
     }
   }
 
@@ -90,26 +91,53 @@ class ShoppingCartRepository {
         return {'regular': [], 'pickup': []};
       }
 
-      // cartItems가 있으면 가져오고, 없으면 빈 배열 반환
       List<Map<String, dynamic>> regularCartItems = [];
       if (userDoc.data()!.containsKey('cartItems')) {
         regularCartItems =
             List<Map<String, dynamic>>.from(userDoc.get('cartItems'));
       }
 
-      // pickupItems가 있으면 가져오고, 없으면 빈 배열 반환
       List<Map<String, dynamic>> pickupItems = [];
       if (userDoc.data()!.containsKey('pickupItems')) {
         pickupItems =
             List<Map<String, dynamic>>.from(userDoc.get('pickupItems'));
       }
 
+      // products collection에서 각 상품의 현재 할인 정보 가져오기
+      List<CartModel> updatedRegularItems = await Future.wait(
+        regularCartItems.map((item) async {
+          final productDoc = await _firestore
+              .collection('products')
+              .doc(item['productId'])
+              .get();
+          final discountPercent = productDoc.get('discountPercent') ?? 0;
+          return CartModel.fromMap({
+            ...item,
+            'discountPercent': discountPercent,
+          });
+        }),
+      );
+
+      List<CartModel> updatedPickupItems = await Future.wait(
+        pickupItems.map((item) async {
+          final productDoc = await _firestore
+              .collection('products')
+              .doc(item['productId'])
+              .get();
+          final discountPercent = productDoc.get('discountPercent') ?? 0;
+          return CartModel.fromMap({
+            ...item,
+            'discountPercent': discountPercent,
+          });
+        }),
+      );
+
       return {
-        'regular':
-            regularCartItems.map((item) => CartModel.fromMap(item)).toList(),
-        'pickup': pickupItems.map((item) => CartModel.fromMap(item)).toList(),
+        'regular': updatedRegularItems,
+        'pickup': updatedPickupItems,
       };
     } catch (e) {
+      print('Error loading cart items: $e');
       throw Exception('장바구니 상품을 불러오는데 실패했습니다.');
     }
   }

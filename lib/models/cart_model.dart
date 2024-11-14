@@ -39,5 +39,7 @@ class CartModel {
       quantity: map['quantity'] ?? 1,
     );
   }
-
 }
+
+//레퍼지토리에서 카트모델을 오더아이템 모델로 변경할때는
+// price에 할일율이 적용된 가격을 넘겨주기
