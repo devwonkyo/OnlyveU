@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/widgets/banner_widget.dart';
 import 'package:onlyveyou/screens/home/home/widgets/popular_products_widget.dart';
 import 'package:onlyveyou/screens/home/home/widgets/recommended_products_widget.dart';
-import 'package:onlyveyou/screens/home/later/later_tap_screen.dart';
 import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
 import 'package:onlyveyou/screens/home/todaysale/todaysale_tap_screen.dart';
 import 'package:onlyveyou/utils/firebase_data_uploader.dart';
@@ -97,7 +97,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           Tab(text: '홈'),
           Tab(text: '랭킹'),
           Tab(text: '오특'),
-          Tab(text: '기획'),
+          Tab(text: 'AI추천'),
         ],
         labelColor: AppStyles.mainColor,
         unselectedLabelColor: AppStyles.greyColor,
@@ -177,7 +177,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   // 나중에 탭 컨텐츠
   Widget _buildMagazineTab() {
-    return const LaterTabScreen();
+    return AIRecommendScreen();
   }
 
   // 기존 위젯들...
@@ -192,19 +192,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       childAspectRatio: isPortrait ? 1 : 1.2,
       padding: AppStyles.defaultPadding,
       children: [
-        _buildQuickMenuItem('이벤트', Icons.favorite, () {
+        _buildQuickMenuItem('AI원픽', Icons.favorite, () {
           print('이벤트 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('픽업', Icons.medication, () {
+        _buildQuickMenuItem('AR가상', Icons.medication, () {
           print('픽업 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('뭐할까', Icons.live_tv, () {
+        _buildQuickMenuItem('날씨추천', Icons.live_tv, () {
           _uploadDummyData(context);
         }),
-        _buildQuickMenuItem('선물하기', Icons.card_giftcard, () {
+        _buildQuickMenuItem('GTP추천', Icons.card_giftcard, () {
           print('선물하기 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('세일', Icons.local_offer, () {
+        _buildQuickMenuItem('내 주변', Icons.local_offer, () {
           print('세일 버튼 클릭됨');
         }),
       ],
