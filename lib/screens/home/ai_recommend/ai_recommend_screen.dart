@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -138,7 +140,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                 return ListView.builder(
                   padding: EdgeInsets.zero,
                   controller: _scrollController,
-                  itemCount: state.products.length,
+                  itemCount: min(state.products.length, 10),
                   itemBuilder: (context, index) {
                     final product = state.products[index];
                     return GestureDetector(
