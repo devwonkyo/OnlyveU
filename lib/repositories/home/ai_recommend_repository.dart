@@ -69,7 +69,7 @@ class AIRecommendRepository {
       final response = await http.post(
         Uri.parse('https://api.openai.com/v1/chat/completions'),
         headers: {
-          'Content-Type': 'application/json; charset=utf-8', // charset 추가
+          'Content-Type': 'application/json; charset=utf-8',
           'Authorization': 'Bearer $openAIApiKey',
         },
         body: jsonEncode({
@@ -77,40 +77,45 @@ class AIRecommendRepository {
           'messages': [
             {
               'role': 'system',
-              'content':
-                  '당신은 e-commerce 추천 시스템입니다. 사용자의 행동 데이터를 기반으로 상품을 추천하고 추천 이유도 제공해주세요.'
+              'content': '정확한 JSON 형식으로만 응답해주세요. 반드시 10개의 상품을 추천해주세요.'
             },
             {
               'role': 'user',
               'content': '''
-              사용자의 행동 데이터:
+              다음 사용자 데이터를 기반으로 10개의 상품을 추천해주세요:
               최근 본 상품: ${userData['viewHistory'].join(', ')}
               좋아요한 상품: ${userData['likedItems'].join(', ')}
               장바구니 상품: ${userData['cartItems'].join(', ')}
               
-              이 사용자에게 적합한 상품 10개를 추천해주시고, 각 상품별로 추천 이유도 함께 알려주세요.
-              다음 JSON 형식으로 응답해주세요:
+              다음 JSON 형식으로만 응답하세요:
               {
-                "products": ["product_id1", "product_id2", ...],
+                "products": ["상품ID1", "상품ID2", "상품ID3", "상품ID4", "상품ID5", "상품ID6", "상품ID7", "상품ID8", "상품ID9", "상품ID10"],
                 "reasons": {
-                  "product_id1": "추천 이유 1",
-                  "product_id2": "추천 이유 2"
+                  "상품ID1": "추천이유1",
+                  "상품ID2": "추천이유2",
+                  "상품ID3": "추천이유3",
+                  "상품ID4": "추천이유4",
+                  "상품ID5": "추천이유5",
+                  "상품ID6": "추천이유6",
+                  "상품ID7": "추천이유7",
+                  "상품ID8": "추천이유8",
+                  "상품ID9": "추천이유9",
+                  "상품ID10": "추천이유10"
                 }
               }
-            '''
+              '''
             }
           ],
-          'temperature': 0.7,
-          'max_tokens': 500,
+          'temperature': 0.3,
+          'max_tokens': 1000, // 토큰 수도 늘림
         }),
       );
 
       if (response.statusCode == 200) {
-        print('AI Response: ${response.body}'); // 디버깅용 로그 추가
-        final decodedResponse = utf8.decode(response.bodyBytes); // utf8 디코딩 추가
+        final decodedResponse = utf8.decode(response.bodyBytes);
         return jsonDecode(decodedResponse);
       } else {
-        throw Exception('AI API 호출 실패: ${response.statusCode}');
+        throw Exception('AI API 호출 실패 (${response.statusCode})');
       }
     } catch (e) {
       throw Exception('AI 추천 요청 실패: $e');
@@ -156,11 +161,6 @@ class AIRecommendRepository {
 
   // 새로운 통합 메소드
   Future<Map<String, dynamic>> getRecommendations() async {
-    late final Map<String, dynamic> userData;
-    late final Map<String, dynamic> aiResponse;
-    late final String content;
-    late final Map<String, dynamic> recommendations;
-
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
@@ -169,20 +169,47 @@ class AIRecommendRepository {
 
       print('Requesting recommendations for userId: ${currentUser.uid}');
 
-      userData = await getUserBehaviorForAI(currentUser.uid);
-      aiResponse = await _getAIRecommendations(userData);
+      final userData = await getUserBehaviorForAI(currentUser.uid);
+      final aiResponse = await _getAIRecommendations(userData);
 
-      content = aiResponse['choices'][0]['message']['content'];
-      recommendations = jsonDecode(content);
+      // 응답 체크 추가
+      if (aiResponse == null ||
+          !aiResponse.containsKey('choices') ||
+          aiResponse['choices'].isEmpty ||
+          !aiResponse['choices'][0].containsKey('message') ||
+          !aiResponse['choices'][0]['message'].containsKey('content')) {
+        throw Exception('AI 응답 형식이 올바르지 않습니다');
+      }
 
-      final List<String> productIds =
-          List<String>.from(recommendations['products'] ?? []);
-      final Map<String, String> reasons =
-          Map<String, String>.from(recommendations['reasons'] ?? {});
+      try {
+        final content = aiResponse['choices'][0]['message']['content'];
+        print('Raw content from AI: $content'); // 디버깅용
 
-      final products = await _fetchProductsByIds(productIds);
+        final recommendations = jsonDecode(content);
 
-      return {'products': products, 'reasons': reasons};
+        // 필수 키 체크
+        if (!recommendations.containsKey('products') ||
+            !recommendations.containsKey('reasons')) {
+          throw Exception('AI 추천 데이터 형식이 올바르지 않습니다');
+        }
+
+        final List<String> productIds =
+            List<String>.from(recommendations['products'] ?? []);
+        final Map<String, String> reasons =
+            Map<String, String>.from(recommendations['reasons'] ?? {});
+
+        // 빈 결과 체크
+        if (productIds.isEmpty) {
+          throw Exception('추천할 상품이 없습니다');
+        }
+
+        final products = await _fetchProductsByIds(productIds);
+
+        return {'products': products, 'reasons': reasons};
+      } catch (parseError) {
+        print('Error parsing AI response: $parseError');
+        throw Exception('AI 응답 파싱 실패: $parseError');
+      }
     } catch (e) {
       print('Error in getRecommendations: $e');
       throw Exception('추천 상품 로드 실패: $e');
