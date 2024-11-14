@@ -194,15 +194,13 @@ final GoRouter router = GoRouter(
           ),
         );
       },
-      routes: [
-        GoRoute(
-          path: 'new_delivery_address',
-          pageBuilder: (context, state) => _buildPageWithTransition(
-            state,
-            const NewDeliveryAddressScreen(),
-          ),
-        ),
-      ],
+    ),
+    GoRoute(
+      path: '/new_delivery_address',
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        state,
+        const NewDeliveryAddressScreen(),
+      ),
     ),
     GoRoute(
       path: '/search',

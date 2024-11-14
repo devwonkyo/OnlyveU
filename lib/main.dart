@@ -16,6 +16,7 @@ import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/like/product_like_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+// import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
@@ -30,11 +31,10 @@ import 'package:onlyveyou/repositories/order/mock_order_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
+// import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
-
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
-import 'package:onlyveyou/simple_bloc_observer.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
@@ -84,8 +84,7 @@ void main() async {
   // final trendCalculator = TrendCalculator();
   // final trendUpdater = TrendUpdater(trendCalculator: trendCalculator);
   // trendUpdater.startUpdating();
-  // BlocObserver 설정
-  Bloc.observer = SimpleBlocObserver();
+
   runApp(const MyApp());
 }
 
@@ -179,11 +178,16 @@ class MyApp extends StatelessWidget {
             BlocProvider<StoreBloc>(
               create: (context) => StoreBloc(),
             ),
+            // BlocProvider<ReviewBloc>(
+            //   // CategoryProductBloc 추가
+            //   create: (context) => ReviewBloc(repository: ReviewRepository()),
+            // ),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, state) {
               return MaterialApp.router(
                 debugShowCheckedModeBanner: false,
+                // themeMode: state.themeMode,
                 themeMode: ThemeMode.light, //todo
                 theme: lightThemeData(),
                 darkTheme: darkThemeData(),
