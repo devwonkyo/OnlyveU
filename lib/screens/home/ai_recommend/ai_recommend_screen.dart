@@ -21,7 +21,6 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
   @override
   void initState() {
     super.initState();
-    // BlocProvider.of 대신 다음과 같이 수정
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _aiRecommendBloc = context.read<AIRecommendBloc>();
       _aiRecommendBloc.add(LoadAIRecommendations());
@@ -56,7 +55,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
               Row(
                 children: [
                   Icon(
-                    Icons.psychology, // AI 아이콘
+                    Icons.psychology,
                     color: Colors.white,
                     size: 28.sp,
                   ),
@@ -79,6 +78,39 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 추천하기 버튼 추가
+                  ElevatedButton(
+                    onPressed: () {
+                      // 추후 추천 로직 API 호출
+                      _aiRecommendBloc.add(LoadAIRecommendations());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.refresh,
+                          color: Color(0xFF2575FC),
+                          size: 18.sp,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          '추천하기',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Color(0xFF2575FC),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],

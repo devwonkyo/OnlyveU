@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
+//단추만들기
 
 // Events
 abstract class AIRecommendEvent extends Equatable {
