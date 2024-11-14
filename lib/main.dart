@@ -28,7 +28,6 @@ import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/auth_repository.dart';
 import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
-import 'package:onlyveyou/repositories/home/ai_recommend_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
 import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
@@ -107,9 +106,7 @@ class MyApp extends StatelessWidget {
         return MultiBlocProvider(
           providers: [
             BlocProvider<AIRecommendBloc>(
-              create: (context) => AIRecommendBloc(
-                repository: AIRecommendRepository(),
-              ),
+              create: (context) => AIRecommendBloc(),
             ),
             BlocProvider(
               create: (context) => CartBloc(
