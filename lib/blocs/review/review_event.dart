@@ -15,3 +15,13 @@ class LoadReviewListEvent extends ReviewEvent{
   @override
   List<Object> get props => [productId];
 }
+
+class AddReviewLikeEvent extends ReviewEvent{
+  String reviewId;
+  String userId;
+
+  AddReviewLikeEvent(this.reviewId, this.userId);
+
+  @override
+  List<Object> get props => [reviewId, userId];
+}

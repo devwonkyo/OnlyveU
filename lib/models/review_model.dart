@@ -8,6 +8,8 @@ class ReviewModel {
   /// 작성자 ID
   final String userId;
 
+  final String userName;
+
   /// 평점
   final double rating;
 
@@ -27,6 +29,7 @@ class ReviewModel {
     required this.reviewId,
     required this.productId,
     required this.userId,
+    required this.userName,
     required this.rating,
     required this.content,
     this.imageUrls = const [],
@@ -39,6 +42,7 @@ class ReviewModel {
       'reviewId': reviewId,
       'productId': productId,
       'userId': userId,
+      'userName': userName,
       'rating': rating,
       'content': content,
       'imageUrls': imageUrls,
@@ -52,11 +56,36 @@ class ReviewModel {
       reviewId: map['reviewId'] as String,
       productId: map['productId'] as String,
       userId: map['userId'] as String,
+      userName: map['userName'] as String,
       rating: (map['rating'] as num).toDouble(),
       content: map['content'] as String,
       imageUrls: List<String>.from(map['imageUrls'] as List? ?? []),
       likedUserIds: List<String>.from(map['likedUserIds'] as List? ?? []),
       createdAt: DateTime.parse(map['createdAt'] as String),
+    );
+  }
+
+  ReviewModel copyWith({
+    String? reviewId,
+    String? productId,
+    String? userId,
+    String? userName,
+    double? rating,
+    String? content,
+    List<String>? imageUrls,
+    List<String>? likedUserIds,
+    DateTime? createdAt,
+  }) {
+    return ReviewModel(
+      reviewId: reviewId ?? this.reviewId,
+      productId: productId ?? this.productId,
+      userId: userId ?? this.userId,
+      userName: userName ?? this.userName,
+      rating: rating ?? this.rating,
+      content: content ?? this.content,
+      imageUrls: imageUrls ?? this.imageUrls,
+      likedUserIds: likedUserIds ?? this.likedUserIds,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
