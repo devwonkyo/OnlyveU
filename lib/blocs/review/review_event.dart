@@ -25,3 +25,13 @@ class AddReviewLikeEvent extends ReviewEvent{
   @override
   List<Object> get props => [reviewId, userId];
 }
+
+
+class AddReviewEvent extends ReviewEvent{
+  final ReviewModel reviewModel;
+
+  const AddReviewEvent(this.reviewModel);
+
+  @override
+  List<Object> get props => [reviewModel];
+}

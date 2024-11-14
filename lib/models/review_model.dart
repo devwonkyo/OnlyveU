@@ -1,6 +1,6 @@
 class ReviewModel {
   /// 리뷰 ID
-  final String reviewId;
+  final String? reviewId;
 
   /// 상품 ID
   final String productId;

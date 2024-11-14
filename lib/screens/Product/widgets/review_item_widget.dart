@@ -6,6 +6,7 @@ import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/like_button.dart';
+import 'package:onlyveyou/utils/string_format.dart';
 
 class ReviewItemWidget extends StatelessWidget {
   final ReviewModel review;
@@ -59,7 +60,7 @@ class ReviewItemWidget extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  review.createdAt.toString(),
+                  formatDate(review.createdAt),
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12.sp,

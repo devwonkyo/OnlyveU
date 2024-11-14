@@ -42,7 +42,7 @@ class _LikeButtonState extends State<LikeButton> {
 
     // Bloc 이벤트 발생
     context.read<ReviewBloc>().add(
-        AddReviewLikeEvent(widget.review.reviewId, widget.userId)
+        AddReviewLikeEvent(widget.review.reviewId ?? "", widget.userId)
     );
   }
 

@@ -442,7 +442,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           tabs: [Tab(text: '상품설명'), Tab(text: '리뷰')],
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.black,
+          indicatorColor: AppsColor.pastelGreen,
+          dividerColor: AppsColor.lightGray,
           labelStyle: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,

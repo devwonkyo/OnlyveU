@@ -14,6 +14,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   ReviewBloc({required this.repository}) : super(ReviewInitial()) {
     on<LoadReviewListEvent>(_findProductReview);
     on<AddReviewLikeEvent>(_addLikeReview);
+    on<AddReviewEvent>(_addReview);
   }
 
   Future<void> _findProductReview(LoadReviewListEvent event, Emitter<ReviewState> emit) async {
@@ -35,6 +36,22 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       emit(LoadErrorReviewState("error : $e"));
     }
   }
+
+
+  Future<void> _addReview(AddReviewEvent event, Emitter<ReviewState> emit) async {
+    try{
+      await repository.addReview(event.reviewModel);
+      print('업로드 완료');
+      emit(SuccessAddReview("업로드 햇씁니당"));
+    }catch(e){
+      print('업로드 에러 : $e');
+      emit(ErrorAddReview("error : $e"));
+    }
+  }
+
+
+
+
 
   //평점 구하기
   double calculateAverageRating(List<ReviewModel> reviews) {
@@ -70,6 +87,8 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
         i: (ratingCounts[i]! / totalReviews) // 100을 곱하지 않고 비율만 반환
     };
   }
+
+
 
 
 
