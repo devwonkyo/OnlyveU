@@ -7,12 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/user_model.dart';
 
-// 가중치 붙여서 100개 추린다음 AI 에게 100개 안에서 물어보기
-// 내가 본거 관심 장바구니와 연관된거를 10개 추천 - 안본게 포함되어 있음
-// 몇개는 내가 본거와 중복이지만 20개가 넘어가기 때문에
-// 추천해주는 10개중 1,2개 섞여도 상관 없음
-
-// AI 추천 관련 로직을 관리하는 Repository
 class AIRecommendRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String openAIApiKey =
@@ -24,6 +18,7 @@ class AIRecommendRepository {
 
   /// 모든 상품 데이터를 Firestore에서 가져오거나 캐싱된 데이터를 반환
   Future<List<ProductModel>> _getAllProducts() async {
+    // 캐시가 유효한 경우 캐시된 데이터 반환
     if (_cachedProducts != null &&
         _lastFetchTime != null &&
         DateTime.now().difference(_lastFetchTime!) < cacheDuration) {
@@ -31,12 +26,14 @@ class AIRecommendRepository {
     }
 
     try {
+      // Firestore에서 상품 데이터 가져오기
       final snapshot = await _firestore.collection('products').get();
       _cachedProducts = snapshot.docs.map((doc) {
         final data = doc.data();
         data['productId'] = doc.id; // 상품 ID를 데이터에 포함
         return ProductModel.fromMap(data);
       }).toList();
+
       _lastFetchTime = DateTime.now();
       return _cachedProducts!;
     } catch (e) {
@@ -44,39 +41,54 @@ class AIRecommendRepository {
     }
   }
 
-  /// 특정 사용자 데이터를 Firestore에서 가져오거나 기본 데이터를 생성
-  Future<UserModel> _getUserData(String userId) async {
-    try {
-      final userDoc = await _firestore.collection('users').doc(userId).get();
-      if (!userDoc.exists) {
-        return UserModel(
-          uid: userId,
-          email: FirebaseAuth.instance.currentUser?.email ?? '',
-          nickname: FirebaseAuth.instance.currentUser?.displayName ?? '사용자',
-          viewHistory: [],
-          likedItems: [],
-          cartItems: [],
-          pickupItems: [],
-        );
-      }
-      final data = userDoc.data();
-      if (data == null) throw Exception('사용자 데이터가 없습니다.');
-      return UserModel.fromMap(data);
-    } catch (e) {
-      throw Exception('사용자 데이터를 불러오는데 실패했습니다: $e');
-    }
-  }
-
   /// 사용자 행동 데이터를 AI가 사용할 수 있는 형식으로 변환
   Future<Map<String, dynamic>> getUserBehaviorForAI(String userId) async {
     try {
-      final user = await _getUserData(userId);
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+
+      if (!userDoc.exists) {
+        return {
+          'viewHistory': <String>[],
+          'likedItems': <String>[],
+          'cartItems': <String>[],
+        };
+      }
+
+      final userData = userDoc.data()!;
+
+      // List<dynamic>을 List<String>으로 안전하게 변환
+      List<String> convertToStringList(dynamic list) {
+        if (list == null) return [];
+        if (list is List) {
+          return list.map((item) => item.toString()).toList();
+        }
+        return [];
+      }
+
+      // cartItems 처리를 위한 특별 변환 함수
+      List<String> convertCartItems(dynamic cartItems) {
+        if (cartItems == null) return [];
+        if (cartItems is List) {
+          return cartItems
+              .map((item) {
+                if (item is Map) {
+                  return item['productId']?.toString() ?? '';
+                }
+                return item.toString();
+              })
+              .where((id) => id.isNotEmpty)
+              .toList();
+        }
+        return [];
+      }
+
       return {
-        'viewHistory': user.viewHistory,
-        'likedItems': user.likedItems,
-        'cartItems': user.cartItems.map((item) => item.productId).toList(),
+        'viewHistory': convertToStringList(userData['viewHistory']),
+        'likedItems': convertToStringList(userData['likedItems']),
+        'cartItems': convertCartItems(userData['cartItems']),
       };
     } catch (e) {
+      print('사용자 행동 데이터 가져오기 실패: $e');
       return {
         'viewHistory': <String>[],
         'likedItems': <String>[],
@@ -85,13 +97,22 @@ class AIRecommendRepository {
     }
   }
 
-  /// OpenAI API를 호출하여 추천 결과를 반환
+  /// AI 추천 시스템에 요청하여 추천 상품 받아오기
   Future<Map<String, dynamic>> _getAIRecommendations(
       List<ProductModel> allProducts, Map<String, dynamic> userData) async {
     try {
-      // 상품 데이터를 정렬하고 상위 100개를 추출
-      final topProducts = allProducts
-          .where((p) => p.productId.isNotEmpty)
+      // 사용자가 이미 상호작용한 상품 ID 목록 생성
+      final List<String> interactedProducts = [
+        ...List<String>.from(userData['viewHistory'] ?? []),
+        ...List<String>.from(userData['likedItems'] ?? []),
+        ...List<String>.from(userData['cartItems'] ?? []),
+      ].toSet().toList(); // 중복 제거
+
+      // 상호작용하지 않은 상품만 필터링
+      final availableProducts = allProducts
+          .where((p) =>
+              p.productId.isNotEmpty &&
+              !interactedProducts.contains(p.productId))
           .toList()
         ..sort((a, b) =>
             ((b.salesVolume * 0.4) + (b.rating * 0.3) + (b.visitCount * 0.3))
@@ -99,14 +120,42 @@ class AIRecommendRepository {
                     (a.rating * 0.3) +
                     (a.visitCount * 0.3)));
 
-      // 사용자 데이터와 상품 데이터를 요청 형식으로 변환
+      // 상품 데이터를 직렬화 가능한 형태로 변환
+      final productsForAI = availableProducts
+          .take(100)
+          .map((p) => {
+                'id': p.productId,
+                'name': p.name,
+                'price': p.price.replaceAll(',', ''),
+                'rating': p.rating,
+                'salesVolume': p.salesVolume,
+                'visitCount': p.visitCount,
+                'brandName': p.brandName,
+                'categoryId': p.categoryId,
+                'discountPercent': p.discountPercent,
+                'tagList': p.tagList,
+              })
+          .toList();
+
+      // 사용자가 상호작용한 상품들의 상세 정보
+      final interactedProductsDetails = allProducts
+          .where((p) => interactedProducts.contains(p.productId))
+          .map((p) => {
+                'id': p.productId,
+                'name': p.name,
+                'categoryId': p.categoryId,
+                'brandName': p.brandName,
+                'tagList': p.tagList,
+              })
+          .toList();
+
       final requestBody = {
         'model': 'gpt-3.5-turbo',
         'messages': [
           {
             'role': 'system',
             'content': """
-JSON 형식으로 응답하세요:
+당신은 사용자 맞춤형 쇼핑 추천 AI입니다. JSON 형식으로만 응답하세요:
 {
   "products": ["상품ID1", "상품ID2", ...],
   "reasons": {
@@ -118,25 +167,32 @@ JSON 형식으로 응답하세요:
           {
             'role': 'user',
             'content': """
-사용자 행동:
+사용자의 상호작용 정보:
 ${jsonEncode(userData)}
 
-가능한 상품 목록:
-${jsonEncode(topProducts.take(100).map((p) => {
-                      'id': p.productId,
-                      'name': p.name,
-                      'price': int.tryParse(p.price.replaceAll(',', '')) ?? 0,
-                      'rating': p.rating
-                    }))}
+사용자가 이미 본/관심/장바구니에 담은 상품들:
+${jsonEncode(interactedProductsDetails)}
 
-10개의 상품을 추천해주세요."""
+추천 가능한 새로운 상품 목록:
+${jsonEncode(productsForAI)}
+
+요청사항:
+1. 사용자가 이미 본 상품, 관심상품, 장바구니에 담은 상품은 제외합니다.
+2. 대신 이러한 상품들과 연관성이 높은 새로운 상품을 추천해주세요.
+3. 연관성 판단 기준:
+   - 같은 브랜드의 다른 상품
+   - 같은 카테고리의 비슷한 가격대 상품
+   - 비슷한 태그를 가진 상품
+   - 같은 스타일/용도의 상품
+4. 각 추천 상품에 대해 구체적인 추천 이유를 설명해주세요.
+
+위 조건을 만족하는 10개의 상품을 추천해주세요."""
           }
         ],
         'temperature': 0.3,
-        'max_tokens': 800,
+        'max_tokens': 1000,
       };
 
-      // OpenAI API 호출
       final response = await http.post(
         Uri.parse('https://api.openai.com/v1/chat/completions'),
         headers: {
@@ -146,7 +202,6 @@ ${jsonEncode(topProducts.take(100).map((p) => {
         body: jsonEncode(requestBody),
       );
 
-      // 응답 데이터 처리
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
         final content =
@@ -186,7 +241,7 @@ ${jsonEncode(topProducts.take(100).map((p) => {
     }
   }
 
-  /// 추천 상품 목록을 반환
+  /// 추천 상품 목록을 반환하는 메인 메서드
   Future<Map<String, dynamic>> getRecommendations() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -194,7 +249,19 @@ ${jsonEncode(topProducts.take(100).map((p) => {
 
       final allProducts = await _getAllProducts();
       final userData = await getUserBehaviorForAI(currentUser.uid);
-      return await _getAIRecommendations(allProducts, userData);
+      final rawRecommendations =
+          await _getAIRecommendations(allProducts, userData);
+
+      // API 응답 검증 및 타입 변환
+      if (!rawRecommendations.containsKey('products') ||
+          !rawRecommendations.containsKey('reasons')) {
+        throw Exception('잘못된 추천 데이터 형식');
+      }
+
+      return {
+        'products': rawRecommendations['products'],
+        'reasons': rawRecommendations['reasons'] as Map<String, dynamic>
+      };
     } catch (e) {
       throw Exception('추천 데이터를 불러오는데 실패했습니다: $e');
     }
@@ -226,5 +293,9 @@ ${jsonEncode(topProducts.take(100).map((p) => {
         'cartCount': (data['cartItems'] as List?)?.length ?? 0,
       };
     });
+  }
+
+  Future<List<ProductModel>> getAllProducts() async {
+    return _getAllProducts();
   }
 }
