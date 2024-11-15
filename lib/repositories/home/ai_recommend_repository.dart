@@ -7,6 +7,12 @@ import 'package:http/http.dart' as http;
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/user_model.dart';
 
+// 가중치 붙여서 100개 추린다음 AI 에게 100개 안에서 물어보기
+// 내가 본거 관심 장바구니와 연관된거를 10개 추천 - 안본게 포함되어 있음
+// 몇개는 내가 본거와 중복이지만 20개가 넘어가기 때문에
+// 추천해주는 10개중 1,2개 섞여도 상관 없음
+
+// AI 추천 관련 로직을 관리하는 Repository
 class AIRecommendRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String openAIApiKey =
@@ -16,6 +22,7 @@ class AIRecommendRepository {
   DateTime? _lastFetchTime;
   static const cacheDuration = Duration(minutes: 30);
 
+  /// 모든 상품 데이터를 Firestore에서 가져오거나 캐싱된 데이터를 반환
   Future<List<ProductModel>> _getAllProducts() async {
     if (_cachedProducts != null &&
         _lastFetchTime != null &&
@@ -24,30 +31,24 @@ class AIRecommendRepository {
     }
 
     try {
-      print('Fetching all products from Firestore...');
       final snapshot = await _firestore.collection('products').get();
       _cachedProducts = snapshot.docs.map((doc) {
         final data = doc.data();
-        data['productId'] = doc.id;
+        data['productId'] = doc.id; // 상품 ID를 데이터에 포함
         return ProductModel.fromMap(data);
       }).toList();
       _lastFetchTime = DateTime.now();
-      print('Fetched ${_cachedProducts!.length} products');
       return _cachedProducts!;
     } catch (e) {
-      print('Error fetching products: $e');
-      throw Exception('전체 상품 로드 실패: $e');
+      throw Exception('상품 데이터를 불러오는데 실패했습니다: $e');
     }
   }
 
+  /// 특정 사용자 데이터를 Firestore에서 가져오거나 기본 데이터를 생성
   Future<UserModel> _getUserData(String userId) async {
     try {
-      print('Fetching user data for userId: $userId');
       final userDoc = await _firestore.collection('users').doc(userId).get();
-
       if (!userDoc.exists) {
-        print('Creating new user data');
-        // 기본 UserModel 생성
         return UserModel(
           uid: userId,
           email: FirebaseAuth.instance.currentUser?.email ?? '',
@@ -58,19 +59,15 @@ class AIRecommendRepository {
           pickupItems: [],
         );
       }
-
       final data = userDoc.data();
-      if (data == null) {
-        throw Exception('사용자 데이터가 null입니다');
-      }
-
+      if (data == null) throw Exception('사용자 데이터가 없습니다.');
       return UserModel.fromMap(data);
     } catch (e) {
-      print('Error in getUserData: $e');
-      throw Exception('사용자 데이터 로드 실패: $e');
+      throw Exception('사용자 데이터를 불러오는데 실패했습니다: $e');
     }
   }
 
+  /// 사용자 행동 데이터를 AI가 사용할 수 있는 형식으로 변환
   Future<Map<String, dynamic>> getUserBehaviorForAI(String userId) async {
     try {
       final user = await _getUserData(userId);
@@ -80,7 +77,6 @@ class AIRecommendRepository {
         'cartItems': user.cartItems.map((item) => item.productId).toList(),
       };
     } catch (e) {
-      print('Error getting user behavior: $e');
       return {
         'viewHistory': <String>[],
         'likedItems': <String>[],
@@ -89,15 +85,11 @@ class AIRecommendRepository {
     }
   }
 
-  //여기가 핵심. AI 에게 물어보는곳
+  /// OpenAI API를 호출하여 추천 결과를 반환
   Future<Map<String, dynamic>> _getAIRecommendations(
       List<ProductModel> allProducts, Map<String, dynamic> userData) async {
     try {
-      print('=== Starting AI Recommendations ===');
-      print('Total products available: ${allProducts.length}');
-      print('User data received: $userData');
-
-      // 1. 상품 정렬 및 필터링
+      // 상품 데이터를 정렬하고 상위 100개를 추출
       final topProducts = allProducts
           .where((p) => p.productId.isNotEmpty)
           .toList()
@@ -107,61 +99,14 @@ class AIRecommendRepository {
                     (a.rating * 0.3) +
                     (a.visitCount * 0.3)));
 
-      print('Sorted products count: ${topProducts.length}');
-
-      // 2. 상품 데이터 변환
-      final productsData = topProducts
-          .take(100)
-          .map((product) => {
-                'id': product.productId,
-                'name': product.name,
-                'brand': product.brandName,
-                'category': product.categoryId,
-                'price': int.tryParse(product.price.replaceAll(',', '')) ?? 0,
-                'discount': product.discountPercent,
-                'rating': product.rating,
-                'popular': product.isPopular || product.isBest,
-              })
-          .toList();
-
-      // 3. 사용자 데이터 정제
-      final userHistory = {
-        'viewHistory': (userData['viewHistory'] as List?)
-                ?.take(5)
-                .where((id) => id != null && id.toString().isNotEmpty)
-                .toList() ??
-            [],
-        'likedItems': (userData['likedItems'] as List?)
-                ?.take(5)
-                .where((id) => id != null && id.toString().isNotEmpty)
-                .toList() ??
-            [],
-        'cartItems': (userData['cartItems'] as List?)
-                ?.take(5)
-                .where((id) => id != null && id.toString().isNotEmpty)
-                .toList() ??
-            [],
-      };
-
-      // 4. API 요청 데이터 준비
-      final userHistoryStr = """
-최근 조회: ${jsonEncode(userHistory['viewHistory'])}
-관심 상품: ${jsonEncode(userHistory['likedItems'])}
-장바구니: ${jsonEncode(userHistory['cartItems'])}""";
-
-      final productsDataStr = jsonEncode(productsData);
-
-      print('Request data prepared');
-      print('User history length: ${userHistoryStr.length}');
-      print('Products data length: ${productsDataStr.length}');
-
+      // 사용자 데이터와 상품 데이터를 요청 형식으로 변환
       final requestBody = {
         'model': 'gpt-3.5-turbo',
         'messages': [
           {
             'role': 'system',
             'content': """
-다음 형식의 JSON으로만 응답하세요:
+JSON 형식으로 응답하세요:
 {
   "products": ["상품ID1", "상품ID2", ...],
   "reasons": {
@@ -173,23 +118,25 @@ class AIRecommendRepository {
           {
             'role': 'user',
             'content': """
-다음 사용자의 구매 이력을 바탕으로 상품을 추천해주세요.
-
 사용자 행동:
-$userHistoryStr
+${jsonEncode(userData)}
 
 가능한 상품 목록:
-$productsDataStr
+${jsonEncode(topProducts.take(100).map((p) => {
+                      'id': p.productId,
+                      'name': p.name,
+                      'price': int.tryParse(p.price.replaceAll(',', '')) ?? 0,
+                      'rating': p.rating
+                    }))}
 
-반드시 위 상품 목록에 있는 상품 ID만 사용하여 10개를 추천해주세요."""
+10개의 상품을 추천해주세요."""
           }
         ],
         'temperature': 0.3,
         'max_tokens': 800,
       };
 
-      // 5. API 호출
-      print('Calling OpenAI API...');
+      // OpenAI API 호출
       final response = await http.post(
         Uri.parse('https://api.openai.com/v1/chat/completions'),
         headers: {
@@ -199,86 +146,33 @@ $productsDataStr
         body: jsonEncode(requestBody),
       );
 
-      print('API Response status: ${response.statusCode}');
-
-      // 6. 응답 처리
+      // 응답 데이터 처리
       if (response.statusCode == 200) {
-        final decodedResponse = utf8.decode(response.bodyBytes);
-        final responseData = jsonDecode(decodedResponse);
-
-        print('Full API Response: $responseData');
-
-        if (!responseData.containsKey('choices') ||
-            responseData['choices'].isEmpty ||
-            !responseData['choices'][0].containsKey('message') ||
-            !responseData['choices'][0]['message'].containsKey('content')) {
-          throw Exception('AI 응답 형식이 올바르지 않습니다');
-        }
-
-        final content = responseData['choices'][0]['message']['content'];
-        print('AI Raw Response: $content');
-
-        try {
-          // 응답 문자열 전처리
-          final cleanedContent = content
-              .trim()
-              .replaceAll(RegExp(r'```json\s*|\s*```'), '') // 코드 블록 제거
-              .replaceAll(RegExp(r'[\u0000-\u001F]'), ''); // 제어 문자 제거
-
-          print('Cleaned content: $cleanedContent');
-
-          final parsedContent = jsonDecode(cleanedContent);
-
-          if (!parsedContent.containsKey('products') ||
-              !parsedContent.containsKey('reasons')) {
-            print('Invalid content structure: $parsedContent');
-            throw Exception('필수 필드가 누락되었습니다');
-          }
-
-          final products = List<String>.from(parsedContent['products']);
-          final reasons = Map<String, String>.from(parsedContent['reasons']);
-
-          // 반환 전 유효성 검사
-          if (products.isEmpty || reasons.isEmpty) {
-            throw Exception('추천 데이터가 비어있습니다');
-          }
-
-          print('Successfully parsed response');
-          print('Products: $products');
-          print('Reasons: $reasons');
-
-          return {
-            'products': products,
-            'reasons': reasons,
-          };
-        } catch (e) {
-          print('Error parsing content: $e');
-          print('Problematic content: $content');
-          throw Exception('응답 파싱 실패: $e');
-        }
+        final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        final content =
+            decodedResponse['choices'][0]['message']['content'].trim();
+        return jsonDecode(content);
       } else {
-        throw Exception(
-            'AI API 호출 실패 (${response.statusCode}): ${response.body}');
+        throw Exception('AI API 호출 실패: ${response.body}');
       }
-    } catch (e, stackTrace) {
-      print('=== Error in AI recommendations ===');
-      print('Error: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       throw Exception('AI 추천 요청 실패: $e');
     }
   }
 
+  /// 사용자의 즐겨찾기 상태를 업데이트
   Future<void> toggleFavorite(String productId, String userId) async {
     try {
       await _firestore.runTransaction((transaction) async {
         final userRef = _firestore.collection('users').doc(userId);
         final userData = await userRef.get();
 
-        if (!userData.exists) throw Exception('사용자를 찾을 수 없습니다');
+        if (!userData.exists) throw Exception('사용자 데이터가 없습니다.');
 
         final user = UserModel.fromMap(userData.data()!);
         final likedItems = List<String>.from(user.likedItems);
 
+        // 즐겨찾기 상태를 토글
         if (likedItems.contains(productId)) {
           likedItems.remove(productId);
         } else {
@@ -292,50 +186,24 @@ $productsDataStr
     }
   }
 
+  /// 추천 상품 목록을 반환
   Future<Map<String, dynamic>> getRecommendations() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        throw Exception('로그인이 필요합니다');
-      }
-
-      print('Requesting recommendations for userId: ${currentUser.uid}');
+      if (currentUser == null) throw Exception('로그인이 필요합니다.');
 
       final allProducts = await _getAllProducts();
       final userData = await getUserBehaviorForAI(currentUser.uid);
-      final recommendations =
-          await _getAIRecommendations(allProducts, userData);
-
-      if (!recommendations.containsKey('products') ||
-          !recommendations.containsKey('reasons')) {
-        throw Exception('AI 추천 데이터 형식이 올바르지 않습니다');
-      }
-
-      final List<String> recommendedIds =
-          List<String>.from(recommendations['products'] ?? []);
-
-      if (recommendedIds.isEmpty) {
-        throw Exception('추천할 상품이 없습니다');
-      }
-
-      final recommendedProducts = allProducts
-          .where((product) => recommendedIds.contains(product.productId))
-          .toList();
-
-      return {
-        'products': recommendedProducts,
-        'reasons': recommendations['reasons'] ?? {},
-      };
+      return await _getAIRecommendations(allProducts, userData);
     } catch (e) {
-      print('Error in getRecommendations: $e');
-      throw Exception('추천 상품 로드 실패: $e');
+      throw Exception('추천 데이터를 불러오는데 실패했습니다: $e');
     }
   }
 
+  /// 사용자 활동 데이터를 실시간으로 수신
   Stream<Map<String, int>> getCurrentUserActivityCountsStream() {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      // 로그인하지 않은 경우 기본값 반환
       return Stream.value({
         'viewCount': 0,
         'likeCount': 0,
@@ -349,13 +217,8 @@ $productsDataStr
         .snapshots()
         .map((snapshot) {
       if (!snapshot.exists) {
-        return {
-          'viewCount': 0,
-          'likeCount': 0,
-          'cartCount': 0,
-        };
+        return {'viewCount': 0, 'likeCount': 0, 'cartCount': 0};
       }
-
       final data = snapshot.data()!;
       return {
         'viewCount': (data['viewHistory'] as List?)?.length ?? 0,
