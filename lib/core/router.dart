@@ -39,8 +39,13 @@ import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
+import 'package:onlyveyou/screens/special/virtual/vitual_screen.dart';
 
 import '../screens/search/search_page.dart';
+import '../screens/special/ai_onepick/ai_onepick_screen.dart';
+import '../screens/special/debate/debate_screen.dart';
+import '../screens/special/mbti/mbti_screen.dart';
+import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
@@ -51,6 +56,26 @@ final GoRouter router = GoRouter(
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/ai-onepick',
+          builder: (context, state) => const AiOnePickScreen(),
+        ),
+        GoRoute(
+          path: '/weather',
+          builder: (context, state) => const WeatherScreen(),
+        ),
+        GoRoute(
+          path: '/virtual',
+          builder: (context, state) => const VirtualScreen(),
+        ),
+        GoRoute(
+          path: '/mbti',
+          builder: (context, state) => const MbtiScreen(),
+        ),
+        GoRoute(
+          path: '/debate',
+          builder: (context, state) => const DebateScreen(),
+        ),
         GoRoute(
           path: '/banner1',
           pageBuilder: (context, state) => _buildPageWithTransition(
