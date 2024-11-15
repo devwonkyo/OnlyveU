@@ -64,3 +64,29 @@ class ErrorAddReview extends ReviewState {
   @override
   List<Object> get props => [message];
 }
+
+class LoadingMyReview extends ReviewState {
+
+  const LoadingMyReview();
+
+  @override
+  List<Object> get props => [];
+}
+
+class LoadedMyReview extends ReviewState {
+  final List<ReviewModel> reviewList;
+
+  const LoadedMyReview(this.reviewList);
+
+  @override
+  List<Object> get props => [];
+}
+
+class LoadErrorMyReview extends ReviewState {
+  final String message;
+
+  const LoadErrorMyReview(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

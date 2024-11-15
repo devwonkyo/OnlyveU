@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:onlyveyou/models/review_model.dart';
 
 class ReviewRepository{
@@ -22,6 +25,10 @@ class ReviewRepository{
         return ReviewModel(
           reviewId: doc.id,
           productId: data['productId'],
+          productName: data['productName'],
+          productImage: data['productImage'],
+          purchaseDate: data['purchaseDate'] ?? "2024-11-13T20:02:50.612629",
+          orderType: data['orderType'],
           userId: data['userId'],
           userName: data['userName'],
           rating: (data['rating'] as num).toDouble(),
@@ -65,7 +72,7 @@ class ReviewRepository{
     }
   }
 
-  Future<void> addReview(ReviewModel reviewModel) async {
+  Future<void> addReview(ReviewModel reviewModel,List<File?> images) async {
     try {
       // 1. 사용자 이름 가져오기
       final userDoc = await _firestore
@@ -78,9 +85,48 @@ class ReviewRepository{
       final reviewRef = _firestore.collection('reviews').doc();
       final reviewId = reviewRef.id;
 
+      // 3. 이미지 업로드 및 URL 수집
+      List<String> imageUrls = [];
+      final validImages = images.where((image) => image != null).cast<File>().toList();
+
+      if (validImages.isNotEmpty) {
+        for (var image in validImages) {
+          try {
+            // 파일명 생성: reviewId_timestamp_index.jpg
+            final fileName = '${reviewId}_${DateTime.now().millisecondsSinceEpoch}_${validImages.indexOf(image)}.jpg';
+            final storageRef = FirebaseStorage.instance
+                .ref()
+                .child('reviews')
+                .child(reviewId)
+                .child(fileName);
+
+            // 이미지 업로드
+            final uploadTask = await storageRef.putFile(
+              image,
+              SettableMetadata(
+                contentType: 'image/jpeg',
+                customMetadata: {
+                  'reviewId': reviewId,
+                  'userId': reviewModel.userId,
+                },
+              ),
+            );
+
+            // 업로드된 이미지의 URL 받기
+            final downloadUrl = await uploadTask.ref.getDownloadURL();
+            imageUrls.add(downloadUrl);
+          } catch (e) {
+            print('이미지 업로드 실패: $e');
+            // 개별 이미지 업로드 실패 시 계속 진행
+            continue;
+          }
+        }
+      }
+
       // 3. 최종 리뷰 모델 생성
       final finalReview = reviewModel.copyWith(
         reviewId: reviewId,
+        imageUrls: imageUrls,
         userName: userName,
       );
 
@@ -88,6 +134,30 @@ class ReviewRepository{
       await reviewRef.set(finalReview.toMap());
     } catch (e) {
       throw Exception('리뷰 생성 실패: $e');
+    }
+  }
+
+
+  Future<List<ReviewModel>> findMyReview(String userId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('reviews')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      // 문서들을 ReviewModel 리스트로 변환
+      final reviews = querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        return ReviewModel.fromMap({
+          ...data,
+          'reviewId': doc.id,  // doc.id를 추가
+        });
+      }).toList();
+
+      return reviews;
+    } catch (e) {
+      print('리뷰 데이터 가져오기 실패: $e');
+      return [];
     }
   }
 

@@ -1,9 +1,6 @@
 // 개별 리뷰 아이템 위젯
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:onlyveyou/blocs/review/review_bloc.dart';
-import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/like_button.dart';
 import 'package:onlyveyou/utils/string_format.dart';
@@ -45,7 +42,7 @@ class ReviewItemWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              review.userId,
+              review.userName,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Row(

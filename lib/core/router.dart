@@ -28,6 +28,7 @@ import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
+import 'package:onlyveyou/screens/mypage/review/review_list_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_rating_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_review_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
@@ -236,12 +237,16 @@ final GoRouter router = GoRouter(
         final data = state.extra as Map<String, dynamic>;
         final productModel = data['productModel'] as ProductModel;
         final rating = data['rating'] as double;
+        final purchaseDate = data['purchaseDate'] as DateTime;
+        final orderType = data['orderType'] as OrderType;
         final writeUserId = data['writeUserId'] as String;
 
         return _buildPageUpWithTransition(
           state, WriteReviewScreen(
               productModel: productModel,
+              purchaseDate: purchaseDate,
               rating: rating,
+              orderType: orderType,
               writeUserId: writeUserId
           ),
         );
@@ -250,8 +255,18 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/write_rating',
       builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        final productId = data["productId"] as String;
+        final purchaseDate = data["purchaseDate"] as DateTime;
+        final orderType = data["orderType"] as OrderType;
+        return WriteRatingScreen(productId: productId, purchaseDate: purchaseDate, orderType: orderType);
+      },
+    ),
+    GoRoute(
+      path: '/review_list',
+      builder: (context, state) {
         final productId = state.extra as String;
-        return WriteRatingScreen(productId: productId);
+        return ReviewListScreen(productId: productId);
       },
     ),
   ],
