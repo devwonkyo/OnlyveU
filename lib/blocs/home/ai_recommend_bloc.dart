@@ -17,7 +17,6 @@ class LoadAIRecommendations extends AIRecommendEvent {
   const LoadAIRecommendations();
 }
 
-// 새로운 이벤트 추가
 class UpdateUserActivityCounts extends AIRecommendEvent {
   final Map<String, int> counts;
 
@@ -31,24 +30,26 @@ class UpdateUserActivityCounts extends AIRecommendEvent {
 abstract class AIRecommendState extends Equatable {
   final Map<String, int> activityCounts;
 
-  const AIRecommendState({
-    this.activityCounts = const {
-      'viewCount': 0,
-      'likeCount': 0,
-      'cartCount': 0,
-    },
-  });
+  AIRecommendState({
+    Map<String, int>? activityCounts,
+  }) : activityCounts = activityCounts ??
+            {
+              'viewCount': 0,
+              'likeCount': 0,
+              'cartCount': 0,
+            };
 
   @override
   List<Object?> get props => [activityCounts];
 }
 
 class AIRecommendInitial extends AIRecommendState {
-  const AIRecommendInitial() : super();
+  AIRecommendInitial({Map<String, int>? activityCounts})
+      : super(activityCounts: activityCounts);
 }
 
 class AIRecommendLoading extends AIRecommendState {
-  const AIRecommendLoading({required Map<String, int> activityCounts})
+  AIRecommendLoading({required Map<String, int> activityCounts})
       : super(activityCounts: activityCounts);
 }
 
@@ -56,7 +57,7 @@ class AIRecommendLoaded extends AIRecommendState {
   final List<ProductModel> products;
   final Map<String, String> reasonMap;
 
-  const AIRecommendLoaded({
+  AIRecommendLoaded({
     required this.products,
     required this.reasonMap,
     required Map<String, int> activityCounts,
@@ -73,7 +74,7 @@ class AIRecommendLoaded extends AIRecommendState {
 class AIRecommendError extends AIRecommendState {
   final String message;
 
-  const AIRecommendError({
+  AIRecommendError({
     required this.message,
     required Map<String, int> activityCounts,
   }) : super(activityCounts: activityCounts);
@@ -88,8 +89,7 @@ class AIRecommendBloc extends Bloc<AIRecommendEvent, AIRecommendState> {
 
   AIRecommendBloc({required AIRecommendRepository repository})
       : _repository = repository,
-        super(const AIRecommendInitial()) {
-    // 기존 이벤트 핸들러
+        super(AIRecommendInitial()) {
     on<LoadAIRecommendations>((event, emit) async {
       try {
         emit(AIRecommendLoading(activityCounts: state.activityCounts));
@@ -107,27 +107,27 @@ class AIRecommendBloc extends Bloc<AIRecommendEvent, AIRecommendState> {
       }
     });
 
-    // 새로운 이벤트 핸들러
     on<UpdateUserActivityCounts>((event, emit) {
       if (state is AIRecommendLoaded) {
+        final currentState = state as AIRecommendLoaded;
         emit(AIRecommendLoaded(
-          products: (state as AIRecommendLoaded).products,
-          reasonMap: (state as AIRecommendLoaded).reasonMap,
+          products: currentState.products,
+          reasonMap: currentState.reasonMap,
           activityCounts: event.counts,
         ));
       } else if (state is AIRecommendLoading) {
         emit(AIRecommendLoading(activityCounts: event.counts));
       } else if (state is AIRecommendError) {
+        final currentState = state as AIRecommendError;
         emit(AIRecommendError(
-          message: (state as AIRecommendError).message,
+          message: currentState.message,
           activityCounts: event.counts,
         ));
       } else {
-        emit(AIRecommendInitial());
+        emit(AIRecommendInitial(activityCounts: event.counts));
       }
     });
 
-    // 사용자 활동 데이터 구독 시작
     _startListeningToActivityCounts();
   }
 
@@ -140,8 +140,8 @@ class AIRecommendBloc extends Bloc<AIRecommendEvent, AIRecommendState> {
   }
 
   @override
-  Future<void> close() {
-    _activityCountsSubscription?.cancel();
+  Future<void> close() async {
+    await _activityCountsSubscription?.cancel();
     return super.close();
   }
 }

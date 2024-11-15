@@ -21,12 +21,18 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _aiRecommendBloc = context.read<AIRecommendBloc>();
-      // 초기 데이터 로드
-      //_aiRecommendBloc.add(const LoadAIRecommendations());
-    });
+    _aiRecommendBloc = context.read<AIRecommendBloc>();
+    // 활동 데이터는 자동으로 구독되고 있으므로 추가 작업 불필요
   }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     _aiRecommendBloc = context.read<AIRecommendBloc>();
+  //     // 초기 데이터 로드
+  //     //_aiRecommendBloc.add(const LoadAIRecommendations());
+  //   });
+  // }
 
   @override
   void dispose() {
