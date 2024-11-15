@@ -49,9 +49,14 @@ class SearchResultScreen extends StatelessWidget {
                           children: [
                             const Icon(Icons.tune),
                             SizedBox(width: 20.w),
-                            Text(
-                              '인기순',
-                              style: TextStyle(fontSize: 15.sp),
+                            GestureDetector(
+                              onTap: () {
+                                _showSortOptions(context);
+                              },
+                              child: Text(
+                                '인기순',
+                                style: TextStyle(fontSize: 15.sp),
+                              ),
                             ),
                             const Icon(Icons.keyboard_arrow_down)
                           ],
@@ -89,6 +94,87 @@ class SearchResultScreen extends StatelessWidget {
           }
         },
       ),
+    );
+  }
+
+  void _showSortOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      enableDrag: false,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(height: 15.h),
+            GestureDetector(
+              onTap: () {},
+              child: Row(
+                children: [
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                    child: Text(
+                      '인기순',
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                child: Text(
+                  '판매순',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                child: Text(
+                  '낮은 가격순',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                child: Text(
+                  '리뷰 많은 순',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                child: Text(
+                  '할인율순',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                child: Text(
+                  '신상품순',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
