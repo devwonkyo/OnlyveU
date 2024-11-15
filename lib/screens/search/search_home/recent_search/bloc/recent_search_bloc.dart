@@ -27,11 +27,15 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
 
   void _onLoadRecentSearches(
       LoadRecentSearches event, Emitter<RecentSearchState> emit) async {
+    // 로딩화면 디버그용 (지워도됨)
+    if (state is RecentSearchInitial) {
+      emit(RecentSearchLoading());
+      await Future.delayed(const Duration(milliseconds: 1200));
+    }
     emit(RecentSearchLoading());
     try {
       final recentSearches = await repository.loadRecentSearches();
       debugPrint('onLoadRecentSearch: $recentSearches');
-      await Future.delayed(const Duration(seconds: 1));
       if (recentSearches.isEmpty) {
         emit(RecentSearchEmpty());
       } else {
