@@ -89,7 +89,6 @@ class AIRecommendRepository {
   Future<Map<String, dynamic>> _getAIRecommendations(
       List<ProductModel> allProducts, Map<String, dynamic> userData) async {
     try {
-      // 상품 데이터를 정렬하고 상위 100개를 추출
       final topProducts = allProducts
           .where((p) => p.productId.isNotEmpty)
           .toList()
@@ -99,7 +98,6 @@ class AIRecommendRepository {
                     (a.rating * 0.3) +
                     (a.visitCount * 0.3)));
 
-      // 사용자 데이터와 상품 데이터를 요청 형식으로 변환
       final requestBody = {
         'model': 'gpt-3.5-turbo',
         'messages': [
@@ -108,11 +106,11 @@ class AIRecommendRepository {
             'content': """
 JSON 형식으로 응답하세요:
 {
-  "products": ["상품ID1", "상품ID2", ...],
-  "reasons": {
-    "상품ID1": "추천이유1",
-    "상품ID2": "추천이유2"
-  }
+ "products": ["상품ID1", "상품ID2", ...],
+ "reasons": {
+   "상품ID1": "추천이유1",
+   "상품ID2": "추천이유2"
+ }
 }"""
           },
           {
@@ -127,7 +125,7 @@ ${jsonEncode(topProducts.take(100).map((p) => {
                       'name': p.name,
                       'price': int.tryParse(p.price.replaceAll(',', '')) ?? 0,
                       'rating': p.rating
-                    }))}
+                    }).toList())}
 
 10개의 상품을 추천해주세요."""
           }
@@ -136,7 +134,6 @@ ${jsonEncode(topProducts.take(100).map((p) => {
         'max_tokens': 800,
       };
 
-      // OpenAI API 호출
       final response = await http.post(
         Uri.parse('https://api.openai.com/v1/chat/completions'),
         headers: {
@@ -146,12 +143,22 @@ ${jsonEncode(topProducts.take(100).map((p) => {
         body: jsonEncode(requestBody),
       );
 
-      // 응답 데이터 처리
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
         final content =
             decodedResponse['choices'][0]['message']['content'].trim();
-        return jsonDecode(content);
+        final aiResponse = jsonDecode(content) as Map<String, dynamic>;
+        final recommendedProductIds =
+            (aiResponse['products'] as List<dynamic>).cast<String>();
+
+        final recommendedProducts = allProducts
+            .where((p) => recommendedProductIds.contains(p.productId))
+            .toList();
+
+        return {
+          'products': recommendedProducts,
+          'reasons': Map<String, String>.from(aiResponse['reasons'] as Map),
+        };
       } else {
         throw Exception('AI API 호출 실패: ${response.body}');
       }
