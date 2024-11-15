@@ -2,11 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/models/review_model.dart';
+import 'package:onlyveyou/screens/Product/widgets/like_button.dart';
+import 'package:onlyveyou/utils/string_format.dart';
 
 class ReviewItemWidget extends StatelessWidget {
   final ReviewModel review;
+  final String userId;
 
-  const ReviewItemWidget({required this.review});
+  const ReviewItemWidget({required this.review, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +21,11 @@ class ReviewItemWidget extends StatelessWidget {
           _buildReviewHeader(),
           SizedBox(height: 8.h),
           Text(review.content),
+          SizedBox(height: 16.h),
           if (review.imageUrls != null && review.imageUrls!.isNotEmpty)
             _buildReviewImages(),
+          SizedBox(height: 16.h),
+          LikeButton(review: review, userId: userId,)
         ],
       ),
     );
@@ -36,7 +42,7 @@ class ReviewItemWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              review.userId,
+              review.userName,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Row(
@@ -51,7 +57,7 @@ class ReviewItemWidget extends StatelessWidget {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  review.createdAt.toString(),
+                  formatDate(review.createdAt),
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12.sp,
@@ -74,11 +80,14 @@ class ReviewItemWidget extends StatelessWidget {
         itemBuilder: (context, imageIndex) {
           return Padding(
             padding: EdgeInsets.only(right: 8.w),
-            child: Image.network(
-              review.imageUrls![imageIndex],
-              width: 80.w,
-              height: 80.h,
-              fit: BoxFit.cover,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(9.r), // 원하는 반경 값으로 설정
+              child: Image.network(
+                review.imageUrls![imageIndex],
+                width: 80.w,
+                height: 80.h,
+                fit: BoxFit.cover,
+              ),
             ),
           );
         },

@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/cart_model.dart';
 import 'package:onlyveyou/models/like_model.dart';
@@ -77,8 +79,7 @@ class ProductDetailRepository {
         productName: productModel.name,
         productImageUrl: productModel.productImageList[0],
         discountPercent: productModel.discountPercent,
-        productPrice: formatDiscountedPriceToInt(
-            productModel.price, productModel.discountPercent.toDouble()),
+        productPrice: int.parse(productModel.price),
         quantity: quantity
       );
 
