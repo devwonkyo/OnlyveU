@@ -43,7 +43,7 @@ import '../screens/search/search_page.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {

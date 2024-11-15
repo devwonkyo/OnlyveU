@@ -5,12 +5,14 @@ class PostModel {
   final List<String> imageUrls;
   final List<String> tags;
   final DateTime createdAt;
+  final String authorUid; // 작성자 UID
 
   PostModel({
     required this.text,
     required this.imageUrls,
     required this.tags,
     DateTime? createdAt,
+    required this.authorUid,
   }) : this.createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
@@ -19,6 +21,7 @@ class PostModel {
       'imageUrls': imageUrls,
       'tags': tags,
       'createdAt': Timestamp.fromDate(createdAt),
+      'authorUid': authorUid,
     };
   }
 
@@ -40,6 +43,7 @@ class PostModel {
         imageUrls: List<String>.from(map['imageUrls'] ?? []),
         tags: List<String>.from(map['tags'] ?? []),
         createdAt: parseCreatedAt(map['createdAt']),
+        authorUid: map['authorUid'] ?? '',
       );
     } catch (e) {
       print('Error parsing PostModel: $e');
@@ -49,6 +53,7 @@ class PostModel {
         imageUrls: List<String>.from(map['imageUrls'] ?? []),
         tags: List<String>.from(map['tags'] ?? []),
         createdAt: DateTime.now(),
+        authorUid: map['authorUid'] ?? '',
       );
     }
   }
