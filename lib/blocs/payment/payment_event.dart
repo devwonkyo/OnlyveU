@@ -72,13 +72,16 @@ class CheckOrderDetails extends PaymentEvent {
 }
 
 // payment_event.dart
-
+// payment_event.dart
 class SubmitOrder extends PaymentEvent {
-  const SubmitOrder();
+  final OrderModel order;
+
+  const SubmitOrder(this.order);
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [order];
 }
+
 
 class InitializePayment extends PaymentEvent {
   final OrderModel order;
