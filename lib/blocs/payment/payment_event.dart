@@ -71,8 +71,6 @@ class CheckOrderDetails extends PaymentEvent {
   List<Object> get props => [];
 }
 
-
-
 // payment_event.dart
 
 class SubmitOrder extends PaymentEvent {
@@ -81,7 +79,6 @@ class SubmitOrder extends PaymentEvent {
   @override
   List<Object> get props => [];
 }
-
 
 class InitializePayment extends PaymentEvent {
   final OrderModel order;
@@ -92,3 +89,9 @@ class InitializePayment extends PaymentEvent {
   List<Object> get props => [order];
 }
 
+class TestEvent extends PaymentEvent {
+  const TestEvent();
+
+  @override
+  List<Object> get props => [];
+}

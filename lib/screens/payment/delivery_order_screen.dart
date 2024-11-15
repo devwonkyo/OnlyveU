@@ -12,11 +12,12 @@ import 'package:onlyveyou/utils/styles.dart';
 class DeliveryOrderInfo extends StatelessWidget {
   final DeliveryInfoModel? deliveryInfo;
   final List<String> deliveryMessages;
-
+  final VoidCallback? onAddressChange; // 콜백 추가
   const DeliveryOrderInfo({
     super.key,
     required this.deliveryInfo,
     required this.deliveryMessages,
+    this.onAddressChange, // 콜백 초기화
   });
 
   @override
@@ -77,7 +78,13 @@ class DeliveryOrderInfo extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  _showModalBottomSheet(context);
+                  //_showModalBottomSheet(context);
+                  onAddressChange!(); // 콜백 함수 호출
+                  //원래는 modalbottomsheet를 띄웠지만 상태관리 문제가 있을 수 있다고 판단하여 주석처리
+                  //라우터에 문제가 있을 확률은?
+
+                  // 배송지
+                  // context.push('/new_delivery_address');
                 },
                 child: Text(
                   '변경',

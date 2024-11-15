@@ -409,6 +409,7 @@ import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/screens/payment/delivery_order_screen.dart';
+import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/pickup_order_screen.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -430,22 +431,19 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  late DeliveryInfoModel _currentDeliveryInfo;
-
+  DeliveryInfoModel? _currentDeliveryInfo;
+  bool _isInitialized = false;
   @override
   void initState() {
     super.initState();
     // 주문 상품 가져오기 이벤트 추가
     // 전달된 order 값 확인
-    _currentDeliveryInfo = widget.order.deliveryInfo ??
-        DeliveryInfoModel(
-          deliveryName: '',
-          address: '',
-          detailAddress: '',
-          recipientName: '',
-          recipientPhone: '',
-        );
-    context.read<PaymentBloc>().add(InitializePayment(widget.order));
+    final bloc = context.read<PaymentBloc>();
+    _currentDeliveryInfo = bloc.deliveryInfo; // 초기값 설정
+    if (!_isInitialized) {
+      context.read<PaymentBloc>().add(InitializePayment(widget.order));
+      _isInitialized = true; // 초기화 플래그를 설정합니다.
+    }
 
     //  context.read<PaymentBloc>().add(UpdateDeliveryInfo(  //배송지 정보 업데이트 하기 위해서
     //     deliveryName: deliveryName,
@@ -463,6 +461,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String _selectedPaymentMethod = '빠른결제';
   bool _saveAsDefault = false;
   bool _agreeToAll = false;
+
+
+  
+  // NewDeliveryAddressScreen으로 이동하고 데이터를 받아오기
+  void _navigateToNewAddress() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const NewDeliveryAddressScreen()),
+    );
+
+    if (result != null && result is DeliveryInfoModel) {
+      setState(() {
+        _currentDeliveryInfo = result; // 받은 데이터를 상태에 저장
+      });
+
+
+   
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -483,28 +500,40 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             // 주문 유형에 따른 UI 표시
             // 주문 유형에 따른 UI 표시
-            BlocBuilder<PaymentBloc, PaymentState>(
-              builder: (context, state) {
-                if (state is PaymentLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (widget.order.orderType == OrderType.delivery) {
-                  if (state is PaymentLoaded) {
-                    print(state);
-                    return DeliveryOrderInfo(
-                      deliveryInfo: state.deliveryInfo,
-                      deliveryMessages: widget.deliveryMessages,
-                    );
-                  }
-                  return DeliveryOrderInfo(
-                    deliveryInfo: state.deliveryInfo, // 전달받은 deliveryInfo를 사용
-                    deliveryMessages: widget.deliveryMessages,
-                  );
-                } else if (widget.order.orderType == OrderType.pickup) {
-                  return const PickupOrderInfo();
-                } else {
-                  return Container(); // 기본적으로 빈 컨테이너 반환
+            BlocListener<PaymentBloc, PaymentState>(
+              listener: (context, state) {
+                if (state is DeliveryInfoUpdated) {
+                  print("PaymentScreen에서 DeliveryInfoUpdated 상태를 받았습니다.");
+                  setState(() {
+                    state.deliveryInfo;
+                  });
                 }
               },
+              //배송 요청사항, 배송지 등록 모두 delivery_info_updated state를 배출해주는데 배송 요청사항만 emit이 되는 상태
+
+              //payment screen에 들어오면 기본적으로 paymentloaded state가 된다.
+              //배송지를 등록하거나 배송 요청사항을 업데이트 할 때 delivery_info_updated state를 emit하게 설정했는데 요청사항만 된다
+              //그래서 배송지 등록을 하고 나서 state를 print하면 paymentloaded가 유지가 된다
+              //emit state한 게 적용이 잘 안 되는 것 같다. router문제? 차이는 화면이 하나 더 있다?
+              child: BlocBuilder<PaymentBloc, PaymentState>(
+                builder: (context, state) {
+                  if (state is PaymentLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (widget.order.orderType == OrderType.delivery) {
+                    print("Curredt state: $state");
+                    // _currentDeliveryInfo가 null이 아니면 업데이트된 정보를 사용
+                    return DeliveryOrderInfo(
+                      deliveryInfo: _currentDeliveryInfo ?? state.deliveryInfo,
+                      deliveryMessages: widget.deliveryMessages,
+                      onAddressChange: _navigateToNewAddress, // 콜백 전달
+                    );
+                  } else if (widget.order.orderType == OrderType.pickup) {
+                    return const PickupOrderInfo();
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
             ),
 
             const SizedBox(height: 20),
