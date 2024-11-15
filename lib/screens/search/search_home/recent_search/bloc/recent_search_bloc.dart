@@ -30,8 +30,8 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
     emit(RecentSearchLoading());
     try {
       final recentSearches = await repository.loadRecentSearches();
-      await Future.delayed(const Duration(seconds: 2));
       debugPrint('onLoadRecentSearch: $recentSearches');
+      await Future.delayed(const Duration(seconds: 1));
       if (recentSearches.isEmpty) {
         emit(RecentSearchEmpty());
       } else {
@@ -44,9 +44,14 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
 
   void _onRemoveSearchTerm(
       RemoveSearchTerm event, Emitter<RecentSearchState> emit) async {
-    await repository.removeSearchTerm(event.term);
-    final recentSearches = await repository.loadRecentSearches();
-    emit(RecentSearchLoaded(recentSearches));
+    try {
+      await repository.removeSearchTerm(event.term);
+      final recentSearches = await repository.loadRecentSearches();
+      emit(RecentSearchLoading());
+      emit(RecentSearchLoaded(recentSearches));
+    } catch (e) {
+      emit(RecentSearchError(e.toString()));
+    }
   }
 
   void _onClearAllSearchTerms(

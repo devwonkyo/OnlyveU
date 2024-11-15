@@ -45,7 +45,7 @@ class TreandSearchView extends StatelessWidget {
                     children: [
                       // 순위
                       SizedBox(
-                        width: 40.w,
+                        width: 30.w,
                         child: Text(
                           '${index + 1}',
                           style: TextStyle(
