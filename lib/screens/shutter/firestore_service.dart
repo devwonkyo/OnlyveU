@@ -21,4 +21,16 @@ class FirestoreService {
       rethrow;
     }
   }
+
+  Future<String> fetchNickname(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) {
+        return doc['nickname'] ?? 'Unknown User';
+      }
+    } catch (e) {
+      print('Error fetching nickname: $e');
+    }
+    return 'Unknown User';
+  }
 }
