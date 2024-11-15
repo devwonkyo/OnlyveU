@@ -8,25 +8,44 @@ abstract class ShutterEvent {}
 
 class FetchPosts extends ShutterEvent {}
 
+class FetchNicknames extends ShutterEvent {
+  final List<String> uids;
+  FetchNicknames(this.uids);
+}
+
+class _UpdatePosts extends ShutterEvent {
+  final List<PostModel> posts;
+  _UpdatePosts(this.posts);
+}
+
+class _FetchError extends ShutterEvent {
+  final String message;
+  _FetchError(this.message);
+}
+
 // State
 class ShutterState {
   final List<PostModel> posts;
+  final Map<String, String> nicknames;
   final bool isLoading;
   final String? error;
 
   ShutterState({
     required this.posts,
+    this.nicknames = const {},
     this.isLoading = false,
     this.error,
   });
 
   ShutterState copyWith({
     List<PostModel>? posts,
+    Map<String, String>? nicknames,
     bool? isLoading,
     String? error,
   }) {
     return ShutterState(
       posts: posts ?? this.posts,
+      nicknames: nicknames ?? this.nicknames,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
@@ -46,6 +65,8 @@ class ShutterBloc extends Bloc<ShutterEvent, ShutterState> {
       await _postsSubscription?.cancel();
       _postsSubscription = _firestoreService.getPosts().listen(
         (posts) {
+          final uids = posts.map((post) => post.authorUid).toSet().toList();
+          add(FetchNicknames(uids));
           add(_UpdatePosts(posts));
         },
         onError: (error) {
@@ -54,18 +75,27 @@ class ShutterBloc extends Bloc<ShutterEvent, ShutterState> {
       );
     });
 
+    on<FetchNicknames>((event, emit) async {
+      try {
+        final nicknames = Map<String, String>.from(state.nicknames);
+        for (final uid in event.uids) {
+          if (!nicknames.containsKey(uid)) {
+            final nickname = await _firestoreService.fetchNickname(uid);
+            nicknames[uid] = nickname;
+          }
+        }
+        emit(state.copyWith(nicknames: nicknames));
+      } catch (e) {
+        print('Error fetching nicknames: $e');
+      }
+    });
+
     on<_UpdatePosts>((event, emit) {
-      emit(state.copyWith(
-        posts: event.posts,
-        isLoading: false,
-      ));
+      emit(state.copyWith(posts: event.posts, isLoading: false));
     });
 
     on<_FetchError>((event, emit) {
-      emit(state.copyWith(
-        error: event.message,
-        isLoading: false,
-      ));
+      emit(state.copyWith(error: event.message, isLoading: false));
     });
   }
 
@@ -74,14 +104,4 @@ class ShutterBloc extends Bloc<ShutterEvent, ShutterState> {
     _postsSubscription?.cancel();
     return super.close();
   }
-}
-
-class _UpdatePosts extends ShutterEvent {
-  final List<PostModel> posts;
-  _UpdatePosts(this.posts);
-}
-
-class _FetchError extends ShutterEvent {
-  final String message;
-  _FetchError(this.message);
 }

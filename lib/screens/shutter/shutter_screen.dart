@@ -5,6 +5,8 @@ import 'package:onlyveyou/widgets/default_appbar.dart';
 import 'package:onlyveyou/blocs/shutter/shutter_bloc.dart';
 import 'package:onlyveyou/screens/shutter/firestore_service.dart';
 import 'package:onlyveyou/models/post_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ShutterScreen extends StatelessWidget {
   const ShutterScreen({super.key});
@@ -93,7 +95,7 @@ class ShutterScreen extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 10),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.zero,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,6 +142,32 @@ class ShutterScreen extends StatelessWidget {
                     color: Colors.grey,
                   ),
                 ),
+                // 현재 로그인된 사용자 정보 불러오기
+                FutureBuilder<User?>(
+                  future: _getCurrentUser(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Text('로그인되지 않았습니다.');
+                    }
+
+                    final currentUser = snapshot.data!;
+                    return Text(
+                      '작성자: ${currentUser.email ?? "알 수 없음"}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    );
+                  },
+                ),
                 if (post.tags.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Wrap(
@@ -159,5 +187,16 @@ class ShutterScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // FirebaseAuth에서 현재 로그인된 사용자 가져오기
+  Future<User?> _getCurrentUser() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      return currentUser;
+    } catch (e) {
+      print('Error getting current user: $e');
+      return null;
+    }
   }
 }
