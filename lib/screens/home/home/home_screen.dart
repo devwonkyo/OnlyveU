@@ -195,16 +195,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         _buildQuickMenuItem('AI원픽', Icons.favorite, () {
           print('이벤트 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('AR가상', Icons.medication, () {
+        _buildQuickMenuItem('날씨추천', Icons.wb_sunny_sharp, () {
           print('픽업 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('운명 화장품', Icons.live_tv, () {
+        _buildQuickMenuItem('AR가상', Icons.live_tv, () {
           _uploadDummyData(context);
         }),
-        _buildQuickMenuItem('날씨추천', Icons.card_giftcard, () {
+        _buildQuickMenuItem('MBTI', Icons.hail_outlined, () {
           print('선물하기 버튼 클릭됨');
         }),
-        _buildQuickMenuItem('GTP추천', Icons.local_offer, () {
+        _buildQuickMenuItem('VS투표', Icons.balance_rounded, () {
           print('세일 버튼 클릭됨');
         }),
       ],
