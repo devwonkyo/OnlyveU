@@ -39,8 +39,8 @@ enum OrderStatus {
 }
 
 class OrderModel {
-  /// 주문 ID
-  final String? id;
+  /// 주문 ID   자동으로 id생성하기 위해서 late
+  late final String? id;
 
   /// 주문한 사용자 ID
   final String userId;

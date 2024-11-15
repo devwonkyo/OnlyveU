@@ -182,19 +182,24 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-    GoRoute(
-      path: '/payment',
-      pageBuilder: (context, state) {
-        final order = state.extra as OrderModel;
-        return _buildPageWithTransition(
-          state,
-          BlocProvider(
-            create: (context) => PaymentBloc(),
-            child: PaymentScreen(order: order),
-          ),
-        );
-      },
-    ),
+   GoRoute(
+  path: '/payment',
+  pageBuilder: (context, state) {
+    // state.extra를 통해 전달된 OrderModel을 가져옴
+    final order = state.extra as OrderModel;
+
+    return _buildPageWithTransition(
+      state,
+      BlocProvider(
+        create: (context) => PaymentBloc(
+          orderRepository: context.read<OrderRepository>(), // OrderRepository를 주입
+        )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
+        child: PaymentScreen(order: order),
+      ),
+    );
+  },
+),
+
     GoRoute(
       path: '/new_delivery_address',
       pageBuilder: (context, state) => _buildPageWithTransition(

@@ -13,11 +13,13 @@ class DeliveryOrderInfo extends StatelessWidget {
   final DeliveryInfoModel? deliveryInfo;
   final List<String> deliveryMessages;
   final VoidCallback? onAddressChange; // 콜백 추가
+  final ValueChanged<String>? onDeliveryMessageSelected; // 콜백 추가
   const DeliveryOrderInfo({
     super.key,
     required this.deliveryInfo,
     required this.deliveryMessages,
     this.onAddressChange, // 콜백 초기화
+    this.onDeliveryMessageSelected, // 콜백 초기화
   });
 
   @override
@@ -145,6 +147,7 @@ class DeliveryOrderInfo extends StatelessWidget {
                 value: selectedMessage,
                 onChanged: (value) {
                   if (value != null) {
+                    onDeliveryMessageSelected?.call(value);
                     context
                         .read<PaymentBloc>()
                         .add(SelectDeliveryMessage(value));

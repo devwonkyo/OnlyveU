@@ -176,8 +176,9 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   int _totalAmount = 0; // 유지되는 totalAmount
   DeliveryInfoModel? _deliveryInfo;
   OrderType _orderType = OrderType.delivery; // 기본값 설정
+  final OrderRepository orderRepository;
 
-  PaymentBloc() : super(PaymentInitial()) {
+  PaymentBloc({required this.orderRepository}) : super(PaymentInitial()) {
     debugPrint("PaymentBloc has been created.");
     // 먼저 _initializePayment 함수를 선언
 
@@ -268,6 +269,21 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       }
     });
 
+    //주문하기 메서드
+    on<SubmitOrder>(
+      (SubmitOrder event, Emitter<PaymentState> emitt) async {
+        try {
+          emit(PaymentLoading());
+          // Firestore에 주문 데이터 저장
+          await orderRepository.saveOrder(event.order);
+
+          emit(PaymentSuccess());
+        } catch (e) {
+          emit(const PaymentError('주문 제출 중 오류가 발생했습니다.'));
+        }
+      },
+    );
+
     on<CheckOrderDetails>((event, emit) {
       debugPrint("OrderModel details:");
       debugPrint("- User ID: ${FirebaseAuth.instance.currentUser?.uid ?? ''}");
@@ -275,10 +291,6 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       debugPrint("- Total Amount: $_totalAmount");
       debugPrint("- Delivery Info: $_deliveryInfo");
       debugPrint("- Order Type: $_orderType");
-    });
-
-    on<TestEvent>((event, emt) {
-      emit(PaymentInitial());
     });
   }
 

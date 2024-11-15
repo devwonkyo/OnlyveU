@@ -8,8 +8,10 @@ abstract class PaymentState extends Equatable {
   List<OrderItemModel> get orderItems => [];
   OrderType get orderType => OrderType.delivery; // 기본값 설정
   DeliveryInfoModel? get deliveryInfo => null; // deliveryInfo를 추상 getter로 추가
+ int get totalAmount => 0;
+
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [orderItems, orderType, deliveryInfo, totalAmount];
 }
 
 class PaymentInitial extends PaymentState {}
@@ -20,6 +22,7 @@ class PaymentLoading extends PaymentState {}
 class PaymentLoaded extends PaymentState {
   @override
   final List<OrderItemModel> orderItems;
+  @override
   final int totalAmount;
   @override
   final OrderType orderType;
@@ -62,13 +65,17 @@ class PaymentMessageSelected extends PaymentState {
       [selectedMessage, orderItems, totalAmount, orderType, deliveryInfo ?? ''];
 }
 
+// 결제 성공 상태
+class PaymentSuccess extends PaymentState {}
+
+// 결제 오류 상태
 class PaymentError extends PaymentState {
   final String message;
 
   const PaymentError(this.message);
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 }
 
 class DeliveryInfoUpdated extends PaymentState {
