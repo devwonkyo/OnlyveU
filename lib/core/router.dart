@@ -58,23 +58,38 @@ final GoRouter router = GoRouter(
       routes: [
         GoRoute(
           path: '/ai-onepick',
-          builder: (context, state) => const AiOnePickScreen(),
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            AIOnepickScreen(),
+          ),
         ),
         GoRoute(
           path: '/weather',
-          builder: (context, state) => const WeatherScreen(),
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const WeatherScreen(),
+          ),
         ),
         GoRoute(
           path: '/virtual',
-          builder: (context, state) => const VirtualScreen(),
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const VirtualScreen(),
+          ),
         ),
         GoRoute(
           path: '/mbti',
-          builder: (context, state) => const MbtiScreen(),
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const MbtiScreen(),
+          ),
         ),
         GoRoute(
           path: '/debate',
-          builder: (context, state) => const DebateScreen(),
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const DebateScreen(),
+          ),
         ),
         GoRoute(
           path: '/banner1',
