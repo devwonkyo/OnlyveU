@@ -17,7 +17,6 @@ class AIRecommendRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String openAIApiKey =
       FirebaseRemoteConfig.instance.getString('openai_api_key');
-
   List<ProductModel>? _cachedProducts;
   DateTime? _lastFetchTime;
   static const cacheDuration = Duration(minutes: 30);
