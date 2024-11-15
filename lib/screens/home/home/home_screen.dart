@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
@@ -193,19 +194,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       padding: AppStyles.defaultPadding,
       children: [
         _buildQuickMenuItem('AI원픽', Icons.favorite, () {
-          print('이벤트 버튼 클릭됨');
+          context.push('/ai-onepick');
         }),
         _buildQuickMenuItem('날씨추천', Icons.wb_sunny_sharp, () {
-          print('픽업 버튼 클릭됨');
+          context.push('/weather');
         }),
         _buildQuickMenuItem('AR가상', Icons.live_tv, () {
-          _uploadDummyData(context);
+          context.push('/virtual');
+        }), // _uploadDummyData(context);
+        _buildQuickMenuItem('VS투표', Icons.balance_rounded, () {
+          context.push('/debate');
         }),
         _buildQuickMenuItem('MBTI', Icons.hail_outlined, () {
-          print('선물하기 버튼 클릭됨');
-        }),
-        _buildQuickMenuItem('VS투표', Icons.balance_rounded, () {
-          print('세일 버튼 클릭됨');
+          context.push('/mbti');
         }),
       ],
     );
