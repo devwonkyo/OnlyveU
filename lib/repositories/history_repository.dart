@@ -3,20 +3,28 @@ import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
+class HistoryData {
+  final List<ProductModel> recentItems;
+  final List<ProductModel> likedItems;
+
+  HistoryData({
+    required this.recentItems,
+    required this.likedItems,
+  });
+}
+
 class HistoryRepository {
   final FirebaseFirestore _firestore;
   final ShoppingCartRepository _cartRepository;
-  final _prefs = OnlyYouSharedPreference(); // 추가
+  final _prefs = OnlyYouSharedPreference();
   final Map<String, ProductModel> _productCache = {};
 
   HistoryRepository(
-      {FirebaseFirestore? firestore,
-      ShoppingCartRepository? cartRepository // 추가
-      })
+      {FirebaseFirestore? firestore, ShoppingCartRepository? cartRepository})
       : _firestore = firestore ?? FirebaseFirestore.instance,
         _cartRepository = cartRepository ?? ShoppingCartRepository();
 
-  Stream<List<ProductModel>> fetchHistoryItems() async* {
+  Stream<HistoryData> fetchHistoryAndLikedItems() async* {
     try {
       final String currentUserId = await _prefs.getCurrentUserId();
 
@@ -25,80 +33,128 @@ class HistoryRepository {
           .doc(currentUserId)
           .snapshots()
           .asyncMap((userSnapshot) async {
-        if (!userSnapshot.exists) return [];
+        if (!userSnapshot.exists) {
+          return HistoryData(recentItems: [], likedItems: []);
+        }
 
         final List<String> viewHistory =
             List<String>.from(userSnapshot.data()?['viewHistory'] ?? []);
+        final List<String> likedItems =
+            List<String>.from(userSnapshot.data()?['likedItems'] ?? []);
 
-        final List<ProductModel> products = [];
-        for (String productId in viewHistory) {
-          // 캐시된 제품이 있으면 사용
-          if (_productCache.containsKey(productId)) {
-            products.add(_productCache[productId]!);
-            continue;
-          }
+        final List<ProductModel> recentProducts =
+            await _fetchProductsByIds(viewHistory);
+        final List<ProductModel> likedProducts =
+            await _fetchProductsByIds(likedItems);
 
-          // 캐시에 없으면 Firebase에서 가져옴
-          final productDoc =
-              await _firestore.collection('products').doc(productId).get();
-          if (productDoc.exists) {
-            Map<String, dynamic> data =
-                productDoc.data() as Map<String, dynamic>;
-            data['productId'] = productDoc.id;
-            final product = ProductModel.fromMap(data);
-            _productCache[productId] = product; // 캐시에 저장
-            products.add(product);
-          }
-        }
-        return products;
+        return HistoryData(
+          recentItems: recentProducts,
+          likedItems: likedProducts,
+        );
       });
     } catch (e) {
-      print('Error fetching history items: $e');
-      throw Exception('최근 본 상품을 불러오는데 실패했습니다.');
+      print('Error fetching history and liked items: $e');
+      throw Exception('상품 정보를 불러오는데 실패했습니다.');
     }
+  }
+
+  Future<List<ProductModel>> _fetchProductsByIds(
+      List<String> productIds) async {
+    final List<ProductModel> products = [];
+
+    for (String productId in productIds) {
+      if (_productCache.containsKey(productId)) {
+        products.add(_productCache[productId]!);
+        continue;
+      }
+
+      final productDoc =
+          await _firestore.collection('products').doc(productId).get();
+      if (productDoc.exists) {
+        Map<String, dynamic> data = productDoc.data() as Map<String, dynamic>;
+        data['productId'] = productDoc.id;
+        final product = ProductModel.fromMap(data);
+        _productCache[productId] = product;
+        products.add(product);
+      }
+    }
+
+    return products;
   }
 
   Future<void> toggleFavorite(String productId, String userId) async {
     try {
       await _firestore.runTransaction((transaction) async {
-        final productDoc = _firestore.collection('products').doc(productId);
-        final userDoc = _firestore.collection('users').doc(userId);
+        final productRef = _firestore.collection('products').doc(productId);
+        final userRef = _firestore.collection('users').doc(userId);
 
-        final productSnapshot = await transaction.get(productDoc);
-        final userSnapshot = await transaction.get(userDoc);
+        final productDoc = await transaction.get(productRef);
+        final userDoc = await transaction.get(userRef);
 
-        // favoriteList와 likedItems 업데이트
         List<String> favoriteList =
-            List<String>.from(productSnapshot.get('favoriteList') ?? []);
+            List<String>.from(productDoc.get('favoriteList') ?? []);
         List<String> likedItems = List<String>.from(
-            userSnapshot.exists ? userSnapshot.get('likedItems') ?? [] : []);
+            userDoc.exists ? userDoc.get('likedItems') ?? [] : []);
 
-        // 삭제 로직
-        favoriteList.remove(userId);
-        likedItems.remove(productId);
-
-        // 트랜잭션으로 두 컬렉션 동시 업데이트
-        transaction.update(productDoc, {'favoriteList': favoriteList});
-        if (userSnapshot.exists) {
-          transaction.update(userDoc, {'likedItems': likedItems});
+        if (favoriteList.contains(userId)) {
+          favoriteList.remove(userId);
+          likedItems.remove(productId);
         } else {
-          transaction.set(userDoc, {'likedItems': likedItems});
+          favoriteList.add(userId);
+          likedItems.add(productId);
+        }
+
+        transaction.update(productRef, {'favoriteList': favoriteList});
+        if (userDoc.exists) {
+          transaction.update(userRef, {'likedItems': likedItems});
+        } else {
+          transaction.set(
+              userRef, {'likedItems': likedItems}, SetOptions(merge: true));
         }
       });
-    } catch (e) {
-      print('Error removing favorite: $e');
-      throw Exception('좋아요 삭제 처리에 실패했습니다.');
-    }
-  } //^
 
-  //장바구니
+      _productCache.remove(productId);
+    } catch (e) {
+      print('Error toggling favorite: $e');
+      throw Exception('좋아요 처리에 실패했습니다.');
+    }
+  }
+
   Future<void> addToCart(String productId) async {
     try {
-      await _cartRepository.addToCart(productId); // ShoppingCartRepository 사용
+      await _cartRepository.addToCart(productId);
     } catch (e) {
       print('Error adding to cart: $e');
       throw Exception('장바구니 추가에 실패했습니다.');
     }
   }
+
+  Future<void> removeHistoryItem(String productId, String userId) async {
+    try {
+      final userRef = _firestore.collection('users').doc(userId);
+      await _firestore.runTransaction((transaction) async {
+        final userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) return;
+
+        List<String> viewHistory =
+            List<String>.from(userDoc.get('viewHistory') ?? []);
+        viewHistory.remove(productId);
+
+        transaction.update(userRef, {'viewHistory': viewHistory});
+      });
+    } catch (e) {
+      print('Error removing history item: $e');
+      throw Exception('최근 본 상품 삭제에 실패했습니다.');
+    }
+  }
+
+  Future<void> clearHistory(String userId) async {
+    try {
+      final userRef = _firestore.collection('users').doc(userId);
+      await userRef.update({'viewHistory': []});
+    } catch (e) {
+      print('Error clearing history: $e');
+      throw Exception('히스토리 초기화에 실패했습니다.');
+    }
+  }
 }
-////////
