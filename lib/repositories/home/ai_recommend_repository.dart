@@ -6,7 +6,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/user_model.dart';
-
+//
 // 가중치 붙여서 100개 추린다음 AI 에게 100개 안에서 물어보기
 // 내가 본거 관심 장바구니와 연관된거를 10개 추천 - 안본게 포함되어 있음
 // 몇개는 내가 본거와 중복이지만 20개가 넘어가기 때문에
