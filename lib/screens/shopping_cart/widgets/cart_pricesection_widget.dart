@@ -14,6 +14,21 @@ class CartPriceSectionWidget extends StatelessWidget {
   });
 
   // 총 상품 금액 계산 (할인 전)
+  // static int calculateTotalOriginalPrice({
+  //   required List<CartModel> items,
+  //   required Map<String, bool> selectedItems,
+  //   required Map<String, int> itemQuantities,
+  // }) {
+  //   return items.fold(0, (sum, item) {
+  //     if (selectedItems[item.productId] == true) {
+  //       final quantity = itemQuantities[item.productId] ?? 1;
+  //       return sum + (item.productPrice * quantity);
+  //     }
+  //     return sum;
+  //   });
+  // }
+
+  // 할인 적용된 총 금액 계산
   static int calculateTotalOriginalPrice({
     required List<CartModel> items,
     required Map<String, bool> selectedItems,
@@ -22,13 +37,13 @@ class CartPriceSectionWidget extends StatelessWidget {
     return items.fold(0, (sum, item) {
       if (selectedItems[item.productId] == true) {
         final quantity = itemQuantities[item.productId] ?? 1;
-        return sum + (item.productPrice * quantity);
+        return sum + (item.productPrice * quantity); // 원래 가격 사용
       }
       return sum;
     });
   }
 
-  // 할인 적용된 총 금액 계산
+// 할인 적용된 총 금액 계산
   static int calculateTotalDiscountedPrice({
     required List<CartModel> items,
     required Map<String, bool> selectedItems,
@@ -37,27 +52,13 @@ class CartPriceSectionWidget extends StatelessWidget {
     return items.fold(0, (sum, item) {
       if (selectedItems[item.productId] == true) {
         final quantity = itemQuantities[item.productId] ?? 1;
+        // 할인율을 적용하여 계산
         final discountedPrice =
-            item.productPrice * (100 - item.discountPercent) / 100;
-        return sum + (discountedPrice * quantity).round();
+            (item.productPrice * (100 - item.discountPercent) / 100).round();
+        return sum + (discountedPrice * quantity);
       }
       return sum;
     });
-  }
-
-  // 총 할인 금액 계산
-  int calculateTotalDiscount() {
-    final originalPrice = calculateTotalOriginalPrice(
-      items: items,
-      selectedItems: selectedItems,
-      itemQuantities: itemQuantities,
-    );
-    final discountedPrice = calculateTotalDiscountedPrice(
-      items: items,
-      selectedItems: selectedItems,
-      itemQuantities: itemQuantities,
-    );
-    return originalPrice - discountedPrice;
   }
 
   // 선택된 상품 개수 계산
@@ -87,7 +88,7 @@ class CartPriceSectionWidget extends StatelessWidget {
       selectedItems: selectedItems,
       itemQuantities: itemQuantities,
     );
-    final totalDiscount = calculateTotalDiscount();
+    final totalDiscount = originalPrice - discountedPrice;
     final selectedCount = _calculateSelectedItemCount();
     final totalQuantity = _calculateTotalQuantity();
 
