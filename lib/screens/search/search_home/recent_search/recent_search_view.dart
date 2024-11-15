@@ -62,7 +62,6 @@ class RecentlySearchButton extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 context.read<RecentSearchBloc>().add(RemoveSearchTerm(title));
-                context.read<RecentSearchBloc>().add(LoadRecentSearches());
               },
               child: Icon(
                 Icons.close,
