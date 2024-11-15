@@ -92,38 +92,25 @@ class AIRecommendError extends AIRecommendState {
 
 // BLoC 정의: 이벤트를 처리하고 상태를 관리
 class AIRecommendBloc extends Bloc<AIRecommendEvent, AIRecommendState> {
-  final AIRecommendRepository _repository;
-  StreamSubscription? _activityCountsSubscription;
+  final AIRecommendRepository _repository; // AI 추천 관련 데이터 처리
+  StreamSubscription? _activityCountsSubscription; // 사용자 활동 데이터 구독
 
   AIRecommendBloc({required AIRecommendRepository repository})
       : _repository = repository,
         super(AIRecommendInitial()) {
+    // AI 추천 로드 이벤트 처리
     on<LoadAIRecommendations>((event, emit) async {
       try {
         emit(AIRecommendLoading(activityCounts: state.activityCounts));
         final result = await _repository.getRecommendations();
-
-        // private 메소드 대신 public 메소드 사용
-        final allProducts = await _repository.getAllProducts();
-
-        final productIds = List<String>.from(result['products'] ?? []);
-
-        final recommendedProducts = allProducts
-            .where((product) => productIds.contains(product.productId))
-            .toList();
-
-        final typedReasonMap = (result['reasons'] as Map<String, dynamic>?)
-                ?.map((key, value) => MapEntry(key, value.toString())) ??
-            {};
-
         emit(AIRecommendLoaded(
-          products: recommendedProducts,
-          reasonMap: typedReasonMap,
+          products: result['products'], // 추천된 상품
+          reasonMap: result['reasons'], // 추천 이유
           activityCounts: state.activityCounts,
         ));
       } catch (e) {
         emit(AIRecommendError(
-          message: e.toString(),
+          message: e.toString(), // 에러 메시지
           activityCounts: state.activityCounts,
         ));
       }
