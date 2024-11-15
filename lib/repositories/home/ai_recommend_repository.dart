@@ -16,9 +16,36 @@ class AIRecommendRepository {
   DateTime? _lastFetchTime;
   static const cacheDuration = Duration(minutes: 30);
 
-  /// 모든 상품 데이터를 Firestore에서 가져오거나 캐싱된 데이터를 반환
+  /// API 응답에서 안전하게 문자열 맵으로 변환하는 유틸리티 메서드
+  Map<String, String> _safelyParseReasonMap(dynamic rawReasons) {
+    if (rawReasons == null) return {};
+
+    try {
+      if (rawReasons is Map) {
+        return rawReasons.map((key, value) =>
+            MapEntry(key.toString(), value?.toString() ?? '회원님 취향과 일치'));
+      }
+    } catch (e) {
+      print('Reason map parsing error: $e');
+    }
+    return {};
+  }
+
+  /// API 응답에서 안전하게 상품 ID 리스트로 변환하는 유틸리티 메서드
+  List<String> _safelyParseProductIds(dynamic rawProducts) {
+    if (rawProducts == null) return [];
+
+    try {
+      if (rawProducts is List) {
+        return rawProducts.map((item) => item.toString()).toList();
+      }
+    } catch (e) {
+      print('Product IDs parsing error: $e');
+    }
+    return [];
+  }
+
   Future<List<ProductModel>> _getAllProducts() async {
-    // 캐시가 유효한 경우 캐시된 데이터 반환
     if (_cachedProducts != null &&
         _lastFetchTime != null &&
         DateTime.now().difference(_lastFetchTime!) < cacheDuration) {
@@ -26,11 +53,10 @@ class AIRecommendRepository {
     }
 
     try {
-      // Firestore에서 상품 데이터 가져오기
       final snapshot = await _firestore.collection('products').get();
       _cachedProducts = snapshot.docs.map((doc) {
         final data = doc.data();
-        data['productId'] = doc.id; // 상품 ID를 데이터에 포함
+        data['productId'] = doc.id;
         return ProductModel.fromMap(data);
       }).toList();
 
@@ -41,7 +67,6 @@ class AIRecommendRepository {
     }
   }
 
-  /// 사용자 행동 데이터를 AI가 사용할 수 있는 형식으로 변환
   Future<Map<String, dynamic>> getUserBehaviorForAI(String userId) async {
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
@@ -56,7 +81,6 @@ class AIRecommendRepository {
 
       final userData = userDoc.data()!;
 
-      // List<dynamic>을 List<String>으로 안전하게 변환
       List<String> convertToStringList(dynamic list) {
         if (list == null) return [];
         if (list is List) {
@@ -65,7 +89,6 @@ class AIRecommendRepository {
         return [];
       }
 
-      // cartItems 처리를 위한 특별 변환 함수
       List<String> convertCartItems(dynamic cartItems) {
         if (cartItems == null) return [];
         if (cartItems is List) {
@@ -97,18 +120,15 @@ class AIRecommendRepository {
     }
   }
 
-  /// AI 추천 시스템에 요청하여 추천 상품 받아오기
   Future<Map<String, dynamic>> _getAIRecommendations(
       List<ProductModel> allProducts, Map<String, dynamic> userData) async {
     try {
-      // 사용자가 이미 상호작용한 상품 ID 목록 생성
       final List<String> interactedProducts = [
         ...List<String>.from(userData['viewHistory'] ?? []),
         ...List<String>.from(userData['likedItems'] ?? []),
         ...List<String>.from(userData['cartItems'] ?? []),
-      ].toSet().toList(); // 중복 제거
+      ].toSet().toList();
 
-      // 상호작용하지 않은 상품만 필터링
       final availableProducts = allProducts
           .where((p) =>
               p.productId.isNotEmpty &&
@@ -120,7 +140,6 @@ class AIRecommendRepository {
                     (a.rating * 0.3) +
                     (a.visitCount * 0.3)));
 
-      // 상품 데이터를 직렬화 가능한 형태로 변환
       final productsForAI = availableProducts
           .take(100)
           .map((p) => {
@@ -137,7 +156,6 @@ class AIRecommendRepository {
               })
           .toList();
 
-      // 사용자가 상호작용한 상품들의 상세 정보
       final interactedProductsDetails = allProducts
           .where((p) => interactedProducts.contains(p.productId))
           .map((p) => {
@@ -154,20 +172,28 @@ class AIRecommendRepository {
         'messages': [
           {
             'role': 'system',
-            'content': """
-당신은 사용자 맞춤형 쇼핑 추천 AI입니다. JSON 형식으로만 응답하세요:
+            'content': '''당신은 사용자 맞춤형 쇼핑 추천 AI입니다. 
+반드시 아래와 같은 정확한 JSON 형식으로만 응답해야 합니다:
+
 {
-  "products": ["상품ID1", "상품ID2", ...],
+  "products": ["product_id_1", "product_id_2"],
   "reasons": {
-    "상품ID1": "추천이유1",
-    "상품ID2": "추천이유2"
+    "product_id_1": "simple reason without quotes or special chars",
+    "product_id_2": "simple reason without quotes or special chars"
   }
-}"""
+}
+
+주의사항:
+1. 모든 문자열은 쌍따옴표(")로 감싸야 합니다
+2. 문자열 내부에 쌍따옴표(")를 사용하지 마세요
+3. 특수문자나 줄바꿈을 사용하지 마세요
+4. 추천 이유는 간단한 텍스트로만 작성하세요
+5. 설명이나 부가 정보를 추가하지 마세요
+6. 정확히 위 형식만 반환하세요'''
           },
           {
             'role': 'user',
-            'content': """
-사용자의 상호작용 정보:
+            'content': '''사용자의 상호작용 정보:
 ${jsonEncode(userData)}
 
 사용자가 이미 본/관심/장바구니에 담은 상품들:
@@ -176,21 +202,12 @@ ${jsonEncode(interactedProductsDetails)}
 추천 가능한 새로운 상품 목록:
 ${jsonEncode(productsForAI)}
 
-요청사항:
-1. 사용자가 이미 본 상품, 관심상품, 장바구니에 담은 상품은 제외합니다.
-2. 대신 이러한 상품들과 연관성이 높은 새로운 상품을 추천해주세요.
-3. 연관성 판단 기준:
-   - 같은 브랜드의 다른 상품
-   - 같은 카테고리의 비슷한 가격대 상품
-   - 비슷한 태그를 가진 상품
-   - 같은 스타일/용도의 상품
-4. 각 추천 상품에 대해 구체적인 추천 이유를 설명해주세요.
-
-위 조건을 만족하는 10개의 상품을 추천해주세요."""
+위 정보를 바탕으로 10개의 상품을 추천해주세요. 반드시 지정된 JSON 형식으로만 응답하세요.'''
           }
         ],
         'temperature': 0.3,
         'max_tokens': 1000,
+        'response_format': {'type': 'json_object'}
       };
 
       final response = await http.post(
@@ -204,18 +221,86 @@ ${jsonEncode(productsForAI)}
 
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
-        final content =
-            decodedResponse['choices'][0]['message']['content'].trim();
-        return jsonDecode(content);
+        String content = decodedResponse['choices']?[0]?['message']?['content']
+                ?.toString() ??
+            '{}';
+
+        // 문자열 정리 (이스케이프 처리 제거)
+        content = content.trim();
+
+        // JSON 파싱 시도
+        try {
+          // 첫 번째 파싱 시도
+          Map<String, dynamic> aiResponse = jsonDecode(content);
+          return {
+            'products': _safelyParseProductIds(aiResponse['products']),
+            'reasons': _safelyParseReasonMap(aiResponse['reasons']),
+          };
+        } catch (e) {
+          print('First JSON parsing attempt failed: $e');
+          print('Content causing error: $content');
+
+          try {
+            // 백업 파싱: JSON 형식이 깨진 경우 정규식으로 추출 시도
+            final productsMatch =
+                RegExp(r'"products":\s*\[(.*?)\]').firstMatch(content);
+            final reasonsMatch =
+                RegExp(r'"reasons":\s*\{(.*?)\}').firstMatch(content);
+
+            final products = productsMatch
+                    ?.group(1)
+                    ?.split(',')
+                    .map((s) => s.trim().replaceAll('"', ''))
+                    .where((s) => s.isNotEmpty)
+                    .toList() ??
+                [];
+
+            final reasons = <String, String>{};
+            if (reasonsMatch != null) {
+              final reasonsStr = reasonsMatch.group(1) ?? '';
+              final reasonPairs = reasonsStr.split(',');
+              for (var pair in reasonPairs) {
+                final parts = pair.split(':');
+                if (parts.length == 2) {
+                  final key = parts[0].trim().replaceAll('"', '');
+                  final value = parts[1].trim().replaceAll('"', '');
+                  if (key.isNotEmpty && value.isNotEmpty) {
+                    reasons[key] = value;
+                  }
+                }
+              }
+            }
+
+            if (products.isNotEmpty) {
+              return {
+                'products': products,
+                'reasons': reasons,
+              };
+            }
+          } catch (e2) {
+            print('Backup parsing failed: $e2');
+          }
+
+          // 모든 파싱 시도가 실패한 경우 빈 결과 반환
+          return {
+            'products': <String>[],
+            'reasons': <String, String>{},
+          };
+        }
       } else {
+        print('API call failed with status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
         throw Exception('AI API 호출 실패: ${response.body}');
       }
     } catch (e) {
-      throw Exception('AI 추천 요청 실패: $e');
+      print('AI recommendation error: $e');
+      return {
+        'products': <String>[],
+        'reasons': <String, String>{},
+      };
     }
   }
 
-  /// 사용자의 즐겨찾기 상태를 업데이트
   Future<void> toggleFavorite(String productId, String userId) async {
     try {
       await _firestore.runTransaction((transaction) async {
@@ -227,7 +312,6 @@ ${jsonEncode(productsForAI)}
         final user = UserModel.fromMap(userData.data()!);
         final likedItems = List<String>.from(user.likedItems);
 
-        // 즐겨찾기 상태를 토글
         if (likedItems.contains(productId)) {
           likedItems.remove(productId);
         } else {
@@ -241,33 +325,30 @@ ${jsonEncode(productsForAI)}
     }
   }
 
-  /// 추천 상품 목록을 반환하는 메인 메서드
   Future<Map<String, dynamic>> getRecommendations() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) throw Exception('로그인이 필요합니다.');
 
-      final allProducts = await _getAllProducts();
+      final allProducts = await getAllProducts();
       final userData = await getUserBehaviorForAI(currentUser.uid);
       final rawRecommendations =
           await _getAIRecommendations(allProducts, userData);
 
-      // API 응답 검증 및 타입 변환
-      if (!rawRecommendations.containsKey('products') ||
-          !rawRecommendations.containsKey('reasons')) {
-        throw Exception('잘못된 추천 데이터 형식');
+      if (rawRecommendations['products'].isEmpty) {
+        print('Warning: No products were recommended');
       }
 
-      return {
-        'products': rawRecommendations['products'],
-        'reasons': rawRecommendations['reasons'] as Map<String, dynamic>
-      };
+      return rawRecommendations;
     } catch (e) {
-      throw Exception('추천 데이터를 불러오는데 실패했습니다: $e');
+      print('Recommendation error: $e');
+      return {
+        'products': <String>[],
+        'reasons': <String, String>{},
+      };
     }
   }
 
-  /// 사용자 활동 데이터를 실시간으로 수신
   Stream<Map<String, int>> getCurrentUserActivityCountsStream() {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
