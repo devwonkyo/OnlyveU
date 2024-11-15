@@ -24,7 +24,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _aiRecommendBloc = context.read<AIRecommendBloc>();
       // 초기 데이터 로드
-      _aiRecommendBloc.add(const LoadAIRecommendations());
+      //_aiRecommendBloc.add(const LoadAIRecommendations());
     });
   }
 
