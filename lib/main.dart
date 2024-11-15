@@ -189,7 +189,6 @@ class MyApp extends StatelessWidget {
               create: (context) => StoreBloc(),
             ),
             BlocProvider<ReviewBloc>(
-              // CategoryProductBloc 추가
               create: (context) => ReviewBloc(repository: ReviewRepository()),
             ),
           ],
