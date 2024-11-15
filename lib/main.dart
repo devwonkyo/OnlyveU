@@ -128,9 +128,10 @@ class MyApp extends StatelessWidget {
             ),
             BlocProvider(
               create: (context) => HistoryBloc(
-                historyRepository: HistoryRepository(),
-                cartRepository:
-                    ShoppingCartRepository(), // ProductRepository 제거
+                historyRepository: HistoryRepository(
+                  cartRepository: ShoppingCartRepository(),
+                ),
+                cartRepository: ShoppingCartRepository(),
               )..add(LoadHistoryItems()),
             ),
             BlocProvider<ProfileEditBloc>(
