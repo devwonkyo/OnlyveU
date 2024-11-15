@@ -60,6 +60,7 @@ class ReviewItem extends StatelessWidget {
                         ),
                       ],
                     ),
+                    SizedBox(height: 12.h,),
                     Text(
                       reviewModel.productName,
                       style: TextStyle(
@@ -76,11 +77,27 @@ class ReviewItem extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           Row(
-            children: List.generate(5, (index) => Icon(
-              Icons.star,
-              size: 16.sp,
-              color: Colors.amber,
-            )),
+            children: List.generate(5, (index) {
+              if (index < (reviewModel.rating ~/ 1)) {  // 정수부분 (완전 채워진 별)
+                return Icon(
+                  Icons.star,
+                  size: 16.sp,
+                  color: Colors.amber,
+                );
+              } else if (index < reviewModel.rating) {  // 소수부분 (반별)
+                return Icon(
+                  Icons.star_half,
+                  size: 16.sp,
+                  color: Colors.amber,
+                );
+              } else {  // 나머지 (빈 별)
+                return Icon(
+                  Icons.star_border,
+                  size: 16.sp,
+                  color: Colors.grey[300],
+                );
+              }
+            }),
           ),
           SizedBox(height: 8.h),
           Text(
