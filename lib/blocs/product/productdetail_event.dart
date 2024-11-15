@@ -34,3 +34,4 @@ class TouchProductLikeEvent extends ProductDetailEvent {
   @override
   List<Object?> get props => [productId];
 }
+

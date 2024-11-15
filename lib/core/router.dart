@@ -7,6 +7,7 @@ import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -29,6 +30,9 @@ import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
+import 'package:onlyveyou/screens/mypage/review/review_list_screen.dart';
+import 'package:onlyveyou/screens/mypage/review/write_rating_screen.dart';
+import 'package:onlyveyou/screens/mypage/review/write_review_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/search/search_result/search_result_screen.dart';
@@ -235,6 +239,44 @@ final GoRouter router = GoRouter(
       path: '/search',
       builder: (context, state) => const SearchPage(),
     ),
+    GoRoute(
+      path: '/write_review',
+      pageBuilder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        final productModel = data['productModel'] as ProductModel;
+        final rating = data['rating'] as double;
+        final purchaseDate = data['purchaseDate'] as DateTime;
+        final orderType = data['orderType'] as OrderType;
+        final writeUserId = data['writeUserId'] as String;
+
+        return _buildPageUpWithTransition(
+          state, WriteReviewScreen(
+              productModel: productModel,
+              purchaseDate: purchaseDate,
+              rating: rating,
+              orderType: orderType,
+              writeUserId: writeUserId
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/write_rating',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        final productId = data["productId"] as String;
+        final purchaseDate = data["purchaseDate"] as DateTime;
+        final orderType = data["orderType"] as OrderType;
+        return WriteRatingScreen(productId: productId, purchaseDate: purchaseDate, orderType: orderType);
+      },
+    ),
+    GoRoute(
+      path: '/review_list',
+      builder: (context, state) {
+        final productId = state.extra as String;
+        return ReviewListScreen(productId: productId);
+      },
+    ),
   ],
 );
 
@@ -245,6 +287,28 @@ CustomTransitionPage<void> _buildPageWithTransition(
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+  );
+}
+
+CustomTransitionPage<void> _buildPageUpWithTransition(
+    GoRouterState state, Widget child) {
+  return CustomTransitionPage(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
       const end = Offset.zero;
       const curve = Curves.easeInOut;
 

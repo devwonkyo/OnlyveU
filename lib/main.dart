@@ -116,6 +116,7 @@ class MyApp extends StatelessWidget {
                   ),
                   child: const AIRecommendScreen(),
                 ),
+
                 BlocProvider(
                   create: (context) => CartBloc(
                     cartRepository: ShoppingCartRepository(),
