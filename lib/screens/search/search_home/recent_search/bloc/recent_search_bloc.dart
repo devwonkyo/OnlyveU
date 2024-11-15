@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../../repositories/search_repositories/recent_search_repository/recent_search_repository.dart';
 
@@ -26,11 +27,15 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
 
   void _onLoadRecentSearches(
       LoadRecentSearches event, Emitter<RecentSearchState> emit) async {
+    // 로딩화면 디버그용 (지워도됨)
+    if (state is RecentSearchInitial) {
+      emit(RecentSearchLoading());
+      await Future.delayed(const Duration(milliseconds: 1200));
+    }
     emit(RecentSearchLoading());
     try {
       final recentSearches = await repository.loadRecentSearches();
-      await Future.delayed(const Duration(seconds: 2));
-      print('onLoadRecentSearch: $recentSearches');
+      debugPrint('onLoadRecentSearch: $recentSearches');
       if (recentSearches.isEmpty) {
         emit(RecentSearchEmpty());
       } else {
@@ -43,9 +48,14 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
 
   void _onRemoveSearchTerm(
       RemoveSearchTerm event, Emitter<RecentSearchState> emit) async {
-    await repository.removeSearchTerm(event.term);
-    final recentSearches = await repository.loadRecentSearches();
-    emit(RecentSearchLoaded(recentSearches));
+    try {
+      await repository.removeSearchTerm(event.term);
+      final recentSearches = await repository.loadRecentSearches();
+      emit(RecentSearchLoading());
+      emit(RecentSearchLoaded(recentSearches));
+    } catch (e) {
+      emit(RecentSearchError(e.toString()));
+    }
   }
 
   void _onClearAllSearchTerms(

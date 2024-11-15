@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/search_repositories/recent_search_repository/recent_search_repository_impl.dart';
 import 'package:onlyveyou/repositories/search_repositories/suggestion_repository/suggestion_repository_impl.dart';
@@ -8,6 +9,7 @@ import 'package:onlyveyou/screens/search/search_home/recent_search/bloc/recent_s
 import 'package:onlyveyou/screens/search/search_result/search_result_screen.dart';
 
 import 'search_home/search_home_screen.dart';
+import 'search_home/trend_search/bloc/trend_search_bloc.dart';
 import 'search_result/bloc/search_result_bloc.dart';
 import 'search_suggestion/bloc/search_suggestion_bloc.dart';
 import 'search_suggestion/search_suggestion_screen.dart';
@@ -19,7 +21,7 @@ class SearchPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('==========$runtimeType==========');
+    debugPrint('==========$runtimeType==========');
     return MultiBlocProvider(
       providers: [
         BlocProvider<SearchTextFieldBloc>(
@@ -28,6 +30,11 @@ class SearchPage extends StatelessWidget {
         BlocProvider<RecentSearchBloc>(
           create: (context) => RecentSearchBloc(
             repository: RecentSearchRepositoryImpl(),
+          ),
+        ),
+        BlocProvider<TrendSearchBloc>(
+          create: (context) => TrendSearchBloc(
+            repository: SuggestionRepositoryImpl(),
           ),
         ),
         BlocProvider(
@@ -54,7 +61,9 @@ class SearchPage extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.shopping_bag_outlined,
                     color: Colors.black),
-                onPressed: () {},
+                onPressed: () {
+                  context.push('/cart');
+                },
               ),
             ],
           ),
@@ -84,7 +93,7 @@ class SearchPage extends StatelessWidget {
                   },
                   child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
                     builder: (context, state) {
-                      print('$state');
+                      debugPrint(state.toString());
                       if (state is SearchTextFieldEmpty) {
                         return const SearchHomeScreen();
                       } else if (state is SearchTextFieldTyping) {

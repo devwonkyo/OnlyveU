@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../blocs/home/home_bloc.dart';
 import '../../../models/product_model.dart';
@@ -29,7 +30,7 @@ class SearchResultScreen extends StatelessWidget {
           if (state is SearchResultInitial) {
             return const SizedBox();
           } else if (state is SearchResultLoading) {
-            return const Center(child: Text('로딩화면 구현 예정'));
+            return const ResultSkeleton();
           } else if (state is SearchResultLoaded) {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -87,6 +88,68 @@ class SearchResultScreen extends StatelessWidget {
             return const Center(child: Text('No results found.'));
           }
         },
+      ),
+    );
+  }
+}
+
+class ResultSkeleton extends StatelessWidget {
+  const ResultSkeleton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15.w),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 60.h,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '총 개',
+                  style: TextStyle(fontSize: 15.sp),
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.tune),
+                    SizedBox(width: 20.w),
+                    Text(
+                      '인기순',
+                      style: TextStyle(fontSize: 15.sp),
+                    ),
+                    const Icon(Icons.keyboard_arrow_down)
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[200]!,
+              highlightColor: Colors.grey[100]!,
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10.w,
+                  mainAxisSpacing: 10.h,
+                ),
+                itemCount: 8,
+                itemBuilder: (context, index) => Container(
+                  height: 5.h,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.r),
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

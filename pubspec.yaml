@@ -61,6 +61,10 @@ dependencies:
   daum_postcode_search: ^0.0.3
   kpostal: ^1.1.0
 
+  http: ^1.2.2
+  dart_openai: ^5.1.0
+  firebase_remote_config: ^5.1.5
+
 
 dev_dependencies:
   flutter_test:
