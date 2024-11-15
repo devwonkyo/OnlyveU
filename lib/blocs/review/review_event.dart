@@ -29,9 +29,19 @@ class AddReviewLikeEvent extends ReviewEvent{
 
 class AddReviewEvent extends ReviewEvent{
   final ReviewModel reviewModel;
+  final List<File?> images;
 
-  const AddReviewEvent(this.reviewModel);
+  const AddReviewEvent(this.reviewModel, this.images);
 
   @override
-  List<Object> get props => [reviewModel];
+  List<Object> get props => [reviewModel, images];
+}
+
+
+class LoadReviewListWithUserIdEvent extends ReviewEvent{
+
+  const LoadReviewListWithUserIdEvent();
+
+  @override
+  List<Object> get props => [];
 }

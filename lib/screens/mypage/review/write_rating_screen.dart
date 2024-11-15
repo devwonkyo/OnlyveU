@@ -5,13 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
+import 'package:onlyveyou/models/order_model.dart';
 
 class WriteRatingScreen extends StatefulWidget {
   final String productId;
+  final DateTime purchaseDate;
+  final OrderType orderType;
 
   const WriteRatingScreen({
     Key? key,
-    required this.productId,
+    required this.productId, required this.purchaseDate, required this.orderType,
   }) : super(key: key);
 
   @override
@@ -113,6 +116,8 @@ class _WriteRatingScreenState extends State<WriteRatingScreen> {
                                   extra: {
                                     'productModel': state.product,
                                     'rating': rating,
+                                    'purchaseDate': widget.purchaseDate,
+                                    'orderType': widget.orderType,
                                     'writeUserId': state.userId
                                   });
                             });

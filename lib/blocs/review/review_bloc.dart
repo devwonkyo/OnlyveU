@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/repositories/review/review_repository.dart';
+import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 part 'review_event.dart';
 part 'review_state.dart';
@@ -15,6 +17,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     on<LoadReviewListEvent>(_findProductReview);
     on<AddReviewLikeEvent>(_addLikeReview);
     on<AddReviewEvent>(_addReview);
+    on<LoadReviewListWithUserIdEvent>(_findMyReview);
   }
 
   Future<void> _findProductReview(LoadReviewListEvent event, Emitter<ReviewState> emit) async {
@@ -40,7 +43,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
 
   Future<void> _addReview(AddReviewEvent event, Emitter<ReviewState> emit) async {
     try{
-      await repository.addReview(event.reviewModel);
+      await repository.addReview(event.reviewModel,event.images);
       print('업로드 완료');
       emit(SuccessAddReview("업로드 햇씁니당"));
     }catch(e){
@@ -49,6 +52,18 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     }
   }
 
+  Future<void> _findMyReview(LoadReviewListWithUserIdEvent event, Emitter<ReviewState> emit) async {
+    try{
+      emit(const LoadingMyReview());
+
+      final userId = await OnlyYouSharedPreference().getCurrentUserId();
+      final reviews = await repository.findMyReview(userId);
+
+      emit(LoadedMyReview(reviews));
+    }catch (e){
+      emit(LoadErrorMyReview("error : $e"));
+    }
+  }
 
 
 
