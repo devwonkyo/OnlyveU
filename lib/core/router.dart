@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
+import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -204,19 +206,24 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-    GoRoute(
-      path: '/payment',
-      pageBuilder: (context, state) {
-        final order = state.extra as OrderModel;
-        return _buildPageWithTransition(
-          state,
-          BlocProvider(
-            create: (context) => PaymentBloc(),
-            child: PaymentScreen(order: order),
-          ),
-        );
-      },
-    ),
+   GoRoute(
+  path: '/payment',
+  pageBuilder: (context, state) {
+    // state.extra를 통해 전달된 OrderModel을 가져옴
+    final order = state.extra as OrderModel;
+
+    return _buildPageWithTransition(
+      state,
+      BlocProvider(
+        create: (context) => PaymentBloc(
+          orderRepository: context.read<OrderRepository>(), // OrderRepository를 주입
+        )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
+        child: PaymentScreen(order: order),
+      ),
+    );
+  },
+),
+
     GoRoute(
       path: '/new_delivery_address',
       pageBuilder: (context, state) => _buildPageWithTransition(
