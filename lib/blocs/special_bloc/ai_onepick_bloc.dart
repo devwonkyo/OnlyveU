@@ -3,14 +3,9 @@ import 'package:equatable/equatable.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 
-//일단 인디케이커는 수정해줘야함
-//1.나갔다 들어오와도 채팅 계속. 그냥 5번째마다 계속 상품 추천, 5, 10, 15...
-//5번째 질문하고 답하면서 카드 보여주잖아? 그러고 다시 1번질문 바로 하기.
-//리셋은 아예 초기화-> 이렇게 하면 맨처음 들어올때 처럼 먼저 인사를 안한다.
-//아예 리셋이 더 편함
-
-//2.나갔다 들어오면 리셋버튼처럼 초기화 해주기, 채팅막기- 다시 시작하기로 리셋버튼 효과
-//
+// 1.로딩시회색말고인공지능이생각하는걸로하기
+// 2.말끊기는거해결해야함
+// 3.실제태그가없어서제목에서유추해야함
 
 // Events
 abstract class AIOnepickEvent extends Equatable {
