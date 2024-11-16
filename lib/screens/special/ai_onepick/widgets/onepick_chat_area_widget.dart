@@ -43,10 +43,7 @@ class AIChatContent extends StatelessWidget {
             ],
           ),
         ),
-        if (recommendedProduct != null)
-          _buildRecommendationCard(context)
-        else
-          _buildInputArea(),
+        _buildInputArea(),
       ],
     );
   }
@@ -84,6 +81,7 @@ class AIChatContent extends StatelessWidget {
         itemBuilder: (context, index) {
           final message = messages[index];
           return _buildMessageBubble(
+            context,
             message['content'] ?? '',
             message['role'] == 'assistant',
           );
@@ -92,7 +90,132 @@ class AIChatContent extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageBubble(String text, bool isAI) {
+  Widget _buildMessageBubble(BuildContext context, String text, bool isAI) {
+    // AI가 제품을 추천할 때 메시지와 함께 제품 카드를 표시
+    if (isAI && recommendedProduct != null) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFF8B7AFF).withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.auto_awesome,
+                color: const Color(0xFF8B7AFF),
+                size: 16.sp,
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // AI 메시지
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        color: const Color(0xFF8B7AFF),
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  // 제품 카드
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: GestureDetector(
+                      onTap: () => context.push(
+                        '/product-detail',
+                        extra: recommendedProduct!.productId,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(12.r),
+                            ),
+                            child: Image.network(
+                              recommendedProduct!.productImageList.first,
+                              height: 120.h,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(12.w),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  recommendedProduct!.brandName,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  recommendedProduct!.name,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  recommendationReason ?? '',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: const Color(0xFF8B7AFF),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 일반적인 메시지 버블
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
