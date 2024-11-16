@@ -4,8 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
-
-import '../../../../repositories/special/ai_onepick_repository.dart';
+import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 
 class AIChatContent extends StatelessWidget {
   final List<Map<String, String>> messages;
@@ -58,50 +57,7 @@ class AIChatContent extends StatelessWidget {
     );
   }
 
-  // 한번 더 하기 버튼
-  Widget _buildOneMoreButton(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () => context.read<AIOnepickBloc>().add(ResetChat()),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF8B7AFF),
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24.r),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.refresh, color: Colors.white),
-            SizedBox(width: 8.w),
-            Text(
-              '한번 더 하기',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildChatArea() {
-//채팅 생길때마다 자동 스크롤
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         scrollController.animateTo(
@@ -128,13 +84,21 @@ class AIChatContent extends StatelessWidget {
       blendMode: BlendMode.dstOut,
       child: ListView.builder(
         controller: scrollController,
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        padding: EdgeInsets.only(
+          left: 16.w,
+          right: 16.w,
+          top: 8.h,
+          bottom: 16.h,
+        ),
         itemCount: messages.length,
         itemBuilder: (context, index) {
           final message = messages[index];
-          return _buildMessageBubble(context, message['content'] ?? '',
-              message['role'] == 'assistant', index // 현재 메시지의 인덱스 전달
-              );
+          return _buildMessageBubble(
+            context,
+            message['content'] ?? '',
+            message['role'] == 'assistant',
+            index,
+          );
         },
       ),
     );
@@ -142,13 +106,10 @@ class AIChatContent extends StatelessWidget {
 
   Widget _buildMessageBubble(
       BuildContext context, String text, bool isAI, int messageIndex) {
-    // messageIndex 추가
-    // 마지막 메시지이면서 currentStep이 5일 때만 카드 표시
     if (isAI &&
         recommendedProduct != null &&
-        messageIndex == messages.length - 1 && // 현재가 마지막 메시지인지 확인
+        messageIndex == messages.length - 1 &&
         context.read<AIOnepickRepository>().currentStep == 5) {
-      // 5단계인지 확인
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Row(
@@ -172,31 +133,41 @@ class AIChatContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // AI 메시지
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.7,
                     ),
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        color: const Color(0xFF8B7AFF),
-                        fontSize: 14.sp,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 12.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      constraints: const BoxConstraints(
+                        minHeight: 0,
+                        maxHeight: double.infinity,
+                      ),
+                      child: Text(
+                        text,
+                        style: TextStyle(
+                          color: const Color(0xFF8B7AFF),
+                          fontSize: 14.sp,
+                        ),
+                        softWrap: true,
+                        maxLines: null,
+                        overflow: TextOverflow.visible,
                       ),
                     ),
                   ),
                   SizedBox(height: 8.h),
-                  // 제품 카드
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -271,7 +242,6 @@ class AIChatContent extends StatelessWidget {
       );
     }
 
-    // 일반적인 메시지 버블
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
@@ -294,7 +264,10 @@ class AIChatContent extends StatelessWidget {
             ),
             SizedBox(width: 8.w),
           ],
-          Flexible(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.7,
+            ),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
@@ -310,16 +283,65 @@ class AIChatContent extends StatelessWidget {
                   ),
                 ],
               ),
+              constraints: const BoxConstraints(
+                minHeight: 0,
+                maxHeight: double.infinity,
+              ),
               child: Text(
                 text,
                 style: TextStyle(
                   color: isAI ? const Color(0xFF8B7AFF) : Colors.white,
                   fontSize: 14.sp,
                 ),
+                softWrap: true,
+                maxLines: null,
+                overflow: TextOverflow.visible,
               ),
             ),
           ),
+          if (!isAI) SizedBox(width: 8.w),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOneMoreButton(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () => context.read<AIOnepickBloc>().add(ResetChat()),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF8B7AFF),
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24.r),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.refresh, color: Colors.white),
+            SizedBox(width: 8.w),
+            Text(
+              '한번 더 하기',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -350,7 +372,7 @@ class AIChatContent extends StatelessWidget {
               ),
               child: TextField(
                 controller: textController,
-                enabled: !isLoading && currentStep < 5, //5번 되면 채팅 막기
+                enabled: !isLoading && currentStep < 5,
                 style: TextStyle(color: const Color(0xFF8B7AFF)),
                 decoration: InputDecoration(
                   hintText: '메시지를 입력하세요...',
@@ -381,110 +403,6 @@ class AIChatContent extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildRecommendationCard(BuildContext context) {
-    if (recommendedProduct == null) return SizedBox.shrink();
-
-    return SingleChildScrollView(
-      // 스크롤 가능하도록 추가
-      child: GestureDetector(
-        // 카드 전체 클릭 가능하도록 추가
-        onTap: () => context.push(
-          '/product-detail',
-          extra: recommendedProduct!.productId,
-        ),
-        child: Container(
-          margin: EdgeInsets.all(12.w), // 마진 줄임
-          constraints: BoxConstraints(
-            // 최대 높이 제한
-            maxHeight: MediaQuery.of(context).size.height * 0.4,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // 내용물 크기에 맞추도록 변경
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
-                child: Image.network(
-                  recommendedProduct!.productImageList.first,
-                  width: double.infinity,
-                  height: 150.h, // 이미지 높이 줄임
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(12.w), // 패딩 줄임
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      recommendedProduct!.brandName,
-                      style: TextStyle(
-                        fontSize: 12.sp, // 폰트 크기 줄임
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      recommendedProduct!.name,
-                      style: TextStyle(
-                        fontSize: 14.sp, // 폰트 크기 줄임
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 6.h),
-                    Text(
-                      recommendationReason ?? '',
-                      style: TextStyle(
-                        fontSize: 12.sp, // 폰트 크기 줄임
-                        color: const Color(0xFF8B7AFF),
-                      ),
-                    ),
-                    SizedBox(height: 12.h),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => context.push(
-                          '/product-detail',
-                          extra: recommendedProduct!.productId,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8B7AFF),
-                          padding:
-                              EdgeInsets.symmetric(vertical: 10.h), // 패딩 줄임
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                        ),
-                        child: Text(
-                          '자세히 보기',
-                          style: TextStyle(
-                            fontSize: 14.sp, // 폰트 크기 줄임
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
