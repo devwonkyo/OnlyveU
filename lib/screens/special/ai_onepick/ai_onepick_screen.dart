@@ -81,9 +81,8 @@ class _AIOnepickScreenState extends State<AIOnepickScreen> {
             ),
             child: Column(
               children: [
-                SizedBox(
-                    height:
-                        kToolbarHeight + MediaQuery.of(context).padding.top),
+                SizedBox(height: MediaQuery.of(context).padding.top),
+                // AIChatHeader를 상단으로 이동
                 AIChatHeader(
                   currentStep: context.read<AIOnepickRepository>().currentStep,
                 ),

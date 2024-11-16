@@ -52,6 +52,17 @@ class AIChatContent extends StatelessWidget {
   }
 
   Widget _buildChatArea() {
+//채팅 생길때마다 자동 스크롤
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+
     return ShaderMask(
       shaderCallback: (Rect bounds) {
         return LinearGradient(
@@ -194,87 +205,103 @@ class AIChatContent extends StatelessWidget {
   Widget _buildRecommendationCard(BuildContext context) {
     if (recommendedProduct == null) return SizedBox.shrink();
 
-    return Container(
-      margin: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return SingleChildScrollView(
+      // 스크롤 가능하도록 추가
+      child: GestureDetector(
+        // 카드 전체 클릭 가능하도록 추가
+        onTap: () => context.push(
+          '/product-detail',
+          extra: recommendedProduct!.productId,
+        ),
+        child: Container(
+          margin: EdgeInsets.all(12.w), // 마진 줄임
+          constraints: BoxConstraints(
+            // 최대 높이 제한
+            maxHeight: MediaQuery.of(context).size.height * 0.4,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-            child: Image.network(
-              recommendedProduct!.productImageList.first,
-              width: double.infinity,
-              height: 200.h,
-              fit: BoxFit.cover,
-            ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  recommendedProduct!.brandName,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  recommendedProduct!.name,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  recommendationReason ?? '',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: const Color(0xFF8B7AFF),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                SizedBox(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // 내용물 크기에 맞추도록 변경
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+                child: Image.network(
+                  recommendedProduct!.productImageList.first,
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => context.push(
-                      '/product-detail',
-                      extra: recommendedProduct!.productId,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8B7AFF),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
+                  height: 150.h, // 이미지 높이 줄임
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(12.w), // 패딩 줄임
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recommendedProduct!.brandName,
+                      style: TextStyle(
+                        fontSize: 12.sp, // 폰트 크기 줄임
+                        color: Colors.grey[600],
                       ),
                     ),
-                    child: Text(
-                      '자세히 보기',
+                    SizedBox(height: 4.h),
+                    Text(
+                      recommendedProduct!.name,
                       style: TextStyle(
-                        fontSize: 16.sp,
+                        fontSize: 14.sp, // 폰트 크기 줄임
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
+                    SizedBox(height: 6.h),
+                    Text(
+                      recommendationReason ?? '',
+                      style: TextStyle(
+                        fontSize: 12.sp, // 폰트 크기 줄임
+                        color: const Color(0xFF8B7AFF),
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => context.push(
+                          '/product-detail',
+                          extra: recommendedProduct!.productId,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8B7AFF),
+                          padding:
+                              EdgeInsets.symmetric(vertical: 10.h), // 패딩 줄임
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          '자세히 보기',
+                          style: TextStyle(
+                            fontSize: 14.sp, // 폰트 크기 줄임
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
