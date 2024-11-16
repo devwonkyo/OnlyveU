@@ -60,6 +60,7 @@ class AIOnepickComplete extends AIOnepickState {
   List<Object?> get props => [product, recommendationReason, errorMessage];
 }
 
+//
 // Bloc
 class AIOnepickBloc extends Bloc<AIOnepickEvent, AIOnepickState> {
   final AIOnepickRepository _repository;
