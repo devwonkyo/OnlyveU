@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 
+///
 // 1.로딩시회색말고인공지능이생각하는걸로하기
 // 2.말끊기는거해결해야함
 // 3.실제태그가없어서제목에서유추해야함
