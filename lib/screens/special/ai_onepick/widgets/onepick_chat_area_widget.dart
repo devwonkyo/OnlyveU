@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/product_model.dart';
+
+import '../../../../repositories/special/ai_onepick_repository.dart';
 
 class AIChatContent extends StatelessWidget {
   final List<Map<String, String>> messages;
@@ -80,19 +83,23 @@ class AIChatContent extends StatelessWidget {
         itemCount: messages.length,
         itemBuilder: (context, index) {
           final message = messages[index];
-          return _buildMessageBubble(
-            context,
-            message['content'] ?? '',
-            message['role'] == 'assistant',
-          );
+          return _buildMessageBubble(context, message['content'] ?? '',
+              message['role'] == 'assistant', index // 현재 메시지의 인덱스 전달
+              );
         },
       ),
     );
   }
 
-  Widget _buildMessageBubble(BuildContext context, String text, bool isAI) {
-    // AI가 제품을 추천할 때 메시지와 함께 제품 카드를 표시
-    if (isAI && recommendedProduct != null) {
+  Widget _buildMessageBubble(
+      BuildContext context, String text, bool isAI, int messageIndex) {
+    // messageIndex 추가
+    // 마지막 메시지이면서 currentStep이 5일 때만 카드 표시
+    if (isAI &&
+        recommendedProduct != null &&
+        messageIndex == messages.length - 1 && // 현재가 마지막 메시지인지 확인
+        context.read<AIOnepickRepository>().currentStep == 5) {
+      // 5단계인지 확인
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Row(
