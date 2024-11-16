@@ -19,10 +19,18 @@ class _AIOnepickScreenState extends State<AIOnepickScreen> {
   final ScrollController _scrollController = ScrollController();
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 리프레시 버튼과 동일한 순서로 실행
+    context
+        .read<AIOnepickBloc>()
+        .add(ResetChat()); // ResetChat -> StartChat -> repository.startChat()
+  }
+
+  @override
   void initState() {
     super.initState();
     // 대화 시작
-    context.read<AIOnepickBloc>().add(StartChat());
   }
 
   @override

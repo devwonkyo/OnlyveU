@@ -194,7 +194,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       padding: AppStyles.defaultPadding,
       children: [
         _buildQuickMenuItem('AI원픽', Icons.favorite, () {
-          context.push('/ai-onepick');
+          context.push('/ai-onepick'); // ResetChat 제거
         }),
         _buildQuickMenuItem('날씨추천', Icons.wb_sunny_sharp, () {
           context.push('/weather');
