@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
 
 import '../../../../repositories/special/ai_onepick_repository.dart';
@@ -28,6 +29,9 @@ class AIChatContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final repository = context.read<AIOnepickRepository>();
+    final currentStep = repository.currentStep;
+
     return Column(
       children: [
         Expanded(
@@ -46,8 +50,53 @@ class AIChatContent extends StatelessWidget {
             ],
           ),
         ),
-        _buildInputArea(),
+        if (currentStep >= 5)
+          _buildOneMoreButton(context)
+        else
+          _buildInputArea(context),
       ],
+    );
+  }
+
+  // 한번 더 하기 버튼
+  Widget _buildOneMoreButton(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () => context.read<AIOnepickBloc>().add(ResetChat()),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF8B7AFF),
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24.r),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.refresh, color: Colors.white),
+            SizedBox(width: 8.w),
+            Text(
+              '한번 더 하기',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -57,7 +106,7 @@ class AIChatContent extends StatelessWidget {
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
       }
@@ -275,7 +324,10 @@ class AIChatContent extends StatelessWidget {
     );
   }
 
-  Widget _buildInputArea() {
+  Widget _buildInputArea(BuildContext context) {
+    final repository = context.read<AIOnepickRepository>();
+    final currentStep = repository.currentStep;
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -298,7 +350,7 @@ class AIChatContent extends StatelessWidget {
               ),
               child: TextField(
                 controller: textController,
-                enabled: !isLoading,
+                enabled: !isLoading && currentStep < 5, //5번 되면 채팅 막기
                 style: TextStyle(color: const Color(0xFF8B7AFF)),
                 decoration: InputDecoration(
                   hintText: '메시지를 입력하세요...',
@@ -323,8 +375,9 @@ class AIChatContent extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(Icons.send, color: Colors.white),
-              onPressed:
-                  isLoading ? null : () => onSendMessage(textController.text),
+              onPressed: (isLoading || currentStep >= 5)
+                  ? null
+                  : () => onSendMessage(textController.text),
             ),
           ),
         ],
