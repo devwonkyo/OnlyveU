@@ -108,12 +108,12 @@ class OrderModel {
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
     final orderType = OrderType.values.firstWhere(
-          (e) => e.name == map['orderType'],
+      (e) => e.name == map['orderType'],
       orElse: () => OrderType.delivery, // 기본값 설정
     );
 
     final status = OrderStatus.values.firstWhere(
-          (e) => e.name == map['status'],
+      (e) => e.name == map['status'],
       orElse: () => OrderStatus.pending, // 기본값 설정
     );
 
@@ -125,13 +125,11 @@ class OrderModel {
       ),
       status: status,
       orderType: orderType,
-      pickupTime: map['pickupTime'] != null
-          ? DateTime.parse(map['pickupTime'])
-          : null,
+      pickupTime:
+          map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
       pickStore: map['pickStore'] as String?,
-      pickInfo: map['pickInfo'] != null
-          ? StoreModel.fromMap(map['pickInfo'])
-          : null,
+      pickInfo:
+          map['pickInfo'] != null ? StoreModel.fromMap(map['pickInfo']) : null,
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
           : null,
@@ -139,8 +137,7 @@ class OrderModel {
     );
   }
 
-
- /// `copyWith` 메서드 추가
+  /// `copyWith` 메서드 추가
   OrderModel copyWith({
     String? id,
     String? userId,
