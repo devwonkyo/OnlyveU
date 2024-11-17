@@ -22,21 +22,10 @@ class ReviewRepository{
       // 문서들을 ReviewModel 리스트로 변환
       final reviews = querySnapshot.docs.map((doc) {
         final data = doc.data();
-        return ReviewModel(
-          reviewId: doc.id,
-          productId: data['productId'],
-          productName: data['productName'],
-          productImage: data['productImage'],
-          purchaseDate: data['purchaseDate'] ?? "2024-11-13T20:02:50.612629",
-          orderType: data['orderType'],
-          userId: data['userId'],
-          userName: data['userName'],
-          rating: (data['rating'] as num).toDouble(),
-          content: data['content'],
-          imageUrls: List<String>.from(data['imageUrls'] ?? []),
-          likedUserIds: List<String>.from(data['likedUserIds'] ?? []),
-          createdAt: DateTime.parse(data['createdAt']),
-        );
+        return ReviewModel.fromMap({
+          ...data,
+          'reviewId': doc.id,  // doc.id를 추가
+        });
       }).toList();
 
       return reviews;
