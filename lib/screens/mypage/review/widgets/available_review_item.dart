@@ -83,11 +83,15 @@ class AvailableReviewItem extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    reviewModel.orderItem.reviewId == null
-                        ? () {
+                    if(reviewModel.orderItem.reviewId != null){
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('이미 작성한 리뷰 입니다.'),
+                        ),
+                      );
+                    }else{
                       context.push("/write_rating", extra: reviewModel);
                     }
-                    : null; // reviewId가 null이 아닐 때는 버튼 비활성화
                   },
                   child: Text('리뷰 쓰기'),
                   style: OutlinedButton.styleFrom(

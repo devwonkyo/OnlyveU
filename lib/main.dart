@@ -9,6 +9,7 @@ import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/category/category_product_bloc.dart';
 import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/blocs/inventory/inventory_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
@@ -32,6 +33,7 @@ import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
 import 'package:onlyveyou/repositories/home/ai_recommend_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
+import 'package:onlyveyou/repositories/inventory/inventory_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
@@ -208,6 +210,9 @@ class MyApp extends StatelessWidget {
                 ),
                 BlocProvider<OrderBloc>(
                   create: (context) => OrderBloc(OrderRepository(firestore: FirebaseFirestore.instance)),
+                ),
+                BlocProvider<InventoryBloc>(
+                  create: (context) => InventoryBloc(InventoryRepository()),
                 ),
               ],
               child: BlocBuilder<ThemeBloc, ThemeState>(

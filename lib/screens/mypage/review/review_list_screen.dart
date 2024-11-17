@@ -24,15 +24,18 @@ class ReviewListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("rebuild");
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (initialTabIndex == 0) {
         context.read<OrderBloc>().add(FetchAvailableReviewOrdersEvent());
+        print("index 0 rebuild");
       } else {
         context.read<ReviewBloc>().add(LoadReviewListWithUserIdEvent());
+        print("index 1 rebuild");
       }
     });
     return DefaultTabController(
-      initialIndex: 0,
+      initialIndex: initialTabIndex,
       length: 2,
       child: Scaffold(
         backgroundColor: Colors.white,

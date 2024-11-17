@@ -123,7 +123,11 @@ class ReviewRepository{
       // 4. 리뷰 저장
       await reviewRef.set(finalReview.toMap());
 
+      //오더 정보에 리뷰추가
       updateOrderItemReviewId(orderId: orderId, orderItemId: orderItemId, reviewId: reviewId);
+
+      //제품 정보에 리뷰추가
+      updateProductReviewListWithArrayUnion(productId: reviewModel.productId, reviewId:  reviewId);
     } catch (e) {
       throw Exception('리뷰 생성 실패: $e');
     }
@@ -177,6 +181,29 @@ class ReviewRepository{
     }
   }
 
+  // product에 리뷰추가
+  Future<void> updateProductReviewListWithArrayUnion({
+    required String productId,
+    required String reviewId,
+  }) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+
+      // arrayUnion을 사용하여 직접 업데이트
+      await firestore.collection('products').doc(productId).update({
+        'reviewList': FieldValue.arrayUnion([reviewId])
+      });
+
+      print('리뷰 리스트 업데이트 완료: $productId');
+    } on FirebaseException catch (e) {
+      print('Firebase 업데이트 실패: ${e.message}');
+      throw e;
+    } catch (e) {
+      print('리뷰 리스트 업데이트 실패: $e');
+      throw e;
+    }
+  }
+
 
   Future<List<ReviewModel>> findMyReview(String userId) async {
     try {
@@ -200,6 +227,97 @@ class ReviewRepository{
       return [];
     }
   }
+
+
+  Future<void> updateReview(ReviewModel reviewModel, List<String?> images) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final storage = FirebaseStorage.instance;
+
+      List<String> newImageUrls = [];
+
+      // 이미지 리스트가 null이 아니고 비어있지 않은 경우에만 처리
+      if (images.isNotEmpty) {
+        for (String? imagePath in images) {
+          // null 체크
+          if (imagePath == null) {
+            print('Null 이미지 경로 발견. 건너뜁니다.');
+            continue;
+          }
+
+          // URL인 경우 바로 추가
+          if (imagePath.startsWith('http')) {
+            newImageUrls.add(imagePath);
+            continue;
+          }
+
+          // 로컬 파일 경로가 비어있지 않은 경우에만 업로드
+          if (imagePath.isNotEmpty) {
+            try {
+              final ref = storage
+                  .ref()
+                  .child('reviews')
+                  .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+              final file = File(imagePath);
+              // 파일 존재 여부 확인
+              if (!await file.exists()) {
+                print('파일이 존재하지 않습니다: $imagePath');
+                continue;
+              }
+
+              final uploadTask = await ref.putFile(
+                file,
+                SettableMetadata(
+                  contentType: 'image/jpeg',
+                  customMetadata: {
+                    'reviewId': reviewModel.reviewId ?? '',
+                    'uploadedAt': DateTime.now().toIso8601String(),
+                  },
+                ),
+              );
+
+              final downloadUrl = await uploadTask.ref.getDownloadURL();
+              newImageUrls.add(downloadUrl);
+            } catch (e) {
+              print('개별 이미지 업로드 실패: $e');
+              continue;
+            }
+          }
+        }
+      }
+
+      // 업데이트할 데이터 맵 생성
+      Map<String, dynamic> updateData = {
+        'rating': reviewModel.rating,
+        'content': reviewModel.content,
+      };
+
+      // 새로운 이미지 URL이 있는 경우에만 imageUrls 업데이트
+      if (newImageUrls.isNotEmpty) {
+        updateData['imageUrls'] = newImageUrls;
+      }
+
+      // reviewId null 체크
+      if (reviewModel.reviewId == null) {
+        throw Exception('Review ID is null');
+      }
+
+      // Firestore 업데이트
+      await firestore.collection('reviews').doc(reviewModel.reviewId).update(updateData);
+
+      print('리뷰 업데이트 완료: ${reviewModel.reviewId}');
+      print('업데이트된 이미지 URLs: $newImageUrls');
+
+    } on FirebaseException catch (e) {
+      print('Firebase 오류: ${e.message}');
+      throw Exception('Firebase 오류: ${e.message}');
+    } catch (e) {
+      print('업로드 에러: $e');
+      throw Exception('업로드 에러: $e');
+    }
+  }
+
 
 
 
