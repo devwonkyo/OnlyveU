@@ -16,7 +16,7 @@ class OrderRepository {
       // Firestore에서 생성된 doc ID를 toMap에 포함
       final orderData = order.toMap();
       orderData['id'] = doc.id;
-
+      
       await doc.set(orderData);
     } catch (e) {
       throw Exception('Firestore 저장 오류: $e');
