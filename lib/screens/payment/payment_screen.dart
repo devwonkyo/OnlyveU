@@ -12,6 +12,7 @@ import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/screens/payment/delivery_order_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/pickup_order_screen.dart';
+import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -185,7 +186,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               height: 10,
                             ),
                             Text(
-                              '${item.productPrice * item.quantity}원',
+                              '${formatPrice((item.productPrice * item.quantity).toString())}원',
                               style: AppStyles.priceTextStyle,
                             ),
                           ],
@@ -221,7 +222,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         style: AppStyles.headingStyle,
                       ),
                       Text(
-                        '$totalAmount원',
+                        '${formatPrice(totalAmount.toString())}원', // formatPrice 메서드 적용
                         style: AppStyles.headingStyle,
                       ),
                     ],
@@ -450,7 +451,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ),
                       ),
                       child: Text(
-                        '$totalAmount원 결제하기',
+                        '${formatPrice(totalAmount.toString())}원 결제하기',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

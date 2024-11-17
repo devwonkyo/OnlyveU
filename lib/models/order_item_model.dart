@@ -25,6 +25,7 @@
 //   }
 // }
 class OrderItemModel {
+    
   final String productId;
   final String productName;
   final String productImageUrl;
