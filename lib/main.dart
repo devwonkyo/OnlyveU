@@ -15,6 +15,7 @@ import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
+import 'package:onlyveyou/blocs/order/order_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/like/product_like_bloc.dart';
@@ -204,6 +205,9 @@ class MyApp extends StatelessWidget {
                   // CategoryProductBloc 추가
                   create: (context) =>
                       ReviewBloc(repository: ReviewRepository()),
+                ),
+                BlocProvider<OrderBloc>(
+                  create: (context) => OrderBloc(OrderRepository(firestore: FirebaseFirestore.instance)),
                 ),
               ],
               child: BlocBuilder<ThemeBloc, ThemeState>(

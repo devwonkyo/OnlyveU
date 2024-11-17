@@ -7,19 +7,17 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/models/available_review_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 
 class WriteReviewScreen extends StatefulWidget {
-  final ProductModel productModel;
-  final DateTime purchaseDate;
+  final AvailableOrderModel availableOrderModel;
   final double rating;
-  final String writeUserId;
-  final OrderType orderType;
 
 
-  const WriteReviewScreen({Key? key, required this.productModel, required this.rating, required this.writeUserId, required this.purchaseDate, required this.orderType})
+  const WriteReviewScreen({Key? key, required this.availableOrderModel, required this.rating, })
       : super(key: key);
 
   @override
@@ -29,7 +27,7 @@ class WriteReviewScreen extends StatefulWidget {
 class _ReviewCreateScreenState extends State<WriteReviewScreen> {
   late double rating;
   final TextEditingController _reviewController = TextEditingController();
-  late final ProductModel productModel;
+  late final AvailableOrderModel availableOrderModel;
   final List<File?> selectedImages = List.generate(4, (index) => null);
   final ImagePicker _picker = ImagePicker();
 
@@ -38,7 +36,7 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
   void initState() {
     super.initState();
     rating = widget.rating;
-    productModel = widget.productModel;
+    availableOrderModel = widget.availableOrderModel;
   }
 
   @override
@@ -91,7 +89,7 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                         height: 80.w,
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: NetworkImage(productModel.productImageList[0]),
+                            image: NetworkImage(availableOrderModel.orderItem.productImageUrl),
                             fit: BoxFit.cover,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
@@ -103,15 +101,15 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              productModel.brandName,
+                              "[주문 상품]",
                               style: TextStyle(
                                 fontSize: 12.sp,
                                 color: Colors.grey,
                               ),
                             ),
-                            SizedBox(height: 4.h),
+                            SizedBox(height: 10.h),
                             Text(
-                              productModel.name,
+                              availableOrderModel.orderItem.productName,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
@@ -296,28 +294,28 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
   }
 
   void _submitReview() {
-    // TODO: 리뷰 등록 로직 구현
     if (_reviewController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('리뷰 내용을 입력해주세요.')),
       );
-      print('업로드 못함 리뷰내용 입력해');
       return;
     }
 
     final reviewModel = ReviewModel(reviewId: "",
-        productId: productModel.productId,
-        productImage: productModel.productImageList[0],
-        productName: productModel.name,
-        userId: widget.writeUserId,
-        purchaseDate: widget.purchaseDate,
+        productId: availableOrderModel.productId,
+        productImage: availableOrderModel.orderItem.productImageUrl,
+        productName: availableOrderModel.orderItem.productName,
+
+        userId: availableOrderModel.orderUserId,
+        purchaseDate: availableOrderModel.purchaseDate,
         userName: "",
-        orderType: widget.orderType,
+        orderType: availableOrderModel.orderType,
         rating: rating, content: _reviewController.text, createdAt: DateTime.now());
 
     print('업로드 눌림');
+
     context.read<ReviewBloc>().add(
-      AddReviewEvent(reviewModel,selectedImages),
+      AddReviewEvent(reviewModel, selectedImages, availableOrderModel.orderId, availableOrderModel.orderItem.orderItemId ?? ""),
     );
   }
 

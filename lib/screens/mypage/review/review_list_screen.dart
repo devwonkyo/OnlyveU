@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onlyveyou/blocs/order/order_bloc.dart';
+import 'package:onlyveyou/blocs/order/order_event.dart';
+import 'package:onlyveyou/blocs/order/order_state.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/models/order_model.dart';
@@ -10,13 +13,26 @@ import 'package:onlyveyou/screens/mypage/review/write_rating_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_review_list_screen.dart';
 
 class ReviewListScreen extends StatelessWidget {
-  final String productId;
+  // 초기 탭 인덱스를 받을 수 있도록 추가
+  final int initialTabIndex;
 
-  const ReviewListScreen({Key? key, required this.productId}) : super(key: key);
+  const ReviewListScreen({
+    Key? key,
+    // 기본값을 0으로 설정하면 '리뷰 작성' 탭이 기본
+    this.initialTabIndex = 0,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (initialTabIndex == 0) {
+        context.read<OrderBloc>().add(FetchAvailableReviewOrdersEvent());
+      } else {
+        context.read<ReviewBloc>().add(LoadReviewListWithUserIdEvent());
+      }
+    });
     return DefaultTabController(
+      initialIndex: 0,
       length: 2,
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -32,11 +48,6 @@ class ReviewListScreen extends StatelessWidget {
               icon: Icon(Icons.shopping_bag_outlined, color: Colors.black),
               onPressed: () {
                 // TODO: 장바구니 페이지로 이동
-                context.push("/write_rating",extra: {
-                  "productId" : productId,
-                  "purchaseDate" : DateTime.now(),
-                  "orderType" : OrderType.delivery
-                });
               },
             ),
           ],
@@ -72,6 +83,7 @@ class ReviewListScreen extends StatelessWidget {
                       case 0:
                         print('리뷰 작성 탭 클릭');
                         // TODO: 리뷰 작성 탭 클릭 시 처리할 로직
+                        context.read<OrderBloc>().add(FetchAvailableReviewOrdersEvent());
                         break;
                       case 1:
                         print('나의 리뷰 탭 클릭');

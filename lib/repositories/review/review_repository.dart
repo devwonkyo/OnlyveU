@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 
 class ReviewRepository{
@@ -61,7 +62,7 @@ class ReviewRepository{
     }
   }
 
-  Future<void> addReview(ReviewModel reviewModel,List<File?> images) async {
+  Future<void> addReview(ReviewModel reviewModel,List<File?> images, String orderId, String orderItemId) async {
     try {
       // 1. 사용자 이름 가져오기
       final userDoc = await _firestore
@@ -121,8 +122,58 @@ class ReviewRepository{
 
       // 4. 리뷰 저장
       await reviewRef.set(finalReview.toMap());
+
+      updateOrderItemReviewId(orderId: orderId, orderItemId: orderItemId, reviewId: reviewId);
     } catch (e) {
       throw Exception('리뷰 생성 실패: $e');
+    }
+  }
+
+  //오더 아이템에 추가
+  Future<void> updateOrderItemReviewId({
+    required String orderId,
+    required String orderItemId,
+    required String reviewId,
+  }) async {
+    try {
+      // 파이어베이스 인스턴스 가져오기
+      final firestore = FirebaseFirestore.instance;
+
+      // 1. 먼저 해당 주문 문서를 가져옵니다
+      final orderDoc = await firestore.collection('orders').doc(orderId).get();
+
+      if (!orderDoc.exists) {
+        throw Exception('Order not found');
+      }
+
+      // 2. 주문 데이터를 OrderModel로 변환
+      final orderData = orderDoc.data()!;
+      final order = OrderModel.fromMap(orderData);
+
+      // 3. items 배열에서 해당 orderItemId를 가진 아이템의 인덱스를 찾습니다
+      final itemIndex = order.items.indexWhere(
+              (item) => item.orderItemId == orderItemId
+      );
+
+      if (itemIndex == -1) {
+        throw Exception('Order item not found');
+      }
+
+      // 4. Firestore 업데이트를 위한 새로운 items 배열 생성
+      final updatedItems = List<Map<String, dynamic>>.from(
+          orderData['items'] as List<dynamic>
+      );
+
+      // 5. 해당 인덱스의 아이템에 reviewId 추가
+      updatedItems[itemIndex]['reviewId'] = reviewId;
+
+      // 6. Firestore 문서 업데이트
+      await firestore.collection('orders').doc(orderId).update({
+        'items': updatedItems,
+      });
+    } catch (e) {
+      print('주문 아이템 리뷰 ID 업데이트 실패: $e');
+      rethrow;
     }
   }
 

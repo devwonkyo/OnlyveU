@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:onlyveyou/models/available_review_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
 
 abstract class OrderState extends Equatable {
@@ -44,11 +45,11 @@ class OrderError extends OrderState {
 
 
 // 주문 목록이 로드된 상태
-/*class AvailableReviewOrderLoaded extends OrderState {
-  final List<OrderModel> orders;
+class AvailableReviewOrderLoaded extends OrderState {
+  final List<AvailableOrderModel> orders;
 
-  OrdersLoaded(this.orders);
+  AvailableReviewOrderLoaded(this.orders);
 
   @override
   List<Object?> get props => [orders];
-}*/
+}
