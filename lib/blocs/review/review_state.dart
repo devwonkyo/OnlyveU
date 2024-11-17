@@ -90,3 +90,30 @@ class LoadErrorMyReview extends ReviewState {
   @override
   List<Object> get props => [message];
 }
+
+
+class LoadingUpdateReview extends ReviewState {
+
+  const LoadingUpdateReview();
+
+  @override
+  List<Object> get props => [];
+}
+
+class SuccessUpdateReview extends ReviewState {
+  final String message;
+
+  const SuccessUpdateReview(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class ErrorUpdateReview extends ReviewState {
+  final String message;
+
+  const ErrorUpdateReview(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

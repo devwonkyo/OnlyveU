@@ -7,6 +7,7 @@ import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/available_review_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
@@ -31,6 +32,7 @@ import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
+import 'package:onlyveyou/screens/mypage/review/modify_review_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/review_list_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_rating_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_review_screen.dart';
@@ -41,6 +43,7 @@ import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
+import 'package:onlyveyou/screens/store/store_list_screen.dart';
 
 import '../screens/search/search_page.dart';
 import '../widgets/bottom_navbar.dart';
@@ -266,6 +269,20 @@ final GoRouter router = GoRouter(
       path: '/review_list',
       builder: (context, state) {
         return ReviewListScreen();
+      },
+    ),
+    GoRoute(
+      path: '/modify_review',
+      builder: (context, state) {
+        final reviewModel = state.extra as ReviewModel;
+        return ModifyReviewScreen(reviewModel: reviewModel);
+      },
+    ),
+    GoRoute(
+      path: '/store_list',
+      builder: (context, state) {
+        final productModel = state.extra as ProductModel;
+        return StoreListScreen(productModel: productModel);
       },
     ),
   ],

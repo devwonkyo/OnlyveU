@@ -47,3 +47,13 @@ class LoadReviewListWithUserIdEvent extends ReviewEvent{
   @override
   List<Object> get props => [];
 }
+
+class UpdateReviewEvent extends ReviewEvent{
+  final ReviewModel reviewModel;
+  final List<String?> images;
+
+  const UpdateReviewEvent(this.reviewModel, this.images);
+
+  @override
+  List<Object> get props => [reviewModel, images];
+}
