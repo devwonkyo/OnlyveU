@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
+import 'package:onlyveyou/models/available_review_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
@@ -243,19 +244,13 @@ final GoRouter router = GoRouter(
       path: '/write_review',
       pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>;
-        final productModel = data['productModel'] as ProductModel;
+        final availableOrderModel = data['availableOrderModel'] as AvailableOrderModel;
         final rating = data['rating'] as double;
-        final purchaseDate = data['purchaseDate'] as DateTime;
-        final orderType = data['orderType'] as OrderType;
-        final writeUserId = data['writeUserId'] as String;
 
         return _buildPageUpWithTransition(
           state, WriteReviewScreen(
-              productModel: productModel,
-              purchaseDate: purchaseDate,
-              rating: rating,
-              orderType: orderType,
-              writeUserId: writeUserId
+            availableOrderModel: availableOrderModel,
+            rating: rating,
           ),
         );
       },
@@ -263,18 +258,14 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/write_rating',
       builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>;
-        final productId = data["productId"] as String;
-        final purchaseDate = data["purchaseDate"] as DateTime;
-        final orderType = data["orderType"] as OrderType;
-        return WriteRatingScreen(productId: productId, purchaseDate: purchaseDate, orderType: orderType);
+        final availableOrderModel = state.extra as AvailableOrderModel;
+        return WriteRatingScreen(availableOrderModel: availableOrderModel);
       },
     ),
     GoRoute(
       path: '/review_list',
       builder: (context, state) {
-        final productId = state.extra as String;
-        return ReviewListScreen(productId: productId);
+        return ReviewListScreen();
       },
     ),
   ],

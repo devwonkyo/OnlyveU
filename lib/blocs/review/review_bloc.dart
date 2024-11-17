@@ -43,7 +43,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
 
   Future<void> _addReview(AddReviewEvent event, Emitter<ReviewState> emit) async {
     try{
-      await repository.addReview(event.reviewModel,event.images);
+      await repository.addReview(event.reviewModel, event.images, event.orderId, event.orderItemId);
       print('업로드 완료');
       emit(SuccessAddReview("업로드 햇씁니당"));
     }catch(e){
