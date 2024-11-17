@@ -106,22 +106,31 @@ class OrderModel {
     };
   }
 
-  factory OrderModel.fromMap(String id, Map<String, dynamic> map) {
-    final orderType =
-        OrderType.values.firstWhere((e) => e.name == map['orderType']);
+  factory OrderModel.fromMap(Map<String, dynamic> map) {
+    final orderType = OrderType.values.firstWhere(
+          (e) => e.name == map['orderType'],
+      orElse: () => OrderType.delivery, // 기본값 설정
+    );
+
+    final status = OrderStatus.values.firstWhere(
+          (e) => e.name == map['status'],
+      orElse: () => OrderStatus.pending, // 기본값 설정
+    );
 
     return OrderModel(
-      id: id,
-      userId: map['userId'],
+      id: map['id'] as String?, // id를 map에서 직접 가져옴
+      userId: map['userId'] as String,
       items: List<OrderItemModel>.from(
-          map['items'].map((item) => OrderItemModel.fromMap(item))),
-      status: OrderStatus.values.firstWhere((e) => e.name == map['status']),
+        (map['items'] as List).map((item) => OrderItemModel.fromMap(item)),
+      ),
+      status: status,
       orderType: orderType,
-      pickupTime:
-          map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
-      pickStore: map['pickStore'],
+      pickupTime: map['pickupTime'] != null
+          ? DateTime.parse(map['pickupTime'])
+          : null,
+      pickStore: map['pickStore'] as String?,
       pickInfo: map['pickInfo'] != null
-          ? StoreModel.fromMap(map['pickInfo']) // Added pickInfo
+          ? StoreModel.fromMap(map['pickInfo'])
           : null,
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])

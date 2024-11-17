@@ -41,3 +41,14 @@ class OrderError extends OrderState {
   @override
   List<Object?> get props => [message];
 }
+
+
+// 주문 목록이 로드된 상태
+/*class AvailableReviewOrderLoaded extends OrderState {
+  final List<OrderModel> orders;
+
+  OrdersLoaded(this.orders);
+
+  @override
+  List<Object?> get props => [orders];
+}*/
