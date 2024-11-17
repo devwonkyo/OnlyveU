@@ -6,12 +6,16 @@ import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
+import 'package:onlyveyou/blocs/store/store_bloc.dart';
+import 'package:onlyveyou/blocs/store/store_state.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/models/store_model.dart';
 import 'package:onlyveyou/screens/payment/delivery_order_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/pickup_order_screen.dart';
+import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -185,7 +189,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               height: 10,
                             ),
                             Text(
-                              '${item.productPrice * item.quantity}원',
+                              '${formatPrice((item.productPrice * item.quantity).toString())}원',
                               style: AppStyles.priceTextStyle,
                             ),
                           ],
@@ -221,7 +225,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         style: AppStyles.headingStyle,
                       ),
                       Text(
-                        '$totalAmount원',
+                        '${formatPrice(totalAmount.toString())}원', // formatPrice 메서드 적용
                         style: AppStyles.headingStyle,
                       ),
                     ],
@@ -403,60 +407,75 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: MediaQuery.of(context).size.height * 0.05,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // 결제 버튼 로직
-                        // OrderModel 생성
-                        final updatedDeliveryInfo = _currentDeliveryInfo != null
-                            ? DeliveryInfoModel(
-                                deliveryName:
-                                    _currentDeliveryInfo!.deliveryName,
-                                address: _currentDeliveryInfo!.address,
-                                detailAddress:
-                                    _currentDeliveryInfo!.detailAddress,
-                                recipientName:
-                                    _currentDeliveryInfo!.recipientName,
-                                recipientPhone:
-                                    _currentDeliveryInfo!.recipientPhone,
-                                deliveryRequest: selectedDeliveryMessage, // 추가
-                              )
-                            : null;
-                        final order = OrderModel(
-                          userId: widget.order.userId,
-                          items: widget.order.items,
-                          orderType: widget.order.orderType,
-                          deliveryInfo: updatedDeliveryInfo,
-                          status: OrderStatus.pending,
-                          createdAt: DateTime.now(),
+                    child: BlocBuilder<StoreBloc, StoreState>(
+                      builder: (context, storeState) {
+                        StoreModel? selectedStore;
+                        // StoreBloc의 상태에서 선택된 매장 정보 가져오기
+                        if (storeState is StoreSelected) {
+                          selectedStore = storeState.selectedStore;
+                        }
+                        return ElevatedButton(
+                          onPressed: () {
+                            // 결제 버튼 로직
+                            // OrderModel 생성
+                            final updatedDeliveryInfo =
+                                _currentDeliveryInfo != null
+                                    ? DeliveryInfoModel(
+                                        deliveryName:
+                                            _currentDeliveryInfo!.deliveryName,
+                                        address: _currentDeliveryInfo!.address,
+                                        detailAddress:
+                                            _currentDeliveryInfo!.detailAddress,
+                                        recipientName:
+                                            _currentDeliveryInfo!.recipientName,
+                                        recipientPhone: _currentDeliveryInfo!
+                                            .recipientPhone,
+                                        deliveryRequest:
+                                            selectedDeliveryMessage, // 추가
+                                      )
+                                    : null;
+                            final order = OrderModel(
+                              userId: widget.order.userId,
+                              items: widget.order.items,
+                              orderType: widget.order.orderType,
+                              deliveryInfo: updatedDeliveryInfo,
+                              status: OrderStatus.pending,
+                              createdAt: DateTime.now(),
+                              pickupTime: DateTime.now()
+                                  .add(const Duration(hours: 3)), // 3시간 후 픽업
+                              pickStore: selectedStore?.storeName, // 선택된 매장명
+                              pickInfo: selectedStore, // 선택된 StoreModel
+                            );
+
+                            // SubmitOrder 이벤트를 Bloc에 전달
+                            context.read<PaymentBloc>().add(SubmitOrder(order));
+
+                            // 주문 성공 시 처리
+                            context.read<PaymentBloc>().stream.listen((state) {
+                              if (state is PaymentSuccess) {
+                                print('주문 성공');
+                                Navigator.pop(context); // 화면 닫기
+                              } else if (state is PaymentError) {
+                                print('주문 실패: ${state.message}');
+                              }
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            '${formatPrice(totalAmount.toString())}원 결제하기',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         );
-
-                        // SubmitOrder 이벤트를 Bloc에 전달
-                        context.read<PaymentBloc>().add(SubmitOrder(order));
-
-                        // 주문 성공 시 처리
-                        context.read<PaymentBloc>().stream.listen((state) {
-                          if (state is PaymentSuccess) {
-                            print('주문 성공');
-                            Navigator.pop(context); // 화면 닫기
-                          } else if (state is PaymentError) {
-                            print('주문 실패: ${state.message}');
-                          }
-                        });
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        '$totalAmount원 결제하기',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
                     ),
                   ),
                 );

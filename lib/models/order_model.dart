@@ -108,12 +108,12 @@ class OrderModel {
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
     final orderType = OrderType.values.firstWhere(
-          (e) => e.name == map['orderType'],
+      (e) => e.name == map['orderType'],
       orElse: () => OrderType.delivery, // 기본값 설정
     );
 
     final status = OrderStatus.values.firstWhere(
-          (e) => e.name == map['status'],
+      (e) => e.name == map['status'],
       orElse: () => OrderStatus.pending, // 기본값 설정
     );
 
@@ -125,17 +125,43 @@ class OrderModel {
       ),
       status: status,
       orderType: orderType,
-      pickupTime: map['pickupTime'] != null
-          ? DateTime.parse(map['pickupTime'])
-          : null,
+      pickupTime:
+          map['pickupTime'] != null ? DateTime.parse(map['pickupTime']) : null,
       pickStore: map['pickStore'] as String?,
-      pickInfo: map['pickInfo'] != null
-          ? StoreModel.fromMap(map['pickInfo'])
-          : null,
+      pickInfo:
+          map['pickInfo'] != null ? StoreModel.fromMap(map['pickInfo']) : null,
       deliveryInfo: map['deliveryInfo'] != null
           ? DeliveryInfoModel.fromMap(map['deliveryInfo'])
           : null,
       createdAt: DateTime.parse(map['createdAt']),
+    );
+  }
+
+  /// `copyWith` 메서드 추가
+  OrderModel copyWith({
+    String? id,
+    String? userId,
+    List<OrderItemModel>? items,
+    OrderStatus? status,
+    OrderType? orderType,
+    int? totalPrice,
+    DateTime? createdAt,
+    DateTime? pickupTime,
+    String? pickStore,
+    StoreModel? pickInfo,
+    DeliveryInfoModel? deliveryInfo,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      items: items ?? this.items,
+      status: status ?? this.status,
+      orderType: orderType ?? this.orderType,
+      pickupTime: pickupTime ?? this.pickupTime,
+      pickStore: pickStore ?? this.pickStore,
+      pickInfo: pickInfo ?? this.pickInfo,
+      deliveryInfo: deliveryInfo ?? this.deliveryInfo,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
