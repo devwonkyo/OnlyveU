@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
-import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
+import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart' as postEvent;
+import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart' as postBloc;
 import 'package:onlyveyou/blocs/shutter/shutterpost_state.dart';
 
 class PostScreen extends StatefulWidget {
@@ -29,15 +29,15 @@ class _PostScreenState extends State<PostScreen> {
     );
 
     if (pickedFile != null) {
-      context.read<PostBloc>().add(AddImageEvent(pickedFile));
+      context.read<postBloc.PostBloc>().add(postEvent.AddImageEvent(pickedFile));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<PostBloc, PostState>(
+    return BlocListener<postBloc.PostBloc, PostState>(
       listener: (context, state) {
-        if (state.text.isEmpty && state.images.isEmpty) {
+        if ((state.text.isEmpty ?? true) && (state.images.isEmpty)) {
           GoRouter.of(context).go('/shutter');
         }
       },
@@ -55,18 +55,18 @@ class _PostScreenState extends State<PostScreen> {
             },
           ),
           actions: [
-            BlocBuilder<PostBloc, PostState>(
+            BlocBuilder<postBloc.PostBloc, PostState>(
               builder: (context, state) {
                 final isButtonEnabled =
-                    state.images.isNotEmpty || _textController.text.isNotEmpty;
+                    (state?.images?.isNotEmpty ?? false) || (_textController.text.isNotEmpty);
 
                 return TextButton(
                   onPressed: isButtonEnabled
                       ? () {
-                          context.read<PostBloc>().add(SubmitPostEvent(
+                          context.read<postBloc.PostBloc>().add(postEvent.SubmitPostEvent(
                                 text: _textController.text,
-                                images: state.images,
-                                tags: state.tags,
+                                images: state?.images ?? [],
+                                tags: state?.tags ?? [],
                               ));
                           _textController.clear();
                         }
@@ -82,7 +82,7 @@ class _PostScreenState extends State<PostScreen> {
             ),
           ],
         ),
-        body: BlocBuilder<PostBloc, PostState>(
+        body: BlocBuilder<postBloc.PostBloc, PostState>(
           builder: (context, state) {
             return SingleChildScrollView(
               child: Padding(
@@ -101,7 +101,7 @@ class _PostScreenState extends State<PostScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Center(
-                          child: state.images.isEmpty
+                          child: state?.images?.isEmpty ?? true
                               ? Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -115,7 +115,7 @@ class _PostScreenState extends State<PostScreen> {
                                 )
                               : ListView.builder(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: state.images.length,
+                                  itemCount: state?.images?.length ?? 0,
                                   itemBuilder: (context, index) {
                                     return Stack(
                                       children: [
@@ -125,7 +125,7 @@ class _PostScreenState extends State<PostScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(8),
                                             child: Image.file(
-                                              File(state.images[index].path),
+                                              File(state!.images[index].path),
                                               width: 100,
                                               height: 100,
                                               fit: BoxFit.cover,
@@ -138,10 +138,11 @@ class _PostScreenState extends State<PostScreen> {
                                           child: GestureDetector(
                                             onTap: () {
                                               final updatedImages =
-                                                  List<XFile>.from(state.images)
+                                                  List<XFile>.from(state!.images)
                                                     ..removeAt(index);
-                                              context.read<PostBloc>().emit(
-                                                  state.copyWith(
+                                              context
+                                                  .read<postBloc.PostBloc>()
+                                                  .emit(state.copyWith(
                                                       images: updatedImages));
                                             },
                                             child: CircleAvatar(
@@ -162,11 +163,11 @@ class _PostScreenState extends State<PostScreen> {
                         ),
                       ),
                     ),
-                    if (state.images.isNotEmpty)
+                    if ((state?.images?.isNotEmpty ?? false))
                       Padding(
                         padding: EdgeInsets.only(top: 8),
                         child: Text(
-                          '${state.images.length}개의 사진이 선택됨',
+                          '${state?.images?.length ?? 0}개의 사진이 선택됨',
                           style: TextStyle(color: Colors.grey),
                         ),
                       ),
@@ -180,7 +181,7 @@ class _PostScreenState extends State<PostScreen> {
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (text) {
-                        context.read<PostBloc>().add(UpdateTextEvent(text));
+                        context.read<postBloc.PostBloc>().add(postEvent.UpdateTextEvent(text));
                       },
                     ),
                     SizedBox(height: 16),
