@@ -9,6 +9,7 @@ import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/category/category_product_list_skeleton_screen.dart';
 import 'package:onlyveyou/screens/category/widgets/filter_item.dart';
 import 'package:onlyveyou/utils/dummy_data.dart';
+import 'package:onlyveyou/utils/function_method.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/widgets/main_promotion_banner.dart';
 import 'package:onlyveyou/widgets/product_widgets/vertical_product_card.dart';
@@ -30,6 +31,8 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
   late final ScrollController _scrollController;
   bool isMainCategory = false;
   String? userId;
+  //todo remove
+  String? token;
 
   @override
   void initState() {
@@ -65,8 +68,11 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
   Future<void> _initializeUserId() async {
     // 비동기 작업 수행
     String fetchedUserId = await OnlyYouSharedPreference().getCurrentUserId();
+    //todo remove
+    String fetchedUserToken = await OnlyYouSharedPreference().getToken();
     setState(() {
       userId = fetchedUserId; // 상태를 업데이트하여 UI 갱신
+      token = fetchedUserToken;
     });
   }
 
@@ -100,7 +106,9 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
           IconButton(
             icon: Icon(Icons.shopping_bag_outlined,
                 color: Colors.black, size: 24.sp),
-            onPressed: () {},
+            onPressed: () {
+              sendNotification(title: "알림",body: "테스트 푸시",pushToken: token ?? '');
+            },
           ),
         ],
       ),
