@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/explain_product.dart';
@@ -90,7 +92,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 if (state is ProductLikedSuccess) {
                   if (state.likeState) {
                     //좋아요 를 눌렀을 때
-                    showLikeAnimation(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("좋아요를 눌렀습니다.")),
+                    );
                   }
                 }
               },
@@ -405,7 +409,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         Padding(
           padding: EdgeInsets.all(16.0.w),
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              context.push("/store_list", extra: product);
+            },
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.h),
               shape: RoundedRectangleBorder(

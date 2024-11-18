@@ -29,3 +29,8 @@ class AuthFailure extends AuthState {
 class LogoutSuccess extends AuthState {}
 
 class DeleteAccountSuccess extends AuthState {}
+
+class LoadedUserCartCount extends AuthState {
+  final int cartItemsCount;
+  LoadedUserCartCount({required this.cartItemsCount});
+}
