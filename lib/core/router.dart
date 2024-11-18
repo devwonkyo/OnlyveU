@@ -53,7 +53,7 @@ import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -64,7 +64,7 @@ final GoRouter router = GoRouter(
           path: '/ai-onepick',
           pageBuilder: (context, state) => _buildPageWithTransition(
             state,
-            AIOnepickScreen(),
+            const AIOnepickScreen(),
           ),
         ),
         GoRoute(
@@ -253,24 +253,24 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-   GoRoute(
-  path: '/payment',
-  pageBuilder: (context, state) {
-    // state.extra를 통해 전달된 OrderModel을 가져옴
-    final order = state.extra as OrderModel;
+    GoRoute(
+      path: '/payment',
+      pageBuilder: (context, state) {
+        // state.extra를 통해 전달된 OrderModel을 가져옴
+        final order = state.extra as OrderModel;
 
-    return _buildPageWithTransition(
-      state,
-      BlocProvider(
-        create: (context) => PaymentBloc(
-          orderRepository: context.read<OrderRepository>(), // OrderRepository를 주입
-        )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
-        child: PaymentScreen(order: order),
-      ),
-    );
-  },
-),
-
+        return _buildPageWithTransition(
+          state,
+          BlocProvider(
+            create: (context) => PaymentBloc(
+              orderRepository:
+                  context.read<OrderRepository>(), // OrderRepository를 주입
+            )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
+            child: PaymentScreen(order: order),
+          ),
+        );
+      },
+    ),
     GoRoute(
       path: '/new_delivery_address',
       pageBuilder: (context, state) => _buildPageWithTransition(
@@ -286,11 +286,13 @@ final GoRouter router = GoRouter(
       path: '/write_review',
       pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>;
-        final availableOrderModel = data['availableOrderModel'] as AvailableOrderModel;
+        final availableOrderModel =
+            data['availableOrderModel'] as AvailableOrderModel;
         final rating = data['rating'] as double;
 
         return _buildPageUpWithTransition(
-          state, WriteReviewScreen(
+          state,
+          WriteReviewScreen(
             availableOrderModel: availableOrderModel,
             rating: rating,
           ),
@@ -307,7 +309,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/review_list',
       builder: (context, state) {
-        return ReviewListScreen();
+        return const ReviewListScreen();
       },
     ),
     GoRoute(
