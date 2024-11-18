@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/ranking_bloc.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -91,7 +92,7 @@ class RankingCardWidget extends StatelessWidget {
                     SizedBox(height: 4.h),
                     // 원래 가격 (취소선)
                     Text(
-                      '${originalPrice.toString()}원',
+                      '${formatPrice(product.price)}원',
                       style: TextStyle(
                         color: Colors.grey,
                         decoration: TextDecoration.lineThrough,
@@ -113,7 +114,7 @@ class RankingCardWidget extends StatelessWidget {
                         SizedBox(width: 8.w),
                         Flexible(
                           child: Text(
-                            '${discountedPrice}원', // 할인 가격 표시
+                            '${formatDiscountedPriceToString(product.price, product.discountPercent.toDouble())}원', // 할인 가격 표시
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16.sp,
