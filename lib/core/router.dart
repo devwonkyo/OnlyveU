@@ -6,8 +6,8 @@ import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
-import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -35,23 +35,62 @@ import 'package:onlyveyou/screens/mypage/review/write_rating_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_review_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
-import 'package:onlyveyou/screens/search/search_result/search_result_screen.dart';
 import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
+import 'package:onlyveyou/screens/special/virtual/vitual_screen.dart';
 
 import '../screens/search/search_page.dart';
+import '../screens/special/ai_onepick/ai_onepick_screen.dart';
+import '../screens/special/debate/debate_screen.dart';
+import '../screens/special/mbti/mbti_screen.dart';
+import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/home',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/ai-onepick',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            AIOnepickScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/weather',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const WeatherScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/virtual',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const VirtualScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/mbti',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const MbtiScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/debate',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const DebateScreen(),
+          ),
+        ),
         GoRoute(
           path: '/banner1',
           pageBuilder: (context, state) => _buildPageWithTransition(
@@ -210,24 +249,24 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-   GoRoute(
-  path: '/payment',
-  pageBuilder: (context, state) {
-    // state.extra를 통해 전달된 OrderModel을 가져옴
-    final order = state.extra as OrderModel;
+    GoRoute(
+      path: '/payment',
+      pageBuilder: (context, state) {
+        // state.extra를 통해 전달된 OrderModel을 가져옴
+        final order = state.extra as OrderModel;
 
-    return _buildPageWithTransition(
-      state,
-      BlocProvider(
-        create: (context) => PaymentBloc(
-          orderRepository: context.read<OrderRepository>(), // OrderRepository를 주입
-        )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
-        child: PaymentScreen(order: order),
-      ),
-    );
-  },
-),
-
+        return _buildPageWithTransition(
+          state,
+          BlocProvider(
+            create: (context) => PaymentBloc(
+              orderRepository:
+                  context.read<OrderRepository>(), // OrderRepository를 주입
+            )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
+            child: PaymentScreen(order: order),
+          ),
+        );
+      },
+    ),
     GoRoute(
       path: '/new_delivery_address',
       pageBuilder: (context, state) => _buildPageWithTransition(
@@ -250,13 +289,13 @@ final GoRouter router = GoRouter(
         final writeUserId = data['writeUserId'] as String;
 
         return _buildPageUpWithTransition(
-          state, WriteReviewScreen(
+          state,
+          WriteReviewScreen(
               productModel: productModel,
               purchaseDate: purchaseDate,
               rating: rating,
               orderType: orderType,
-              writeUserId: writeUserId
-          ),
+              writeUserId: writeUserId),
         );
       },
     ),
@@ -267,7 +306,10 @@ final GoRouter router = GoRouter(
         final productId = data["productId"] as String;
         final purchaseDate = data["purchaseDate"] as DateTime;
         final orderType = data["orderType"] as OrderType;
-        return WriteRatingScreen(productId: productId, purchaseDate: purchaseDate, orderType: orderType);
+        return WriteRatingScreen(
+            productId: productId,
+            purchaseDate: purchaseDate,
+            orderType: orderType);
       },
     ),
     GoRoute(

@@ -21,6 +21,7 @@ import 'package:onlyveyou/blocs/product/like/product_like_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
+import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -36,6 +37,7 @@ import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
+import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
@@ -110,13 +112,23 @@ class MyApp extends StatelessWidget {
           builder: (_, child) {
             return MultiBlocProvider(
               providers: [
+                RepositoryProvider(
+                  create: (context) => AIOnepickRepository(),
+                ),
+
+// 등록된 Repository를 사용
+                BlocProvider<AIOnepickBloc>(
+                  create: (context) => AIOnepickBloc(
+                    repository:
+                        context.read<AIOnepickRepository>(), // 기존 인스턴스 재사용
+                  ),
+                ),
                 BlocProvider(
                   create: (context) => AIRecommendBloc(
                     repository: AIRecommendRepository(),
                   ),
                   child: const AIRecommendScreen(),
                 ),
-
                 BlocProvider(
                   create: (context) => CartBloc(
                     cartRepository: ShoppingCartRepository(),
