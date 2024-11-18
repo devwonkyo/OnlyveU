@@ -30,3 +30,8 @@ class LogoutRequested extends AuthEvent {}
 
 // 회원 탈퇴 요청 이벤트
 class DeleteAccountRequested extends AuthEvent {}
+
+
+class GetUserInfo extends AuthEvent {
+  GetUserInfo();
+}

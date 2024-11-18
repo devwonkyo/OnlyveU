@@ -8,35 +8,33 @@ import 'package:image_picker/image_picker.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/available_review_model.dart';
-import 'package:onlyveyou/models/order_model.dart';
-import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 
-class WriteReviewScreen extends StatefulWidget {
-  final AvailableOrderModel availableOrderModel;
-  final double rating;
+class ModifyReviewScreen extends StatefulWidget {
+  final ReviewModel reviewModel;
 
-
-  const WriteReviewScreen({Key? key, required this.availableOrderModel, required this.rating, })
+  const ModifyReviewScreen({Key? key, required this.reviewModel})
       : super(key: key);
 
   @override
-  State<WriteReviewScreen> createState() => _ReviewCreateScreenState();
+  State<ModifyReviewScreen> createState() => _ReviewCreateScreenState();
 }
 
-class _ReviewCreateScreenState extends State<WriteReviewScreen> {
+class _ReviewCreateScreenState extends State<ModifyReviewScreen> {
   late double rating;
-  final TextEditingController _reviewController = TextEditingController();
-  late final AvailableOrderModel availableOrderModel;
-  final List<File?> selectedImages = List.generate(4, (index) => null);
-  final ImagePicker _picker = ImagePicker();
+  late final TextEditingController _reviewController;
+  late final ReviewModel reviewModel;
+  late final List<String?> selectedImages;
 
 
   @override
   void initState() {
     super.initState();
-    rating = widget.rating;
-    availableOrderModel = widget.availableOrderModel;
+    reviewModel = widget.reviewModel;
+    _reviewController = TextEditingController(text: reviewModel.content);
+    rating = reviewModel.rating;
+    final List<String> existingImageList = reviewModel.imageUrls;
+    selectedImages = List.generate(4, (index) => index < existingImageList.length ? existingImageList[index] : null);
   }
 
   @override
@@ -49,7 +47,7 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          '리뷰 작성',
+          '리뷰 수정',
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w500,
@@ -59,21 +57,21 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
       ),
       body: BlocConsumer<ReviewBloc, ReviewState>(
         listener: (context, state) {
-          if (state is SuccessAddReview) {
+          if (state is SuccessUpdateReview) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
             context.pop();
             context.pop();
           }
-          if (state is ErrorAddReview) {
+          if (state is ErrorUpdateReview) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
           }
         },
         builder: (context, state) {
-          if (state is LoadingAddReview) {
+          if (state is LoadingUpdateReview) {
             return Center(child: CircularProgressIndicator());
           }
           return SingleChildScrollView(
@@ -89,7 +87,7 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                         height: 80.w,
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: NetworkImage(availableOrderModel.orderItem.productImageUrl),
+                            image: NetworkImage(reviewModel.productImage),
                             fit: BoxFit.cover,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
@@ -109,7 +107,7 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                             ),
                             SizedBox(height: 10.h),
                             Text(
-                              availableOrderModel.orderItem.productName,
+                              reviewModel.productName,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
@@ -136,12 +134,19 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(5, (index) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4.w),
-                      child: Icon(
-                        index < rating ? Icons.star : Icons.star,
-                        size: 36.sp,
-                        color: index < rating ? Colors.amber : Colors.grey[300],
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          rating = index + 1;
+                        });
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w),
+                        child: Icon(
+                          index < rating ? Icons.star : Icons.star,
+                          size: 36.sp,
+                          color: index < rating ? Colors.amber : Colors.grey[300],
+                        ),
                       ),
                     );
                   }),
@@ -153,7 +158,6 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                     controller: _reviewController,
                     maxLines: 8,
                     decoration: InputDecoration(
-                      hintText: '상품에 대한 솔직한 리뷰를 남겨주세요.',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.r),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -200,10 +204,14 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                                   decoration: BoxDecoration(
                                     color: Colors.grey[200],
                                     borderRadius: BorderRadius.circular(8.r),
-                                    image: hasImage ? DecorationImage(
-                                      image: FileImage(selectedImages[index]!),
+                                    image: hasImage
+                                        ? DecorationImage(
+                                      image: selectedImages[index]!.startsWith('https')
+                                          ? NetworkImage(selectedImages[index]!)
+                                          : FileImage(File(selectedImages[index]!)) as ImageProvider,
                                       fit: BoxFit.cover,
-                                    ) : null,
+                                    )
+                                        : null,
                                   ),
                                   child: !hasImage ? Center(
                                     child: Icon(
@@ -251,7 +259,7 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
                     strokeWidth: 2,
                   ),
                 )
-                    : Text('리뷰 등록하기'),
+                    : Text('리뷰 수정하기'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppsColor.pastelGreen,
                   foregroundColor: Colors.white,
@@ -271,18 +279,16 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
 
   Future<void> _pickImage(int index) async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-      if (pickedFile != null) {
-        final file = File(pickedFile.path);
-
+      if (image != null) {
         setState(() {
-          selectedImages[index] = file;
+          selectedImages[index] = image.path;
+
+          for (int i = 0; i <= 3 && i < selectedImages.length; i++) {
+            print(selectedImages[i]);
+          }
         });
       }
     } catch (e) {
@@ -301,21 +307,15 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
       return;
     }
 
-    final reviewModel = ReviewModel(reviewId: "",
-        productId: availableOrderModel.productId,
-        productImage: availableOrderModel.orderItem.productImageUrl,
-        productName: availableOrderModel.orderItem.productName,
+    final reviewModel = widget.reviewModel.copyWith(
+        rating: rating,
+        content: _reviewController.text,
+    );
 
-        userId: availableOrderModel.orderUserId,
-        purchaseDate: availableOrderModel.purchaseDate,
-        userName: "",
-        orderType: availableOrderModel.orderType,
-        rating: rating, content: _reviewController.text, createdAt: DateTime.now());
-
-    print('업로드 눌림');
+    print('리뷰 업데이트 눌림');
 
     context.read<ReviewBloc>().add(
-      AddReviewEvent(reviewModel, selectedImages, availableOrderModel.orderId, availableOrderModel.orderItem.orderItemId ?? ""),
+      UpdateReviewEvent(reviewModel, selectedImages),
     );
   }
 

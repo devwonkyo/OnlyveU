@@ -17,6 +17,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     on<LoadReviewListEvent>(_findProductReview);
     on<AddReviewLikeEvent>(_addLikeReview);
     on<AddReviewEvent>(_addReview);
+    on<UpdateReviewEvent>(_updateReview);
     on<LoadReviewListWithUserIdEvent>(_findMyReview);
   }
 
@@ -43,7 +44,8 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
 
   Future<void> _addReview(AddReviewEvent event, Emitter<ReviewState> emit) async {
     try{
-      await repository.addReview(event.reviewModel,event.images);
+      emit(LoadingAddReview());
+      await repository.addReview(event.reviewModel, event.images, event.orderId, event.orderItemId);
       print('업로드 완료');
       emit(SuccessAddReview("업로드 햇씁니당"));
     }catch(e){
@@ -62,6 +64,18 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       emit(LoadedMyReview(reviews));
     }catch (e){
       emit(LoadErrorMyReview("error : $e"));
+    }
+  }
+
+  Future<void> _updateReview(UpdateReviewEvent event, Emitter<ReviewState> emit) async {
+    try{
+      emit(LoadingUpdateReview());
+      await repository.updateReview(event.reviewModel, event.images);
+      print('업데이트 완료');
+      emit(SuccessUpdateReview("업데이트 햇씁니당"));
+    }catch(e){
+      print('업로드 에러 : $e');
+      emit(ErrorUpdateReview("error : $e"));
     }
   }
 
@@ -102,10 +116,6 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
         i: (ratingCounts[i]! / totalReviews) // 100을 곱하지 않고 비율만 반환
     };
   }
-
-
-
-
 
 
 }
