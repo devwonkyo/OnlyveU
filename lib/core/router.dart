@@ -38,24 +38,63 @@ import 'package:onlyveyou/screens/mypage/review/write_rating_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_review_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
-import 'package:onlyveyou/screens/search/search_result/search_result_screen.dart';
 import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/store/store_list_screen.dart';
+import 'package:onlyveyou/screens/special/virtual/vitual_screen.dart';
 
 import '../screens/search/search_page.dart';
+import '../screens/special/ai_onepick/ai_onepick_screen.dart';
+import '../screens/special/debate/debate_screen.dart';
+import '../screens/special/mbti/mbti_screen.dart';
+import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/home',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/ai-onepick',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            AIOnepickScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/weather',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const WeatherScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/virtual',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const VirtualScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/mbti',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const MbtiScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/debate',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const DebateScreen(),
+          ),
+        ),
         GoRoute(
           path: '/banner1',
           pageBuilder: (context, state) => _buildPageWithTransition(

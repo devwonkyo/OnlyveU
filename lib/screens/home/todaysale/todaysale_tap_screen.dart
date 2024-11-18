@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/todaysale_bloc.dart';
 import 'package:onlyveyou/repositories/home/today_sale_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
+import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
@@ -243,7 +244,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                     SizedBox(height: 4.h),
                                     // 원래 가격 (취소선 표시)
                                     Text(
-                                      '${product.price}원',
+                                      '${formatPrice(product.price)}원',
                                       style: TextStyle(
                                         color: Colors.grey,
                                         decoration: TextDecoration.lineThrough,
@@ -264,7 +265,7 @@ class _TodaySaleTabScreenState extends State<TodaySaleTabScreen> {
                                         ),
                                         SizedBox(width: 8.w),
                                         Text(
-                                          '${_calculateDiscountedPrice(product.price, product.discountPercent)}원',
+                                          '${formatDiscountedPriceToString(product.price, product.discountPercent.toDouble())}원',
                                           style: TextStyle(
                                             fontSize: 14.sp,
                                             fontWeight: FontWeight.bold,
