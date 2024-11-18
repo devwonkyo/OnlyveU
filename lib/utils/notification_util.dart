@@ -76,10 +76,39 @@ class NotificationUtil {
         payload: message.data['screen'] );
   }
 
+
+ //사용방법 "/home?parameter"
   void _handleNotificationTap(String? payload) {
     print('payload = $payload');
     if (payload != null) {
-      _router.go(payload);
+      final screenAndParameter = splitScreenParameter(payload);
+
+      if(screenAndParameter[1].isEmpty){
+        router.push(screenAndParameter[0]);
+      }else{
+        router.push(screenAndParameter[0],extra: screenAndParameter[1]);
+      }
     }
   }
+
+
+
+  List<String> splitScreenParameter(String data) {
+    String screen;
+    String parameter;
+
+    int questionMarkIndex = data.indexOf('?');
+
+    if (questionMarkIndex != -1) {
+      // '?'가 존재하는 경우
+      screen = data.substring(0, questionMarkIndex);
+      parameter = data.substring(questionMarkIndex + 1);
+    } else {
+      // '?'가 없는 경우
+      screen = data;
+      parameter = '';
+    }
+    return [screen, parameter];
+  }
+
 }
