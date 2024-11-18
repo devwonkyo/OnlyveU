@@ -8,6 +8,7 @@ import 'package:onlyveyou/blocs/payment/payment_state.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_state.dart';
+import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
@@ -20,7 +21,7 @@ import 'package:onlyveyou/utils/styles.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<String> deliveryMessages = [
-    '배송 메시지를 선택해주세요.',
+    '없음',
     '그냥 문 앞에 놓아 주시면 돼요.',
     '직접 받을게요.(부재 시 문앞)',
     '벨을 누르지 말아주세요.',
@@ -448,7 +449,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             );
 
                             // SubmitOrder 이벤트를 Bloc에 전달
-                            context.read<PaymentBloc>().add(SubmitOrder(order));
+                            if (_saveAsDefault && _agreeToAll) {
+                              context
+                                  .read<PaymentBloc>()
+                                  .add(SubmitOrder(order));
+                            } else {
+                              checkboxDialog(context);
+                            }
 
                             // 주문 성공 시 처리
                             context.read<PaymentBloc>().stream.listen((state) {
@@ -487,4 +494,100 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
     );
   }
+}
+
+void checkboxDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          titlePadding: EdgeInsets.zero,
+          contentPadding: const EdgeInsets.all(16.0),
+          title: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: const BoxDecoration(
+              color: AppsColor.pastelGreen,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.white,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  "안내",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: AppsColor.pastelGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: AppsColor.pastelGreen,
+                      size: 24,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '체크박스를 모두 동의해주세요',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 70),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.4,
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppsColor.pastelGreen,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      });
 }

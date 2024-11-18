@@ -5,58 +5,6 @@ import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_event.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_state.dart';
 
-Widget _buildPurchaseTypeDropdown(BuildContext context) {
-  final purchaseOptions = ['온라인몰 구매', '매장 구매'];
-  return BlocBuilder<OrderStatusBloc, OrderStatusState>(
-    builder: (context, state) {
-      String? selectedPurchaseType;
-
-      if (state is OrderStatusInitial) {
-        selectedPurchaseType = state.selectedPurchaseType;
-      } else if (state is PurchaseTypeSelected) {
-        selectedPurchaseType = state.selectedPurchaseType;
-      } else if (state is StatusSelected) {
-        selectedPurchaseType = state.selectedPurchaseType;
-      }
-
-      return DropdownButtonHideUnderline(
-        child: DropdownButton2<String>(
-          isExpanded: true,
-          items: purchaseOptions
-              .map((type) => DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  ))
-              .toList(),
-          value: selectedPurchaseType,
-          onChanged: (value) {
-            if (value != null) {
-              context.read<OrderStatusBloc>().add(SelectPurchaseType(value));
-            }
-          },
-          buttonStyleData: const ButtonStyleData(
-            height: 50,
-            padding: EdgeInsets.symmetric(horizontal: 16),
-          ),
-          dropdownStyleData: DropdownStyleData(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: Colors.white,
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
 Widget _buildStatusDropdown(BuildContext context) {
   return BlocBuilder<OrderStatusBloc, OrderStatusState>(
     builder: (context, state) {
