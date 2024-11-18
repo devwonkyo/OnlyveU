@@ -58,7 +58,7 @@ class OrderStatusScreen extends StatelessWidget {
   }
 
   Widget _buildPurchaseTypeDropdown(BuildContext context) {
-    final purchaseOptions = ['온라인몰 구매', '매장 구매'];
+    final purchaseOptions = ['온라인몰 구매', '픽업 구매'];
     return BlocBuilder<OrderStatusBloc, OrderStatusState>(
       builder: (context, state) {
         String? selectedPurchaseType;

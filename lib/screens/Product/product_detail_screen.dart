@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/Product/widgets/explain_product.dart';
@@ -90,7 +92,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 if (state is ProductLikedSuccess) {
                   if (state.likeState) {
                     //좋아요 를 눌렀을 때
-                    showLikeAnimation(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("좋아요를 눌렀습니다.")),
+                    );
                   }
                 }
               },
@@ -405,7 +409,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         Padding(
           padding: EdgeInsets.all(16.0.w),
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              context.push("/store_list", extra: product);
+            },
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 16.h),
               shape: RoundedRectangleBorder(
@@ -436,13 +442,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         TabBar(
           onTap: (index) {
             if (index == 1) {
-              // context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
+              context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
             }
           },
           tabs: [Tab(text: '상품설명'), Tab(text: '리뷰')],
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.black,
+          indicatorColor: AppsColor.pastelGreen,
+          dividerColor: AppsColor.lightGray,
           labelStyle: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
@@ -467,17 +474,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ),
         BlocBuilder<ReviewBloc, ReviewState>(
+          buildWhen: (previous, current) {
+            // LoadedReviewState 상태일 때만 리빌드
+            return current is LoadedReviewState;
+          },
           builder: (context, state) {
-
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ReviewSummaryWidget(),
-                  ReviewListWidget(),
-                ],
-              ),
-            );
+            if(state is LoadedReviewState){
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ReviewSummaryWidget(reviewList: state.reviewList, ratingAverage: state.reviewAverageRating, ratingPercentAge: state.reviewRatingPercentAge,),
+                    Container(height: 8.h, color: Colors.grey[200]),
+                    ReviewListWidget(reviewList: state.reviewList, userId: userId,),
+                  ],
+                ),
+              );
+            }
+            return Text("review road error");
             },
         ),
       ],

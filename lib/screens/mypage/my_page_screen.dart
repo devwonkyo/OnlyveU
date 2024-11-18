@@ -209,6 +209,7 @@ class MyPageScreen extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: () {
                           // 버튼 클릭 시 동작
+                          context.push("/review_list");
                         },
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.grey.shade300),
