@@ -221,7 +221,8 @@ class MyApp extends StatelessWidget {
                       ReviewBloc(repository: ReviewRepository()),
                 ),
                 BlocProvider<OrderBloc>(
-                  create: (context) => OrderBloc(OrderRepository(firestore: FirebaseFirestore.instance)),
+                  create: (context) => OrderBloc(
+                      OrderRepository(firestore: FirebaseFirestore.instance)),
                 ),
                 BlocProvider<InventoryBloc>(
                   create: (context) => InventoryBloc(InventoryRepository()),
