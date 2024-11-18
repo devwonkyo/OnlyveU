@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:onlyveyou/models/post_model.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_state.dart';
+import 'package:onlyveyou/screens/shutter/firestore_service.dart';
 
 class PostBloc extends Bloc<PostEvent, PostState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -30,14 +31,12 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
         // Get current user's UID
         final User? user = FirebaseAuth.instance.currentUser;
+        final authorUid = user?.uid ?? ''; // 로그인된 사용자의 UID
 
-        if (user != null) {
-          final String uid = user?.uid ?? ''; // 로그인된 사용자의 uid
-          print('Logged in as: $uid'); // 콘솔에 uid 출력
-        } else {
-          print('No user logged in');
-        }
-        final authorUid = user?.uid ?? ''; // Ensure you get the UID correctly
+        if (authorUid.isEmpty) throw Exception('User not logged in.');
+
+        // Fetch nickname
+        final nickname = await FirestoreService().fetchNickname(authorUid);
 
         // Upload images to Firebase Storage
         final imageUrls = await Future.wait(state.images.map((image) async {
@@ -55,8 +54,10 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           imageUrls: imageUrls,
           tags: event.tags,
           createdAt: DateTime.now(),
-          authorUid: user?.uid ?? '', // Use the actual UID
+          authorUid: authorUid,
+          authorName: nickname, // 작성자의 닉네임 저장
         );
+
         await _firestore.collection('posts').add(post.toMap());
 
         emit(PostState.initial());

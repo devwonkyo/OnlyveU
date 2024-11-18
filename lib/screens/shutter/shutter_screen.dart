@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/widgets/default_appbar.dart';
 import 'package:onlyveyou/blocs/shutter/shutter_bloc.dart';
-import 'package:onlyveyou/screens/shutter/firestore_service.dart';
+import 'package:onlyveyou/blocs/shutter/shutter_event.dart';
+import 'package:onlyveyou/blocs/shutter/shutter_state.dart';
 import 'package:onlyveyou/models/post_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:onlyveyou/screens/shutter/firestore_service.dart';
+import 'package:onlyveyou/widgets/default_appbar.dart';
 
 class ShutterScreen extends StatelessWidget {
   const ShutterScreen({super.key});
@@ -22,6 +22,7 @@ class ShutterScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -47,43 +48,73 @@ class ShutterScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
-                '요즘 인기있는',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              BlocBuilder<ShutterBloc, ShutterState>(
+
+              // Posts List
+              Expanded(child: BlocBuilder<ShutterBloc, ShutterState>(
                 builder: (context, state) {
                   if (state.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (state.error != null) {
-                    return Center(child: Text('Error: ${state.error}'));
+                    return Center(child: CircularProgressIndicator());
                   }
 
                   if (state.posts.isEmpty) {
-                    return const Center(
-                      child: Text('아직 게시물이 없습니다.'),
-                    );
+                    return Center(child: Text('No posts available.'));
                   }
 
-                  return Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        context.read<ShutterBloc>().add(FetchPosts());
-                      },
-                      child: ListView.builder(
-                        itemCount: state.posts.length,
-                        itemBuilder: (context, index) {
-                          final post = state.posts[index];
-                          return _buildPostWithActions(post);
-                        },
-                      ),
-                    ),
+                  return ListView.builder(
+                    itemCount: state.posts.length,
+                    itemBuilder: (context, index) {
+                      final post = state.posts[index];
+                      return Card(
+                        margin: EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: NetworkImage(post
+                                        .imageUrls.isNotEmpty
+                                    ? post.imageUrls.first
+                                    : 'https://via.placeholder.com/150'), // 이미지 표시
+                              ),
+                              title: Text(post.authorName), // 작성자 이름
+                              subtitle: Text(
+                                post.createdAt.toString(), // 작성 시간
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(post.text), // 본문 텍스트
+                            ),
+                            if (post.imageUrls.isNotEmpty) // 이미지가 있을 경우 표시
+                              SizedBox(
+                                height: 200,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: post.imageUrls.length,
+                                  itemBuilder: (context, imgIndex) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Image.network(
+                                        post.imageUrls[imgIndex],
+                                        fit: BoxFit.cover,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            Wrap(
+                              spacing: 8.0,
+                              children: post.tags
+                                  .map((tag) => Chip(label: Text(tag))) // 태그 표시
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                 },
-              ),
+              )),
             ],
           ),
         ),
@@ -91,15 +122,13 @@ class ShutterScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPostWithActions(PostModel post) {
+  Widget _buildPostCard(BuildContext context, PostModel post) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Display image if available
           if (post.imageUrls.isNotEmpty)
             ClipRRect(
               borderRadius:
@@ -111,22 +140,20 @@ class ShutterScreen extends StatelessWidget {
                 height: 200,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 },
                 errorBuilder: (context, error, stackTrace) {
-                  return const Center(
-                    child: Icon(Icons.error),
-                  );
+                  return const Center(child: Icon(Icons.error));
                 },
               ),
             ),
+          // Post content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Post text
                 Text(
                   post.text,
                   style: const TextStyle(
@@ -135,6 +162,7 @@ class ShutterScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // Post created date
                 Text(
                   '${post.createdAt.year}년 ${post.createdAt.month}월 ${post.createdAt.day}일',
                   style: const TextStyle(
@@ -142,32 +170,16 @@ class ShutterScreen extends StatelessWidget {
                     color: Colors.grey,
                   ),
                 ),
-                // 현재 로그인된 사용자 정보 불러오기
-                FutureBuilder<User?>(
-                  future: _getCurrentUser(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    }
-
-                    if (!snapshot.hasData || snapshot.data == null) {
-                      return const Text('로그인되지 않았습니다.');
-                    }
-
-                    final currentUser = snapshot.data!;
-                    return Text(
-                      '작성자: ${currentUser.email ?? "알 수 없음"}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    );
-                  },
+                const SizedBox(height: 8),
+                // Post author name
+                Text(
+                  '작성자: ${post.authorName}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
                 ),
+                // Post tags
                 if (post.tags.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Wrap(
@@ -187,16 +199,5 @@ class ShutterScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  // FirebaseAuth에서 현재 로그인된 사용자 가져오기
-  Future<User?> _getCurrentUser() async {
-    try {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      return currentUser;
-    } catch (e) {
-      print('Error getting current user: $e');
-      return null;
-    }
   }
 }

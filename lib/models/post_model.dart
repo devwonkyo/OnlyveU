@@ -6,6 +6,7 @@ class PostModel {
   final List<String> tags;
   final DateTime createdAt;
   final String authorUid; // 작성자 UID
+  final String authorName; // 작성자 닉네임 또는 이름
 
   PostModel({
     required this.text,
@@ -13,6 +14,7 @@ class PostModel {
     required this.tags,
     DateTime? createdAt,
     required this.authorUid,
+    required this.authorName,
   }) : this.createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
@@ -22,6 +24,7 @@ class PostModel {
       'tags': tags,
       'createdAt': Timestamp.fromDate(createdAt),
       'authorUid': authorUid,
+      'authorName': authorName,
     };
   }
 
@@ -43,7 +46,9 @@ class PostModel {
         imageUrls: List<String>.from(map['imageUrls'] ?? []),
         tags: List<String>.from(map['tags'] ?? []),
         createdAt: parseCreatedAt(map['createdAt']),
-        authorUid: map['authorUid'] ?? '',
+        authorUid: map['authorUid']?.toString() ?? '',
+        authorName:
+            map['authorName']?.toString() ?? 'Unknown', // 기본값: 'Unknown'
       );
     } catch (e) {
       print('Error parsing PostModel: $e');
@@ -53,7 +58,8 @@ class PostModel {
         imageUrls: List<String>.from(map['imageUrls'] ?? []),
         tags: List<String>.from(map['tags'] ?? []),
         createdAt: DateTime.now(),
-        authorUid: map['authorUid'] ?? '',
+        authorUid: map['authorUid']?.toString() ?? '',
+        authorName: map['authorName']?.toString() ?? 'Unknown',
       );
     }
   }

@@ -112,7 +112,7 @@ class DeliveryOrderInfo extends StatelessWidget {
   Widget _buildDeliveryMessageSection(BuildContext context) {
     return BlocBuilder<PaymentBloc, PaymentState>(
       builder: (context, state) {
-        String selectedMessage = '배송 메시지를 선택해주세요.';
+        String selectedMessage = '없음';
         if (state is PaymentMessageSelected) {
           selectedMessage = state.selectedMessage;
         } else if (state is DeliveryInfoUpdated &&
