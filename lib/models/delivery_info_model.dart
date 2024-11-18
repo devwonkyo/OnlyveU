@@ -57,4 +57,19 @@ class DeliveryInfoModel {
       deliveryRequest: deliveryRequest ?? this.deliveryRequest,
     );
   }
+    @override
+  List<Object?> get props => [
+        deliveryName,
+        address,
+        detailAddress,
+        recipientName,
+        recipientPhone,
+        deliveryRequest,
+      ];
+
+  @override
+  String toString() {
+    return 'DeliveryInfoModel(deliveryName: $deliveryName, address: $address, detailAddress: $detailAddress, recipientName: $recipientName, recipientPhone: $recipientPhone, deliveryRequest: $deliveryRequest)';
+  }
 }
+

@@ -12,11 +12,14 @@ import 'package:onlyveyou/utils/styles.dart';
 class DeliveryOrderInfo extends StatelessWidget {
   final DeliveryInfoModel? deliveryInfo;
   final List<String> deliveryMessages;
-
+  final VoidCallback? onAddressChange; // 콜백 추가
+  final ValueChanged<String>? onDeliveryMessageSelected; // 콜백 추가
   const DeliveryOrderInfo({
     super.key,
     required this.deliveryInfo,
     required this.deliveryMessages,
+    this.onAddressChange, // 콜백 초기화
+    this.onDeliveryMessageSelected, // 콜백 초기화
   });
 
   @override
@@ -77,7 +80,13 @@ class DeliveryOrderInfo extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  _showModalBottomSheet(context);
+                  //_showModalBottomSheet(context);
+                  onAddressChange!(); // 콜백 함수 호출
+                  //원래는 modalbottomsheet를 띄웠지만 상태관리 문제가 있을 수 있다고 판단하여 주석처리
+                  //라우터에 문제가 있을 확률은?
+
+                  // 배송지
+                  // context.push('/new_delivery_address');
                 },
                 child: Text(
                   '변경',
@@ -103,7 +112,7 @@ class DeliveryOrderInfo extends StatelessWidget {
   Widget _buildDeliveryMessageSection(BuildContext context) {
     return BlocBuilder<PaymentBloc, PaymentState>(
       builder: (context, state) {
-        String selectedMessage = '배송 메시지를 선택해주세요.';
+        String selectedMessage = '없음';
         if (state is PaymentMessageSelected) {
           selectedMessage = state.selectedMessage;
         } else if (state is DeliveryInfoUpdated &&
@@ -138,6 +147,7 @@ class DeliveryOrderInfo extends StatelessWidget {
                 value: selectedMessage,
                 onChanged: (value) {
                   if (value != null) {
+                    onDeliveryMessageSelected?.call(value);
                     context
                         .read<PaymentBloc>()
                         .add(SelectDeliveryMessage(value));

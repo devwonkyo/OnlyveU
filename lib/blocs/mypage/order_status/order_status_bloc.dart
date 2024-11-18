@@ -21,7 +21,7 @@ class OrderStatusBloc extends Bloc<OrderStatusEvent, OrderStatusState> {
     if (event.purchaseType == '온라인몰 구매') {
       statusOptions = ['전체 상태', '주문접수', '결제완료', '배송준비중', '배송중', '배송완료'];
     } else {
-      statusOptions = ['전체 상태', '매장 구매완료', '매장 구매취소'];
+      statusOptions = ['전체 상태', '픽업 구매완료', '픽업 구매취소'];
     }
 
     // 상태 옵션이 업데이트될 때, 기본 선택 상태를 '전체 상태'로 초기화

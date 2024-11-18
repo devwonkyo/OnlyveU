@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/widgets/ai_recommend_empty_state.dart';
+import 'package:onlyveyou/utils/format_price.dart';
 
 class AIRecommendScreen extends StatefulWidget {
   const AIRecommendScreen({Key? key}) : super(key: key);
@@ -21,12 +22,18 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _aiRecommendBloc = context.read<AIRecommendBloc>();
-      // 초기 데이터 로드
-      _aiRecommendBloc.add(const LoadAIRecommendations());
-    });
+    _aiRecommendBloc = context.read<AIRecommendBloc>();
+    // 활동 데이터는 자동으로 구독되고 있으므로 추가 작업 불필요
   }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     _aiRecommendBloc = context.read<AIRecommendBloc>();
+  //     // 초기 데이터 로드
+  //     //_aiRecommendBloc.add(const LoadAIRecommendations());
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -282,7 +289,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                                 ),
                                 SizedBox(height: 4.h),
                                 Text(
-                                  '${product.price}원',
+                                  '${formatPrice(product.price)}원',
                                   style: TextStyle(
                                     color: Colors.grey,
                                     decoration: TextDecoration.lineThrough,
@@ -302,7 +309,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                                     ),
                                     SizedBox(width: 8.w),
                                     Text(
-                                      '${_calculateDiscountedPrice(product.price, product.discountPercent)}원',
+                                      '${formatDiscountedPriceToString(product.price, product.discountPercent.toDouble())}원',
                                       style: TextStyle(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.bold,

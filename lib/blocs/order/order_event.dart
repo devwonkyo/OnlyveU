@@ -48,3 +48,6 @@ class DeleteOrderEvent extends OrderEvent {
   @override
   List<Object?> get props => [orderId];
 }
+
+// 주문 목록을 가져오는 이벤트
+class FetchAvailableReviewOrdersEvent extends OrderEvent {}

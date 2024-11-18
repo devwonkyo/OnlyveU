@@ -6,15 +6,22 @@ import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
+import 'package:onlyveyou/blocs/store/store_bloc.dart';
+import 'package:onlyveyou/blocs/store/store_state.dart';
+import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/models/store_model.dart';
 import 'package:onlyveyou/screens/payment/delivery_order_screen.dart';
+import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/pickup_order_screen.dart';
+import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<String> deliveryMessages = [
-    '배송 메시지를 선택해주세요.',
+    '없음',
     '그냥 문 앞에 놓아 주시면 돼요.',
     '직접 받을게요.(부재 시 문앞)',
     '벨을 누르지 말아주세요.',
@@ -30,13 +37,22 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
+  DeliveryInfoModel? _currentDeliveryInfo;
+  String selectedDeliveryMessage = '배송 메시지를 선택해주세요.';
+  bool _isInitialized = false;
   @override
   void initState() {
     super.initState();
     // 주문 상품 가져오기 이벤트 추가
     // 전달된 order 값 확인
-    context.read<PaymentBloc>().add(InitializePayment(widget.order));
-    //  context.read<PaymentBloc>().add(UpdateDeliveryInfo(  //배송지 정보 업데이트 하기 위해서 
+    final bloc = context.read<PaymentBloc>();
+    _currentDeliveryInfo = bloc.deliveryInfo; // 초기값 설정
+    if (!_isInitialized) {
+      context.read<PaymentBloc>().add(InitializePayment(widget.order));
+      _isInitialized = true; // 초기화 플래그를 설정합니다.
+    }
+
+    //  context.read<PaymentBloc>().add(UpdateDeliveryInfo(  //배송지 정보 업데이트 하기 위해서
     //     deliveryName: deliveryName,
     //     address: address,
     //     detailAddress: detailAddress,
@@ -52,6 +68,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String _selectedPaymentMethod = '빠른결제';
   bool _saveAsDefault = false;
   bool _agreeToAll = false;
+
+  // NewDeliveryAddressScreen으로 이동하고 데이터를 받아오기
+  void _navigateToNewAddress() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const NewDeliveryAddressScreen()),
+    );
+
+    if (result != null && result is DeliveryInfoModel) {
+      setState(() {
+        _currentDeliveryInfo = result; // 받은 데이터를 상태에 저장
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,34 +102,47 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
             // 주문 유형에 따른 UI 표시
             // 주문 유형에 따른 UI 표시
-            BlocBuilder<PaymentBloc, PaymentState>(
-              builder: (context, state) {
-                if (state is PaymentLoading) {
-                  return const Center(child: CircularProgressIndicator());
+            BlocListener<PaymentBloc, PaymentState>(
+              listener: (context, state) {
+                if (state is DeliveryInfoUpdated) {
+                  print("PaymentScreen에서 DeliveryInfoUpdated 상태를 받았습니다.");
+                  setState(() {
+                    state.deliveryInfo;
+                  });
+                }
+              },
+              //배송 요청사항, 배송지 등록 모두 delivery_info_updated state를 배출해주는데 배송 요청사항만 emit이 되는 상태
 
-                } 
-          
-              //state가 orderdeliveryupdated일 때로 따로? 
-
-                else {
-                  // 전달받은 orderType을 사용하여 화면에 표시
-                  if (widget.order.orderType == OrderType.delivery) {
-   
-
-                 
+              //payment screen에 들어오면 기본적으로 paymentloaded state가 된다.
+              //배송지를 등록하거나 배송 요청사항을 업데이트 할 때 delivery_info_updated state를 emit하게 설정했는데 요청사항만 된다
+              //그래서 배송지 등록을 하고 나서 state를 print하면 paymentloaded가 유지가 된다
+              //emit state한 게 적용이 잘 안 되는 것 같다. router문제? 차이는 화면이 하나 더 있다?
+              child: BlocBuilder<PaymentBloc, PaymentState>(
+                builder: (context, state) {
+                  if (state is PaymentLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (widget.order.orderType == OrderType.delivery) {
+                    print("Curredt state: $state");
+                    // _currentDeliveryInfo가 null이 아니면 업데이트된 정보를 사용
                     return DeliveryOrderInfo(
-                      deliveryInfo:
-                          state.deliveryInfo ?? widget.order.deliveryInfo,
-                      deliveryMessages: widget.deliveryMessages,
-                    );
+                        deliveryInfo:
+                            _currentDeliveryInfo ?? state.deliveryInfo,
+                        deliveryMessages: widget.deliveryMessages,
+                        onAddressChange: _navigateToNewAddress, // 콜백 전달
+                        onDeliveryMessageSelected: (message) {
+                          setState(() {
+                            selectedDeliveryMessage = message;
+                          });
+                        });
                   } else if (widget.order.orderType == OrderType.pickup) {
                     return const PickupOrderInfo();
                   } else {
                     return Container();
                   }
-                }
-              },
+                },
+              ),
             ),
+
             const SizedBox(height: 20),
             Divider(
               height: 1,
@@ -147,7 +190,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               height: 10,
                             ),
                             Text(
-                              '${item.productPrice * item.quantity}원',
+                              '${formatPrice((item.productPrice * item.quantity).toString())}원',
                               style: AppStyles.priceTextStyle,
                             ),
                           ],
@@ -158,7 +201,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 100),
+
             Divider(
               height: 1,
               thickness: 5,
@@ -183,7 +226,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         style: AppStyles.headingStyle,
                       ),
                       Text(
-                        '$totalAmount원',
+                        '${formatPrice(totalAmount.toString())}원', // formatPrice 메서드 적용
                         style: AppStyles.headingStyle,
                       ),
                     ],
@@ -326,7 +369,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             ),
-
             // Agree to All Checkbox
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -366,28 +408,81 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: MediaQuery.of(context).size.height * 0.05,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // 결제 버튼 로직
-                        print("결제하기 버튼");
-                        context
-                            .read<PaymentBloc>()
-                            .add(const CheckOrderDetails());
+                    child: BlocBuilder<StoreBloc, StoreState>(
+                      builder: (context, storeState) {
+                        StoreModel? selectedStore;
+                        // StoreBloc의 상태에서 선택된 매장 정보 가져오기
+                        if (storeState is StoreSelected) {
+                          selectedStore = storeState.selectedStore;
+                        }
+                        return ElevatedButton(
+                          onPressed: () {
+                            // 결제 버튼 로직
+                            // OrderModel 생성
+                            final updatedDeliveryInfo =
+                                _currentDeliveryInfo != null
+                                    ? DeliveryInfoModel(
+                                        deliveryName:
+                                            _currentDeliveryInfo!.deliveryName,
+                                        address: _currentDeliveryInfo!.address,
+                                        detailAddress:
+                                            _currentDeliveryInfo!.detailAddress,
+                                        recipientName:
+                                            _currentDeliveryInfo!.recipientName,
+                                        recipientPhone: _currentDeliveryInfo!
+                                            .recipientPhone,
+                                        deliveryRequest:
+                                            selectedDeliveryMessage, // 추가
+                                      )
+                                    : null;
+                            final order = OrderModel(
+                              userId: widget.order.userId,
+                              items: widget.order.items,
+                              orderType: widget.order.orderType,
+                              deliveryInfo: updatedDeliveryInfo,
+                              status: OrderStatus.pending,
+                              createdAt: DateTime.now(),
+                              pickupTime: DateTime.now()
+                                  .add(const Duration(hours: 3)), // 3시간 후 픽업
+                              pickStore: selectedStore?.storeName, // 선택된 매장명
+                              pickInfo: selectedStore, // 선택된 StoreModel
+                            );
+
+                            // SubmitOrder 이벤트를 Bloc에 전달
+                            if (_saveAsDefault && _agreeToAll) {
+                              context
+                                  .read<PaymentBloc>()
+                                  .add(SubmitOrder(order));
+                            } else {
+                              checkboxDialog(context);
+                            }
+
+                            // 주문 성공 시 처리
+                            context.read<PaymentBloc>().stream.listen((state) {
+                              if (state is PaymentSuccess) {
+                                print('주문 성공');
+                                Navigator.pop(context); // 화면 닫기
+                              } else if (state is PaymentError) {
+                                print('주문 실패: ${state.message}');
+                              }
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            '${formatPrice(totalAmount.toString())}원 결제하기',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        '$totalAmount원 결제하기',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
                     ),
                   ),
                 );
@@ -399,4 +494,100 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
     );
   }
+}
+
+void checkboxDialog(BuildContext context) {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          titlePadding: EdgeInsets.zero,
+          contentPadding: const EdgeInsets.all(16.0),
+          title: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: const BoxDecoration(
+              color: AppsColor.pastelGreen,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.white,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  "안내",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: AppsColor.pastelGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: AppsColor.pastelGreen,
+                      size: 24,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '체크박스를 모두 동의해주세요',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 70),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.4,
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppsColor.pastelGreen,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      });
 }
