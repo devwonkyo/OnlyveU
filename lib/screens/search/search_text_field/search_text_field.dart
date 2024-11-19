@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'bloc/search_text_field_bloc.dart';
+import '../../../blocs/search/search_text_field/search_text_field_bloc.dart';
 
 class SearchTextField extends StatefulWidget {
   const SearchTextField({
