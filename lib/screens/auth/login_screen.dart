@@ -20,6 +20,33 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  late final String token;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  // SharedPreferences에서 토큰을 가져오는 메서드
+  Future<void> _loadToken() async {
+    try {
+      final loadedToken = await OnlyYouSharedPreference().getToken();
+      if (mounted) {  // setState 전에 위젯이 여전히 트리에 있는지 확인
+        setState(() {
+          token = loadedToken;
+        });
+      }
+      print('Loaded token: $token');  // 디버깅용
+    } catch (e) {
+      print('Error loading token: $e');
+      if (mounted) {
+        setState(() {
+          token = '';  // 에러 발생 시 토큰을 null로 설정
+        });
+      }
+    }
+  }
 
   Future<void> _saveUserModelToFirestore(UserModel user) async {
     try {
@@ -96,6 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
         uid: uid,
         email: email,
         nickname: nickname,
+        token: token,
       );
 
       // Firebase Firestore에 UserModel 저장
@@ -132,6 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
           uid: user.uid,
           email: user.email ?? '',
           nickname: user.displayName ?? '',
+          token: token ?? '',
         );
 
         // Firebase Firestore에 UserModel 저장

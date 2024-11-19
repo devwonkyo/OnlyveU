@@ -5,15 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/search_repositories/recent_search_repository/recent_search_repository_impl.dart';
 import 'package:onlyveyou/repositories/search_repositories/suggestion_repository/suggestion_repository_impl.dart';
-import 'package:onlyveyou/screens/search/search_home/recent_search/bloc/recent_search_bloc.dart';
+import 'package:onlyveyou/blocs/search/recent_search/recent_search_bloc.dart';
 import 'package:onlyveyou/screens/search/search_result/search_result_screen.dart';
 
 import 'search_home/search_home_screen.dart';
-import 'search_home/trend_search/bloc/trend_search_bloc.dart';
-import 'search_result/bloc/search_result_bloc.dart';
-import 'search_suggestion/bloc/search_suggestion_bloc.dart';
+import '../../blocs/search/trend_search/trend_search_bloc.dart';
+import '../../blocs/search/search_result/search_result_bloc.dart';
+import '../../blocs/search/search_suggestion/search_suggestion_bloc.dart';
 import 'search_suggestion/search_suggestion_screen.dart';
-import 'search_text_field/bloc/search_text_field_bloc.dart';
+import '../../blocs/search/search_text_field/search_text_field_bloc.dart';
 import 'search_text_field/search_text_field.dart';
 
 class SearchPage extends StatelessWidget {
