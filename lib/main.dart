@@ -44,6 +44,7 @@ import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/utils/deeplink_service.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
@@ -74,6 +75,27 @@ void main() async {
   final prefs = OnlyYouSharedPreference();
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
+
+
+  DeepLinkService().initialize(router);
+
+
+  //카카오톡
+  kakaoSchemeStream.listen((url) {
+    Uri uri = Uri.parse(url ?? "");
+    final productId = uri.queryParameters['productId'];
+    final screen = uri.queryParameters['screen'];
+    print("productId : $productId, screen : $screen ");
+
+    if(screen != null){
+      router.push(screen, extra: productId);
+    }
+
+  }, onError: (e) {
+    // 에러 상황의 예외 처리 코드를 작성합니다.
+    print("kakao listen error : $e");
+  });
+
 
 // 모든 제품 로컬 저장 (검색용)
   try {
