@@ -14,6 +14,7 @@ class _MapScreenState extends State<MapScreen> {
   late final LocationBloc _locationBloc;
   GoogleMapController? _mapController;
   bool _isRealLocation = true;
+  LatLng _currentPosition = const LatLng(37.5665, 126.9780);
 
   @override
   void initState() {
@@ -28,12 +29,14 @@ class _MapScreenState extends State<MapScreen> {
         bloc: _locationBloc,
         listener: (context, state) {
           if (state is LocationSuccess && _mapController != null) {
+            setState(() {
+              _currentPosition = LatLng(
+                state.position.latitude,
+                state.position.longitude,
+              );
+            });
             _mapController?.animateCamera(
               CameraUpdate.newCameraPosition(state.cameraPosition),
-            );
-          } else if (state is LocationError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
             );
           }
         },
@@ -41,8 +44,8 @@ class _MapScreenState extends State<MapScreen> {
           return Stack(
             children: [
               GoogleMap(
-                initialCameraPosition: const CameraPosition(
-                  target: LatLng(37.5665, 126.9780),
+                initialCameraPosition: CameraPosition(
+                  target: _currentPosition,
                   zoom: 15,
                 ),
                 myLocationEnabled: true,
@@ -51,6 +54,11 @@ class _MapScreenState extends State<MapScreen> {
                 onMapCreated: (controller) {
                   _mapController = controller;
                   _startLocationUpdates();
+                },
+                onCameraMove: (position) {
+                  setState(() {
+                    _currentPosition = position.target;
+                  });
                 },
               ),
               if (state is LocationSuccess)
@@ -68,8 +76,8 @@ class _MapScreenState extends State<MapScreen> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           Text(
-                            '위도: ${state.position.latitude.toStringAsFixed(4)}\n'
-                            '경도: ${state.position.longitude.toStringAsFixed(4)}',
+                            '위도: ${_currentPosition.latitude.toStringAsFixed(4)}\n'
+                            '경도: ${_currentPosition.longitude.toStringAsFixed(4)}',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 8),
@@ -89,8 +97,6 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                 ),
-              if (state is LocationLoading)
-                const Center(child: CircularProgressIndicator()),
             ],
           );
         },
@@ -128,3 +134,11 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 }
+
+// 모델이 어떻다... 이런 애기를 - 그게 뭔가 물어볼때. 그걸 내가 다시 지티피에게 물어보는게 중요하다
+//  그게 뭔지-> 내 질문을 내가 적어놓자!
+//  개념을 자꾸 물어보는 방향으로 사용해보자!
+// 책을 보면 당연하게 말하는게- 책을 보면 나올것. ------
+// 자신만의 개념을 정립?? = > 지피티가 하라고 하더라고요 ㅠㅠ -> 이거를 명확하게 어떻게 가는지 알아야 한다!
+// 구현에 급급한 느낌! ㅠㅠ  -> 책 과목 : 플러터 기본서
+// 깡샘 책 보기!
