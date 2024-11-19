@@ -33,9 +33,7 @@ class WeatherScreen extends StatelessWidget {
           SliverToBoxAdapter(
             child: WeatherStatsSection(),
           ),
-          SliverToBoxAdapter(
-            child: WeatherProductRecommendationWidget(),
-          ),
+          WeatherProductRecommendationWidget(),
         ],
       ),
     );
