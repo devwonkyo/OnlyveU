@@ -82,6 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           // 다른 사용자 정보도 저장
           await _prefs.setEmail(event.email);
           // ... 다른 정보들 저장
+          await authRepository.addTokenWithUserId(userCredential.user!.uid);
 
           emit(LoginSuccess(userId: userCredential.user!.uid));
         } else {
