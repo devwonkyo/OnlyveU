@@ -2,8 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../models/search_models/search_models.dart';
-import '../../../../../repositories/search_repositories/suggestion_repository/suggestion_repository.dart';
+import '../../../models/search_models/search_models.dart';
+import '../../../repositories/search_repositories/suggestion_repository/suggestion_repository.dart';
 
 part 'trend_search_event.dart';
 part 'trend_search_state.dart';
