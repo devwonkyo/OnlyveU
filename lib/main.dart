@@ -4,7 +4,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
@@ -63,12 +62,11 @@ void main() async {
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
-
   //FCM Token 설정
   String? fcmToken = await FirebaseMessaging.instance.getToken();
   print('fcmToken : $fcmToken');
 
-  if(fcmToken != null){
+  if (fcmToken != null) {
     OnlyYouSharedPreference().setToken(fcmToken);
   }
 
@@ -251,7 +249,8 @@ class MyApp extends StatelessWidget {
                       ReviewBloc(repository: ReviewRepository()),
                 ),
                 BlocProvider<OrderBloc>(
-                  create: (context) => OrderBloc(OrderRepository(firestore: FirebaseFirestore.instance)),
+                  create: (context) => OrderBloc(
+                      OrderRepository(firestore: FirebaseFirestore.instance)),
                 ),
                 BlocProvider<InventoryBloc>(
                   create: (context) => InventoryBloc(InventoryRepository()),

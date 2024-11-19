@@ -98,19 +98,25 @@ class AIRecommendBloc extends Bloc<AIRecommendEvent, AIRecommendState> {
   AIRecommendBloc({required AIRecommendRepository repository})
       : _repository = repository,
         super(AIRecommendInitial()) {
-    // AI 추천 로드 이벤트 처리
+    // AI 추천 로드 이벤트 처리 -> 마지막단계에서 ai 에게 프로덕트 아이디 받고 뿌려줌
     on<LoadAIRecommendations>((event, emit) async {
       try {
+        // 로딩 상태를 emit
         emit(AIRecommendLoading(activityCounts: state.activityCounts));
+
+        // OpenAI API를 호출하여 추천 데이터를 가져옴
         final result = await _repository.getRecommendations();
+
+        // 추천 데이터를 성공적으로 받아오면 Loaded 상태로 emit
         emit(AIRecommendLoaded(
-          products: result['products'], // 추천된 상품
-          reasonMap: result['reasons'], // 추천 이유
+          products: result['products'], // 추천된 상품 리스트
+          reasonMap: result['reasons'], // 추천 이유 맵
           activityCounts: state.activityCounts,
         ));
       } catch (e) {
+        // 에러 발생 시 Error 상태 emit
         emit(AIRecommendError(
-          message: e.toString(), // 에러 메시지
+          message: e.toString(),
           activityCounts: state.activityCounts,
         ));
       }
