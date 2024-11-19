@@ -39,6 +39,12 @@ class OnlyYouSharedPreference {
     preferences.setString('phone', phone);
   }
 
+  // fcm token 저장
+  Future<void> setToken(String token) async {
+    SharedPreferences preferences = await prefs;
+    preferences.setString('token', token);
+  }
+
   // 이메일 읽기
   Future<String> getEmail() async {
     SharedPreferences preferences = await prefs;
@@ -63,6 +69,14 @@ class OnlyYouSharedPreference {
     return preferences.getString('phone') ?? "";
   }
 
+  // 토큰 읽기
+  Future<String> getToken() async {
+    SharedPreferences preferences = await prefs;
+    return preferences.getString('token') ?? "";
+  }
+
+
+
   // 유저 정보 삭제
   Future<void> removeUserInfo() async {
     SharedPreferences preferences = await prefs;
@@ -70,6 +84,7 @@ class OnlyYouSharedPreference {
     await preferences.remove('gender');
     await preferences.remove('nickname');
     await preferences.remove('phone');
+    await preferences.remove('token');
   }
 
   // 전체 데이터 삭제
@@ -100,6 +115,7 @@ class OnlyYouSharedPreference {
     print('Nickname: ${await getNickname()}');
     print('Phone: ${await getPhone()}');
     print('Gender: ${await getGender()}');
+    print('token: ${await getToken()}');
     print('=====================');
     // 테마 모드 저장
   }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'package:onlyveyou/screens/search/search_text_field/bloc/search_text_field_bloc.dart';
+import 'package:onlyveyou/blocs/search/search_text_field/search_text_field_bloc.dart';
 
-import 'bloc/recent_search_bloc.dart';
+import '../../../../blocs/search/recent_search/recent_search_bloc.dart';
 
 class RecentSearchView extends StatelessWidget {
   const RecentSearchView({

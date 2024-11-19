@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       : super(AuthInitial()) {
     on<LogoutRequested>(_onLogoutRequested);
     on<DeleteAccountRequested>(_onDeleteAccountRequested);
+    on<GetUserInfo>(_getUserCartCount);
     on<SignUpRequested>((event, emit) async {
       emit(AuthLoading());
       print('emit AuthLoading');
@@ -79,6 +82,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           // 다른 사용자 정보도 저장
           await _prefs.setEmail(event.email);
           // ... 다른 정보들 저장
+          await authRepository.addTokenWithUserId(userCredential.user!.uid);
 
           emit(LoginSuccess(userId: userCredential.user!.uid));
         } else {
@@ -131,5 +135,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(AuthFailure("회원 탈퇴에 실패했습니다: $e"));
     }
+  }
+
+  Future<void> _getUserCartCount(GetUserInfo event, Emitter<AuthState> emit) async {
+    int userCartCount = await authRepository.getCartItemsCount();
+    print("userCartCount : $userCartCount");
+    emit(LoadedUserCartCount(cartItemsCount: userCartCount));
   }
 }
