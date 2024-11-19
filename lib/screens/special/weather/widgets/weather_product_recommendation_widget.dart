@@ -6,8 +6,9 @@ class WeatherProductRecommendationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
+    // SliverList 대신 MultiSliver를 사용하여 여러 Sliver를 묶습니다
+    return SliverList(
+      delegate: SliverChildListDelegate([
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 8.h),
           child: Row(
@@ -56,27 +57,28 @@ class WeatherProductRecommendationWidget extends StatelessWidget {
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.all(16.w),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16.h,
-              crossAxisSpacing: 16.w,
-              childAspectRatio: 0.6,
-              mainAxisExtent: 280.h,
-            ),
-            itemBuilder: (context, index) => _buildRecommendationCard(),
-            itemCount: 6,
-          ),
+        SizedBox(
+          height: 16.h,
         ),
-      ],
+        GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 16.h,
+            crossAxisSpacing: 16.w,
+            childAspectRatio: 0.6,
+            mainAxisExtent: 280.h,
+          ),
+          itemBuilder: (context, index) => _buildRecommendationCard(),
+          itemCount: 6,
+        ),
+      ]),
     );
   }
 
-  Widget _buildRecommendationCard() {
+  static Widget _buildRecommendationCard() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
