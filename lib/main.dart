@@ -63,12 +63,11 @@ void main() async {
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
-
   //FCM Token 설정
   String? fcmToken = await FirebaseMessaging.instance.getToken();
   print('fcmToken : $fcmToken');
 
-  if(fcmToken != null){
+  if (fcmToken != null) {
     OnlyYouSharedPreference().setToken(fcmToken);
   }
 
@@ -213,7 +212,8 @@ class MyApp extends StatelessWidget {
                   create: (context) => ThemeBloc(),
                 ),
                 BlocProvider<OrderStatusBloc>(
-                  create: (context) => OrderStatusBloc(),
+                  create: (context) => OrderStatusBloc(
+                      OrderRepository(firestore: FirebaseFirestore.instance)),
                 ),
                 BlocProvider<ProductDetailBloc>(
                   create: (context) =>

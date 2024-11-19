@@ -1,12 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'order_status_event.dart';
 import 'order_status_state.dart';
 
 class OrderStatusBloc extends Bloc<OrderStatusEvent, OrderStatusState> {
-  OrderStatusBloc() : super(OrderStatusInitial()) {
+  OrderRepository orderRepository;
+  OrderStatusBloc(this.orderRepository) : super(OrderStatusInitial()) {
     on<SelectPurchaseType>(_onSelectPurchaseType);
     on<SelectStatus>(_onSelectStatus);
-
+    on<FetchOrder>(_onFetchOrder);
     // Bloc이 생성될 때 기본 구매 유형과 상태 설정
     add(const SelectPurchaseType('온라인몰 구매'));
   }
@@ -36,5 +39,10 @@ class OrderStatusBloc extends Bloc<OrderStatusEvent, OrderStatusState> {
       emit(StatusSelected(currentState.selectedPurchaseType,
           currentState.statusOptions, event.status));
     }
+  }
+
+  void _onFetchOrder(FetchOrder event, Emitter<OrderStatusState> emit) async {
+    final orders = await orderRepository.fetchOrder();
+    emit(OrderFetch(orders));
   }
 }
