@@ -6,8 +6,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class LocationData {
-  static const double defaultLatitude = 37.5665;
-  static const double defaultLongitude = 126.9780;
+  static const double defaultLatitude = 37.57142;
+  static const double defaultLongitude = 126.9658;
 
   final Position position;
   final Marker marker;
@@ -38,7 +38,7 @@ class LocationData {
       marker: Marker(
         markerId: const MarkerId('current_location'),
         position: LatLng(defaultLatitude, defaultLongitude),
-        infoWindow: const InfoWindow(title: '서울시청'),
+        infoWindow: const InfoWindow(title: '기상청'),
       ),
       cameraPosition: const CameraPosition(
         target: LatLng(defaultLatitude, defaultLongitude),
@@ -127,7 +127,7 @@ class LocationRepository {
     const locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 10,
-      timeLimit: Duration(seconds: 5),
+      timeLimit: Duration(seconds: 30), // 5초에서 30초로 증가
     );
 
     Geolocator.getPositionStream(locationSettings: locationSettings).listen(
@@ -156,7 +156,17 @@ class LocationRepository {
       marker: Marker(
         markerId: const MarkerId('current_location'),
         position: latLng,
-        infoWindow: const InfoWindow(title: '현재 위치'),
+        // 현재 위치이면 빨간색, 기본 위치(기상청)이면 파란색 마커 사용
+        icon: position.latitude == LocationData.defaultLatitude &&
+                position.longitude == LocationData.defaultLongitude
+            ? BitmapDescriptor.defaultMarker
+            : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(
+          title: position.latitude == LocationData.defaultLatitude &&
+                  position.longitude == LocationData.defaultLongitude
+              ? '기상청'
+              : '현재 위치',
+        ),
       ),
       cameraPosition: CameraPosition(
         target: latLng,
