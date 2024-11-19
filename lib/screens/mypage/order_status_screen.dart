@@ -23,9 +23,9 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     context.read<OrderStatusBloc>().add(const FetchOrder());
   }
 
-  
   @override
   Widget build(BuildContext context) {
+    String? selectedOrderType; // 선택된 주문 타입 (null이면 전체)
     return Scaffold(
       appBar: AppBar(
         title: const Text('주문/배송 조회'),
@@ -42,7 +42,9 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      print("전체 버튼 클릭");
+                      setState(() {
+                        selectedOrderType = null; // 전체 보기
+                      });
                     },
                     child: Text(
                       '전체',
@@ -52,7 +54,9 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                   const SizedBox(width: 15),
                   GestureDetector(
                     onTap: () {
-                      print("배송 버튼 클릭");
+                      setState(() {
+                        selectedOrderType = 'delivery'; // 배송 필터링
+                      });
                     },
                     child: Text(
                       '배송',
@@ -63,6 +67,9 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                   GestureDetector(
                     onTap: () {
                       print("매장 픽업 버튼 클릭");
+                      setState(() {
+                        selectedOrderType = 'pickup'; // 픽업 필터링
+                      });
                     },
                     child: Text(
                       '매장픽업',
@@ -80,7 +87,18 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is OrderFetch) {
                     // 날짜별로 주문 데이터를 그룹화
-                    final groupedOrders = groupOrdersByDate(state.orders);
+                    final filteredOrders = selectedOrderType == null
+                        ? state.orders // 전체 보기
+                        : state.orders.where((order) {
+                            return order.orderType == selectedOrderType;
+                          }).toList();
+
+                    if (filteredOrders.isEmpty) {
+                      return const Center(
+                        child: Text('해당 조건의 주문이 없습니다.'),
+                      );
+                    }
+                    final groupedOrders = groupOrdersByDate(filteredOrders);
 
                     return ListView(
                       shrinkWrap: true,
@@ -105,8 +123,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                  
-                                    order.status.name, // 주문 상태   
+                                    order.status.name, // 주문 상태
                                     style: AppStyles.bodyTextStyle,
                                   ),
                                   const SizedBox(height: 10),
