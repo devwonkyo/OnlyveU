@@ -6,7 +6,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../repositories/special/weather/location_repository.dart';
 
-// Events
 abstract class LocationEvent {}
 
 class GetCurrentLocation extends LocationEvent {}
@@ -15,7 +14,6 @@ class StartLocationUpdates extends LocationEvent {}
 
 class StopLocationUpdates extends LocationEvent {}
 
-// States
 abstract class LocationState {}
 
 class LocationInitial extends LocationState {}
@@ -39,10 +37,9 @@ class LocationError extends LocationState {
   LocationError(this.message);
 }
 
-// Bloc
 class LocationBloc extends Bloc<LocationEvent, LocationState> {
   final LocationRepository _repository;
-  StreamSubscription<Position>? _locationSubscription;
+  StreamSubscription<LocationData>? _locationSubscription;
 
   LocationBloc({required LocationRepository repository})
       : _repository = repository,
@@ -50,45 +47,46 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
     on<GetCurrentLocation>((event, emit) async {
       try {
         emit(LocationLoading());
-
-        final position = await _repository.getCurrentLocation();
-        final latLng = _repository.positionToLatLng(position);
-
-        emit(LocationSuccess(
-          position: position,
-          marker: _repository.createLocationMarker(latLng),
-          cameraPosition: _repository.updateCameraPosition(latLng),
-        ));
+        final locationData = await _repository.getCurrentLocationData();
+        if (!isClosed) {
+          emit(LocationSuccess(
+            position: locationData.position,
+            marker: locationData.marker,
+            cameraPosition: locationData.cameraPosition,
+          ));
+        }
       } catch (e) {
-        emit(LocationError(e.toString()));
+        if (!isClosed) {
+          emit(LocationError(e.toString()));
+        }
       }
     });
 
     on<StartLocationUpdates>((event, emit) async {
-      _locationSubscription?.cancel();
-      _locationSubscription = _repository.getLocationStream().listen(
-        (position) {
-          final latLng = _repository.positionToLatLng(position);
+      await _locationSubscription?.cancel();
 
-          emit(LocationSuccess(
-            position: position,
-            marker: _repository.createLocationMarker(latLng),
-            cameraPosition: _repository.updateCameraPosition(latLng),
-          ));
-        },
-        onError: (error) => emit(LocationError(error.toString())),
+      emit(LocationLoading());
+
+      await emit.forEach<LocationData>(
+        _repository.getLocationDataStream(),
+        onData: (locationData) => LocationSuccess(
+          position: locationData.position,
+          marker: locationData.marker,
+          cameraPosition: locationData.cameraPosition,
+        ),
+        onError: (error, stackTrace) => LocationError(error.toString()),
       );
     });
 
-    on<StopLocationUpdates>((event, emit) {
-      _locationSubscription?.cancel();
+    on<StopLocationUpdates>((event, emit) async {
+      await _locationSubscription?.cancel();
       _locationSubscription = null;
     });
   }
 
   @override
-  Future<void> close() {
-    _locationSubscription?.cancel();
+  Future<void> close() async {
+    await _locationSubscription?.cancel();
     return super.close();
   }
 }
