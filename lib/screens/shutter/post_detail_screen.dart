@@ -10,7 +10,7 @@ import 'package:onlyveyou/models/post_model.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final PostModel post;
-  const PostDetailScreen({Key? key, required this.post}) : super(key: key);
+  const PostDetailScreen({super.key, required this.post});
 
   @override
   _PostDetailScreenState createState() => _PostDetailScreenState();
@@ -117,8 +117,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       stream: _postStream,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
                             child: CircularProgressIndicator(),
                           );
                         }
@@ -157,18 +157,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         children: [
                           Text(
                             widget.post.text,
-                            style: TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             formatDate(widget.post.createdAt),
-                            style: TextStyle(color: Colors.grey),
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
                       child: Text(
                         'Comments',
                         style: TextStyle(
@@ -180,11 +180,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     BlocBuilder<CommentBloc, CommentState>(
                       builder: (context, state) {
                         if (state is CommentLoadingState) {
-                          return Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else if (state is CommentLoadedState) {
                           return ListView.builder(
                             shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: state.comments.length,
                             itemBuilder: (context, index) {
                               final comment = state.comments[index];
@@ -195,10 +196,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 title: Row(
                                   children: [
                                     Text(comment.authorName),
-                                    SizedBox(width: 8),
+                                    const SizedBox(width: 8),
                                     Text(
                                       formatDate(comment.createdAt),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey,
                                       ),
@@ -212,7 +213,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         } else if (state is CommentErrorState) {
                           return Center(child: Text(state.error));
                         }
-                        return SizedBox.shrink();
+                        return const SizedBox.shrink();
                       },
                     ),
                   ],
@@ -226,14 +227,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   Expanded(
                     child: TextField(
                       controller: _commentController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Add a comment...',
                         border: OutlineInputBorder(),
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.send),
+                    icon: const Icon(Icons.send),
                     onPressed: _addComment,
                   ),
                 ],
