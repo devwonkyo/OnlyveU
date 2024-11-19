@@ -11,52 +11,63 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  late final LocationBloc _locationBloc;
   GoogleMapController? _mapController;
+  bool _initialLocationSet = false;
 
   @override
   void initState() {
     super.initState();
-    // 화면이 생성될 때 위치 정보 요청
-    context.read<LocationBloc>().add(GetCurrentLocation());
+    _locationBloc = context.read<LocationBloc>();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<LocationBloc, LocationState>(
+        bloc: _locationBloc,
         listener: (context, state) {
-          if (state is LocationSuccess) {
-            // 위치가 업데이트될 때마다 카메라 이동
-            _mapController?.animateCamera(
-              CameraUpdate.newCameraPosition(state.cameraPosition),
-            );
-          } else if (state is LocationError) {
-            // 에러 발생시 스낵바 표시
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+          if (state is LocationSuccess && _mapController != null) {
+            if (!_initialLocationSet) {
+              _mapController
+                  ?.moveCamera(
+                CameraUpdate.newCameraPosition(state.cameraPosition),
+              )
+                  .then((_) {
+                setState(() => _initialLocationSet = true);
+              }).catchError((e) {
+                debugPrint('Camera movement failed: $e');
+              });
+            } else {
+              _mapController
+                  ?.animateCamera(
+                CameraUpdate.newCameraPosition(state.cameraPosition),
+              )
+                  .catchError((e) {
+                debugPrint('Camera animation failed: $e');
+              });
+            }
           }
         },
         builder: (context, state) {
-          if (state is LocationLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is LocationSuccess) {
-            return Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: state.cameraPosition,
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                  markers: {state.marker},
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                    // 지도가 생성되면 위치 업데이트 시작
-                    context.read<LocationBloc>().add(StartLocationUpdates());
-                  },
+          return Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition: const CameraPosition(
+                  target: LatLng(37.5665, 126.9780),
+                  zoom: 15,
                 ),
-                // 날씨 정보를 표시할 오버레이 위젯 (나중에 구현)
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                markers: state is LocationSuccess ? {state.marker} : {},
+                onMapCreated: (controller) {
+                  _mapController = controller;
+                  _locationBloc
+                    ..add(GetCurrentLocation())
+                    ..add(StartLocationUpdates());
+                },
+              ),
+              if (state is LocationSuccess)
                 Positioned(
                   top: 50,
                   left: 16,
@@ -80,12 +91,10 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                 ),
-              ],
-            );
-          }
-
-          return const Center(
-            child: Text('위치 정보를 가져올 수 없습니다.'),
+              if (state is LocationLoading)
+                const Center(child: CircularProgressIndicator()),
+              if (state is LocationError) Center(child: Text(state.message)),
+            ],
           );
         },
       ),
@@ -94,8 +103,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
-    // 화면이 종료될 때 위치 업데이트 중지
-    context.read<LocationBloc>().add(StopLocationUpdates());
+    _locationBloc.add(StopLocationUpdates());
     _mapController?.dispose();
     super.dispose();
   }

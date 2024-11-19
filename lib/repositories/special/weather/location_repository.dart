@@ -1,89 +1,185 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
+
+class LocationData {
+  static const double defaultLatitude = 37.5665;
+  static const double defaultLongitude = 126.9780;
+
+  final Position position;
+  final Marker marker;
+  final CameraPosition cameraPosition;
+
+  LocationData({
+    required this.position,
+    required this.marker,
+    required this.cameraPosition,
+  });
+
+  factory LocationData.defaultLocation() {
+    final position = Position(
+      latitude: defaultLatitude,
+      longitude: defaultLongitude,
+      timestamp: DateTime.now(),
+      accuracy: 0,
+      altitude: 0,
+      heading: 0,
+      speed: 0,
+      speedAccuracy: 0,
+      altitudeAccuracy: 0,
+      headingAccuracy: 0,
+    );
+
+    return LocationData(
+      position: position,
+      marker: Marker(
+        markerId: const MarkerId('current_location'),
+        position: LatLng(defaultLatitude, defaultLongitude),
+        infoWindow: const InfoWindow(title: '서울시청'),
+      ),
+      cameraPosition: const CameraPosition(
+        target: LatLng(defaultLatitude, defaultLongitude),
+        zoom: 15.0,
+      ),
+    );
+  }
+}
 
 class LocationRepository {
-  // 싱글톤 패턴 구현
   static final LocationRepository _instance = LocationRepository._internal();
   factory LocationRepository() => _instance;
   LocationRepository._internal();
 
-  // 위치 권한 체크 및 요청
-  Future<bool> checkAndRequestPermission() async {
-    // 현재 권한 상태 체크
-    final status = await Permission.location.status;
+  Stream<LocationData>? _locationStream;
+  StreamController<LocationData>? _streamController;
 
-    if (status.isGranted) {
-      return true;
-    }
-
-    // 권한이 없으면 요청
-    final result = await Permission.location.request();
-    return result.isGranted;
-  }
-
-  // 위치 서비스 활성화 체크 및 요청
-  Future<bool> checkLocationService() async {
+  Future<bool> _checkAndRequestPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
     if (!serviceEnabled) {
-      // 위치 서비스가 꺼져있으면 설정으로 이동
       await Geolocator.openLocationSettings();
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return false;
     }
 
-    return serviceEnabled;
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return false;
+    }
+
+    return permission != LocationPermission.deniedForever;
   }
 
-  // 현재 위치 가져오기
-  Future<Position> getCurrentLocation() async {
-    try {
-      // 권한 체크
-      bool hasPermission = await checkAndRequestPermission();
-      bool serviceEnabled = await checkLocationService();
+  Future<LocationData> getCurrentLocationData() async {
+    LocationData defaultLocation = LocationData.defaultLocation();
 
-      if (!hasPermission || !serviceEnabled) {
-        throw Exception('Location permissions are required');
+    try {
+      if (!await _checkAndRequestPermission()) {
+        return defaultLocation;
       }
 
-      // 현재 위치 반환
-      return await Geolocator.getCurrentPosition(
+      final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 15),
       );
+
+      if (_isInKoreaRegion(position)) {
+        return _createLocationData(position);
+      }
+
+      return defaultLocation;
     } catch (e) {
-      throw Exception('Failed to get current location: $e');
+      debugPrint('Location error: $e');
+      return defaultLocation;
     }
   }
 
-  // 위치 변경 스트림 제공
-  Stream<Position> getLocationStream() {
+  Future<bool> checkLocationService() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        await Geolocator.openLocationSettings();
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      }
+      return serviceEnabled;
+    } on PlatformException catch (e) {
+      debugPrint('위치 서비스 초기화 실패: $e');
+      return false;
+    }
+  }
+
+  Stream<LocationData> getLocationDataStream() {
+    if (_locationStream != null) {
+      return _locationStream!;
+    }
+
+    _streamController = StreamController<LocationData>.broadcast(
+      onCancel: () {
+        _streamController?.close();
+        _streamController = null;
+        _locationStream = null;
+      },
+    );
+
     const locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 10, // 10미터마다 업데이트
+      distanceFilter: 10,
+      timeLimit: Duration(seconds: 5),
     );
 
-    return Geolocator.getPositionStream(locationSettings: locationSettings);
+    Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+      (position) {
+        if (_isInKoreaRegion(position)) {
+          _streamController?.add(_createLocationData(position));
+        } else {
+          _streamController?.add(LocationData.defaultLocation());
+        }
+      },
+      onError: (error) {
+        debugPrint('Location stream error: $error');
+        _streamController?.add(LocationData.defaultLocation());
+      },
+      cancelOnError: false,
+    );
+
+    _locationStream = _streamController?.stream;
+    return _locationStream!;
   }
 
-  // Position을 LatLng로 변환 (구글맵용)
-  LatLng positionToLatLng(Position position) {
-    return LatLng(position.latitude, position.longitude);
-  }
-
-  // 마커 생성
-  Marker createLocationMarker(LatLng position) {
-    return Marker(
-      markerId: const MarkerId('current_location'),
+  LocationData _createLocationData(Position position) {
+    final latLng = LatLng(position.latitude, position.longitude);
+    return LocationData(
       position: position,
-      infoWindow: const InfoWindow(title: '현재 위치'),
+      marker: Marker(
+        markerId: const MarkerId('current_location'),
+        position: latLng,
+        infoWindow: const InfoWindow(title: '현재 위치'),
+      ),
+      cameraPosition: CameraPosition(
+        target: latLng,
+        zoom: 15.0,
+      ),
     );
   }
 
-  // 카메라 위치 업데이트
-  CameraPosition updateCameraPosition(LatLng position) {
-    return CameraPosition(
-      target: position,
-      zoom: 15.0,
-    );
+  bool _isInKoreaRegion(Position position) {
+    const double minLat = 33.0;
+    const double maxLat = 38.5;
+    const double minLng = 125.0;
+    const double maxLng = 132.0;
+
+    return position.latitude >= minLat &&
+        position.latitude <= maxLat &&
+        position.longitude >= minLng &&
+        position.longitude <= maxLng;
+  }
+
+  void dispose() {
+    _streamController?.close();
+    _streamController = null;
+    _locationStream = null;
   }
 }
