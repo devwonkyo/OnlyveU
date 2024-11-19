@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_event.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_state.dart';
+import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/utils/format_price.dart';
+import 'package:onlyveyou/utils/order_status_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 import 'package:intl/intl.dart';
 
@@ -16,6 +19,7 @@ class OrderStatusScreen extends StatefulWidget {
 }
 
 class _OrderStatusScreenState extends State<OrderStatusScreen> {
+  OrderType? selectedOrderType;
   @override
   void initState() {
     super.initState();
@@ -25,7 +29,6 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String? selectedOrderType; // 선택된 주문 타입 (null이면 전체)
     return Scaffold(
       appBar: AppBar(
         title: const Text('주문/배송 조회'),
@@ -48,19 +51,23 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     },
                     child: Text(
                       '전체',
-                      style: AppStyles.subHeadingStyle,
+                      style: selectedOrderType == null
+                          ? AppStyles.headingStyle
+                          : AppStyles.bodyTextStyle,
                     ),
                   ),
                   const SizedBox(width: 15),
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        selectedOrderType = 'delivery'; // 배송 필터링
+                        selectedOrderType = OrderType.delivery; // 배송 필터링
                       });
                     },
                     child: Text(
                       '배송',
-                      style: AppStyles.subHeadingStyle,
+                      style: selectedOrderType == OrderType.delivery
+                          ? AppStyles.headingStyle
+                          : AppStyles.bodyTextStyle,
                     ),
                   ),
                   const SizedBox(width: 15),
@@ -68,12 +75,14 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                     onTap: () {
                       print("매장 픽업 버튼 클릭");
                       setState(() {
-                        selectedOrderType = 'pickup'; // 픽업 필터링
+                        selectedOrderType = OrderType.pickup; // 픽업 필터링
                       });
                     },
                     child: Text(
                       '매장픽업',
-                      style: AppStyles.subHeadingStyle,
+                      style: selectedOrderType == OrderType.pickup
+                          ? AppStyles.headingStyle
+                          : AppStyles.bodyTextStyle,
                     ),
                   ),
                 ],
@@ -86,12 +95,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                   if (state is OrderStatusInitial) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is OrderFetch) {
-                    // 날짜별로 주문 데이터를 그룹화
-                    final filteredOrders = selectedOrderType == null
-                        ? state.orders // 전체 보기
-                        : state.orders.where((order) {
-                            return order.orderType == selectedOrderType;
-                          }).toList();
+                    final filteredOrders = selectedOrderType ==
+                            null //selectedOrderType이 Null이면 전체 다 보여주기 만약에 아니면 선택된 Ordertype과 일치하는 Ordertype order만 보여주기
+                        ? state.orders
+                        : state.orders
+                            .where(
+                                (order) => order.orderType == selectedOrderType)
+                            .toList();
 
                     if (filteredOrders.isEmpty) {
                       return const Center(
@@ -123,7 +133,8 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    order.status.name, // 주문 상태
+                                    orderStatusToKorean[order.status] ??
+                                        "알 수 없음",
                                     style: AppStyles.bodyTextStyle,
                                   ),
                                   const SizedBox(height: 10),
@@ -138,55 +149,70 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                       final item = order.items[itemIndex];
                                       return Column(
                                         children: [
-                                          Row(
-                                            children: [
-                                              SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.3,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.14,
-                                                child: Image.network(
-                                                  item.productImageUrl, // 상품 이미지
-                                                  fit: BoxFit.fill,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 10),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                          InkWell(
+                                            onTap: () {
+                                              context.push("/product-detail",
+                                                  extra: item.productId);
+                                            },
+                                            child: Column(
+                                              // child로 Column 사용
+                                              children: [
+                                                Row(
                                                   children: [
-                                                    Text(
-                                                      item.productName, // 상품명
-                                                      maxLines: 2,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: AppStyles
-                                                          .subHeadingStyle,
+                                                    SizedBox(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.3,
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .height *
+                                                              0.14,
+                                                      child: Image.network(
+                                                        item.productImageUrl, // 상품 이미지
+                                                        fit: BoxFit.fill,
+                                                      ),
                                                     ),
-                                                    const SizedBox(height: 5),
-                                                    Text(
-                                                      '수량: ${item.quantity}', // 수량
-                                                      style: AppStyles
-                                                          .smallTextStyle,
-                                                    ),
-                                                    const SizedBox(height: 5),
-                                                    Text(
-                                                      '가격: ${intformatPrice(item.productPrice)}원', // 가격
-                                                      style: AppStyles
-                                                          .priceTextStyle,
+                                                    const SizedBox(width: 10),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            item.productName, // 상품명
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: AppStyles
+                                                                .subHeadingStyle,
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 5),
+                                                          Text(
+                                                            '수량: ${item.quantity}', // 수량
+                                                            style: AppStyles
+                                                                .smallTextStyle,
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 5),
+                                                          Text(
+                                                            '가격: ${intformatPrice(item.productPrice)}원', // 가격
+                                                            style: AppStyles
+                                                                .priceTextStyle,
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
+                                                const SizedBox(height: 20),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       );
@@ -200,7 +226,23 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                       }).toList(),
                     );
                   } else {
-                    return const Center(child: Text('No orders found'));
+                    return const Column(
+                      children: [
+                        Icon(
+                          Icons.error,
+                          size: 80,
+                          color: Colors.grey,
+                        ),
+                        Text(
+                          '기간 내 주문내역이 없습니다', //만약 주문 내역이 없다면
+                          style: TextStyle(
+                            color: AppsColor.darkGray,
+                            fontSize: 20,
+                          ),
+                        ),
+                        //주문 내역이 있다면 해당 주문 내역을 보여준다
+                      ],
+                    );
                   }
                 },
               ),
