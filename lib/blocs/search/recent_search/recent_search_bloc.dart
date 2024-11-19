@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../repositories/search_repositories/recent_search_repository/recent_search_repository.dart';
+import '../../../repositories/search_repositories/recent_search_repository/recent_search_repository.dart';
 
 part 'recent_search_event.dart';
 part 'recent_search_state.dart';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../search_home/recent_search/bloc/recent_search_bloc.dart';
+import '../../../blocs/search/recent_search/recent_search_bloc.dart';
 import '../search_home/search_home_screen.dart';
-import '../search_text_field/bloc/search_text_field_bloc.dart';
-import 'bloc/search_suggestion_bloc.dart';
+import '../../../blocs/search/search_text_field/search_text_field_bloc.dart';
+import '../../../blocs/search/search_suggestion/search_suggestion_bloc.dart';
 
 class SearchSuggestionScreen extends StatelessWidget {
   const SearchSuggestionScreen({

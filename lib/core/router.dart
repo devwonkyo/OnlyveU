@@ -7,6 +7,8 @@ import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/available_review_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/models/post_model.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/models/product_model.dart';
@@ -40,6 +42,7 @@ import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/screens/shutter/post_detail_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/store/store_list_screen.dart';
@@ -53,7 +56,7 @@ import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -64,7 +67,7 @@ final GoRouter router = GoRouter(
           path: '/ai-onepick',
           pageBuilder: (context, state) => _buildPageWithTransition(
             state,
-            AIOnepickScreen(),
+            const AIOnepickScreen(),
           ),
         ),
         GoRoute(
@@ -245,6 +248,16 @@ final GoRouter router = GoRouter(
       builder: (context, state) => PostScreen(),
     ),
     GoRoute(
+      path: '/post-detail',
+      pageBuilder: (context, state) {
+        final post = state.extra as PostModel;
+        return _buildPageUpWithTransition(
+          state,
+          PostDetailScreen(post: post),
+        );
+      },
+    ),
+    GoRoute(
       path: '/product-detail',
       builder: (context, state) {
         final productId = state.extra as String;
@@ -253,24 +266,24 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-   GoRoute(
-  path: '/payment',
-  pageBuilder: (context, state) {
-    // state.extra를 통해 전달된 OrderModel을 가져옴
-    final order = state.extra as OrderModel;
+    GoRoute(
+      path: '/payment',
+      pageBuilder: (context, state) {
+        // state.extra를 통해 전달된 OrderModel을 가져옴
+        final order = state.extra as OrderModel;
 
-    return _buildPageWithTransition(
-      state,
-      BlocProvider(
-        create: (context) => PaymentBloc(
-          orderRepository: context.read<OrderRepository>(), // OrderRepository를 주입
-        )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
-        child: PaymentScreen(order: order),
-      ),
-    );
-  },
-),
-
+        return _buildPageWithTransition(
+          state,
+          BlocProvider(
+            create: (context) => PaymentBloc(
+              orderRepository:
+                  context.read<OrderRepository>(), // OrderRepository를 주입
+            )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
+            child: PaymentScreen(order: order),
+          ),
+        );
+      },
+    ),
     GoRoute(
       path: '/new_delivery_address',
       pageBuilder: (context, state) => _buildPageWithTransition(
@@ -286,11 +299,13 @@ final GoRouter router = GoRouter(
       path: '/write_review',
       pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>;
-        final availableOrderModel = data['availableOrderModel'] as AvailableOrderModel;
+        final availableOrderModel =
+            data['availableOrderModel'] as AvailableOrderModel;
         final rating = data['rating'] as double;
 
         return _buildPageUpWithTransition(
-          state, WriteReviewScreen(
+          state,
+          WriteReviewScreen(
             availableOrderModel: availableOrderModel,
             rating: rating,
           ),
@@ -307,7 +322,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/review_list',
       builder: (context, state) {
-        return ReviewListScreen();
+        return const ReviewListScreen();
       },
     ),
     GoRoute(
