@@ -51,7 +51,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
             context.read<SearchTextFieldBloc>().add(TextChanged(text));
           },
           onSubmitted: (text) {
-            context.read<SearchTextFieldBloc>().add(TextSubmitted(text));
+            context.read<SearchTextFieldBloc>().add(TextSubmitted(text.trim()));
           },
           // 입력창
           decoration: InputDecoration(
@@ -104,7 +104,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
                         FocusScope.of(context).unfocus();
                         context
                             .read<SearchTextFieldBloc>()
-                            .add(TextSubmitted(_controller.text));
+                            .add(TextSubmitted(_controller.text.trim()));
                       },
                       child: SizedBox(
                         width: 40.w,
