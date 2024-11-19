@@ -51,12 +51,15 @@ dependencies:
   image_picker: ^1.1.2
   shimmer: ^3.0.0
   kakao_flutter_sdk_user: ^1.9.5
+  kakao_flutter_sdk: ^1.9.6
   shared_preferences: ^2.3.2
   kakao_flutter_sdk_common: ^1.9.6
   dropdown_button2: ^2.3.9
   stream_transform: ^2.1.0
   google_sign_in: ^6.2.1
   sliver_tools: ^0.2.12
+  kakao_flutter_sdk_share: ^1.9.6
+  firebase_dynamic_links: ^6.0.10
 
   daum_postcode_search: ^0.0.3
   kpostal: ^1.1.0

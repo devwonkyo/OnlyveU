@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -16,8 +17,10 @@ import 'package:onlyveyou/screens/Product/widgets/review_summary_widget.dart';
 import 'package:onlyveyou/screens/Product/widgets/reviewlist_widget.dart';
 import 'package:onlyveyou/screens/Product/widgets/sticky_tabbar_delegate.dart';
 import 'package:onlyveyou/screens/product/widgets/expandable_bottom_sheet.dart';
+import 'package:onlyveyou/utils/deeplink_service.dart';
 import 'package:onlyveyou/utils/dummy_data.dart';
 import 'package:onlyveyou/utils/format_price.dart';
+import 'package:onlyveyou/utils/kakao_share_service.dart';
 import 'package:onlyveyou/widgets/small_promotion_banner.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -34,6 +37,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isAppBarVisible = true;
   late PageController _pageController;
   int _currentPage = 0;
+  final KakaoShareService _kakaoShareService = KakaoShareService();
+
+
 
   @override
   void initState() {
@@ -158,15 +164,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       actions: [
         IconButton(
           icon: Icon(Icons.search, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            context.push("/search");
+          },
         ),
         IconButton(
           icon: Icon(Icons.home_outlined, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            context.go("/home");
+          },
         ),
         IconButton(
           icon: Icon(Icons.shopping_cart_outlined, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            context.push("/cart");
+          },
         ),
       ],
     );
@@ -286,12 +298,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   SizedBox(width: 8.w),
                   GestureDetector(
                     onTap: () {
-                      // 버튼이 눌렸을 때의 동작
+                      //공유 버튼
+                      _shareProduct(context,product);
                     },
-                    child: Icon(
-                      Icons.share,
-                      size: 20.sp,
-                    ),
+                      child: Image(
+                        image: AssetImage('assets/image/kakaoshare.png'),  // 또는 NetworkImage
+                        width: 20.sp,
+                        height: 20.sp,
+                      )
+                  ),
+                  SizedBox(width: 8.w),
+                  GestureDetector(
+                      onTap: () {
+                        // 복사 버튼
+                        _copyDeepLink(product.productId);
+                      },
+                      child: Icon(
+                        Icons.copy,
+                        size: 20.sp,
+                      )
                   ),
                 ],
               ),
@@ -515,5 +540,37 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     Future.delayed(const Duration(seconds: 1), () {
       overlayEntry.remove();
     });
+  }
+
+  Future<void> _shareProduct(BuildContext context, ProductModel product) async {
+    try {
+      final dynamicLink = await DeepLinkService().createProductShareLink(productId: product.productId);
+
+      print('Generated Dynamic Link: ${dynamicLink.toString()}');
+
+      await _kakaoShareService.shareToKakao(
+        title: product.name,
+        description: "${product.discountPercent}% 할인중!\n${formatDiscountedPriceToString(product.price,product.discountPercent.toDouble())}원",
+        link: dynamicLink,
+        imageUrl: product.productImageList[0],
+        productId: product.productId,
+        buttonTitle: '상품 보러가기',
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('공유하기에 실패했습니다.')),
+      );
+    }
+  }
+
+  Future<void> _copyDeepLink(String productId) async {
+    final dynamicLink = await DeepLinkService().createProductShareLink(productId: productId);
+    Clipboard.setData(ClipboardData(text: dynamicLink.toString()));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('제품 링크가 복사되었습니다'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }
