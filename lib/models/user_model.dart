@@ -6,6 +6,7 @@ class UserModel {
   String nickname;
   String phone; // 추가된 전화번호
   String gender; // 추가된 성별
+  String token; // 토큰
   List<String> recentSearches; // 최근 검색어 리스트
   List<String> likedItems; // 좋아요한 아이템 리스트
   List<CartModel> cartItems; // 장바구니 아이템 리스트
@@ -17,6 +18,7 @@ class UserModel {
     required this.uid,
     required this.email,
     required this.nickname,
+    this.token = '',
     this.phone = '',
     this.gender = '',
     this.recentSearches = const [],
@@ -32,6 +34,7 @@ class UserModel {
       'uid': uid,
       'email': email,
       'nickname': nickname,
+      'token': token,
       'phone': phone,
       'gender': gender,
       'recentSearches': recentSearches,
@@ -48,6 +51,7 @@ class UserModel {
       uid: map['uid'],
       email: map['email'],
       nickname: map['nickname'],
+      token: map['token'] ?? '',
       phone: map['phone'] ?? '',
       gender: map['gender'] ?? '',
       recentSearches: List<String>.from(map['recentSearches'] ?? []),

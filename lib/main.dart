@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
@@ -27,6 +29,7 @@ import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
+import 'package:onlyveyou/config/fcm.dart';
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/auth_repository.dart';
@@ -44,6 +47,7 @@ import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/utils/notification_util.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
@@ -58,6 +62,24 @@ void main() async {
 
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
+
+
+  //FCM Token 설정
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print('fcmToken : $fcmToken');
+
+  if(fcmToken != null){
+    OnlyYouSharedPreference().setToken(fcmToken);
+  }
+
+  FirebaseMessaging.instance.onTokenRefresh.listen((fcmServerToken) {
+    fcmToken ??= fcmServerToken;
+    OnlyYouSharedPreference().setToken(fcmToken ?? "");
+    print('fcmToken : $fcmToken');
+  }).onError((err) {
+    // Error getting token.
+    print('error : Firebase token error');
+  });
 
   // print("hash key ${await KakaoSdk.origin}");
   final remoteConfig = FirebaseRemoteConfig.instance;
@@ -94,6 +116,14 @@ void main() async {
   } catch (e) {
     debugPrint('Error fetching and storing suggestions: $e');
   }
+
+  //권한 설정, 버전관리
+  await NotificationUtil().requestNotificationPermission();
+  await NotificationUtil().initialize();
+
+  //FCM 설정
+  setupForegroundFirebaseMessaging();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
