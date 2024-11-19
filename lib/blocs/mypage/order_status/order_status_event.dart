@@ -24,3 +24,10 @@ class SelectStatus extends OrderStatusEvent {
   @override
   List<Object?> get props => [status];
 }
+
+
+class FetchOrder extends OrderStatusEvent {
+  const FetchOrder();
+  @override
+  List<Object?> get props => [];
+}
