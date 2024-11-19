@@ -8,9 +8,9 @@ import 'package:shimmer/shimmer.dart';
 import '../../../blocs/home/home_bloc.dart';
 import '../../../models/product_model.dart';
 import '../../../utils/styles.dart';
-import '../search_home/recent_search/bloc/recent_search_bloc.dart';
-import '../search_text_field/bloc/search_text_field_bloc.dart';
-import 'bloc/search_result_bloc.dart';
+import '../../../blocs/search/recent_search/recent_search_bloc.dart';
+import '../../../blocs/search/search_text_field/search_text_field_bloc.dart';
+import '../../../blocs/search/search_result/search_result_bloc.dart';
 
 class SearchResultScreen extends StatelessWidget {
   const SearchResultScreen({
@@ -218,19 +218,41 @@ class ResultSkeleton extends StatelessWidget {
               baseColor: Colors.grey[200]!,
               highlightColor: Colors.grey[100]!,
               child: GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 10.w,
                   mainAxisSpacing: 10.h,
+                  mainAxisExtent: 300.h,
                 ),
                 itemCount: 8,
-                itemBuilder: (context, index) => Container(
-                  height: 5.h,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5.r),
-                    color: Colors.grey,
-                  ),
+                itemBuilder: (context, index) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 150.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.r),
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Container(
+                      height: 20.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.r),
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Container(
+                      width: 100.w,
+                      height: 20.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.r),
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

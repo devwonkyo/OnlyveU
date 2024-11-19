@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:onlyveyou/models/product_model.dart';
 
-import '../../../../repositories/product_repository.dart';
+import '../../../repositories/product_repository.dart';
 
 part 'search_result_event.dart';
 part 'search_result_state.dart';
