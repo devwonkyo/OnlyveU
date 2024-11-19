@@ -39,6 +39,7 @@ class LocationData {
         markerId: const MarkerId('current_location'),
         position: LatLng(defaultLatitude, defaultLongitude),
         infoWindow: const InfoWindow(title: '기상청'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       ),
       cameraPosition: const CameraPosition(
         target: LatLng(defaultLatitude, defaultLongitude),
