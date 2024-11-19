@@ -107,7 +107,8 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
             icon: Icon(Icons.shopping_bag_outlined,
                 color: Colors.black, size: 24.sp),
             onPressed: () {
-              sendNotification(title: "알림",body: "테스트 푸시",pushToken: token ?? '');
+              sendNotification(
+                  title: "알림", body: "테스트 푸시", pushToken: token ?? '');
             },
           ),
         ],
@@ -117,15 +118,15 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
           if (state is AddCartError) {
             print(state.message);
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('${state.message}'),
-              duration: Duration(seconds: 2), // 표시 지속 시간
+              content: Text(state.message),
+              duration: const Duration(seconds: 2), // 표시 지속 시간
             ));
           }
           if (state is AddCartSuccess) {
             print(state.message);
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('${state.message}'),
-              duration: Duration(seconds: 2), // 표시 지속 시간
+              content: Text(state.message),
+              duration: const Duration(seconds: 2), // 표시 지속 시간
             ));
           }
         },
@@ -261,7 +262,7 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                                         onTap: () => context.push(
                                             "/product-detail",
                                             extra: "1_4_1"));
-                                            // extra: products[index].productId));
+                                    // extra: products[index].productId));
                                   },
                                   childCount: products.length,
                                 ),
