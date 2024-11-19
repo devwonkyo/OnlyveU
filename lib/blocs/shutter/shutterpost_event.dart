@@ -27,6 +27,13 @@ class UpdateTextEvent extends PostEvent {
   List<Object?> get props => [text];
 }
 
+class ToggleLikeEvent extends PostEvent {
+  final String postId;
+  final String userId;
+
+  ToggleLikeEvent({required this.postId, required this.userId});
+}
+
 class SubmitPostEvent extends PostEvent {
   final String text;
   final List<XFile> images;
