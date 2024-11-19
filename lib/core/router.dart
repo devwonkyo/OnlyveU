@@ -6,6 +6,7 @@ import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/models/post_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
@@ -37,6 +38,7 @@ import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
 import 'package:onlyveyou/screens/payment/payment_screen.dart';
 import 'package:onlyveyou/screens/product/product_detail_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/screens/shutter/post_detail_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/special/virtual/vitual_screen.dart';
@@ -239,6 +241,16 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/shutterpost',
       builder: (context, state) => PostScreen(),
+    ),
+    GoRoute(
+      path: '/post-detail',
+      pageBuilder: (context, state) {
+        final post = state.extra as PostModel;
+        return _buildPageUpWithTransition(
+          state,
+          PostDetailScreen(post: post),
+        );
+      },
     ),
     GoRoute(
       path: '/product-detail',
