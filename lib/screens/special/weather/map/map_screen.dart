@@ -13,7 +13,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late final LocationBloc _locationBloc;
   GoogleMapController? _mapController;
-  bool _initialLocationSet = false;
+  bool _isRealLocation = true;
 
   @override
   void initState() {
@@ -28,25 +28,13 @@ class _MapScreenState extends State<MapScreen> {
         bloc: _locationBloc,
         listener: (context, state) {
           if (state is LocationSuccess && _mapController != null) {
-            if (!_initialLocationSet) {
-              _mapController
-                  ?.moveCamera(
-                CameraUpdate.newCameraPosition(state.cameraPosition),
-              )
-                  .then((_) {
-                setState(() => _initialLocationSet = true);
-              }).catchError((e) {
-                debugPrint('Camera movement failed: $e');
-              });
-            } else {
-              _mapController
-                  ?.animateCamera(
-                CameraUpdate.newCameraPosition(state.cameraPosition),
-              )
-                  .catchError((e) {
-                debugPrint('Camera animation failed: $e');
-              });
-            }
+            _mapController?.animateCamera(
+              CameraUpdate.newCameraPosition(state.cameraPosition),
+            );
+          } else if (state is LocationError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
           }
         },
         builder: (context, state) {
@@ -62,9 +50,7 @@ class _MapScreenState extends State<MapScreen> {
                 markers: state is LocationSuccess ? {state.marker} : {},
                 onMapCreated: (controller) {
                   _mapController = controller;
-                  _locationBloc
-                    ..add(GetCurrentLocation())
-                    ..add(StartLocationUpdates());
+                  _startLocationUpdates();
                 },
               ),
               if (state is LocationSuccess)
@@ -86,6 +72,18 @@ class _MapScreenState extends State<MapScreen> {
                             '경도: ${state.position.longitude.toStringAsFixed(4)}',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _toggleLocation,
+                                child: Text(_isRealLocation
+                                    ? '서울 기상청으로 이동'
+                                    : '현재 위치로 이동'),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -93,12 +91,34 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               if (state is LocationLoading)
                 const Center(child: CircularProgressIndicator()),
-              if (state is LocationError) Center(child: Text(state.message)),
             ],
           );
         },
       ),
     );
+  }
+
+  void _toggleLocation() {
+    setState(() {
+      _isRealLocation = !_isRealLocation;
+      _startLocationUpdates();
+    });
+  }
+
+  void _startLocationUpdates() {
+    if (_isRealLocation) {
+      _locationBloc.add(GetCurrentLocation());
+      _locationBloc.add(StartLocationUpdates());
+    } else {
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          const CameraPosition(
+            target: LatLng(37.5665, 126.9780),
+            zoom: 15,
+          ),
+        ),
+      );
+    }
   }
 
   @override
