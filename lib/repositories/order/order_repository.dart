@@ -24,22 +24,38 @@ class OrderRepository {
   }
 
 
-  Future<List<OrderModel>> getOrders() async {
+  Future<List<OrderModel>> getAvailableReviewOrders() async {
     final userId = await OnlyYouSharedPreference().getCurrentUserId();
     try {
+      final userOrdersQuery = await firestore
+          .collection('orders')
+          .where('userId', isEqualTo: userId).get();
+
+      if (userOrdersQuery.docs.isEmpty) {
+        print('해당 사용자의 주문이 없습니다.');
+        return [];
+      }
+
       final querySnapshot = await firestore
           .collection('orders')
           .where('userId', isEqualTo: userId)
-          .get();
+          .where('status', whereIn: [
+        OrderStatus.readyForPickup.name,
+        OrderStatus.delivered.name
+      ]).get();
 
-      // 화살표 함수 사용
-      final orders = querySnapshot.docs.map(
-              (doc) => OrderModel.fromMap(doc.data())
-      ).toList();
+      // querySnapshot이 비어있으면 빈 리스트 반환
+      if (querySnapshot.docs.isEmpty) {
+        return [];
+      }
+
+      final orders = querySnapshot.docs
+          .map((doc) => OrderModel.fromMap(doc.data()))
+          .toList();
 
       return orders;
     } catch (e) {
-      print('주문 데이터 가져오기 실패: $e');
+      print('완료된 주문 데이터 가져오기 실패: $e');
       return [];
     }
   }

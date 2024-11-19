@@ -4,11 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
+import 'package:onlyveyou/models/available_review_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/post_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
+import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -31,6 +34,7 @@ import 'package:onlyveyou/screens/mypage/edit/phone_number_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/profile_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/my_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/order_status_screen.dart';
+import 'package:onlyveyou/screens/mypage/review/modify_review_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/review_list_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_rating_screen.dart';
 import 'package:onlyveyou/screens/mypage/review/write_review_screen.dart';
@@ -41,6 +45,7 @@ import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/shutter/post_detail_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
+import 'package:onlyveyou/screens/store/store_list_screen.dart';
 import 'package:onlyveyou/screens/special/virtual/vitual_screen.dart';
 
 import '../screens/search/search_page.dart';
@@ -51,7 +56,7 @@ import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -261,24 +266,24 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-    GoRoute(
-      path: '/payment',
-      pageBuilder: (context, state) {
-        // state.extra를 통해 전달된 OrderModel을 가져옴
-        final order = state.extra as OrderModel;
+   GoRoute(
+  path: '/payment',
+  pageBuilder: (context, state) {
+    // state.extra를 통해 전달된 OrderModel을 가져옴
+    final order = state.extra as OrderModel;
 
-        return _buildPageWithTransition(
-          state,
-          BlocProvider(
-            create: (context) => PaymentBloc(
-              orderRepository:
-                  context.read<OrderRepository>(), // OrderRepository를 주입
-            )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
-            child: PaymentScreen(order: order),
-          ),
-        );
-      },
-    ),
+    return _buildPageWithTransition(
+      state,
+      BlocProvider(
+        create: (context) => PaymentBloc(
+          orderRepository: context.read<OrderRepository>(), // OrderRepository를 주입
+        )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
+        child: PaymentScreen(order: order),
+      ),
+    );
+  },
+),
+
     GoRoute(
       path: '/new_delivery_address',
       pageBuilder: (context, state) => _buildPageWithTransition(
@@ -294,41 +299,42 @@ final GoRouter router = GoRouter(
       path: '/write_review',
       pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>;
-        final productModel = data['productModel'] as ProductModel;
+        final availableOrderModel = data['availableOrderModel'] as AvailableOrderModel;
         final rating = data['rating'] as double;
-        final purchaseDate = data['purchaseDate'] as DateTime;
-        final orderType = data['orderType'] as OrderType;
-        final writeUserId = data['writeUserId'] as String;
 
         return _buildPageUpWithTransition(
-          state,
-          WriteReviewScreen(
-              productModel: productModel,
-              purchaseDate: purchaseDate,
-              rating: rating,
-              orderType: orderType,
-              writeUserId: writeUserId),
+          state, WriteReviewScreen(
+            availableOrderModel: availableOrderModel,
+            rating: rating,
+          ),
         );
       },
     ),
     GoRoute(
       path: '/write_rating',
       builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>;
-        final productId = data["productId"] as String;
-        final purchaseDate = data["purchaseDate"] as DateTime;
-        final orderType = data["orderType"] as OrderType;
-        return WriteRatingScreen(
-            productId: productId,
-            purchaseDate: purchaseDate,
-            orderType: orderType);
+        final availableOrderModel = state.extra as AvailableOrderModel;
+        return WriteRatingScreen(availableOrderModel: availableOrderModel);
       },
     ),
     GoRoute(
       path: '/review_list',
       builder: (context, state) {
-        final productId = state.extra as String;
-        return ReviewListScreen(productId: productId);
+        return ReviewListScreen();
+      },
+    ),
+    GoRoute(
+      path: '/modify_review',
+      builder: (context, state) {
+        final reviewModel = state.extra as ReviewModel;
+        return ModifyReviewScreen(reviewModel: reviewModel);
+      },
+    ),
+    GoRoute(
+      path: '/store_list',
+      builder: (context, state) {
+        final productModel = state.extra as ProductModel;
+        return StoreListScreen(productModel: productModel);
       },
     ),
   ],

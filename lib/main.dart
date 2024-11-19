@@ -1,20 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/category/category_product_bloc.dart';
 import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/blocs/inventory/inventory_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/set_new_password/set_new_password_bloc.dart';
+import 'package:onlyveyou/blocs/order/order_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
 import 'package:onlyveyou/blocs/product/like/product_like_bloc.dart';
@@ -25,6 +29,7 @@ import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
+import 'package:onlyveyou/config/fcm.dart';
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/auth_repository.dart';
@@ -32,6 +37,7 @@ import 'package:onlyveyou/repositories/category_repository.dart';
 import 'package:onlyveyou/repositories/history_repository.dart';
 import 'package:onlyveyou/repositories/home/ai_recommend_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
+import 'package:onlyveyou/repositories/inventory/inventory_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
@@ -41,6 +47,7 @@ import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/utils/notification_util.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
@@ -55,6 +62,24 @@ void main() async {
 
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
+
+
+  //FCM Token 설정
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print('fcmToken : $fcmToken');
+
+  if(fcmToken != null){
+    OnlyYouSharedPreference().setToken(fcmToken);
+  }
+
+  FirebaseMessaging.instance.onTokenRefresh.listen((fcmServerToken) {
+    fcmToken ??= fcmServerToken;
+    OnlyYouSharedPreference().setToken(fcmToken ?? "");
+    print('fcmToken : $fcmToken');
+  }).onError((err) {
+    // Error getting token.
+    print('error : Firebase token error');
+  });
 
   // print("hash key ${await KakaoSdk.origin}");
   final remoteConfig = FirebaseRemoteConfig.instance;
@@ -91,6 +116,14 @@ void main() async {
   } catch (e) {
     debugPrint('Error fetching and storing suggestions: $e');
   }
+
+  //권한 설정, 버전관리
+  await NotificationUtil().requestNotificationPermission();
+  await NotificationUtil().initialize();
+
+  //FCM 설정
+  setupForegroundFirebaseMessaging();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
@@ -216,6 +249,12 @@ class MyApp extends StatelessWidget {
                   // CategoryProductBloc 추가
                   create: (context) =>
                       ReviewBloc(repository: ReviewRepository()),
+                ),
+                BlocProvider<OrderBloc>(
+                  create: (context) => OrderBloc(OrderRepository(firestore: FirebaseFirestore.instance)),
+                ),
+                BlocProvider<InventoryBloc>(
+                  create: (context) => InventoryBloc(InventoryRepository()),
                 ),
               ],
               child: BlocBuilder<ThemeBloc, ThemeState>(
