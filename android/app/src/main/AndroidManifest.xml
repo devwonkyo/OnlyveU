@@ -4,11 +4,14 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:label="onlyveyou"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -41,6 +44,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
 
         <!-- 카카오 로그인 커스텀 URL 스킴 설정 -->
@@ -83,6 +87,10 @@
                 <category android:name="${applicationId}"/>
             </intent-filter>
         </receiver>
+        <!--구글 맵 연동 -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${map_api}"/>
 
     </application>
     <!-- Required to query activities that can process text, see:
