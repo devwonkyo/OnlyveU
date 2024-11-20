@@ -12,6 +12,7 @@ import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/repositories/order/payment_repository.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -278,6 +279,7 @@ final GoRouter router = GoRouter(
             create: (context) => PaymentBloc(
               orderRepository:
                   context.read<OrderRepository>(), // OrderRepository를 주입
+              repository: context.read<PaymentRepository>(),
             )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
             child: PaymentScreen(order: order),
           ),
