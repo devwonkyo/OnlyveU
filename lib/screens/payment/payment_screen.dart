@@ -1,25 +1,30 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
-import 'package:onlyveyou/blocs/mypage/order_status/order_status_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
-import 'package:onlyveyou/blocs/shutter/shutterpost_event.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
-import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/models/payment_model.dart';
 import 'package:onlyveyou/models/store_model.dart';
 import 'package:onlyveyou/screens/payment/delivery_order_screen.dart';
 import 'package:onlyveyou/screens/payment/new_delivery_address_screen.dart';
+
 import 'package:onlyveyou/screens/payment/pickup_order_screen.dart';
 import 'package:onlyveyou/utils/format_price.dart';
 import 'package:onlyveyou/utils/styles.dart';
+import 'package:tosspayments_widget_sdk_flutter/model/agreement_status.dart';
+import 'package:tosspayments_widget_sdk_flutter/model/payment_info.dart';
+import 'package:tosspayments_widget_sdk_flutter/model/payment_widget_options.dart';
+import 'package:tosspayments_widget_sdk_flutter/payment_widget.dart';
+
+import 'package:tosspayments_widget_sdk_flutter/widgets/agreement.dart';
+import 'package:tosspayments_widget_sdk_flutter/widgets/payment_method.dart';
 
 class PaymentScreen extends StatefulWidget {
   final List<String> deliveryMessages = [
@@ -39,6 +44,10 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
+  late PaymentWidget paymentWidget;
+  AgreementWidgetControl? agreementWidgetControl; // 추가
+  AgreementStatus? agreementStatus; // 약관 동의 상태를 저장할 변수 추가
+  PaymentMethodWidgetControl? paymentMethodWidgetControl;
   DeliveryInfoModel? _currentDeliveryInfo;
   String selectedDeliveryMessage = '배송 메시지를 선택해주세요.';
   bool _isInitialized = false;
@@ -53,7 +62,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
       context.read<PaymentBloc>().add(InitializePayment(widget.order));
       _isInitialized = true; // 초기화 플래그를 설정합니다.
     }
+    // PaymentWidget 초기화
+    paymentWidget = PaymentWidget(
+      clientKey: dotenv.env['TOSS_CLIENT_KEY']!,
+      customerKey: 'customer_key',
+    );
 
+    // 결제 수단 렌더링 및 컨트롤 받아오기
+    _renderPaymentMethods();
     //  context.read<PaymentBloc>().add(UpdateDeliveryInfo(  //배송지 정보 업데이트 하기 위해서
     //     deliveryName: deliveryName,
     //     address: address,
@@ -65,6 +81,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
     print("- Order Type: ${widget.order.orderType}");
     print("- Total Items: ${widget.order.items.length}");
     print("- Total Price: ${widget.order.totalPrice}");
+  }
+
+  //결제 수단 렌더링
+  void _renderPaymentMethods() async {
+    try {
+      paymentMethodWidgetControl = await paymentWidget.renderPaymentMethods(
+        selector: '#payment-method',
+        amount: Amount(
+          value: widget.order.totalPrice,
+          currency: Currency.KRW,
+          country: "KR",
+        ),
+        options: RenderPaymentMethodsOptions(
+            variantKey: 'DEFAULT'), //결제 ui default 설정
+      );
+    } catch (e) {
+      print('결제 수단 렌더링 중 오류 발생: $e');
+    }
   }
 
   String _selectedPaymentMethod = '빠른결제';
@@ -278,35 +312,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
             // Card Registration Button
             Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
-                height: MediaQuery.of(context).size.height * 0.17,
-                child: OutlinedButton(
-                  onPressed: () {
-                    // Handle card registration action
-                    print("결제 카드 등록 버튼 클릭");
-                  },
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    side: BorderSide(color: Colors.grey[300]!),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.add, size: 40, color: Colors.grey),
-                      const SizedBox(height: 10),
-                      Text(
-                        '자주 사용하는 카드나 계좌를 등록하고\n더욱 빠르게 결제할 수 있습니다.',
-                        style: AppStyles.smallTextStyle,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                child: Column(
+              children: [
+                // 카드 등록 버튼을 Toss Payments 위젯으로 대체
+                // 결제 수단 위젯
+                PaymentMethodWidget(
+                  paymentWidget: paymentWidget,
+                  selector: '#payment-method', // 필수 매개변수
+                ),
+
+                // 약관 동의 위젯
+                // 약관 동의 위젯
+                // 약관 동의 위젯
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: AgreementWidget(
+                    paymentWidget: paymentWidget,
+                    selector: '#agreement', // 필수 매개변수
+                    onChange: (status) {
+                      setState(() {
+                        agreementStatus = status;
+                      });
+                    },
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 10),
+              ],
+            )),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -418,56 +449,108 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           selectedStore = storeState.selectedStore;
                         }
                         return ElevatedButton(
-                          onPressed: () {
-                            // 결제 버튼 로직
-                            // OrderModel 생성
-                            final updatedDeliveryInfo =
-                                _currentDeliveryInfo != null
-                                    ? DeliveryInfoModel(
-                                        deliveryName:
-                                            _currentDeliveryInfo!.deliveryName,
-                                        address: _currentDeliveryInfo!.address,
-                                        detailAddress:
-                                            _currentDeliveryInfo!.detailAddress,
-                                        recipientName:
-                                            _currentDeliveryInfo!.recipientName,
-                                        recipientPhone: _currentDeliveryInfo!
-                                            .recipientPhone,
-                                        deliveryRequest:
-                                            selectedDeliveryMessage, // 추가
-                                      )
-                                    : null;
-                            final order = OrderModel(
-                              userId: widget.order.userId,
-                              items: widget.order.items,
-                              orderType: widget.order.orderType,
-                              deliveryInfo: updatedDeliveryInfo,
-                              status: OrderStatus.pending,
-                              createdAt: DateTime.now(),
-                              pickupTime: DateTime.now()
-                                  .add(const Duration(hours: 3)), // 3시간 후 픽업
-                              pickStore: selectedStore?.storeName, // 선택된 매장명
-                              pickInfo: selectedStore, // 선택된 StoreModel
-                            );
-
-                            // SubmitOrder 이벤트를 Bloc에 전달
-                            if (_saveAsDefault && _agreeToAll) {
-                              context
-                                  .read<PaymentBloc>()
-                                  .add(SubmitOrder(order));
-                            } else {
-                              checkboxDialog(context);
-                            }
-
-                            // 주문 성공 시 처리
-                            context.read<PaymentBloc>().stream.listen((state) {
-                              if (state is PaymentSuccess) {
-                                print('주문 성공');
-                                Navigator.pop(context); // 화면 닫기
-                              } else if (state is PaymentError) {
-                                print('주문 실패: ${state.message}');
+                          onPressed: () async {
+                            try {
+                              // 필수 정보 및 체크박스 확인
+                              if (!_saveAsDefault ||
+                                  !_agreeToAll ||
+                                  (widget.order.orderType ==
+                                          OrderType.delivery &&
+                                      _currentDeliveryInfo == null)) {
+                                // 필수 정보가 없거나 체크박스가 선택되지 않은 경우
+                                _showAlertDialog(context, "모든 정보를 입력해주세요");
+                                return;
                               }
-                            });
+
+                              // 결제 정보 생성
+                              final paymentInfo = PaymentInfo(
+                                orderId:
+                                    'order_${DateTime.now().millisecondsSinceEpoch}',
+                                orderName: '주문 상품명',
+                              );
+
+                              // 결제 요청
+                              final paymentResult =
+                                  await paymentWidget.requestPayment(
+                                paymentInfo: paymentInfo,
+                              );
+
+                              if (paymentResult.success != null) {
+                                // 결제 성공 처리
+                                print("성공");
+                                context.read<PaymentBloc>().add(
+                                      PaymentApprove(
+                                        paymentResult.success!.paymentKey,
+                                        paymentResult.success!.orderId,
+                                        paymentResult.success!.amount,
+                                      ),
+                                    );
+
+                                // 주문 제출 이벤트 호출
+                                final updatedDeliveryInfo =
+                                    _currentDeliveryInfo != null
+                                        ? DeliveryInfoModel(
+                                            deliveryName: _currentDeliveryInfo!
+                                                .deliveryName,
+                                            address:
+                                                _currentDeliveryInfo!.address,
+                                            detailAddress: _currentDeliveryInfo!
+                                                .detailAddress,
+                                            recipientName: _currentDeliveryInfo!
+                                                .recipientName,
+                                            recipientPhone:
+                                                _currentDeliveryInfo!
+                                                    .recipientPhone,
+                                            deliveryRequest:
+                                                selectedDeliveryMessage, // 추가
+                                          )
+                                        : null;
+
+                                final order = OrderModel(
+                                  userId: widget.order.userId,
+                                  items: widget.order.items,
+                                  orderType: widget.order.orderType,
+                                  deliveryInfo: updatedDeliveryInfo,
+                                  status: OrderStatus.pending,
+                                  createdAt: DateTime.now(),
+                                  pickupTime: DateTime.now().add(
+                                      const Duration(hours: 3)), // 3시간 후 픽업
+                                  pickStore:
+                                      selectedStore?.storeName, // 선택된 매장명
+                                  pickInfo: selectedStore, // 선택된 StoreModel
+                                );
+
+                                context
+                                    .read<PaymentBloc>()
+                                    .add(SubmitOrder(order));
+
+                                // 주문 성공 메시지 표시
+                                // 주문 성공 메시지 표시 후 확인 버튼을 누르면 네비게이션 수행
+                                _paymentSuccess(context, "주문을 성공적으로 완료했습니다.",
+                                    () {
+                                  context.go('/order-status');
+                                });
+                                // 필요에 따라 화면 이동 또는 초기화 작업 수행
+                              } else if (paymentResult.fail != null) {
+                                // 결제 실패 처리
+                                print("실패");
+                                context.read<PaymentBloc>().add(
+                                      PaymentFail(
+                                        paymentResult.fail!.errorCode,
+                                        paymentResult.fail!.errorMessage,
+                                      ),
+                                    );
+
+                                // 결제 실패 메시지 표시
+                                _showAlertDialog(context,
+                                    "결제에 실패했습니다: ${paymentResult.fail!.errorMessage}");
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text("결제 처리 중 오류가 발생했습니다: $e")),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.black,
@@ -476,7 +559,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ),
                           ),
                           child: Text(
-                            '${formatPrice(totalAmount.toString())}원 결제하기',
+                            '${formatPrice(widget.order.totalPrice.toString())}원 결제하기',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -592,4 +675,47 @@ void checkboxDialog(BuildContext context) {
           ),
         );
       });
+}
+
+void _showAlertDialog(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('안내'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text('확인'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              // 필요한 경우 여기서 추가적인 동작을 수행할 수 있습니다.
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _paymentSuccess(
+    BuildContext context, String message, VoidCallback onConfirm) {
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        title: const Text('안내'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text('확인'),
+            onPressed: () {
+              Navigator.of(dialogContext).pop(); // 다이얼로그 닫기
+              onConfirm(); // 다이얼로그가 닫힌 후 네비게이션 수행
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
