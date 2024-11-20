@@ -4,11 +4,15 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
         android:label="onlyveyou"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -105,6 +109,14 @@
                 <category android:name="${applicationId}"/>
             </intent-filter>
         </receiver>
+        <!-- 구글 플레이 서비스 버전 추가 -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <!--구글 맵 연동 -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${map_api}"/>
 
     </application>
     <!-- Required to query activities that can process text, see:
