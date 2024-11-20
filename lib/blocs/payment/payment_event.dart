@@ -2,6 +2,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:onlyveyou/models/payment_model.dart';
 
 abstract class PaymentEvent extends Equatable {
   const PaymentEvent();
@@ -82,11 +83,18 @@ class SubmitOrder extends PaymentEvent {
   List<Object> get props => [order];
 }
 
-
 class InitializePayment extends PaymentEvent {
   final OrderModel order;
 
   const InitializePayment(this.order);
+
+  @override
+  List<Object> get props => [order];
+}
+
+class SubmitPayment extends PaymentEvent {
+  final OrderModel order;
+  const SubmitPayment(this.order);
 
   @override
   List<Object> get props => [order];
@@ -98,3 +106,27 @@ class TestEvent extends PaymentEvent {
   @override
   List<Object> get props => [];
 }
+
+
+class PaymentApprove extends PaymentEvent {
+  final String paymentKey;
+  final String orderId;
+  final num amount;
+
+  const PaymentApprove(this.paymentKey, this.orderId, this.amount);
+
+  @override
+  List<Object> get props => [paymentKey, orderId, amount];
+}
+
+class PaymentFail extends PaymentEvent {
+  final String errorCode;
+  final String errorMessage;
+
+  const PaymentFail(this.errorCode, this.errorMessage);
+
+  @override
+  List<Object> get props => [errorCode, errorMessage];
+}
+
+

@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
@@ -39,6 +43,7 @@ import 'package:onlyveyou/repositories/home/ai_recommend_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
 import 'package:onlyveyou/repositories/inventory/inventory_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
+import 'package:onlyveyou/repositories/order/payment_repository.dart';
 import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/review/review_repository.dart';
@@ -62,6 +67,7 @@ void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
@@ -168,6 +174,7 @@ class MyApp extends StatelessWidget {
           RepositoryProvider(
               create: (context) =>
                   OrderRepository(firestore: FirebaseFirestore.instance)),
+          RepositoryProvider(create: (context) => PaymentRepository()), // 추가
         ],
         child: ScreenUtilInit(
           designSize: const Size(375, 812),
@@ -259,6 +266,7 @@ class MyApp extends StatelessWidget {
                 BlocProvider<PaymentBloc>(
                   create: (context) => PaymentBloc(
                     orderRepository: context.read<OrderRepository>(),
+                    repository: PaymentRepository(),
                   ),
                 ),
                 BlocProvider<PostBloc>(
@@ -300,6 +308,7 @@ class MyApp extends StatelessWidget {
                   return MaterialApp.router(
                     debugShowCheckedModeBanner: false,
                     // themeMode: state.themeMode,
+                    
                     themeMode: ThemeMode.light, //todo
                     theme: lightThemeData(),
                     darkTheme: darkThemeData(),
