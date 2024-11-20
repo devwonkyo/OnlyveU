@@ -1,4 +1,3 @@
-// shutterpost_bloc.dart
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,6 +12,7 @@ import 'package:onlyveyou/screens/shutter/firestore_service.dart';
 class PostBloc extends Bloc<PostEvent, PostState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirestoreService _firestoreService = FirestoreService();
 
   PostBloc() : super(PostState.initial()) {
     on<AddImageEvent>((event, emit) {
@@ -24,21 +24,37 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(state.copyWith(text: event.text));
     });
 
+    // UpdateTagsEvent 핸들러 추가
+    on<UpdateTagsEvent>((event, emit) {
+      emit(state.copyWith(tags: event.tags));
+    });
+
+    on<ToggleLikeEvent>((event, emit) async {
+      try {
+        await _firestoreService.toggleLike(event.postId, event.userId);
+      } catch (e) {
+        print('Error in ToggleLikeEvent: $e');
+        emit(state.copyWith(error: e.toString()));
+      }
+    });
+
     on<SubmitPostEvent>((event, emit) async {
       emit(state.copyWith(isLoading: true));
       try {
         if (state.images.isEmpty) return;
 
-        // Get current user's UID
         final User? user = FirebaseAuth.instance.currentUser;
-        final authorUid = user?.uid ?? ''; // 로그인된 사용자의 UID
-
+        final authorUid = user?.uid ?? '';
         if (authorUid.isEmpty) throw Exception('User not logged in.');
 
-        // Fetch nickname
-        final nickname = await FirestoreService().fetchNickname(authorUid);
+        // 사용자 프로필 정보 가져오기
+        final userDoc =
+            await _firestore.collection('users').doc(authorUid).get();
+        final userData = userDoc.data();
+        final nickname = userData?['nickname'] ?? 'Unknown';
+        final profileImageUrl = userData?['profileImageUrl'] ?? '';
 
-        // Upload images to Firebase Storage
+        // 이미지 업로드
         final imageUrls = await Future.wait(state.images.map((image) async {
           final file = File(image.path);
           final fileName =
@@ -48,21 +64,26 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           return await ref.getDownloadURL();
         }));
 
-        // Save post to Firestore
+        // 게시물 생성
+        final docRef = _firestore.collection('posts').doc();
         final post = PostModel(
+          id: docRef.id,
           text: state.text,
           imageUrls: imageUrls,
           tags: event.tags,
           createdAt: DateTime.now(),
           authorUid: authorUid,
-          authorName: nickname, // 작성자의 닉네임 저장
+          authorName: nickname,
+          authorProfileImageUrl: profileImageUrl,
+          likes: 0,
+          likedBy: [],
         );
 
-        await _firestore.collection('posts').add(post.toMap());
-
+        await docRef.set(post.toMap());
         emit(PostState.initial());
       } catch (e) {
         print('Error: $e');
+        emit(state.copyWith(error: e.toString()));
       }
       emit(state.copyWith(isLoading: false));
     });

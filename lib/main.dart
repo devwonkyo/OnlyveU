@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,9 +25,11 @@ import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
 import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
+import 'package:onlyveyou/blocs/special_bloc/weather/location_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
+import 'package:onlyveyou/config/fcm.dart';
 import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/repositories/auth_repository.dart';
@@ -41,9 +44,12 @@ import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
+import 'package:onlyveyou/repositories/special/weather/location_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
+import 'package:onlyveyou/utils/deeplink_service.dart';
+import 'package:onlyveyou/utils/notification_util.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 
 import 'blocs/history/history_bloc.dart';
@@ -58,6 +64,23 @@ void main() async {
 
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
+
+  //FCM Token 설정
+  String? fcmToken = await FirebaseMessaging.instance.getToken();
+  print('fcmToken : $fcmToken');
+
+  if (fcmToken != null) {
+    OnlyYouSharedPreference().setToken(fcmToken);
+  }
+
+  FirebaseMessaging.instance.onTokenRefresh.listen((fcmServerToken) {
+    fcmToken ??= fcmServerToken;
+    OnlyYouSharedPreference().setToken(fcmToken ?? "");
+    print('fcmToken : $fcmToken');
+  }).onError((err) {
+    // Error getting token.
+    print('error : Firebase token error');
+  });
 
   // print("hash key ${await KakaoSdk.origin}");
   final remoteConfig = FirebaseRemoteConfig.instance;
@@ -74,6 +97,36 @@ void main() async {
   final prefs = OnlyYouSharedPreference();
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
+
+
+  DeepLinkService().initialize(router);
+
+
+  //카카오톡
+  kakaoSchemeStream.listen((url) {
+    Uri uri = Uri.parse(url ?? "");
+    final productId = uri.queryParameters['productId'];
+    final screen = uri.queryParameters['screen'];
+    print("productId : $productId, screen : $screen ");
+
+    if(screen != null){
+      router.push(screen, extra: productId);
+    }
+
+  }, onError: (e) {
+    // 에러 상황의 예외 처리 코드를 작성합니다.
+    print("kakao listen error : $e");
+  });
+
+
+  // 위치 서비스 초기화 추가
+  try {
+    final locationRepository = LocationRepository();
+    await locationRepository.checkLocationService();
+  } catch (e) {
+    debugPrint('Location service initialization error: $e');
+  }
+
 
 // 모든 제품 로컬 저장 (검색용)
   try {
@@ -95,6 +148,14 @@ void main() async {
     debugPrint('Error fetching and storing suggestions: $e');
   }
 
+  //권한 설정, 버전관리
+  await NotificationUtil().requestNotificationPermission();
+  await NotificationUtil().initialize();
+
+  //FCM 설정
+  setupForegroundFirebaseMessaging();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   runApp(const MyApp());
 }
 
@@ -115,6 +176,11 @@ class MyApp extends StatelessWidget {
           builder: (_, child) {
             return MultiBlocProvider(
               providers: [
+                BlocProvider<LocationBloc>(
+                  create: (context) => LocationBloc(
+                    repository: LocationRepository(),
+                  ),
+                ),
                 RepositoryProvider(
                   create: (context) => AIOnepickRepository(),
                 ),
@@ -183,7 +249,8 @@ class MyApp extends StatelessWidget {
                   create: (context) => ThemeBloc(),
                 ),
                 BlocProvider<OrderStatusBloc>(
-                  create: (context) => OrderStatusBloc(),
+                  create: (context) => OrderStatusBloc(
+                      OrderRepository(firestore: FirebaseFirestore.instance)),
                 ),
                 BlocProvider<ProductDetailBloc>(
                   create: (context) =>
@@ -221,7 +288,8 @@ class MyApp extends StatelessWidget {
                       ReviewBloc(repository: ReviewRepository()),
                 ),
                 BlocProvider<OrderBloc>(
-                  create: (context) => OrderBloc(OrderRepository(firestore: FirebaseFirestore.instance)),
+                  create: (context) => OrderBloc(
+                      OrderRepository(firestore: FirebaseFirestore.instance)),
                 ),
                 BlocProvider<InventoryBloc>(
                   create: (context) => InventoryBloc(InventoryRepository()),

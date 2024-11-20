@@ -39,6 +39,12 @@ class OnlyYouSharedPreference {
     preferences.setString('phone', phone);
   }
 
+  // fcm token 저장
+  Future<void> setToken(String token) async {
+    SharedPreferences preferences = await prefs;
+    preferences.setString('token', token);
+  }
+
   // 이메일 읽기
   Future<String> getEmail() async {
     SharedPreferences preferences = await prefs;
@@ -63,6 +69,22 @@ class OnlyYouSharedPreference {
     return preferences.getString('phone') ?? "";
   }
 
+  // 토큰 읽기
+  Future<String> getToken() async {
+    SharedPreferences preferences = await prefs;
+    return preferences.getString('token') ?? "";
+  }
+
+  Future<void> setAutoLogin(bool value) async {
+    SharedPreferences preferences = await prefs;
+    await preferences.setBool('autoLogin', value);
+  }
+
+  Future<bool> getAutoLogin() async {
+    SharedPreferences preferences = await prefs;
+    return preferences.getBool('autoLogin') ?? false;
+  }
+
   // 유저 정보 삭제
   Future<void> removeUserInfo() async {
     SharedPreferences preferences = await prefs;
@@ -70,6 +92,7 @@ class OnlyYouSharedPreference {
     await preferences.remove('gender');
     await preferences.remove('nickname');
     await preferences.remove('phone');
+    await preferences.remove('token');
   }
 
   // 전체 데이터 삭제
@@ -100,6 +123,7 @@ class OnlyYouSharedPreference {
     print('Nickname: ${await getNickname()}');
     print('Phone: ${await getPhone()}');
     print('Gender: ${await getGender()}');
+    print('token: ${await getToken()}');
     print('=====================');
     // 테마 모드 저장
   }
@@ -117,7 +141,6 @@ class OnlyYouSharedPreference {
 
   // 모든 데이터 프린트 - 로그아웃 전에 현재 데이터 확인
   Future<void> printAllData() async {
-    
     SharedPreferences preferences = await prefs;
     print('=== 현재 내부 저장소에 있는 데이터 ===');
     print('User ID: ${preferences.getString('userId') ?? '없음'}');

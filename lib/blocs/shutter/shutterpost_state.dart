@@ -8,6 +8,7 @@ class PostState extends Equatable {
   final List<XFile> images;
   final List<String> tags;
   final bool isLoading;
+  final String? error;
 
   const PostState({
     required this.title,
@@ -15,6 +16,7 @@ class PostState extends Equatable {
     required this.images,
     required this.tags,
     this.isLoading = false,
+    this.error,
   });
 
   factory PostState.initial() {
@@ -32,6 +34,7 @@ class PostState extends Equatable {
     List<XFile>? images,
     List<String>? tags,
     bool? isLoading,
+    String? error,
   }) {
     return PostState(
       title: title ?? this.title,
@@ -39,6 +42,7 @@ class PostState extends Equatable {
       images: images ?? this.images,
       tags: tags ?? this.tags,
       isLoading: isLoading ?? this.isLoading,
+      error: error,
     );
   }
 

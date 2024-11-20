@@ -62,4 +62,31 @@ class AuthRepository {
     }
   }
 
+  Future<void> addTokenWithUserId(String userId)async {
+    try {
+      final token = await OnlyYouSharedPreference().getToken();
+
+      final QuerySnapshot userQuery = await _firestore
+          .collection('users')
+          .where('uid', isEqualTo: userId)
+          .get();
+
+      if (userQuery.docs.isNotEmpty) {
+        await _firestore
+            .collection('users')
+            .doc(userQuery.docs.first.id)
+            .update({
+          'token': token
+        });
+
+        print('Token updated successfully');
+      } else {
+        print('No user found with userId: $userId');
+      }
+    } catch (e) {
+      print('Error updating user token: $e');
+      rethrow;  // 에러를 상위로 전파
+    }
+  }
+
 }
