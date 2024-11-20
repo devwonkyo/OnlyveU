@@ -24,6 +24,11 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(state.copyWith(text: event.text));
     });
 
+    // UpdateTagsEvent 핸들러 추가
+    on<UpdateTagsEvent>((event, emit) {
+      emit(state.copyWith(tags: event.tags));
+    });
+
     on<ToggleLikeEvent>((event, emit) async {
       try {
         await _firestoreService.toggleLike(event.postId, event.userId);
