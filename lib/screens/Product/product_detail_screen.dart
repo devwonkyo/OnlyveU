@@ -42,7 +42,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
     context.read<ProductDetailBloc>().add(LoadProductDetail(widget.productId));
-    context.read<ProductDetailBloc>().add(InputProductHistoryEvent(widget.productId));
+    context
+        .read<ProductDetailBloc>()
+        .add(InputProductHistoryEvent(widget.productId));
     context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
   }
 
@@ -442,7 +444,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         TabBar(
           onTap: (index) {
             if (index == 1) {
-              context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
+              context
+                  .read<ReviewBloc>()
+                  .add(LoadReviewListEvent(widget.productId));
             }
           },
           tabs: [Tab(text: '상품설명'), Tab(text: '리뷰')],
@@ -479,20 +483,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             return current is LoadedReviewState;
           },
           builder: (context, state) {
-            if(state is LoadedReviewState){
+            if (state is LoadedReviewState) {
               return SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ReviewSummaryWidget(reviewList: state.reviewList, ratingAverage: state.reviewAverageRating, ratingPercentAge: state.reviewRatingPercentAge,),
+                    ReviewSummaryWidget(
+                      reviewList: state.reviewList,
+                      ratingAverage: state.reviewAverageRating,
+                      ratingPercentAge: state.reviewRatingPercentAge,
+                    ),
                     Container(height: 8.h, color: Colors.grey[200]),
-                    ReviewListWidget(reviewList: state.reviewList, userId: userId,),
+                    ReviewListWidget(
+                      reviewList: state.reviewList,
+                      userId: userId,
+                    ),
                   ],
                 ),
               );
             }
             return Text("review road error");
-            },
+          },
         ),
       ],
     );

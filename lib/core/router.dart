@@ -45,7 +45,8 @@ import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/store/store_list_screen.dart';
 import 'package:onlyveyou/screens/special/virtual/vitual_screen.dart';
 
-import '../screens/search/search_page.dart';
+import '../screens/search/presentation/search_home/search_home_page.dart';
+import '../screens/search0/search_page.dart';
 import '../screens/special/ai_onepick/ai_onepick_screen.dart';
 import '../screens/special/debate/debate_screen.dart';
 import '../screens/special/mbti/mbti_screen.dart';
@@ -253,24 +254,24 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-   GoRoute(
-  path: '/payment',
-  pageBuilder: (context, state) {
-    // state.extra를 통해 전달된 OrderModel을 가져옴
-    final order = state.extra as OrderModel;
+    GoRoute(
+      path: '/payment',
+      pageBuilder: (context, state) {
+        // state.extra를 통해 전달된 OrderModel을 가져옴
+        final order = state.extra as OrderModel;
 
-    return _buildPageWithTransition(
-      state,
-      BlocProvider(
-        create: (context) => PaymentBloc(
-          orderRepository: context.read<OrderRepository>(), // OrderRepository를 주입
-        )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
-        child: PaymentScreen(order: order),
-      ),
-    );
-  },
-),
-
+        return _buildPageWithTransition(
+          state,
+          BlocProvider(
+            create: (context) => PaymentBloc(
+              orderRepository:
+                  context.read<OrderRepository>(), // OrderRepository를 주입
+            )..add(InitializePayment(order)), // PaymentBloc에 초기화 이벤트 전달
+            child: PaymentScreen(order: order),
+          ),
+        );
+      },
+    ),
     GoRoute(
       path: '/new_delivery_address',
       pageBuilder: (context, state) => _buildPageWithTransition(
@@ -280,17 +281,19 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/search',
-      builder: (context, state) => const SearchPage(),
+      builder: (context, state) => const SearchHomePage(),
     ),
     GoRoute(
       path: '/write_review',
       pageBuilder: (context, state) {
         final data = state.extra as Map<String, dynamic>;
-        final availableOrderModel = data['availableOrderModel'] as AvailableOrderModel;
+        final availableOrderModel =
+            data['availableOrderModel'] as AvailableOrderModel;
         final rating = data['rating'] as double;
 
         return _buildPageUpWithTransition(
-          state, WriteReviewScreen(
+          state,
+          WriteReviewScreen(
             availableOrderModel: availableOrderModel,
             rating: rating,
           ),
