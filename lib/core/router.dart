@@ -47,6 +47,7 @@ import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/special/virtual/ar_start_screen.dart';
 import 'package:onlyveyou/screens/special/weather/map/map_screen.dart';
 import 'package:onlyveyou/screens/store/store_list_screen.dart';
+import 'package:onlyveyou/screens/auth/tokencheck_screen.dart';
 
 import '../blocs/special_bloc/weather/location_bloc.dart';
 import '../repositories/special/weather/location_repository.dart';
@@ -58,7 +59,7 @@ import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
@@ -177,8 +178,16 @@ final GoRouter router = GoRouter(
       ],
     ),
     GoRoute(
+      path: '/',
+      builder: (context, state) => TokenCheck(),
+    ),
+    GoRoute(
       path: '/login',
       builder: (context, state) => LoginScreen(),
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => Home(),
     ),
     GoRoute(
       path: '/profile_edit',
