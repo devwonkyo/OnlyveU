@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -51,87 +52,175 @@ class ShutterScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Posts List
-              Expanded(child: BlocBuilder<ShutterBloc, ShutterState>(
-                builder: (context, state) {
-                  if (state.isLoading) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+              Expanded(
+                child: BlocBuilder<ShutterBloc, ShutterState>(
+                  builder: (context, state) {
+                    if (state.isLoading) {
+                      return Center(child: CircularProgressIndicator());
+                    }
 
-                  if (state.posts.isEmpty) {
-                    return Center(child: Text('No posts available.'));
-                  }
+                    if (state.posts.isEmpty) {
+                      return Center(child: Text('No posts available.'));
+                    }
 
-                  return ListView.separated(
-                    itemCount: state.posts.length,
-                    itemBuilder: (context, index) {
-                      final post = state.posts[index];
-                      return GestureDetector(
-                        onTap: () {
-                          context.push('/post-detail', extra: post);
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Post Info
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                  post.authorProfileImageUrl.isNotEmpty
-                                      ? post.authorProfileImageUrl
-                                      : 'https://via.placeholder.com/150', // 기본 프로필 이미지
+                    return ListView.separated(
+                      itemCount: state.posts.length,
+                      itemBuilder: (context, index) {
+                        final post = state.posts[index];
+                        return GestureDetector(
+                          onTap: () {
+                            context.push('/post-detail', extra: post);
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Post Info
+                              ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                    post.authorProfileImageUrl.isNotEmpty
+                                        ? post.authorProfileImageUrl
+                                        : 'https://via.placeholder.com/150', // 기본 프로필 이미지
+                                  ),
+                                ),
+                                title: Text(post.authorName),
+                                subtitle: Text(
+                                  DateFormat('yyyy-MM-dd HH:mm:ss')
+                                      .format(post.createdAt),
                                 ),
                               ),
-                              title: Text(post.authorName),
-                              subtitle: Text(
-                                DateFormat('yyyy-MM-dd HH:mm:ss')
-                                    .format(post.createdAt),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(post.text), // 본문 텍스트
-                            ),
-                            // Image Gallery
-                            if (post.imageUrls.isNotEmpty)
-                              SizedBox(
-                                height: 300, // 적절한 이미지 높이 설정
-                                child: PageView.builder(
-                                  itemCount: post.imageUrls.length,
-                                  itemBuilder: (context, imgIndex) {
-                                    return Image.network(
-                                      post.imageUrls[imgIndex],
-                                      width: MediaQuery.of(context)
-                                          .size
-                                          .width, // 화면 크기에 맞추기
-                                      fit: BoxFit.cover,
-                                    );
-                                  },
-                                ),
-                              ),
-                            // Post Tags
-                            if (post.tags.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Wrap(
-                                  spacing: 8.0,
-                                  children: post.tags
-                                      .map((tag) =>
-                                          Chip(label: Text(tag))) // 태그 표시
-                                      .toList(),
-                                ),
+                                child: Text(post.text), // 본문 텍스트
                               ),
-                          ],
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) => Divider(), // 구분선 추가
-                  );
-                },
-              )),
+                              // Image Gallery
+                              if (post.imageUrls.isNotEmpty)
+                                SizedBox(
+                                  height: 300, // 적절한 이미지 높이 설정
+                                  child: PageView.builder(
+                                    itemCount: post.imageUrls.length,
+                                    itemBuilder: (context, imgIndex) {
+                                      return Image.network(
+                                        post.imageUrls[imgIndex],
+                                        width: MediaQuery.of(context)
+                                            .size
+                                            .width, // 화면 크기에 맞추기
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
+                                ),
+
+                              if (post.tags.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '태그된 제품',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: post.tags.map((productId) {
+                                          return TaggedProductWidget(
+                                            productId: productId,
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                              SizedBox(height: 8),
+                            ],
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) => Divider(),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class TaggedProductWidget extends StatelessWidget {
+  final String productId;
+
+  const TaggedProductWidget({
+    Key? key,
+    required this.productId,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .get(),
+      builder: (context, snapshot) {
+        String productName = '로딩중...';
+
+        if (snapshot.hasData && snapshot.data != null) {
+          final data = snapshot.data!.data() as Map<String, dynamic>?;
+          productName = data?['name'] ?? '제품 없음';
+        }
+
+        return GestureDetector(
+          onTap: () {
+            context.push('/product-detail', extra: productId);
+          },
+          child: Container(
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.4),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Color(0xFFC9C138).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Color(0xFFC9C138).withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.local_offer,
+                  size: 16,
+                  color: Color(0xFFC9C138),
+                ),
+                SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    productName,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 13,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
