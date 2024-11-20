@@ -1,7 +1,9 @@
+// location_repository.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -12,11 +14,13 @@ class LocationData {
   final Position position;
   final Marker marker;
   final CameraPosition cameraPosition;
+  final String address;
 
   LocationData({
     required this.position,
     required this.marker,
     required this.cameraPosition,
+    required this.address,
   });
 
   factory LocationData.defaultLocation() {
@@ -45,6 +49,7 @@ class LocationData {
         target: LatLng(defaultLatitude, defaultLongitude),
         zoom: 15.0,
       ),
+      address: '서울특별시 종로구',
     );
   }
 }
@@ -56,6 +61,113 @@ class LocationRepository {
 
   Stream<LocationData>? _locationStream;
   StreamController<LocationData>? _streamController;
+
+  Future<String> getAddressFromPosition(Position position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        String address =
+            '${place.administrativeArea ?? ''} ${place.subLocality ?? ''}'
+                .trim();
+        return address.isEmpty ? '주소를 찾을 수 없습니다' : address;
+      }
+      return '주소를 찾을 수 없습니다';
+    } catch (e) {
+      debugPrint('Geocoding error: $e');
+      return '주소 변환 중 오류 발생';
+    }
+  }
+
+  Future<LocationData> getCurrentLocationData() async {
+    try {
+      if (!await _checkAndRequestPermission()) {
+        return LocationData.defaultLocation();
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 15),
+      );
+
+      if (_isInKoreaRegion(position)) {
+        final address = await getAddressFromPosition(position);
+        return _createLocationData(position, address);
+      }
+
+      return LocationData.defaultLocation();
+    } catch (e) {
+      debugPrint('Location error: $e');
+      return LocationData.defaultLocation();
+    }
+  }
+
+  Stream<LocationData> getLocationDataStream() {
+    if (_locationStream != null) {
+      return _locationStream!;
+    }
+
+    _streamController = StreamController<LocationData>.broadcast(
+      onCancel: () {
+        _streamController?.close();
+        _streamController = null;
+        _locationStream = null;
+      },
+    );
+
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+      ),
+    ).asyncMap((position) async {
+      if (_isInKoreaRegion(position)) {
+        final address = await getAddressFromPosition(position);
+        return _createLocationData(position, address);
+      }
+      return LocationData.defaultLocation();
+    }).listen(
+      (locationData) => _streamController?.add(locationData),
+      onError: (error) {
+        debugPrint('Location stream error: $error');
+        _streamController?.add(LocationData.defaultLocation());
+      },
+      cancelOnError: false,
+    );
+
+    _locationStream = _streamController?.stream;
+    return _locationStream!;
+  }
+
+  LocationData _createLocationData(Position position, String address) {
+    final latLng = LatLng(position.latitude, position.longitude);
+    return LocationData(
+      position: position,
+      marker: Marker(
+        markerId: const MarkerId('current_location'),
+        position: latLng,
+        icon: position.latitude == LocationData.defaultLatitude &&
+                position.longitude == LocationData.defaultLongitude
+            ? BitmapDescriptor.defaultMarker
+            : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(
+          title: position.latitude == LocationData.defaultLatitude &&
+                  position.longitude == LocationData.defaultLongitude
+              ? '기상청'
+              : address,
+        ),
+      ),
+      cameraPosition: CameraPosition(
+        target: latLng,
+        zoom: 15.0,
+      ),
+      address: address,
+    );
+  }
 
   Future<bool> _checkAndRequestPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -74,30 +186,6 @@ class LocationRepository {
     return permission != LocationPermission.deniedForever;
   }
 
-  Future<LocationData> getCurrentLocationData() async {
-    LocationData defaultLocation = LocationData.defaultLocation();
-
-    try {
-      if (!await _checkAndRequestPermission()) {
-        return defaultLocation;
-      }
-
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 15),
-      );
-
-      if (_isInKoreaRegion(position)) {
-        return _createLocationData(position);
-      }
-
-      return defaultLocation;
-    } catch (e) {
-      debugPrint('Location error: $e');
-      return defaultLocation;
-    }
-  }
-
   Future<bool> checkLocationService() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -110,70 +198,6 @@ class LocationRepository {
       debugPrint('위치 서비스 초기화 실패: $e');
       return false;
     }
-  }
-
-  Stream<LocationData> getLocationDataStream() {
-    if (_locationStream != null) {
-      return _locationStream!;
-    }
-
-    _streamController = StreamController<LocationData>.broadcast(
-      onCancel: () {
-        _streamController?.close();
-        _streamController = null;
-        _locationStream = null;
-      },
-    );
-
-    const locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
-      timeLimit: Duration(seconds: 30), // 5초에서 30초로 증가
-    );
-
-    Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-      (position) {
-        if (_isInKoreaRegion(position)) {
-          _streamController?.add(_createLocationData(position));
-        } else {
-          _streamController?.add(LocationData.defaultLocation());
-        }
-      },
-      onError: (error) {
-        debugPrint('Location stream error: $error');
-        _streamController?.add(LocationData.defaultLocation());
-      },
-      cancelOnError: false,
-    );
-
-    _locationStream = _streamController?.stream;
-    return _locationStream!;
-  }
-
-  LocationData _createLocationData(Position position) {
-    final latLng = LatLng(position.latitude, position.longitude);
-    return LocationData(
-      position: position,
-      marker: Marker(
-        markerId: const MarkerId('current_location'),
-        position: latLng,
-        // 현재 위치이면 빨간색, 기본 위치(기상청)이면 파란색 마커 사용
-        icon: position.latitude == LocationData.defaultLatitude &&
-                position.longitude == LocationData.defaultLongitude
-            ? BitmapDescriptor.defaultMarker
-            : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(
-          title: position.latitude == LocationData.defaultLatitude &&
-                  position.longitude == LocationData.defaultLongitude
-              ? '기상청'
-              : '현재 위치',
-        ),
-      ),
-      cameraPosition: CameraPosition(
-        target: latLng,
-        zoom: 15.0,
-      ),
-    );
   }
 
   bool _isInKoreaRegion(Position position) {
