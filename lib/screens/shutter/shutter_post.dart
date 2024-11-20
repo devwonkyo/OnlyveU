@@ -42,7 +42,7 @@ class _PostScreenState extends State<PostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<PostBloc, PostState>(
+    return  BlocListener<PostBloc, PostState>(
       listener: (context, state) {
         if ((state.text.isEmpty ?? true) && (state.images.isEmpty)) {
           GoRouter.of(context).go('/shutter');
