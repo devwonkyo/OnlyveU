@@ -205,7 +205,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         _buildQuickMenuItem('VS투표', Icons.balance_rounded, () {
           context.push('/debate');
         }),
-        _buildQuickMenuItem('MBTI', Icons.hail_outlined, () {
+        _buildQuickMenuItem('운세', Icons.hail_outlined, () {
           context.push('/mbti');
         }),
       ],

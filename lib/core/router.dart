@@ -11,7 +11,6 @@ import 'package:onlyveyou/models/post_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
-import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
@@ -45,9 +44,12 @@ import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
 import 'package:onlyveyou/screens/shutter/post_detail_screen.dart';
 import 'package:onlyveyou/screens/shutter/shutter_post.dart';
 import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
+import 'package:onlyveyou/screens/special/virtual/ar_start_screen.dart';
+import 'package:onlyveyou/screens/special/weather/map/map_screen.dart';
 import 'package:onlyveyou/screens/store/store_list_screen.dart';
-import 'package:onlyveyou/screens/special/virtual/vitual_screen.dart';
 
+import '../blocs/special_bloc/weather/location_bloc.dart';
+import '../repositories/special/weather/location_repository.dart';
 import '../screens/search/search_page.dart';
 import '../screens/special/ai_onepick/ai_onepick_screen.dart';
 import '../screens/special/debate/debate_screen.dart';
@@ -56,13 +58,25 @@ import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/home',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/map',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            BlocProvider(
+              create: (context) => LocationBloc(
+                repository: LocationRepository(),
+              ),
+              child: const MapScreen(),
+            ),
+          ),
+        ),
         GoRoute(
           path: '/ai-onepick',
           pageBuilder: (context, state) => _buildPageWithTransition(

@@ -1,6 +1,7 @@
 // virtual_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class VirtualScreen extends StatelessWidget {
   const VirtualScreen({Key? key}) : super(key: key);
@@ -42,7 +43,7 @@ class VirtualScreen extends StatelessWidget {
             ),
             SizedBox(height: 32.h),
             ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () => context.push('/ar/camera'),
               icon: Icon(Icons.camera_alt),
               label: Text('카메라 시작하기'),
               style: ElevatedButton.styleFrom(

@@ -4,7 +4,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
@@ -26,6 +25,7 @@ import 'package:onlyveyou/blocs/product/productdetail_bloc.dart';
 import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
 import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
+import 'package:onlyveyou/blocs/special_bloc/weather/location_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -44,6 +44,7 @@ import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
+import 'package:onlyveyou/repositories/special/weather/location_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
@@ -96,6 +97,14 @@ void main() async {
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
 
+  // 위치 서비스 초기화 추가
+  try {
+    final locationRepository = LocationRepository();
+    await locationRepository.checkLocationService();
+  } catch (e) {
+    debugPrint('Location service initialization error: $e');
+  }
+
 // 모든 제품 로컬 저장 (검색용)
   try {
     final productRepository = ProductRepository();
@@ -144,6 +153,11 @@ class MyApp extends StatelessWidget {
           builder: (_, child) {
             return MultiBlocProvider(
               providers: [
+                BlocProvider<LocationBloc>(
+                  create: (context) => LocationBloc(
+                    repository: LocationRepository(),
+                  ),
+                ),
                 RepositoryProvider(
                   create: (context) => AIOnepickRepository(),
                 ),
