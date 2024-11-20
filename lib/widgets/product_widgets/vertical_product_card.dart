@@ -17,12 +17,12 @@ class VerticalProductCard extends StatefulWidget {
   final bool isBest;
 
   const VerticalProductCard({
-    Key? key,
+    super.key,
     required this.productModel,
     this.onTap,
     this.isBest = false,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   State<VerticalProductCard> createState() => _VerticalProductCardState();
@@ -48,7 +48,7 @@ class _VerticalProductCardState extends State<VerticalProductCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. 상품 이미지
-            Container(
+            SizedBox(
               width: 150.w,
               height: 150.w,
               child: ClipRRect(
@@ -196,13 +196,13 @@ class _VerticalProductCardState extends State<VerticalProductCard> {
                     setState(() {
                       isLiked = !isLiked;
                     });
-                    BlocProvider.of<ProductLikeBloc>(context).add(
-                        AddToLikeEvent(
-                            userId: widget.userId,
-                            productId: widget.productModel.productId,
-                        ));
+                    BlocProvider.of<ProductLikeBloc>(context)
+                        .add(AddToLikeEvent(
+                      userId: widget.userId,
+                      productId: widget.productModel.productId,
+                    ));
                   },
-                  child: Container(
+                  child: SizedBox(
                     width: 20.w,
                     height: 20.w,
                     child: Icon(
@@ -219,7 +219,7 @@ class _VerticalProductCardState extends State<VerticalProductCard> {
                         .read<ProductCartBloc>()
                         .add(AddToCartEvent(widget.productModel));
                   },
-                  child: Container(
+                  child: SizedBox(
                     width: 22.w,
                     height: 22.w,
                     child: Icon(
