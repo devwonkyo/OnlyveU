@@ -38,19 +38,25 @@ class RecommendedProductsWidget extends StatelessWidget {
         // 추천 상품 섹션 제목과 더보기 버튼
         Padding(
           padding: AppStyles.defaultPadding,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('국한님을 위한 추천상품', style: AppStyles.headingStyle),
-              GestureDetector(
-                onTap: () => context.push('/more-recommended'),
-                child: Text(
-                  '더보기 >',
-                  style: AppStyles.bodyTextStyle
-                      .copyWith(color: AppStyles.greyColor),
-                ),
-              )
-            ],
+          child: FutureBuilder<String>(
+            future: OnlyYouSharedPreference().getNickname(),
+            builder: (context, snapshot) {
+              final nickname = snapshot.data ?? '고객'; // 닉네임이 없을 경우 '고객'으로 표시
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('$nickname님을 위한 추천상품', style: AppStyles.headingStyle),
+                  GestureDetector(
+                    onTap: () => context.push('/more-recommended'),
+                    child: Text(
+                      '더보기 >',
+                      style: AppStyles.bodyTextStyle
+                          .copyWith(color: AppStyles.greyColor),
+                    ),
+                  )
+                ],
+              );
+            },
           ),
         ),
         // 추천 상품 리스트뷰
