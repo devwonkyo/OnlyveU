@@ -64,18 +64,27 @@ class LocationBloc extends Bloc<LocationEvent, LocationState> {
 
     on<StartLocationUpdates>((event, emit) async {
       await _locationSubscription?.cancel();
-
       emit(LocationLoading());
 
-      await emit.forEach<LocationData>(
-        _repository.getLocationDataStream(),
-        onData: (locationData) => LocationSuccess(
-          position: locationData.position,
-          marker: locationData.marker,
-          cameraPosition: locationData.cameraPosition,
-        ),
-        onError: (error, stackTrace) => LocationError(error.toString()),
-      );
+      try {
+        // 위치 서비스 확인
+        if (!await _repository.checkLocationService()) {
+          emit(LocationError("위치 서비스를 활성화해주세요"));
+          return;
+        }
+
+        await emit.forEach<LocationData>(
+          _repository.getLocationDataStream(),
+          onData: (locationData) => LocationSuccess(
+            position: locationData.position,
+            marker: locationData.marker,
+            cameraPosition: locationData.cameraPosition,
+          ),
+          onError: (error, stackTrace) => LocationError(error.toString()),
+        );
+      } catch (e) {
+        emit(LocationError(e.toString()));
+      }
     });
 
     on<StopLocationUpdates>((event, emit) async {

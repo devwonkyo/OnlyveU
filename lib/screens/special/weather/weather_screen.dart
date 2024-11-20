@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/screens/special/weather/widgets/location_widget.dart';
 import 'package:onlyveyou/screens/special/weather/widgets/weather_product_recommendation_widget.dart';
+import 'package:onlyveyou/screens/special/weather/widgets/weather_stats_section.dart';
 import 'package:onlyveyou/screens/special/weather/widgets/weather_widget.dart';
 
 class WeatherScreen extends StatelessWidget {
