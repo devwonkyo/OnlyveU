@@ -27,6 +27,22 @@ class UpdateTextEvent extends PostEvent {
   List<Object?> get props => [text];
 }
 
+class ToggleLikeEvent extends PostEvent {
+  final String postId;
+  final String userId;
+
+  ToggleLikeEvent({required this.postId, required this.userId});
+}
+
+class UpdateTagsEvent extends PostEvent {
+  final List<String> tags;
+
+  const UpdateTagsEvent(this.tags);
+
+  @override
+  List<Object?> get props => [tags];
+}
+
 class SubmitPostEvent extends PostEvent {
   final String text;
   final List<XFile> images;

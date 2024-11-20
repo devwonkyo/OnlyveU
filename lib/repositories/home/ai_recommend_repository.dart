@@ -83,7 +83,7 @@ class AIRecommendRepository {
       };
     }
   }
-
+  
   /// OpenAI API를 호출하여 추천 결과를 반환
   Future<Map<String, dynamic>> _getAIRecommendations(
       List<ProductModel> allProducts, Map<String, dynamic> userData) async {
