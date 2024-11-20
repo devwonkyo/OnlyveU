@@ -14,6 +14,7 @@ import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
 import 'package:onlyveyou/screens/auth/login_screen.dart';
 import 'package:onlyveyou/screens/auth/signup_screen.dart';
+import 'package:onlyveyou/screens/auth/tokencheck_screen.dart';
 import 'package:onlyveyou/screens/category/category_product_list_screen.dart';
 import 'package:onlyveyou/screens/category/category_screen.dart';
 import 'package:onlyveyou/screens/history/histoy_screen.dart';
@@ -47,7 +48,6 @@ import 'package:onlyveyou/screens/shutter/shutter_screen.dart';
 import 'package:onlyveyou/screens/special/virtual/ar_start_screen.dart';
 import 'package:onlyveyou/screens/special/weather/map/map_screen.dart';
 import 'package:onlyveyou/screens/store/store_list_screen.dart';
-import 'package:onlyveyou/screens/auth/tokencheck_screen.dart';
 
 import '../blocs/special_bloc/weather/location_bloc.dart';
 import '../repositories/special/weather/location_repository.dart';
@@ -59,7 +59,7 @@ import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/home',
   routes: [
     ShellRoute(
       builder: (context, state, child) {
