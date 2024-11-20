@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-part 'search_text_field_event.dart';
-part 'search_text_field_state.dart';
+part 'search_textfield_event.dart';
+part 'search_textfield_state.dart';
 
 class SearchTextFieldBloc
     extends Bloc<SearchTextFieldEvent, SearchTextFieldState> {
