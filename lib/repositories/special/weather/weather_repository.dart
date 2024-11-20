@@ -8,40 +8,44 @@ class WeatherRepository {
   static const String _apiKey = '7bfbceaf4e40e2a8f8fc982b8511e601';
 
   final Map<String, WeatherModel> _cache = {};
-  final Duration _cacheDuration = const Duration(minutes: 30);
-  final Map<String, DateTime> _cacheTimestamp = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+  final Duration _cacheDuration = const Duration(minutes: 15);
+
+  String _getCacheKey(double lat, double lon) =>
+      '${lat.toStringAsFixed(4)},${lon.toStringAsFixed(4)}';
+
+  bool _isCacheValid(String cacheKey) {
+    if (!_cache.containsKey(cacheKey) ||
+        !_cacheTimestamps.containsKey(cacheKey)) {
+      return false;
+    }
+    final age = DateTime.now().difference(_cacheTimestamps[cacheKey]!);
+    return age < _cacheDuration;
+  }
 
   Future<WeatherModel> getWeatherData(double lat, double lon) async {
-    if (_shouldUseCache(lat, lon)) {
-      return _getCachedData(lat, lon);
-    }
-    return _fetchAndCacheWeatherData(lat, lon);
-  }
-
-  bool _shouldUseCache(double lat, double lon) {
     final cacheKey = _getCacheKey(lat, lon);
-    final now = DateTime.now();
-    return _cache.containsKey(cacheKey) &&
-        _cacheTimestamp[cacheKey] != null &&
-        now.difference(_cacheTimestamp[cacheKey]!) < _cacheDuration;
-  }
 
-  WeatherModel _getCachedData(double lat, double lon) {
-    return _cache[_getCacheKey(lat, lon)]!;
-  }
+    // 캐시된 데이터가 있고 유효한 경우
+    if (_isCacheValid(cacheKey)) {
+      print('Returning cached weather data');
+      return _cache[cacheKey]!;
+    }
 
-  Future<WeatherModel> _fetchAndCacheWeatherData(double lat, double lon) async {
     try {
-      print("Fetching weather data for lat: $lat, lon: $lon"); // 디버깅 로그
+      print("Fetching weather data for lat: $lat, lon: $lon");
       final weatherData = await _fetchWeatherData(lat, lon);
-      print("Weather data received: $weatherData"); // 디버깅 로그
       final uvData = await _fetchUVData(lat, lon);
       final airData = await _fetchAirQualityData(lat, lon);
 
       final combinedData = _combineWeatherData(weatherData, uvData, airData);
       final weatherModel = WeatherModel.fromJson(combinedData);
 
-      _updateCache(lat, lon, weatherModel);
+      // 캐시 업데이트
+      _cache[cacheKey] = weatherModel;
+      _cacheTimestamps[cacheKey] = DateTime.now();
+
+      print("Weather data received: $weatherData");
       return weatherModel;
     } catch (e) {
       throw WeatherException(_getErrorMessage(e.toString()));
@@ -101,14 +105,6 @@ class WeatherRepository {
     };
   }
 
-  void _updateCache(double lat, double lon, WeatherModel weather) {
-    final cacheKey = _getCacheKey(lat, lon);
-    _cache[cacheKey] = weather;
-    _cacheTimestamp[cacheKey] = DateTime.now();
-  }
-
-  String _getCacheKey(double lat, double lon) => '$lat-$lon';
-
   String _getErrorMessage(String error) {
     if (error.contains('Invalid API key')) {
       return 'API 키가 유효하지 않습니다.';
@@ -116,6 +112,11 @@ class WeatherRepository {
       return '서버 응답이 너무 늦습니다. 다시 시도해주세요.';
     }
     return '날씨 정보를 가져오는데 실패했습니다.';
+  }
+
+  void clearCache() {
+    _cache.clear();
+    _cacheTimestamps.clear();
   }
 }
 

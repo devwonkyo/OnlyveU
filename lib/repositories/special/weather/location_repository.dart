@@ -15,13 +15,15 @@ class LocationData {
   final Marker marker;
   final CameraPosition cameraPosition;
   final String address;
+  final DateTime timestamp; // 타임스탬프 추가
 
   LocationData({
     required this.position,
     required this.marker,
     required this.cameraPosition,
     required this.address,
-  });
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
 
   factory LocationData.defaultLocation() {
     final position = Position(
@@ -52,6 +54,17 @@ class LocationData {
       address: '서울특별시 종로구',
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is LocationData &&
+        position.latitude == other.position.latitude &&
+        position.longitude == other.position.longitude;
+  }
+
+  @override
+  int get hashCode => position.latitude.hashCode ^ position.longitude.hashCode;
 }
 
 class LocationRepository {
@@ -61,6 +74,8 @@ class LocationRepository {
 
   Stream<LocationData>? _locationStream;
   StreamController<LocationData>? _streamController;
+  LocationData? _lastLocationData;
+  final Duration _minUpdateInterval = const Duration(seconds: 30);
 
   Future<String> getAddressFromPosition(Position position) async {
     try {
@@ -96,7 +111,9 @@ class LocationRepository {
 
       if (_isInKoreaRegion(position)) {
         final address = await getAddressFromPosition(position);
-        return _createLocationData(position, address);
+        final locationData = await _createLocationData(position, address);
+        _lastLocationData = locationData;
+        return locationData;
       }
 
       return LocationData.defaultLocation();
@@ -119,15 +136,29 @@ class LocationRepository {
       },
     );
 
-    Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-      ),
-    ).asyncMap((position) async {
+    const locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 30, // 30미터 이상 이동했을 때만 업데이트
+      timeLimit: Duration(seconds: 60), // 60초마다 업데이트
+    );
+
+    Geolocator.getPositionStream(locationSettings: locationSettings)
+        .distinct() // 중복 위치 필터링
+        .asyncMap((position) async {
+      // 마지막 업데이트 이후 최소 간격 체크
+      if (_lastLocationData != null) {
+        final timeSinceLastUpdate =
+            DateTime.now().difference(_lastLocationData!.timestamp);
+        if (timeSinceLastUpdate < _minUpdateInterval) {
+          return _lastLocationData!;
+        }
+      }
+
       if (_isInKoreaRegion(position)) {
         final address = await getAddressFromPosition(position);
-        return _createLocationData(position, address);
+        final locationData = await _createLocationData(position, address);
+        _lastLocationData = locationData;
+        return locationData;
       }
       return LocationData.defaultLocation();
     }).listen(
@@ -139,7 +170,7 @@ class LocationRepository {
       cancelOnError: false,
     );
 
-    _locationStream = _streamController?.stream;
+    _locationStream = _streamController?.stream.distinct();
     return _locationStream!;
   }
 
