@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:onlyveyou/models/comment_model.dart';
 import 'package:onlyveyou/blocs/shutter/comment_bloc.dart';
 import 'package:onlyveyou/models/post_model.dart';
+import 'package:onlyveyou/widgets/product_tag_selector.dart'; // 이 줄 추가
 
 class PostDetailScreen extends StatefulWidget {
   final PostModel post;
@@ -160,6 +161,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             style: TextStyle(fontSize: 16),
                           ),
                           SizedBox(height: 8),
+                          if (widget.post.tags.isNotEmpty) ...[
+                            ProductTagSelector(
+                              initialTags: widget.post.tags,
+                              onTagsSelected: (_) {},
+                              isReadOnly: true,
+                              selectedColor: Color(0xFFC9C138),
+                            ),
+                            SizedBox(height: 8),
+                          ],
                           Text(
                             formatDate(widget.post.createdAt),
                             style: TextStyle(color: Colors.grey),
