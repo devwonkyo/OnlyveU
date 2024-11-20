@@ -11,9 +11,8 @@ import FirebaseRemoteConfig
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
    // RemoteConfig에서 API 키 가져오기
-      if let mapApiKey = RemoteConfig.remoteConfig().configValue(forKey: "map_api").stringValue {
-        GMSServices.provideAPIKey(mapApiKey)
-      }
+//       let mapApiKey = RemoteConfig.remoteConfig().configValue(forKey: "map_api").stringValue
+//           GMSServices.provideAPIKey(mapApiKey)
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
