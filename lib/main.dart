@@ -226,7 +226,8 @@ class MyApp extends StatelessWidget {
                   create: (context) => ThemeBloc(),
                 ),
                 BlocProvider<OrderStatusBloc>(
-                  create: (context) => OrderStatusBloc(),
+                  create: (context) => OrderStatusBloc(
+                      OrderRepository(firestore: FirebaseFirestore.instance)),
                 ),
                 BlocProvider<ProductDetailBloc>(
                   create: (context) =>

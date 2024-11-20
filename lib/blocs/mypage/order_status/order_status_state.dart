@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:onlyveyou/models/order_model.dart';
 
 abstract class OrderStatusState extends Equatable {
   const OrderStatusState();
@@ -46,4 +47,11 @@ class StatusSelected extends OrderStatusState {
   @override
   List<Object?> get props =>
       [selectedPurchaseType, statusOptions, selectedStatus];
+}
+
+class OrderFetch extends OrderStatusState {
+    final List<OrderModel> orders;
+  const OrderFetch(this.orders);
+  @override
+  List<Object?> get props => [];
 }
