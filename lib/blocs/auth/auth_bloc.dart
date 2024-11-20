@@ -38,17 +38,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         // 얻은 ID로 UserModel 생성
         final userModel = UserModel(
-          uid: userCredential.user!.uid,  // Firestore가 생성한 ID를 uid로 사용
-          email: event.email,
-          nickname: event.nickname,
-          phone: event.phone,
-          gender: event.gender
-        );
+            uid: userCredential.user!.uid, // Firestore가 생성한 ID를 uid로 사용
+            email: event.email,
+            nickname: event.nickname,
+            phone: event.phone,
+            gender: event.gender);
 
         // 3. Authentication의 UID로 Firestore 문서 저장
         await _firestore
             .collection('users')
-            .doc(userCredential.user!.uid)  // Authentication의 UID 사용
+            .doc(userCredential.user!.uid) // Authentication의 UID 사용
             .set(userModel.toMap());
 
         // // SharedPreferences에 사용자 정보 저장
@@ -97,14 +96,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogoutRequested(
       LogoutRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading()); // 로그아웃 중 로딩 상태로 변경
+    emit(AuthLoading());
     try {
-      await sharedPreference.printAllData();
-      await authRepository.logout(); // 로그아웃 수행
-
+      await sharedPreference.setAutoLogin(false); // 자동 로그인 해제
       await sharedPreference.clearPreference();
-      await sharedPreference.printAllData();
-      emit(LogoutSuccess()); // 로그아웃 성공 상태로 전환
+      emit(LogoutSuccess());
     } catch (e) {
       emit(AuthFailure("로그아웃에 실패했습니다: $e"));
     }
@@ -137,7 +133,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _getUserCartCount(GetUserInfo event, Emitter<AuthState> emit) async {
+  Future<void> _getUserCartCount(
+      GetUserInfo event, Emitter<AuthState> emit) async {
     int userCartCount = await authRepository.getCartItemsCount();
     print("userCartCount : $userCartCount");
     emit(LoadedUserCartCount(cartItemsCount: userCartCount));
