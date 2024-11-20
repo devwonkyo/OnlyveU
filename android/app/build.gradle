@@ -1,3 +1,4 @@
+
 plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
@@ -31,6 +32,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Maps API 키 설정 추가
+        manifestPlaceholders = [
+                map_api: "AIzaSyAznC7AN-X1JfBclAr3QjKZQgLOckZ70n4",
+                applicationName: "android.app.Application"  // 이 줄 추가
+        ]
     }
 
     buildTypes {
@@ -44,4 +51,8 @@ android {
 
 flutter {
     source = "../.."
+}
+dependencies {
+    // 기존 의존성들...
+    implementation "com.google.android.gms:play-services-location:21.0.1"  // 이 줄 추가
 }
