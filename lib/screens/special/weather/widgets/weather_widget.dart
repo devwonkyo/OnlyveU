@@ -245,8 +245,9 @@ class _WeatherWidgetState extends State<WeatherWidget> {
                     SizedBox(height: 12.h),
                     _buildWeatherDetailRow(
                       icon: Icons.water_drop_outlined,
-                      title: '강수확률',
-                      value: '${weather.rainProbability.round()}%',
+                      title: '습도', // '강수확률'에서 '습도'로 변경
+                      value:
+                          '${weather.humidity}%', // rainProbability 대신 humidity 사용
                       color: Color(0xFF4ECDC4),
                     ),
                     SizedBox(height: 12.h),
