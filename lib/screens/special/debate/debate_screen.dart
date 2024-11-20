@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DebateScreen extends StatelessWidget {
-  const DebateScreen({Key? key}) : super(key: key);
+  const DebateScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
