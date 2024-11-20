@@ -13,9 +13,12 @@ class WeatherWidget extends StatefulWidget {
 }
 
 class _WeatherWidgetState extends State<WeatherWidget> {
+  late LocationBloc _locationBloc;
+
   @override
   void initState() {
     super.initState();
+    _locationBloc = context.read<LocationBloc>();
     print('WeatherWidget initState called');
     _initializeLocation();
   }
@@ -85,8 +88,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
 
   @override
   void dispose() {
-    print('WeatherWidget disposing...');
-    context.read<LocationBloc>().add(StopLocationUpdates());
+    _locationBloc.add(StopLocationUpdates());
     super.dispose();
   }
 
@@ -221,9 +223,9 @@ class _WeatherWidgetState extends State<WeatherWidget> {
               ),
             ),
             Expanded(
-              flex: 4,
+              flex: 6,
               child: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsets.only(left: 18.w),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -274,11 +276,11 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       children: [
         Spacer(),
         Container(
-          width: 85.w,
+          width: 90.w,
           child: Row(
             children: [
               Icon(icon, size: 16.sp, color: color),
-              SizedBox(width: 4.w),
+              SizedBox(width: 6.w),
               Text(
                 title,
                 style: TextStyle(
@@ -289,9 +291,9 @@ class _WeatherWidgetState extends State<WeatherWidget> {
             ],
           ),
         ),
-        SizedBox(width: 1.w),
+        SizedBox(width: 10.w),
         Container(
-          width: 35.w,
+          width: 50.w,
           child: Text(
             value,
             style: TextStyle(
