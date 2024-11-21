@@ -11,6 +11,8 @@ import 'package:onlyveyou/blocs/shutter/shutterpost_state.dart';
 import 'package:onlyveyou/widgets/product_tag_selector.dart';
 
 class PostScreen extends StatefulWidget {
+  const PostScreen({super.key});
+
   @override
   _PostScreenState createState() => _PostScreenState();
 }
@@ -29,8 +31,8 @@ class _PostScreenState extends State<PostScreen> {
   }
 
   Future<void> _pickImage(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? pickedFile = await _picker.pickImage(
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 85,
     );
@@ -42,21 +44,17 @@ class _PostScreenState extends State<PostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return  BlocListener<PostBloc, PostState>(
-      listener: (context, state) {
-        if ((state.text.isEmpty ?? true) && (state.images.isEmpty)) {
-          GoRouter.of(context).go('/shutter');
-        }
-      },
+    return BlocListener<PostBloc, PostState>(
+      listener: (context, state) {},
       child: BlocBuilder<PostBloc, PostState>(
         builder: (context, state) {
           return Stack(
             children: [
               Scaffold(
                 appBar: AppBar(
-                  title: Text('새 게시물'),
+                  title: const Text('새 게시물'),
                   leading: IconButton(
-                    icon: Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back),
                     onPressed: () {
                       if (GoRouter.of(context).canPop()) {
                         GoRouter.of(context).pop();
@@ -96,7 +94,7 @@ class _PostScreenState extends State<PostScreen> {
                 ),
                 body: SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -112,7 +110,7 @@ class _PostScreenState extends State<PostScreen> {
                                   onTap: state.isLoading
                                       ? null
                                       : () => _pickImage(context),
-                                  child: Column(
+                                  child: const Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(Icons.add_a_photo,
@@ -127,14 +125,15 @@ class _PostScreenState extends State<PostScreen> {
                                 )
                               : Stack(
                                   children: [
-                                    Container(
+                                    SizedBox(
                                       height: 120,
                                       child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
                                         itemCount: state.images.length,
                                         itemBuilder: (context, index) {
                                           return Padding(
-                                            padding: EdgeInsets.only(right: 8),
+                                            padding:
+                                                const EdgeInsets.only(right: 8),
                                             child: Stack(
                                               children: [
                                                 ClipRRect(
@@ -173,8 +172,9 @@ class _PostScreenState extends State<PostScreen> {
                                                               BoxShape.circle,
                                                         ),
                                                         padding:
-                                                            EdgeInsets.all(4),
-                                                        child: Icon(
+                                                            const EdgeInsets
+                                                                .all(4),
+                                                        child: const Icon(
                                                           Icons.close,
                                                           size: 16,
                                                           color: Colors.white,
@@ -196,14 +196,14 @@ class _PostScreenState extends State<PostScreen> {
                                             ? null
                                             : () => _pickImage(context),
                                         child: Container(
-                                          padding: EdgeInsets.all(8),
+                                          padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
                                             color:
                                                 Colors.black.withOpacity(0.5),
                                             borderRadius:
                                                 BorderRadius.circular(8),
                                           ),
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.add_a_photo,
                                             color: Colors.white,
                                             size: 20,
@@ -216,18 +216,18 @@ class _PostScreenState extends State<PostScreen> {
                         ),
                         if (state.images.isNotEmpty)
                           Padding(
-                            padding: EdgeInsets.only(top: 8),
+                            padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               '${state.images.length}개의 사진이 선택됨',
-                              style: TextStyle(color: Colors.grey),
+                              style: const TextStyle(color: Colors.grey),
                             ),
                           ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         TextField(
                           controller: _textController,
                           enabled: !state.isLoading,
                           maxLines: null,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: '게시물 내용을 입력하세요...',
                             border: OutlineInputBorder(),
                           ),
@@ -235,11 +235,11 @@ class _PostScreenState extends State<PostScreen> {
                             context.read<PostBloc>().add(UpdateTextEvent(text));
                           },
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         ProductTagSelector(
                           initialTags: state.tags,
                           onTagsSelected: _handleTagsSelected,
-                          selectedColor: Color(0xFFC9C138),
+                          selectedColor: const Color(0xFFC9C138),
                         ),
                       ],
                     ),
@@ -249,7 +249,7 @@ class _PostScreenState extends State<PostScreen> {
               if (state.isLoading)
                 Container(
                   color: Colors.black.withOpacity(0.5),
-                  child: Center(
+                  child: const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
