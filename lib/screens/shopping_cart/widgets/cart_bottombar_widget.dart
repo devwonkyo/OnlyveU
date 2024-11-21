@@ -124,31 +124,31 @@ class CartBottomBarWidget extends StatelessWidget {
           Row(
             children: [
               // 선물하기 버튼
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: totalSelectedCount > 0
-                      ? () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('선물하기 기능 준비중입니다.'),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                        }
-                      : null,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: BorderSide(color: Colors.grey[300]!),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: const Text(
-                    '선물하기',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-              ),
+              // Expanded(
+              //   child: OutlinedButton(
+              //     onPressed: totalSelectedCount > 0
+              //         ? () {
+              //             ScaffoldMessenger.of(context).showSnackBar(
+              //               const SnackBar(
+              //                 content: Text('선물하기 기능 준비중입니다.'),
+              //                 duration: Duration(seconds: 1),
+              //               ),
+              //             );
+              //           }
+              //         : null,
+              //     style: OutlinedButton.styleFrom(
+              //       padding: const EdgeInsets.symmetric(vertical: 16),
+              //       side: BorderSide(color: Colors.grey[300]!),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(4),
+              //       ),
+              //     ),
+              //     child: const Text(
+              //       '선물하기',
+              //       style: TextStyle(color: Colors.black),
+              //     ),
+              //   ),
+              // ),
               const SizedBox(width: 12),
 
               // 구매하기 버튼

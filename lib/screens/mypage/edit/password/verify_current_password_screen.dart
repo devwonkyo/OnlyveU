@@ -15,10 +15,8 @@ class VerifyCurrentPasswordScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           '비밀번호 변경',
-          style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
@@ -52,7 +50,6 @@ class VerifyCurrentPasswordScreen extends StatelessWidget {
                 builder: (context, state) {
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     width: double.infinity,

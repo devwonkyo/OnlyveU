@@ -15,6 +15,7 @@ import 'package:onlyveyou/blocs/category/category_product_bloc.dart';
 import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/inventory/inventory_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/email/email_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
@@ -43,6 +44,7 @@ import 'package:onlyveyou/repositories/history_repository.dart';
 import 'package:onlyveyou/repositories/home/ai_recommend_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
 import 'package:onlyveyou/repositories/inventory/inventory_repository.dart';
+import 'package:onlyveyou/repositories/mypage/profile_image_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/repositories/order/payment_repository.dart';
 import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
@@ -172,6 +174,9 @@ class MyApp extends StatelessWidget {
               create: (context) =>
                   OrderRepository(firestore: FirebaseFirestore.instance)),
           RepositoryProvider(create: (context) => PaymentRepository()), // 추가
+          RepositoryProvider(
+            create: (context) => ProfileImageRepository(),
+          ),
         ],
         child: ScreenUtilInit(
           designSize: const Size(375, 812),
@@ -233,9 +238,13 @@ class MyApp extends StatelessWidget {
                     cartRepository: ShoppingCartRepository(),
                   )..add(LoadHistoryItems()),
                 ),
-                BlocProvider<ProfileEditBloc>(
-                  create: (context) => ProfileEditBloc(),
+                BlocProvider<ProfileBloc>(
+                  create: (context) => ProfileBloc(
+                    ProfileImageRepository(), // ProfileImageRepository 인스턴스 주입 // FirebaseAuth 인스턴스 주입
+                  ),
+                  lazy: false, // Bloc을 화면 로드와 함께 미리 생성하여 상태를 유지
                 ),
+
                 BlocProvider<CategoryCubit>(
                     create: (context) =>
                         CategoryCubit(categoryRepository: CategoryRepository())
@@ -304,14 +313,16 @@ class MyApp extends StatelessWidget {
                 BlocProvider<InventoryBloc>(
                   create: (context) => InventoryBloc(InventoryRepository()),
                 ),
+                BlocProvider<EmailBloc>(
+                  create: (context) => EmailBloc(),
+                ),
               ],
               child: BlocBuilder<ThemeBloc, ThemeState>(
                 builder: (context, state) {
                   return MaterialApp.router(
                     debugShowCheckedModeBanner: false,
                     themeMode: state.themeMode,
-
-                    //themeMode: ThemeMode.light, //todo
+                    // themeMode: ThemeMode.light, //todo
                     theme: lightThemeData(),
                     darkTheme: darkThemeData(),
                     routerConfig: router,
