@@ -43,7 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
       await _prefs.setAutoLogin(false);
     }
     await _saveUserInfoToSharedPrefs(userId);
-    context.go('/home');
   }
 
   // SharedPreferences에서 토큰을 가져오는 메서드
