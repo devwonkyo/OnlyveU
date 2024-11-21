@@ -1,12 +1,9 @@
-import 'dart:async'; // 주기적인 타이머를 위한 Timer 라이브러리 임포트
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/models/home_model.dart';
 
-// BannerItem 모델을 사용하기 위한 임포트
-
-// 배너 위젯 클래스 정의 (자동 슬라이드 기능 포함)
 class BannerWidget extends StatefulWidget {
   final PageController pageController;
   final List<BannerItem> bannerItems;
@@ -72,7 +69,7 @@ class _BannerWidgetState extends State<BannerWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 320, // 배너 높이 조정
+      height: MediaQuery.of(context).size.width * 1,
       child: Stack(
         children: [
           PageView.builder(
@@ -86,18 +83,17 @@ class _BannerWidgetState extends State<BannerWidget> {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () => _handleBannerTap(index),
-                child: Image.asset(
-                  widget.bannerItems[index].imageAsset,
-                  width: double.infinity,
-                  height: 320,
-                  fit: index == 1
-                      ? BoxFit.contain
-                      : BoxFit.cover, // 두 번째 이미지만 contain으로
+                child: Container(
+                  color: Colors.white,
+                  child: Image.asset(
+                    widget.bannerItems[index].imageAsset,
+                    width: double.infinity,
+                    fit: index == 1 ? BoxFit.contain : BoxFit.cover,
+                  ),
                 ),
               );
             },
           ),
-          // 인디케이터
           Positioned(
             bottom: 16,
             right: 16,
