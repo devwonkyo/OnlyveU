@@ -75,7 +75,7 @@ class OrderModel {
     required this.items,
     required this.orderType,
     this.id,
-    this.status = OrderStatus.pending,
+    this.status = OrderStatus.preparing,
     this.pickupTime,
     this.pickStore,
     this.deliveryInfo,
@@ -164,6 +164,4 @@ class OrderModel {
       createdAt: createdAt ?? this.createdAt,
     );
   }
-
-  
 }

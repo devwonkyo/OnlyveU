@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:onlyveyou/models/user_model.dart';
+import 'package:onlyveyou/utils/styles.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -173,6 +174,13 @@ class _LoginScreenState extends State<LoginScreen> {
       User? user = userCredential.user;
 
       if (user != null) {
+        // 자동 로그인 설정 저장
+        if (autoLogin) {
+          await _prefs.setAutoLogin(true);
+        } else {
+          await _prefs.setAutoLogin(false);
+        }
+
         // UserModel 인스턴스 생성
         UserModel userModel = UserModel(
           uid: user.uid,
@@ -183,8 +191,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Firebase Firestore에 UserModel 저장
         await _saveUserModelToFirestore(userModel);
-        //sharedpreferenc에 저장
-        _saveUserInfoToSharedPrefs(user.uid);
+
+        // SharedPreferences에 저장
+        await _saveUserInfoToSharedPrefs(user.uid);
 
         context.go('/home'); // 홈 화면으로 이동
       }
@@ -217,12 +226,6 @@ class _LoginScreenState extends State<LoginScreen> {
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: Icon(Icons.close, color: Colors.black),
-            onPressed: () {
-              context.pop();
-            },
-          ),
         ),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
@@ -235,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 20),
                   Center(
                     child: Text(
-                      '로그인',
+                      'OnlyveU',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -281,7 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: AppStyles.mainColor,
                       padding: EdgeInsets.symmetric(vertical: 15),
                     ),
                     onPressed: () {
@@ -290,32 +293,27 @@ class _LoginScreenState extends State<LoginScreen> {
                             password: passwordController.text,
                           ));
                     },
-                    child: Text('로그인', style: TextStyle(color: Colors.white)),
+                    child: Text('로그인', style: TextStyle(color: Colors.black)),
                   ),
                   SizedBox(height: 10),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.yellow,
-                      padding: EdgeInsets.symmetric(vertical: 15),
-                    ),
+                    style: ElevatedButton.styleFrom(),
                     onPressed: () {
                       _loginWithKakao();
                     },
-                    child: Text('카카오톡으로 로그인',
-                        style: TextStyle(color: Colors.black)),
+                    child:
+                        Image.asset('assets/image/kakaologin.png', height: 50),
                   ),
                   SizedBox(height: 10),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 15),
-                      side: BorderSide(color: Colors.black),
-                    ),
+                    style: ElevatedButton.styleFrom(),
                     onPressed: () {
                       _loginWithGoogle();
                     },
-                    child:
-                        Text('구글로 로그인', style: TextStyle(color: Colors.black)),
+                    child: Image.asset(
+                      'assets/image/googlelogin.png',
+                      height: 50,
+                    ),
                   ),
                   SizedBox(height: 20),
                   Center(

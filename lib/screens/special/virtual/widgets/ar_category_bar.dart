@@ -16,7 +16,7 @@ class ArCategoryBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black.withOpacity(0.3),
+      color: Colors.transparent,
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
