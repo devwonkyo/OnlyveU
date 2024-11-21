@@ -511,7 +511,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   items: widget.order.items,
                                   orderType: widget.order.orderType,
                                   deliveryInfo: updatedDeliveryInfo,
-                                  status: OrderStatus.pending,
+                                  status: OrderStatus.preparing,
                                   createdAt: DateTime.now(),
                                   pickupTime: DateTime.now().add(
                                       const Duration(hours: 3)), // 3시간 후 픽업
