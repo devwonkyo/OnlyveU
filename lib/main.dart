@@ -5,6 +5,8 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
@@ -13,6 +15,7 @@ import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/inventory/inventory_bloc.dart';
 import 'package:onlyveyou/blocs/map/store_map_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/email/email_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
@@ -28,6 +31,7 @@ import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
 import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
 import 'package:onlyveyou/blocs/special_bloc/weather/location_bloc.dart';
+import 'package:onlyveyou/blocs/special_bloc/weather/weather_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -41,13 +45,16 @@ import 'package:onlyveyou/repositories/home/ai_recommend_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
 import 'package:onlyveyou/repositories/inventory/inventory_repository.dart';
 import 'package:onlyveyou/repositories/map/goecoding_repository.dart';
+import 'package:onlyveyou/repositories/mypage/profile_image_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
+import 'package:onlyveyou/repositories/order/payment_repository.dart';
 import 'package:onlyveyou/repositories/product/product_detail_repository.dart';
 import 'package:onlyveyou/repositories/product_repository.dart';
 import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 import 'package:onlyveyou/repositories/special/weather/location_repository.dart';
+import 'package:onlyveyou/repositories/special/weather/weather_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
@@ -65,6 +72,7 @@ void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
 
@@ -118,7 +126,7 @@ void main() async {
     final screen = uri.queryParameters['screen'];
     print("productId : $productId, screen : $screen ");
 
-    if(screen != null){
+    if (screen != null) {
       router.push(screen, extra: productId);
     }
 
@@ -177,6 +185,10 @@ class MyApp extends StatelessWidget {
           RepositoryProvider(
               create: (context) =>
                   OrderRepository(firestore: FirebaseFirestore.instance)),
+          RepositoryProvider(create: (context) => PaymentRepository()), // 추가
+          RepositoryProvider(
+            create: (context) => ProfileImageRepository(),
+          ),
         ],
         child: ScreenUtilInit(
           designSize: const Size(375, 812),
@@ -185,6 +197,11 @@ class MyApp extends StatelessWidget {
           builder: (_, child) {
             return MultiBlocProvider(
               providers: [
+                BlocProvider<WeatherBloc>(
+                  create: (context) => WeatherBloc(
+                    repository: WeatherRepository(),
+                  ),
+                ),
                 BlocProvider<LocationBloc>(
                   create: (context) => LocationBloc(
                     repository: LocationRepository(),
@@ -233,9 +250,13 @@ class MyApp extends StatelessWidget {
                     cartRepository: ShoppingCartRepository(),
                   )..add(LoadHistoryItems()),
                 ),
-                BlocProvider<ProfileEditBloc>(
-                  create: (context) => ProfileEditBloc(),
+                BlocProvider<ProfileBloc>(
+                  create: (context) => ProfileBloc(
+                    ProfileImageRepository(), // ProfileImageRepository 인스턴스 주입 // FirebaseAuth 인스턴스 주입
+                  ),
+                  lazy: false, // Bloc을 화면 로드와 함께 미리 생성하여 상태를 유지
                 ),
+
                 BlocProvider<CategoryCubit>(
                     create: (context) =>
                         CategoryCubit(categoryRepository: CategoryRepository())
@@ -268,6 +289,7 @@ class MyApp extends StatelessWidget {
                 BlocProvider<PaymentBloc>(
                   create: (context) => PaymentBloc(
                     orderRepository: context.read<OrderRepository>(),
+                    repository: PaymentRepository(),
                   ),
                 ),
                 BlocProvider<PostBloc>(
@@ -302,6 +324,9 @@ class MyApp extends StatelessWidget {
                 ),
                 BlocProvider<InventoryBloc>(
                   create: (context) => InventoryBloc(InventoryRepository()),
+                ),
+                BlocProvider<EmailBloc>(
+                  create: (context) => EmailBloc(),
                 ),
                 BlocProvider<StoreMapBloc>(
                   create: (context) => StoreMapBloc(geocodingRepository: GeocodingRepository()),

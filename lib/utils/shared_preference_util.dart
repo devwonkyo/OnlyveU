@@ -75,7 +75,15 @@ class OnlyYouSharedPreference {
     return preferences.getString('token') ?? "";
   }
 
+  Future<void> setAutoLogin(bool value) async {
+    SharedPreferences preferences = await prefs;
+    await preferences.setBool('autoLogin', value);
+  }
 
+  Future<bool> getAutoLogin() async {
+    SharedPreferences preferences = await prefs;
+    return preferences.getBool('autoLogin') ?? false;
+  }
 
   // 유저 정보 삭제
   Future<void> removeUserInfo() async {
@@ -133,7 +141,6 @@ class OnlyYouSharedPreference {
 
   // 모든 데이터 프린트 - 로그아웃 전에 현재 데이터 확인
   Future<void> printAllData() async {
-    
     SharedPreferences preferences = await prefs;
     print('=== 현재 내부 저장소에 있는 데이터 ===');
     print('User ID: ${preferences.getString('userId') ?? '없음'}');
