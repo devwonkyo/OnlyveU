@@ -9,7 +9,6 @@ Widget BuildIconWithLabel(
       padding: EdgeInsets.zero, // 패딩 제거
       minimumSize: Size.zero,
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      foregroundColor: Colors.black,
     ),
     child: Column(
       mainAxisSize: MainAxisSize.min,
