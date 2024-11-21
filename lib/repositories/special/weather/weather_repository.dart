@@ -78,6 +78,7 @@ class WeatherRepository {
     }
   }
 
+//
   Future<int> _fetchAirQualityData(double lat, double lon) async {
     try {
       final response = await http.get(Uri.parse(
