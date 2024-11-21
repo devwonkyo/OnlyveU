@@ -56,6 +56,8 @@ import '../screens/search/search_page.dart';
 import '../screens/special/ai_onepick/ai_onepick_screen.dart';
 import '../screens/special/debate/debate_screen.dart';
 import '../screens/special/mbti/mbti_screen.dart';
+import '../screens/special/virtual/ar_camera_screen.dart';
+import '../screens/special/virtual/ar_result_screen.dart';
 import '../screens/special/weather/weather_screen.dart';
 import '../widgets/bottom_navbar.dart';
 
@@ -67,6 +69,27 @@ final GoRouter router = GoRouter(
         return ScaffoldWithBottomNavBar(child: child);
       },
       routes: [
+        GoRoute(
+          path: '/ar/camera',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const ArCameraScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/ar/result',
+          pageBuilder: (context, state) => _buildPageWithTransition(
+            state,
+            const ArResultScreen(),
+          ),
+        ),
+        // GoRoute(
+        //   path: '/ar/save',
+        //   pageBuilder: (context, state) => _buildPageWithTransition(
+        //     state,
+        //     const ArSaveScreen(), // 이 화면은 아직 구현되지 않은 것 같습니다
+        //   ),
+        // ),
         GoRoute(
           path: '/map',
           pageBuilder: (context, state) => _buildPageWithTransition(
