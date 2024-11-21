@@ -1,84 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/special_bloc/weather/weather_bloc.dart';
+import 'package:onlyveyou/models/product_model.dart';
+import 'package:onlyveyou/utils/format_price.dart';
 
 class WeatherProductRecommendationWidget extends StatelessWidget {
   const WeatherProductRecommendationWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // SliverList 대신 MultiSliver를 사용하여 여러 Sliver를 묶습니다
-    return SliverList(
-      delegate: SliverChildListDelegate([
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 8.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '날씨 맞춤 추천',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2D3436),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
+    return BlocBuilder<WeatherBloc, WeatherState>(
+      builder: (context, state) {
+        if (state is WeatherLoading) {
+          return SliverToBoxAdapter(
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (state is WeatherLoaded) {
+          return SliverList(
+            delegate: SliverChildListDelegate([
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 8.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.filter_list,
-                      size: 16.sp,
-                      color: Color(0xFF2D3436),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '날씨 맞춤 추천',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2D3436),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 4.w),
+                    SizedBox(height: 4.h),
                     Text(
-                      '필터',
+                      state.recommendationReason,
                       style: TextStyle(
-                        color: Color(0xFF2D3436),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                        color: Color(0xFF7F8C8D),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 16.h,
-        ),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 16.h,
-            crossAxisSpacing: 16.w,
-            childAspectRatio: 0.6,
-            mainAxisExtent: 280.h,
-          ),
-          itemBuilder: (context, index) => _buildRecommendationCard(),
-          itemCount: 6,
-        ),
-      ]),
+              SizedBox(height: 16.h),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16.h,
+                  crossAxisSpacing: 16.w,
+                  childAspectRatio: 0.6,
+                  mainAxisExtent: 280.h,
+                ),
+                itemBuilder: (context, index) => _buildRecommendationCard(
+                  state.recommendedProducts[index],
+                ),
+                itemCount: state.recommendedProducts.length,
+              ),
+            ]),
+          );
+        }
+
+        return SliverToBoxAdapter(child: SizedBox.shrink());
+      },
     );
   }
 
-  static Widget _buildRecommendationCard() {
+  Widget _buildRecommendationCard(ProductModel product) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -98,16 +98,30 @@ class WeatherProductRecommendationWidget extends StatelessWidget {
             borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             child: Container(
               height: 150.h,
-              color: Color(0xFFF1F2F6),
               child: Stack(
                 children: [
-                  Center(
-                    child: Icon(
-                      Icons.image,
-                      color: Colors.grey,
-                      size: 40.sp,
+                  if (product.productImageList.isNotEmpty)
+                    Image.network(
+                      product.productImageList.first,
+                      width: double.infinity,
+                      height: 150.h,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Icon(
+                          Icons.image,
+                          color: Colors.grey,
+                          size: 40.sp,
+                        ),
+                      ),
+                    )
+                  else
+                    Center(
+                      child: Icon(
+                        Icons.image,
+                        color: Colors.grey,
+                        size: 40.sp,
+                      ),
                     ),
-                  ),
                   Positioned(
                     top: 8,
                     right: 8,
@@ -160,37 +174,40 @@ class WeatherProductRecommendationWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '여름 필수템',
+                  product.name,
                   style: TextStyle(
                     color: Color(0xFF2D3436),
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 4.h),
                 Row(
                   children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 6.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFFFF4E3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '30%',
-                        style: TextStyle(
-                          color: Color(0xFFFFA41B),
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
+                    if (product.discountPercent > 0)
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFFFF4E3),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '${product.discountPercent}%',
+                          style: TextStyle(
+                            color: Color(0xFFFFA41B),
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
                     SizedBox(width: 8.w),
                     Text(
-                      '₩89,000',
+                      '₩${formatPrice(product.price)}',
                       style: TextStyle(
                         color: Color(0xFF2D3436),
                         fontSize: 14.sp,
@@ -209,7 +226,7 @@ class WeatherProductRecommendationWidget extends StatelessWidget {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      '4.5',
+                      product.rating.toStringAsFixed(1),
                       style: TextStyle(
                         color: Color(0xFF7F8C8D),
                         fontSize: 12.sp,
@@ -217,7 +234,7 @@ class WeatherProductRecommendationWidget extends StatelessWidget {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      '(128)',
+                      '(${product.reviewList.length})',
                       style: TextStyle(
                         color: Color(0xFF7F8C8D),
                         fontSize: 12.sp,
