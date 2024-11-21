@@ -111,6 +111,7 @@ flutter:
     - assets/image/mypage/coupon_image.jpeg
     - assets/image/shutter/
     - assets/image/banner/
+    - assets/image/ar/
     - .env
   #   - images/a_dot_ham.jpeg
 
