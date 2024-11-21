@@ -110,47 +110,53 @@ class HistoryItemCard extends StatelessWidget {
                       SizedBox(height: 8),
 
                       // 태그 표시
+                      // ... 이전 코드는 동일
+
                       // 태그 표시
                       Row(
                         children: [
                           if (product.isPopular)
                             Container(
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                  horizontal: 6, vertical: 3),
                               decoration: BoxDecoration(
-                                color: Colors.grey[200],
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 '인기',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  // 다크모드일 때는 검은색, 아닐 때는 현재 색상 유지
+                                  fontSize: 11,
                                   color: Theme.of(context).brightness ==
                                           Brightness.dark
-                                      ? Colors.black
-                                      : null,
+                                      ? Colors.white
+                                      : Colors.black87,
                                 ),
                               ),
                             ),
+                          SizedBox(width: 4),
                           if (product.isBest)
                             Container(
-                              margin: EdgeInsets.only(left: 8),
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                  horizontal: 6, vertical: 3),
                               decoration: BoxDecoration(
-                                color: Colors.grey[200],
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.grey[800]
+                                    : Colors.grey[200],
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 'BEST',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  // 다크모드일 때는 검은색, 아닐 때는 현재 색상 유지
+                                  fontSize: 11,
                                   color: Theme.of(context).brightness ==
                                           Brightness.dark
-                                      ? Colors.black
-                                      : null,
+                                      ? Colors.white
+                                      : Colors.black87,
                                 ),
                               ),
                             ),
