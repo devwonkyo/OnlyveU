@@ -98,9 +98,7 @@ void main() async {
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
 
-
   DeepLinkService().initialize(router);
-
 
   //카카오톡
   kakaoSchemeStream.listen((url) {
@@ -109,15 +107,13 @@ void main() async {
     final screen = uri.queryParameters['screen'];
     print("productId : $productId, screen : $screen ");
 
-    if(screen != null){
+    if (screen != null) {
       router.push(screen, extra: productId);
     }
-
   }, onError: (e) {
     // 에러 상황의 예외 처리 코드를 작성합니다.
     print("kakao listen error : $e");
   });
-
 
   // 위치 서비스 초기화 추가
   try {
@@ -126,7 +122,6 @@ void main() async {
   } catch (e) {
     debugPrint('Location service initialization error: $e');
   }
-
 
 // 모든 제품 로컬 저장 (검색용)
   try {
@@ -299,8 +294,8 @@ class MyApp extends StatelessWidget {
                 builder: (context, state) {
                   return MaterialApp.router(
                     debugShowCheckedModeBanner: false,
-                    // themeMode: state.themeMode,
-                    themeMode: ThemeMode.light, //todo
+                    themeMode: state.themeMode,
+                    // themeMode: ThemeMode.light, //todo
                     theme: lightThemeData(),
                     darkTheme: darkThemeData(),
                     routerConfig: router,
