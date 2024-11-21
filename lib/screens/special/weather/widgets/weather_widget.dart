@@ -281,7 +281,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           child: Row(
             children: [
               Icon(icon, size: 16.sp, color: color),
-              SizedBox(width: 6.w),
+              SizedBox(width: 8.w),
               Text(
                 title,
                 style: TextStyle(
@@ -294,7 +294,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         ),
         SizedBox(width: 10.w),
         Container(
-          width: 50.w,
+          width: 60.w,
           child: Text(
             value,
             style: TextStyle(
