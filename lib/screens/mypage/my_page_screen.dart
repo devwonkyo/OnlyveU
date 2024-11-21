@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/auth/auth_event.dart';
 import 'package:onlyveyou/blocs/auth/auth_state.dart';
+import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_event.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_state.dart';
@@ -193,7 +195,125 @@ class MyPageScreen extends StatelessWidget {
                     //     // ),
                     //   ],
                     // ),
-
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF6A11CB),
+                            Color(0xFF2575FC),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.psychology,
+                                color: Colors.white,
+                                size: 28.sp,
+                              ),
+                              SizedBox(width: 12.w),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '맞춤 AI 추천',
+                                      style: TextStyle(
+                                        fontSize: 22.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      '회원님의 취향을 분석한\n맞춤 상품',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: Colors.white.withOpacity(0.9),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context
+                                      .read<AIRecommendBloc>()
+                                      .add(const LoadAIRecommendations());
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w, vertical: 10.h),
+                                  backgroundColor: Colors.white,
+                                  elevation: 2,
+                                  shadowColor: Colors.black.withOpacity(0.1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.auto_awesome,
+                                      color: const Color(0xFF2575FC),
+                                      size: 18.sp,
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Text(
+                                      'AI 추천받기',
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: const Color(0xFF2575FC),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+                          // AI 분석 요약 카드들 - BlocBuilder로 실시간 데이터 표시
+                          BlocBuilder<AIRecommendBloc, AIRecommendState>(
+                            builder: (context, state) {
+                              return SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    _buildAnalysisCard(
+                                      icon: Icons.remove_red_eye,
+                                      title: '최근 본 상품',
+                                      value:
+                                          '${state.activityCounts['viewCount']}개',
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    _buildAnalysisCard(
+                                      icon: Icons.favorite,
+                                      title: '관심 상품',
+                                      value:
+                                          '${state.activityCounts['likeCount']}개',
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    _buildAnalysisCard(
+                                      icon: Icons.shopping_cart,
+                                      title: '장바구니',
+                                      value:
+                                          '${state.activityCounts['cartCount']}개',
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.9,
                       height: 50,
@@ -343,44 +463,6 @@ class MyPageScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Column(
                 children: [
-                  // CustomSection(
-                  //   title: '쇼핑 활동',
-                  //   items: [
-                  //     buildListItem(Icons.receipt_long, '취소/반품/교환 내역'),
-                  //     buildListItem(Icons.account_balance_wallet, '선물함'),
-                  //     buildListItem(Icons.payment, '배송지 관리'),
-                  //     buildListItem(Icons.savings, '재입고 알림'),
-                  //     buildListItem(Icons.receipt_long, '올영매장'),
-                  //     buildListItem(Icons.account_balance_wallet, '티켓 예약 내역'),
-                  //   ],
-                  // ),
-                  // CustomSection(
-                  //   title: '마이 월렛',
-                  //   items: [
-                  //     buildListItem(Icons.receipt_long, '스마트 영수증'),
-                  //     buildListItem(Icons.account_balance_wallet, '환불계좌 관리'),
-                  //     buildListItem(Icons.payment, '빠른결제',
-                  //         subtitle: '토스(0216)'),
-                  //     buildListItem(Icons.savings, '예치금'),
-                  //   ],
-                  // ),
-                  // CustomSection(
-                  //   title: '이벤트·리서치',
-                  //   items: [
-                  //     buildListItem(Icons.event, '이벤트 참여 현황'),
-                  //     buildListItem(Icons.mic, '올리브 보이스', onTap: () {
-                  //       context.push('/admin');
-                  //     }),
-                  //   ],
-                  // ),
-                  // CustomSection(
-                  //   title: '문의',
-                  //   items: [
-                  //     buildListItem(Icons.headset_mic, '고객센터/공지사항'),
-                  //     buildListItem(Icons.help_outline, '상품 문의'),
-                  //     buildListItem(Icons.chat_bubble_outline, '1:1 문의'),
-                  //   ],
-                  // ),
                   buildListItem(
                     Icons.logout,
                     '로그아웃',
@@ -427,4 +509,50 @@ class MyPageScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildAnalysisCard({
+  required IconData icon,
+  required String title,
+  required String value,
+}) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.15),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: Colors.white,
+          size: 20.sp,
+        ),
+        SizedBox(width: 8.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 }
