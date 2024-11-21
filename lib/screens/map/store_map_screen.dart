@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:onlyveyou/blocs/map/store_map_bloc.dart';
+import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/store_with_inventory_model.dart';
 import 'package:onlyveyou/repositories/map/goecoding_repository.dart';
+import 'package:onlyveyou/widgets/cartItmes_appbar.dart';
 
 class StoreMapScreen extends StatefulWidget {
   final StoreWithInventoryModel storeModel;
@@ -17,30 +19,54 @@ class StoreMapScreen extends StatefulWidget {
 
 class _StoreMapScreenState extends State<StoreMapScreen> {
   final Completer<NaverMapController> mapControllerCompleter = Completer();
+  bool _isInitialized = false;
   NMarker? marker;
+  late final StoreMapBloc _mapBloc;  // BLoC 인스턴스 저장
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<StoreMapBloc>().add(
-        LoadStoreLocation(widget.storeModel.address),
-      );
-    });
+    _mapBloc = StoreMapBloc(geocodingRepository: GeocodingRepository());  // BLoC 초기화
+    _initializeMap();
+  }
+
+  Future<void> _initializeMap() async {
+    if (_isInitialized) return;
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
+    _mapBloc.add(LoadStoreLocation(widget.storeModel.address));  // 저장된 BLoC 인스턴스 사용
+    _isInitialized = true;
+  }
+
+  @override
+  void dispose() {
+    _mapBloc.close();  // BLoC 정리
+    marker = null;
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<StoreMapBloc, StoreMapState>(
+    return BlocProvider.value(  // BlocProvider.value 사용
+      value: _mapBloc,  // 기존 BLoC 인스턴스 전달
+      child: BlocConsumer<StoreMapBloc, StoreMapState>(
         listener: (context, state) {
           if (state is StoreMapError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
+          } else if (state is StoreMapLoaded) {
+            _updateMarkerAndCamera(state.position);
           }
         },
         builder: (context, state) {
           return Scaffold(
+            appBar: const CartItemsAppBar(
+              appTitle: '매장 위치 찾기',
+            ),
             body: Stack(
               children: [
                 NaverMap(
@@ -49,12 +75,8 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
                     locationButtonEnable: false,
                     consumeSymbolTapEvents: false,
                   ),
-                  onMapReady: (controller) async {
+                  onMapReady: (controller) {
                     mapControllerCompleter.complete(controller);
-                    if (state is StoreMapLoaded) {
-                      print('call storemaploaded');
-                      await _updateMarkerAndCamera(state.position);
-                    }
                   },
                 ),
                 if (state is StoreMapLoading)
@@ -64,35 +86,86 @@ class _StoreMapScreenState extends State<StoreMapScreen> {
             ),
           );
         },
-      );
+      ),
+    );
   }
 
   Future<void> _updateMarkerAndCamera(NLatLng position) async {
-    if (!mounted) return;
-
     try {
       final controller = await mapControllerCompleter.future;
-      await Future.wait([
-        if (marker != null) controller.deleteOverlay(marker! as NOverlayInfo),
-        controller.addOverlay(
-            NMarker(id: 'store-location', position: position)
-        ),
-        controller.updateCamera(
-          NCameraUpdate.withParams(
-            target: position,
-            zoom: 15,
+
+      // 1. 기존 마커 삭제
+      if (marker != null) {
+        await controller.deleteOverlay(marker! as NOverlayInfo);
+        marker = null;
+      }
+
+      // 2. 새 마커 생성 및 추가
+      marker = NMarker(
+        id: 'store-location',
+        position: position,
+      );
+
+      final iconWidget = Center(
+        child: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: AppsColor.pastelGreen,
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 1,
+                blurRadius: 4,
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 7),  // padding 조정
+          child: Icon(
+            Icons.spa,
+            color: AppsColor.pastelGreen,
+            size: 22,  // 크기 미세 조정
           ),
         ),
-      ]);
+      );
+
+// 위젯을 이미지로 변환할 때도 동일한 크기 사용
+      final overlay = await NOverlayImage.fromWidget(
+        widget: iconWidget,
+        size: const Size(40, 40),
+        context: context,
+      );
+
+      marker!.setIcon(overlay);
+
+// 캡션(상점 이름) 설정
+      marker!.setCaption(
+        NOverlayCaption(
+          text: widget.storeModel.storeName,
+          textSize: 14,
+          color: Colors.black,
+          haloColor: Colors.white,  // 텍스트 테두리 색상
+        ),
+      );
+
+      await controller.addOverlay(marker!);
+
+      // 3. 카메라 이동
+      await controller.updateCamera(
+        NCameraUpdate.withParams(
+          target: position,
+          zoom: 15,
+        ),
+      );
     } catch (e) {
       print('Error updating map: $e');
     }
-  }
-
-  @override
-  void dispose() {
-    marker = null;
-    super.dispose();
   }
 
   Widget _buildBottomSheet() {

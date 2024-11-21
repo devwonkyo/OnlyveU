@@ -260,9 +260,7 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                                         productModel: products[index],
                                         userId: userId ?? "",
                                         onTap: () => context.push(
-                                            "/product-detail",
-                                            extra: "1_4_1"));
-                                    // extra: products[index].productId));
+                                            "/product-detail", extra: products[index].productId));
                                   },
                                   childCount: products.length,
                                 ),

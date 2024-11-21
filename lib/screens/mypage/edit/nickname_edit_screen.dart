@@ -18,14 +18,14 @@ class NicknameEditScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back_ios,
+          ),
           onPressed: () {
             context.pop();
           },
@@ -60,7 +60,6 @@ class NicknameEditScreen extends StatelessWidget {
 
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     width: double.infinity,
