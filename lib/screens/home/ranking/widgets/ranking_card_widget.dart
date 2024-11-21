@@ -42,7 +42,7 @@ class RankingCardWidget extends StatelessWidget {
                   child: Image.network(
                     product.productImageList.first,
                     width: double.infinity,
-                    height: 180.h,
+                    height: 160.h,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
                         Icon(Icons.image, size: 180.h),
