@@ -33,7 +33,6 @@ class ShutterScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
                     ),
                   ),
                   TextButton(
@@ -123,7 +122,6 @@ class ShutterScreen extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.grey[700],
                                         ),
                                       ),
                                       SizedBox(height: 8),
@@ -209,7 +207,6 @@ class TaggedProductWidget extends StatelessWidget {
                   child: Text(
                     productName,
                     style: TextStyle(
-                      color: Colors.black87,
                       fontSize: 13,
                     ),
                     overflow: TextOverflow.ellipsis,
