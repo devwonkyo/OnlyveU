@@ -10,18 +10,31 @@ import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_event.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_state.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/order_status/order_status_event.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_state.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/utils/order_status_util.dart';
+import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/my_page_widget/build_icon_with_label.dart';
 import 'package:onlyveyou/widgets/my_page_widget/custom_section.dart';
 import 'package:onlyveyou/widgets/my_page_widget/order_status.dart';
 
-class MyPageScreen extends StatelessWidget {
+class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
+
+  @override
+  State<MyPageScreen> createState() => _MyPageScreenState();
+}
+
+class _MyPageScreenState extends State<MyPageScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<OrderStatusBloc>().add(const FetchOrder());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,11 +98,30 @@ class MyPageScreen extends StatelessWidget {
                                 if (state is NicknameLoading) {
                                   return const CircularProgressIndicator();
                                 } else if (state is NicknameLoaded) {
-                                  return Text(
-                                    state.nickname, // 사용자 이름으로 대체
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 5.0),
+                                    child: RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        children: [
+                                          const TextSpan(
+                                            text: '안녕하세요 ', // "안녕하세요" 텍스트
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                '${state.nickname}님', // state.nickname 텍스트
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 } else {
@@ -157,7 +189,7 @@ class MyPageScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+
                     // const Row(
                     //   mainAxisAlignment: MainAxisAlignment.spaceAround,
                     //   children: [
@@ -196,95 +228,21 @@ class MyPageScreen extends StatelessWidget {
                     //   ],
                     // ),
                     Container(
-                      padding: EdgeInsets.all(16.w),
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF6A11CB),
-                            Color(0xFF2575FC),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
+                      decoration: const BoxDecoration(),
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.psychology,
-                                color: Colors.white,
-                                size: 28.sp,
-                              ),
-                              SizedBox(width: 12.w),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '맞춤 AI 추천',
-                                      style: TextStyle(
-                                        fontSize: 22.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4.h),
-                                    Text(
-                                      '회원님의 취향을 분석한\n맞춤 상품',
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        color: Colors.white.withOpacity(0.9),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context
-                                      .read<AIRecommendBloc>()
-                                      .add(const LoadAIRecommendations());
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 16.w, vertical: 10.h),
-                                  backgroundColor: Colors.white,
-                                  elevation: 2,
-                                  shadowColor: Colors.black.withOpacity(0.1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.auto_awesome,
-                                      color: const Color(0xFF2575FC),
-                                      size: 18.sp,
-                                    ),
-                                    SizedBox(width: 8.w),
-                                    Text(
-                                      'AI 추천받기',
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        color: const Color(0xFF2575FC),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
                           SizedBox(height: 16.h),
                           // AI 분석 요약 카드들 - BlocBuilder로 실시간 데이터 표시
                           BlocBuilder<AIRecommendBloc, AIRecommendState>(
                             builder: (context, state) {
-                              return SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 10.0,
+                                  right: 10,
+                                ),
                                 child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     _buildAnalysisCard(
                                       icon: Icons.remove_red_eye,
@@ -292,19 +250,22 @@ class MyPageScreen extends StatelessWidget {
                                       value:
                                           '${state.activityCounts['viewCount']}개',
                                     ),
-                                    SizedBox(width: 12.w),
                                     _buildAnalysisCard(
                                       icon: Icons.favorite,
                                       title: '관심 상품',
                                       value:
                                           '${state.activityCounts['likeCount']}개',
                                     ),
-                                    SizedBox(width: 12.w),
-                                    _buildAnalysisCard(
-                                      icon: Icons.shopping_cart,
-                                      title: '장바구니',
-                                      value:
-                                          '${state.activityCounts['cartCount']}개',
+                                    InkWell(
+                                      onTap: () {
+                                        context.push('/cart');
+                                      },
+                                      child: _buildAnalysisCard(
+                                        icon: Icons.shopping_cart,
+                                        title: '장바구니',
+                                        value:
+                                            '${state.activityCounts['cartCount']}개',
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -313,6 +274,9 @@ class MyPageScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+                    const SizedBox(
+                      height: 20,
                     ),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.9,
@@ -367,32 +331,21 @@ class MyPageScreen extends StatelessWidget {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {
-                            // 버튼 클릭 시 동작
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            foregroundColor: Colors.black,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                context.push('/order-status');
-                              },
-                              child: const Row(
-                                children: [
-                                  Text(
-                                    '전체보기',
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 15,
-                                  ),
-                                ],
-                              )),
-                        ),
+                            onPressed: () {
+                              context.push('/order-status');
+                            },
+                            child: const Row(
+                              children: [
+                                Text(
+                                  '전체보기',
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 15,
+                                ),
+                              ],
+                            )),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -470,6 +423,13 @@ class MyPageScreen extends StatelessWidget {
                       context.read<AuthBloc>().add(LogoutRequested());
                     },
                   ),
+                  buildListItem(
+                    Icons.person_off,
+                    '회원탈퇴',
+                    onTap: () {
+                      _showDeleteConfirmationDialog(context);
+                    },
+                  ),
                   ListTile(
                     leading: const Icon(
                       Icons.brightness_4,
@@ -516,43 +476,135 @@ Widget _buildAnalysisCard({
   required String title,
   required String value,
 }) {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.15),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 20.sp,
-        ),
-        SizedBox(width: 8.w),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Colors.white.withOpacity(0.9),
-              ),
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(
+        icon,
+        size: 20.sp,
+      ),
+      SizedBox(width: 8.w),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12.sp,
             ),
-            SizedBox(height: 2.h),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
             ),
-          ],
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+void _showDeleteConfirmationDialog(BuildContext context) {
+  bool isAgreed = false;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
         ),
-      ],
-    ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '탈퇴하기',
+                    style: AppStyles.headingStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '정말 탈퇴하시겠습니까?',
+                    textAlign: TextAlign.center,
+                    style: AppStyles.bodyTextStyle,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isAgreed,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isAgreed = value ?? false;
+                          });
+                        },
+                      ),
+                      const Text('동의합니다'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // 직사각형 모양으로 설정
+                            ),
+                          ),
+                          child: Text(
+                            '취소',
+                            style: AppStyles.bodyTextStyle,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        child: ElevatedButton(
+                          onPressed: isAgreed
+                              ? () {
+                                  // 회원 탈퇴 이벤트 추가
+                                  context
+                                      .read<AuthBloc>()
+                                      .add(DeleteAccountRequested());
+                                  context.go('/login');
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppsColor.pastelGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // 직사각형 모양으로 설정
+                            ),
+                          ),
+                          child: Text(
+                            '확인',
+                            style: AppStyles.bodyTextStyle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    },
   );
 }

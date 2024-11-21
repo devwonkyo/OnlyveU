@@ -227,7 +227,7 @@ class ProfileEditScreen extends StatelessWidget {
                   const Text('|'),
                   TextButton(
                     onPressed: () {
-                      _showDeleteConfirmationDialog(context);
+                      showDeleteConfirmationDialog(context);
                     },
                     child: const Text('회원 탈퇴'),
                   ),
@@ -241,7 +241,7 @@ class ProfileEditScreen extends StatelessWidget {
   }
 // 회원 탈퇴 경고창 표시 함수
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void showDeleteConfirmationDialog(BuildContext context) {
     bool isAgreed = false;
 
     showDialog(
