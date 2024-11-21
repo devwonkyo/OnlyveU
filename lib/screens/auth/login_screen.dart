@@ -14,6 +14,8 @@ import 'package:onlyveyou/models/user_model.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -88,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('확인'),
+              child: const Text('확인'),
             ),
           ],
         );
@@ -212,7 +214,8 @@ class _LoginScreenState extends State<LoginScreen> {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => Center(child: CircularProgressIndicator()),
+            builder: (context) =>
+                const Center(child: CircularProgressIndicator()),
           );
         } else if (state is LoginSuccess) {
           Navigator.of(context).pop();
@@ -236,8 +239,8 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(height: 20),
-                  Center(
+                  const SizedBox(height: 20),
+                  const Center(
                     child: Text(
                       'OnlyveU',
                       style: TextStyle(
@@ -246,32 +249,32 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   TextField(
                     controller: emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: '이메일',
                       border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.black),
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: '비밀번호',
                       border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.black),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text('자동 로그인'),
+                      const Text('자동 로그인'),
                       Switch(
                         value: autoLogin,
                         onChanged: (bool value) {
@@ -282,11 +285,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppStyles.mainColor,
-                      padding: EdgeInsets.symmetric(vertical: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 15),
                     ),
                     onPressed: () {
                       context.read<AuthBloc>().add(LoginRequested(
@@ -294,9 +297,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             password: passwordController.text,
                           ));
                     },
-                    child: Text('로그인', style: TextStyle(color: Colors.black)),
+                    child: const Text('로그인',
+                        style: TextStyle(color: Colors.black)),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(),
                     onPressed: () {
@@ -305,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child:
                         Image.asset('assets/image/kakaologin.png', height: 50),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(),
                     onPressed: () {
@@ -314,13 +318,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Image.asset(
                       'assets/image/googlelogin.png',
                       height: 50,
+                      fit: BoxFit.fill,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Center(
                     child: Column(
                       children: [
-                        Text(
+                        const Text(
                           '계정이 없으신가요?',
                           style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
@@ -328,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             context.push('/signup');
                           },
-                          child: Text(
+                          child: const Text(
                             '회원가입',
                             style: TextStyle(color: Colors.black),
                           ),
