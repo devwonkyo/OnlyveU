@@ -16,10 +16,8 @@ class SetNewPasswordScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           '비밀번호 변경',
-          style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
@@ -60,14 +58,13 @@ class SetNewPasswordScreen extends StatelessWidget {
                               .read<SetNewPasswordBloc>()
                               .add(NewPasswordChanged(value));
                         },
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: '새로운 비밀번호',
-                          border: const OutlineInputBorder(
+                          border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(8)),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey[200],
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -78,14 +75,13 @@ class SetNewPasswordScreen extends StatelessWidget {
                               .read<SetNewPasswordBloc>()
                               .add(ConfirmPasswordChanged(value));
                         },
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: '비밀번호 확인',
-                          border: const OutlineInputBorder(
+                          border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(8)),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey[200],
                         ),
                       ),
                     ],
