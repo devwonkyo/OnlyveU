@@ -212,7 +212,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
                         child: Text(
                           weather.weatherStatus,
                           style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: 14.sp,
                             color: Color(0xFF2D3436),
                           ),
                         ),
