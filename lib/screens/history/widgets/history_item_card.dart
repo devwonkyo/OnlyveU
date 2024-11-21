@@ -110,6 +110,7 @@ class HistoryItemCard extends StatelessWidget {
                       SizedBox(height: 8),
 
                       // 태그 표시
+                      // 태그 표시
                       Row(
                         children: [
                           if (product.isPopular)
@@ -122,7 +123,14 @@ class HistoryItemCard extends StatelessWidget {
                               ),
                               child: Text(
                                 '인기',
-                                style: TextStyle(fontSize: 12),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  // 다크모드일 때는 검은색, 아닐 때는 현재 색상 유지
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.black
+                                      : null,
+                                ),
                               ),
                             ),
                           if (product.isBest)
@@ -136,7 +144,14 @@ class HistoryItemCard extends StatelessWidget {
                               ),
                               child: Text(
                                 'BEST',
-                                style: TextStyle(fontSize: 12),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  // 다크모드일 때는 검은색, 아닐 때는 현재 색상 유지
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.black
+                                      : null,
+                                ),
                               ),
                             ),
                         ],
