@@ -112,6 +112,8 @@ flutter:
     - assets/image/shutter/
     - assets/image/banner/
     - .env
+    - assets/image/kakaologin.png
+    - assets/image/googlelogin.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
