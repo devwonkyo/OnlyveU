@@ -2,10 +2,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/store_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
+import 'package:onlyveyou/repositories/order/payment_repository.dart';
+import 'package:tosspayments_widget_sdk_flutter/model/payment_widget_options.dart';
+import 'package:tosspayments_widget_sdk_flutter/payment_widget.dart';
 import 'package:uuid/uuid.dart';
 import 'payment_event.dart';
 import 'payment_state.dart';
@@ -17,8 +21,9 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   DeliveryInfoModel? _deliveryInfo;
   OrderType _orderType = OrderType.delivery; // 기본값 설정
   final OrderRepository orderRepository;
-
-  PaymentBloc({required this.orderRepository}) : super(PaymentInitial()) {
+  final PaymentRepository repository;
+  PaymentBloc({required this.orderRepository, required this.repository})
+      : super(PaymentInitial()) {
     debugPrint("PaymentBloc has been created.");
     // 먼저 _initializePayment 함수를 선언
 
@@ -44,12 +49,44 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           _orderType,
           _deliveryInfo,
         ));
+
+        // Toss Payments 위젯 초기화 로직 추가
+        final paymentWidget = PaymentWidget(
+          clientKey: dotenv.env['TOSS_CLIENT_KEY']!,
+          customerKey: 'customer_key',
+        );
+
+        // 결제 수단 및 약관 동의 위젯 렌더링
+        final paymentMethodWidgetControl =
+            await paymentWidget.renderPaymentMethods(
+          selector: dotenv.env['TOSS_METHOD_UI_KEY']!,
+          amount: Amount(
+            value: event.order.totalPrice,
+            currency: Currency.KRW,
+            country: "KR",
+          ),
+        );
+
+        final agreementWidgetControl = await paymentWidget.renderAgreement(
+          selector: dotenv.env['TOSS_AGREEMENT_UI_KEY']!,
+        );
+
+        // 모든 위젯이 로드되면 PaymentWidgetLoaded 상태를 emit
+        emit(PaymentWidgetLoaded(
+          event.order.items,
+          event.order.totalPrice,
+          event.order.orderType,
+          event.order.deliveryInfo,
+          paymentWidget,
+          paymentMethodWidgetControl,
+          agreementWidgetControl,
+        ));
       } catch (e) {
         emit(const PaymentError('초기화 중 오류가 발생했습니다.'));
       }
     }
 
-    // on 이벤트 핸들러들 설정
+// on 이벤트 핸들러들 설정
     on<InitializePayment>(initializePayment);
 
     on<SelectDeliveryMessage>((event, emit) {
@@ -142,6 +179,20 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       debugPrint("- Delivery Info: $_deliveryInfo");
       debugPrint("- Order Type: $_orderType");
     });
+
+    on<PaymentApprove>(
+      (PaymentApprove event, Emitter<PaymentState> emit) {
+        // 예를 들어, 서버로 결제 승인 요청을 보내고 결과에 따라 상태를 변경합니다.
+        emit(PaymentSuccess());
+      },
+    );
+
+    on<PaymentFail>(
+      (PaymentFail event, Emitter<PaymentState> emit) {
+        // 예를 들어, 서버로 결제 승인 요청을 보내고 결과에 따라 상태를 변경합니다.
+        emit(PaymentError(event.errorMessage));
+      },
+    );
   }
 
   DeliveryInfoModel? get deliveryInfo => _deliveryInfo;

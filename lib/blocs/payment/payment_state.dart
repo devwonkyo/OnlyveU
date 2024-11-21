@@ -2,6 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_item_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
+import 'package:tosspayments_widget_sdk_flutter/payment_widget.dart';
+import 'package:tosspayments_widget_sdk_flutter/widgets/agreement.dart';
+import 'package:tosspayments_widget_sdk_flutter/widgets/payment_method.dart';
 
 abstract class PaymentState extends Equatable {
   const PaymentState();
@@ -66,7 +69,19 @@ class PaymentMessageSelected extends PaymentState {
 }
 
 // 결제 성공 상태
-class PaymentSuccess extends PaymentState {}
+class PaymentSuccess extends PaymentState {
+  PaymentSuccess();
+}
+
+class PaymentUrlGenerated extends PaymentState {
+  final String paymentUrl; // 생성된 결제 URL
+
+  PaymentUrlGenerated(this.paymentUrl);
+
+  @override
+  List<Object?> get props => [paymentUrl];
+}
+
 
 // 결제 오류 상태
 class PaymentError extends PaymentState {
@@ -96,4 +111,42 @@ class DeliveryInfoUpdated extends PaymentState {
 
   @override
   List<Object> get props => [deliveryInfo, orderItems, totalAmount, orderType];
+}
+
+
+
+
+class PaymentWidgetLoaded extends PaymentState {
+  @override
+  final List<OrderItemModel> orderItems;
+  @override
+  final int totalAmount;
+  @override
+  final OrderType orderType;
+  @override
+  final DeliveryInfoModel? deliveryInfo;
+  final PaymentWidget paymentWidget;
+  final PaymentMethodWidgetControl? paymentMethodWidgetControl;
+  final AgreementWidgetControl? agreementWidgetControl;
+
+  const PaymentWidgetLoaded(
+    this.orderItems,
+    this.totalAmount,
+    this.orderType,
+    this.deliveryInfo,
+    this.paymentWidget,
+    this.paymentMethodWidgetControl,
+    this.agreementWidgetControl,
+  );
+
+  @override
+  List<Object?> get props => [
+        orderItems,
+        totalAmount,
+        orderType,
+        deliveryInfo,
+        paymentWidget,
+        paymentMethodWidgetControl,
+        agreementWidgetControl,
+      ];
 }
