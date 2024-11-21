@@ -1,4 +1,3 @@
-// ranking_card_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,8 +9,8 @@ import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 class RankingCardWidget extends StatelessWidget {
-  final int index; // 상품의 순위를 나타내는 인덱스
-  final ProductModel product; // 상품 정보를 담고 있는 모델 객체
+  final int index;
+  final ProductModel product;
 
   const RankingCardWidget({
     Key? key,
@@ -21,10 +20,11 @@ class RankingCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final originalPrice = int.parse(product.price); // 원래 가격
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final originalPrice = int.parse(product.price);
     final discountedPrice =
-        originalPrice * (100 - product.discountPercent) ~/ 100; // 할인 적용된 가격
-    final formattedRating = product.rating.toStringAsFixed(1); // 별점 (소수점 1자리)
+        originalPrice * (100 - product.discountPercent) ~/ 100;
+    final formattedRating = product.rating.toStringAsFixed(1);
 
     return GestureDetector(
       onTap: () => context.push('/product-detail', extra: product.productId),
@@ -33,10 +33,8 @@ class RankingCardWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 상품 이미지와 순위 표시
             Stack(
               children: [
-                // 상품 이미지
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
@@ -44,11 +42,17 @@ class RankingCardWidget extends StatelessWidget {
                     width: double.infinity,
                     height: 160.h,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Icon(Icons.image, size: 180.h),
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 160.h,
+                      color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                      child: Icon(
+                        Icons.image,
+                        size: 40.h,
+                        color: isDarkMode ? Colors.grey[600] : Colors.grey[400],
+                      ),
+                    ),
                   ),
                 ),
-                // 상위 3위까지는 메인 컬러로 순위 표시
                 Positioned(
                   top: 8,
                   left: 8,
@@ -61,7 +65,7 @@ class RankingCardWidget extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      '${index + 1}', // 순위 표시
+                      '${index + 1}',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -72,35 +76,32 @@ class RankingCardWidget extends StatelessWidget {
                 ),
               ],
             ),
-            // 상품 상세 정보
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 상품명
                     Text(
                       product.name,
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4.h),
-                    // 원래 가격 (취소선)
                     Text(
                       '${formatPrice(product.price)}원',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey,
                         decoration: TextDecoration.lineThrough,
                         fontSize: 14.sp,
                       ),
                     ),
                     SizedBox(height: 4.h),
-                    // 할인율과 할인 적용된 가격
                     Row(
                       children: [
                         Text(
@@ -112,14 +113,12 @@ class RankingCardWidget extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: 8.w),
-                        Flexible(
-                          child: Text(
-                            '${formatDiscountedPriceToString(product.price, product.discountPercent.toDouble())}원', // 할인 가격 표시
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          '${formatDiscountedPriceToString(product.price, product.discountPercent.toDouble())}원',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.sp,
+                            color: isDarkMode ? Colors.white : Colors.black,
                           ),
                         ),
                       ],
@@ -132,14 +131,17 @@ class RankingCardWidget extends StatelessWidget {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 3),
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.grey[200],
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               '인기',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.black87,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
                               ),
                             ),
                           ),
@@ -150,45 +152,46 @@ class RankingCardWidget extends StatelessWidget {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 3),
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.grey[200],
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               'BEST',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.black87,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87,
                               ),
                             ),
                           ),
                       ],
                     ),
                     SizedBox(height: 6),
-                    // 별점과 리뷰 수
                     Row(
                       children: [
                         Icon(Icons.star,
                             size: 16.sp, color: AppStyles.mainColor),
                         SizedBox(width: 4.w),
                         Text(
-                          formattedRating, // 소수점 한 자리로 포맷된 별점
+                          formattedRating,
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
+                            color: isDarkMode ? Colors.white : Colors.black,
                           ),
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          '(${product.reviewList.length})', // 리뷰 수
+                          '(${product.reviewList.length})',
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color: Colors.grey,
+                            color: isDarkMode ? Colors.grey[400] : Colors.grey,
                           ),
                         ),
                       ],
                     ),
-                    // 찜하기 및 장바구니 아이콘
-
                     Row(
                       children: [
                         FutureBuilder<String>(
@@ -196,29 +199,32 @@ class RankingCardWidget extends StatelessWidget {
                           builder: (context, snapshot) {
                             final userId = snapshot.data ?? 'temp_user_id';
                             return GestureDetector(
-                              onTap: () async {
-                                print('좋아요 누른 상품 ID: ${product.productId}');
-                                final prefs = OnlyYouSharedPreference();
-                                final currentUserId =
-                                    await prefs.getCurrentUserId();
+                              onTap: () {
+                                print(
+                                    'Ranking Product ID: ${product.productId}');
                                 context.read<RankingBloc>().add(
-                                      ToggleProductFavorite(product,
-                                          currentUserId), //^ LoadRankingProducts에서 ToggleProductFavorite로 변경
+                                      ToggleProductFavorite(product, userId),
                                     );
                               },
-                              child: Icon(
-                                product.favoriteList.contains(userId)
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                size: 20.sp,
-                                color: product.favoriteList.contains(userId)
-                                    ? Colors.red
-                                    : Colors.grey,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                child: Icon(
+                                  product.favoriteList.contains(userId)
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  size: 18,
+                                  color: product.favoriteList.contains(userId)
+                                      ? Colors.red
+                                      : (isDarkMode
+                                          ? Colors.grey[400]
+                                          : Colors.grey),
+                                ),
                               ),
                             );
                           },
                         ),
-                        SizedBox(width: 16.w),
+                        SizedBox(width: 25),
                         GestureDetector(
                           onTap: () async {
                             context
@@ -237,6 +243,8 @@ class RankingCardWidget extends StatelessWidget {
                                           ? state.message
                                           : (state as RankingError).message),
                                       duration: Duration(milliseconds: 1000),
+                                      backgroundColor:
+                                          isDarkMode ? Colors.grey[800] : null,
                                     ),
                                   );
                                 }
@@ -249,7 +257,8 @@ class RankingCardWidget extends StatelessWidget {
                             child: Icon(
                               Icons.shopping_bag_outlined,
                               size: 20,
-                              color: Colors.grey,
+                              color:
+                                  isDarkMode ? Colors.grey[400] : Colors.grey,
                             ),
                           ),
                         ),
