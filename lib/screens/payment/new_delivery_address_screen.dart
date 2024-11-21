@@ -70,111 +70,114 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
           '새 배송지 추가',
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 15, right: 15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Divider(
-              height: 1,
-              color: Colors.grey[400],
-              thickness: 2,
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: _deliveryNameController,
-              label: '배송지 명',
-              hintText: '예) 올리브네 집, 회사 (최대 10자)',
-              maxLength: 10,
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: _recipientController,
-              label: '받으실 분',
-              hintText: '최대 10자로 작성해주세요',
-              maxLength: 10,
-            ),
-            const SizedBox(height: 20),
-            CustomTextField(
-              controller: _phoneController,
-              label: '휴대폰 번호',
-              hintText: '010-0000-0000',
-              maxLength: 13,
-            ),
-            const SizedBox(height: 20),
-            AddressSearchField(
-              addressController: _addressController,
-              detailedAddressController: _detailedAddressController,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Checkbox(
-                  value: isChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      isChecked = value!;
-                    });
-                  },
-                ),
-                Text(
-                  '기본 배송지로 설정',
-                  style: AppStyles.bodyTextStyle,
-                ),
-              ],
-            ),
-            const SizedBox(height: 80),
-            Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.06,
-                child: BlocBuilder<PaymentBloc, PaymentState>(
-                  builder: (context, state) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        if (_isFormFilled()) {
-                          final updatedDeliveryInfo = DeliveryInfoModel(
-                            deliveryName: _deliveryNameController.text,
-                            address: _addressController.text,
-                            detailAddress: _detailedAddressController.text,
-                            recipientName: _recipientController.text,
-                            recipientPhone: _phoneController.text,
-                          );
-                          context.read<PaymentBloc>().add(UpdateDeliveryInfo(
-                                deliveryName: _deliveryNameController.text,
-                                address: _addressController.text,
-                                detailAddress: _detailedAddressController.text,
-                                recipientName: _recipientController.text,
-                                recipientPhone: _phoneController.text,
-                              ));
-                          // Pop과 함께 데이터를 전달
-                          Navigator.pop(context, updatedDeliveryInfo);
-                          print("버튼 눌럿을 때 : $state");
-                          //a화면 blocbuilder생성-> b화면에서 에빈트 발생 시, a화면에서 b에서 발생시킨 emit state 값을 못 가져온다
-                        } else {
-                          _showWarningPopup('모두 입력해주세요');
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 15, right: 15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Divider(
+                height: 1,
+                color: Colors.grey[400],
+                thickness: 2,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: _deliveryNameController,
+                label: '배송지 명',
+                hintText: '예) 올리브네 집, 회사 (최대 10자)',
+                maxLength: 10,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: _recipientController,
+                label: '받으실 분',
+                hintText: '최대 10자로 작성해주세요',
+                maxLength: 10,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                controller: _phoneController,
+                label: '휴대폰 번호',
+                hintText: '010-0000-0000',
+                maxLength: 13,
+              ),
+              const SizedBox(height: 20),
+              AddressSearchField(
+                addressController: _addressController,
+                detailedAddressController: _detailedAddressController,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Checkbox(
+                    value: isChecked,
+                    onChanged: (value) {
+                      setState(() {
+                        isChecked = value!;
+                      });
+                    },
+                  ),
+                  Text(
+                    '기본 배송지로 설정',
+                    style: AppStyles.bodyTextStyle,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 80),
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: MediaQuery.of(context).size.height * 0.06,
+                  child: BlocBuilder<PaymentBloc, PaymentState>(
+                    builder: (context, state) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          if (_isFormFilled()) {
+                            final updatedDeliveryInfo = DeliveryInfoModel(
+                              deliveryName: _deliveryNameController.text,
+                              address: _addressController.text,
+                              detailAddress: _detailedAddressController.text,
+                              recipientName: _recipientController.text,
+                              recipientPhone: _phoneController.text,
+                            );
+                            context.read<PaymentBloc>().add(UpdateDeliveryInfo(
+                                  deliveryName: _deliveryNameController.text,
+                                  address: _addressController.text,
+                                  detailAddress:
+                                      _detailedAddressController.text,
+                                  recipientName: _recipientController.text,
+                                  recipientPhone: _phoneController.text,
+                                ));
+                            // Pop과 함께 데이터를 전달
+                            Navigator.pop(context, updatedDeliveryInfo);
+                            print("버튼 눌럿을 때 : $state");
+                            //a화면 blocbuilder생성-> b화면에서 에빈트 발생 시, a화면에서 b에서 발생시킨 emit state 값을 못 가져온다
+                          } else {
+                            _showWarningPopup('모두 입력해주세요');
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        '확인',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        child: const Text(
+                          '확인',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
