@@ -9,7 +9,7 @@ import 'package:onlyveyou/screens/home/ai_recommend/widgets/ai_recommend_empty_s
 import 'package:onlyveyou/utils/format_price.dart';
 
 class AIRecommendScreen extends StatefulWidget {
-  const AIRecommendScreen({Key? key}) : super(key: key);
+  const AIRecommendScreen({super.key});
 
   @override
   State<AIRecommendScreen> createState() => _AIRecommendScreenState();
@@ -48,7 +48,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
         // AI 추천 헤더 섹션
         Container(
           padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
                 Color(0xFF6A11CB),
@@ -95,7 +95,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                     onPressed: () {
                       context
                           .read<AIRecommendBloc>()
-                          .add(LoadAIRecommendations());
+                          .add(const LoadAIRecommendations());
                     },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
@@ -112,7 +112,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                       children: [
                         Icon(
                           Icons.auto_awesome,
-                          color: Color(0xFF2575FC),
+                          color: const Color(0xFF2575FC),
                           size: 18.sp,
                         ),
                         SizedBox(width: 8.w),
@@ -120,7 +120,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                           'AI 추천받기',
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color: Color(0xFF2575FC),
+                            color: const Color(0xFF2575FC),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -171,7 +171,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
+                    const CircularProgressIndicator(),
                     SizedBox(height: 16.h),
                     Text(
                       'AI가 맞춤 상품을 분석중입니다...',
@@ -381,7 +381,7 @@ class _AIRecommendScreenState extends State<AIRecommendScreen> {
                     SizedBox(height: 16.h),
                     ElevatedButton(
                       onPressed: () {},
-                      child: Text('다시 시도'),
+                      child: const Text('다시 시도'),
                     ),
                   ],
                 ),
