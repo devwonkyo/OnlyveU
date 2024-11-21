@@ -30,6 +30,7 @@ import 'package:onlyveyou/blocs/review/review_bloc.dart';
 import 'package:onlyveyou/blocs/shutter/shutterpost_bloc.dart';
 import 'package:onlyveyou/blocs/special_bloc/ai_onepick_bloc.dart';
 import 'package:onlyveyou/blocs/special_bloc/weather/location_bloc.dart';
+import 'package:onlyveyou/blocs/special_bloc/weather/weather_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -50,6 +51,7 @@ import 'package:onlyveyou/repositories/review/review_repository.dart';
 import 'package:onlyveyou/repositories/shopping_cart_repository.dart';
 import 'package:onlyveyou/repositories/special/ai_onepick_repository.dart';
 import 'package:onlyveyou/repositories/special/weather/location_repository.dart';
+import 'package:onlyveyou/repositories/special/weather/weather_repository.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/home_screen.dart';
 import 'package:onlyveyou/screens/shopping_cart/shopping_cart_screen.dart';
@@ -104,9 +106,7 @@ void main() async {
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
 
-
   DeepLinkService().initialize(router);
-
 
   //카카오톡
   kakaoSchemeStream.listen((url) {
@@ -115,15 +115,13 @@ void main() async {
     final screen = uri.queryParameters['screen'];
     print("productId : $productId, screen : $screen ");
 
-    if(screen != null){
+    if (screen != null) {
       router.push(screen, extra: productId);
     }
-
   }, onError: (e) {
     // 에러 상황의 예외 처리 코드를 작성합니다.
     print("kakao listen error : $e");
   });
-
 
   // 위치 서비스 초기화 추가
   try {
@@ -132,7 +130,6 @@ void main() async {
   } catch (e) {
     debugPrint('Location service initialization error: $e');
   }
-
 
 // 모든 제품 로컬 저장 (검색용)
   try {
@@ -183,6 +180,11 @@ class MyApp extends StatelessWidget {
           builder: (_, child) {
             return MultiBlocProvider(
               providers: [
+                BlocProvider<WeatherBloc>(
+                  create: (context) => WeatherBloc(
+                    repository: WeatherRepository(),
+                  ),
+                ),
                 BlocProvider<LocationBloc>(
                   create: (context) => LocationBloc(
                     repository: LocationRepository(),

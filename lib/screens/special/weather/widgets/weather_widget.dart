@@ -1,15 +1,173 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/special_bloc/weather/location_bloc.dart';
+import 'package:onlyveyou/blocs/special_bloc/weather/weather_bloc.dart';
+import 'package:onlyveyou/models/weather_model.dart';
 
-class WeatherWidget extends StatelessWidget {
+class WeatherWidget extends StatefulWidget {
   const WeatherWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return _buildWeatherHeader();
+  State<WeatherWidget> createState() => _WeatherWidgetState();
+}
+
+class _WeatherWidgetState extends State<WeatherWidget> {
+  late LocationBloc _locationBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _locationBloc = context.read<LocationBloc>();
+    print('WeatherWidget initState called');
+    _initializeLocation();
   }
 
-  Widget _buildWeatherHeader() {
+  void _initializeLocation() {
+    print('Initializing location...');
+    Future.microtask(() {
+      final locationBloc = context.read<LocationBloc>();
+      print('Requesting location updates...');
+      locationBloc.add(GetCurrentLocation());
+      locationBloc.add(StartLocationUpdates());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print('WeatherWidget build called');
+
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<LocationBloc, LocationState>(
+          listener: (context, state) {
+            print('LocationBloc state: $state');
+            if (state is LocationSuccess) {
+              print(
+                  'Location Success - Lat: ${state.position.latitude}, Lon: ${state.position.longitude}');
+              context.read<WeatherBloc>().add(
+                    FetchWeather(
+                      state.position.latitude,
+                      state.position.longitude,
+                    ),
+                  );
+            } else if (state is LocationError) {
+              print('Location Error: ${state.message}');
+            } else if (state is LocationLoading) {
+              print('Location Loading...');
+            }
+          },
+        ),
+        BlocListener<WeatherBloc, WeatherState>(
+          listener: (context, state) {
+            print('WeatherBloc state: $state');
+            if (state is WeatherError) {
+              print('Weather Error: ${state.message}');
+            } else if (state is WeatherLoaded) {
+              print(
+                  'Weather Loaded: ${state.weather.temperature}°C, ${state.weather.weatherStatus}');
+            }
+          },
+        ),
+      ],
+      child: BlocBuilder<WeatherBloc, WeatherState>(
+        builder: (context, state) {
+          print('Building WeatherWidget with state: $state');
+          if (state is WeatherLoading) {
+            return _buildLoadingState();
+          } else if (state is WeatherError) {
+            return _buildErrorState(state.message);
+          } else if (state is WeatherLoaded) {
+            return _buildWeatherInfo(state.weather);
+          }
+          return _buildInitialState();
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _locationBloc.add(StopLocationUpdates());
+    super.dispose();
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      height: 200.h,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFFF4E3),
+            Color(0xFFFFE4D6),
+          ],
+        ),
+      ),
+      child: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFA41B)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Container(
+      height: 200.h,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFFF4E3),
+            Color(0xFFFFE4D6),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red, size: 40.sp),
+            SizedBox(height: 8.h),
+            Text(
+              message,
+              style: TextStyle(color: Colors.red, fontSize: 14.sp),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInitialState() {
+    return Container(
+      height: 200.h,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFFF4E3),
+            Color(0xFFFFE4D6),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Text(
+          '위치를 가져오는 중...',
+          style: TextStyle(
+            fontSize: 16.sp,
+            color: Color(0xFF2D3436),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherInfo(WeatherModel weather) {
     return Container(
       height: 200.h,
       decoration: BoxDecoration(
@@ -26,7 +184,6 @@ class WeatherWidget extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Row(
           children: [
-            // 왼쪽 현재 날씨 섹션
             Expanded(
               flex: 3,
               child: Column(
@@ -34,7 +191,7 @@ class WeatherWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.wb_sunny,
+                    _getWeatherIcon(weather.weatherStatus),
                     size: 60.sp,
                     color: Color(0xFFFFA41B),
                   ),
@@ -43,7 +200,7 @@ class WeatherWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '24°',
+                        '${weather.temperature.round()}°',
                         style: TextStyle(
                           fontSize: 40.sp,
                           fontWeight: FontWeight.bold,
@@ -53,7 +210,7 @@ class WeatherWidget extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.only(top: 8.h),
                         child: Text(
-                          '맑음',
+                          weather.weatherStatus,
                           style: TextStyle(
                             fontSize: 16.sp,
                             color: Color(0xFF2D3436),
@@ -65,39 +222,39 @@ class WeatherWidget extends StatelessWidget {
                 ],
               ),
             ),
-            // 오른쪽 상세 날씨 정보 섹션
             Expanded(
-              flex: 4,
+              flex: 6,
               child: Padding(
-                padding: EdgeInsets.only(left: 16.w),
+                padding: EdgeInsets.only(left: 18.w),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildWeatherDetailRow(
                       icon: Icons.thermostat_outlined,
                       title: '체감온도',
-                      value: '26°',
+                      value: '${weather.feelsLike.round()}°',
                       color: Color(0xFFF39C12),
                     ),
                     SizedBox(height: 12.h),
                     _buildWeatherDetailRow(
                       icon: Icons.air,
                       title: '바람',
-                      value: '3m/s',
+                      value: '${weather.windSpeed}m/s',
                       color: Color(0xFF3498DB),
                     ),
                     SizedBox(height: 12.h),
                     _buildWeatherDetailRow(
                       icon: Icons.water_drop_outlined,
-                      title: '강수확률',
-                      value: '10%',
+                      title: '습도', // '강수확률'에서 '습도'로 변경
+                      value:
+                          '${weather.humidity}%', // rainProbability 대신 humidity 사용
                       color: Color(0xFF4ECDC4),
                     ),
                     SizedBox(height: 12.h),
                     _buildWeatherDetailRow(
                       icon: Icons.cloud_outlined,
                       title: '구름량',
-                      value: '20%',
+                      value: '${weather.cloudiness}%',
                       color: Color(0xFF95A5A6),
                     ),
                   ],
@@ -118,19 +275,13 @@ class WeatherWidget extends StatelessWidget {
   }) {
     return Row(
       children: [
-        // 왼쪽 여백을 위한 Spacer
         Spacer(),
-        // 아이콘과 텍스트를 담는 고정 너비 컨테이너
         Container(
-          width: 85.w, // 모든 행의 아이콘과 텍스트가 동일한 위치에서 시작하도록 고정 너비 설정
+          width: 90.w,
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: 16.sp,
-                color: color,
-              ),
-              SizedBox(width: 4.w),
+              Icon(icon, size: 16.sp, color: color),
+              SizedBox(width: 6.w),
               Text(
                 title,
                 style: TextStyle(
@@ -141,10 +292,9 @@ class WeatherWidget extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(width: 1.w),
-        // 값을 표시하는 고정 너비 텍스트
+        SizedBox(width: 10.w),
         Container(
-          width: 35.w, // 값의 너비를 고정
+          width: 50.w,
           child: Text(
             value,
             style: TextStyle(
@@ -157,88 +307,15 @@ class WeatherWidget extends StatelessWidget {
       ],
     );
   }
-}
 
-class WeatherStatsSection extends StatelessWidget {
-  const WeatherStatsSection({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildWeatherStats();
-  }
-
-  Widget _buildWeatherStats() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Row(
-        children: [
-          _buildWeatherStat(
-            icon: Icons.water_drop,
-            label: '습도',
-            value: '68%',
-            color: Color(0xFF4ECDC4),
-          ),
-          SizedBox(width: 8.w),
-          _buildWeatherStat(
-            icon: Icons.wb_sunny_outlined,
-            label: '자외선',
-            value: '높음',
-            color: Color(0xFFFF7E5F),
-          ),
-          SizedBox(width: 8.w),
-          _buildWeatherStat(
-            icon: Icons.visibility,
-            label: '미세먼지',
-            value: '좋음',
-            color: Color(0xFF45B649),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWeatherStat({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24.sp),
-            SizedBox(height: 4.h),
-            Text(
-              label,
-              style: TextStyle(
-                color: Color(0xFF7F8C8D),
-                fontSize: 12.sp,
-              ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                color: Color(0xFF2D3436),
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  IconData _getWeatherIcon(String status) {
+    if (status.contains('맑음')) {
+      return Icons.wb_sunny;
+    } else if (status.contains('구름')) {
+      return Icons.cloud;
+    } else if (status.contains('비')) {
+      return Icons.umbrella;
+    }
+    return Icons.wb_sunny_outlined;
   }
 }
