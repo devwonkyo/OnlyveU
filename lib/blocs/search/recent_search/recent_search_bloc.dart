@@ -18,6 +18,12 @@ class RecentSearchBloc extends Bloc<RecentSearchEvent, RecentSearchState> {
     add(LoadRecentSearches());
   }
 
+  @override
+  Future<void> close() {
+    debugPrint('RecentSearchBloc disposed');
+    return super.close();
+  }
+
   void _onAddSearchTerm(
       AddSearchTerm event, Emitter<RecentSearchState> emit) async {
     await repository.addSearchTerm(event.term);
