@@ -5,7 +5,7 @@ import 'package:onlyveyou/config/color.dart'; // AppsColor import 추가
 class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color mainColor;
 
-  DefaultAppBar({Key? key, required this.mainColor}) : super(key: key);
+  const DefaultAppBar({super.key, required this.mainColor});
 
   @override
   Widget build(BuildContext context) {
@@ -61,5 +61,5 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_event.dart';
 import 'package:onlyveyou/blocs/mypage/phone_number/phone_number_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 
 class PhoneNumberEditScreen extends StatelessWidget {
@@ -11,21 +13,25 @@ class PhoneNumberEditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '휴대폰 번호 변경',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
           onPressed: () {
             context.pop();
           },
@@ -43,11 +49,12 @@ class PhoneNumberEditScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '새로운 휴대폰 번호를 입력해주세요',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
               const SizedBox(height: 20),
@@ -59,7 +66,7 @@ class PhoneNumberEditScreen extends StatelessWidget {
                   }
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     width: double.infinity,
@@ -72,9 +79,16 @@ class PhoneNumberEditScreen extends StatelessWidget {
                       },
                       decoration: InputDecoration(
                         hintText: hintText,
+                        hintStyle: TextStyle(
+                          color:
+                              isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                        ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 14),
+                      ),
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                   );
@@ -105,7 +119,9 @@ class PhoneNumberEditScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isButtonEnabled
                             ? AppsColor.pastelGreen
-                            : Colors.grey[400],
+                            : (isDarkMode
+                                ? Colors.grey[700]
+                                : Colors.grey[400]),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
