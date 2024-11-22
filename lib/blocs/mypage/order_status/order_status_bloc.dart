@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:onlyveyou/blocs/order/order_state.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'order_status_event.dart';
@@ -13,7 +14,7 @@ class OrderStatusBloc extends Bloc<OrderStatusEvent, OrderStatusState> {
     // Bloc이 생성될 때 기본 구매 유형과 상태 설정
     add(const SelectPurchaseType('온라인몰 구매'));
   }
-  
+
   // 구매 유형 선택 시 상태 옵션 업데이트
   void _onSelectPurchaseType(
       SelectPurchaseType event, Emitter<OrderStatusState> emit) {
@@ -42,9 +43,9 @@ class OrderStatusBloc extends Bloc<OrderStatusEvent, OrderStatusState> {
   }
 
   void _onFetchOrder(FetchOrder event, Emitter<OrderStatusState> emit) async {
+    emit(OrderStatusInitial());
     final orders = await orderRepository.fetchOrder();
-    //orders에서 status값은 한글로 바꿔서 주기 
-    
+    //orders에서 status값은 한글로 바꿔서 주기
     emit(OrderFetch(orders));
   }
 }

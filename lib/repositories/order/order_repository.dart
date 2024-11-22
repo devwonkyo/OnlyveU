@@ -78,7 +78,7 @@ class OrderRepository {
           'id': doc.id, // Firestore 문서 ID를 id로 포함
         });
       }).toList();
-
+      print("repository에서 fetchorder: ${orders.length}");
       return orders;
     } catch (e) {
       print('Error fetching orders: $e');
