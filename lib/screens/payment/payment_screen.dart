@@ -578,6 +578,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                                 // 주문 성공 메시지 표시
                                 // 주문 성공 메시지 표시 후 확인 버튼을 누르면 네비게이션 수행
+
                                 _paymentSuccess(context, "주문을 성공적으로 완료했습니다.",
                                     () async {
                                   String fetchedUserToken =
@@ -589,7 +590,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                       body: "주문이 정상적으로 처리됐습니다.",
                                       pushToken: fetchedUserToken,
                                       screen: '/order-status');
-                                  context.go('/order-status');
+                                  context.go('/order-status', extra: true);
                                 });
 
                                 // 필요에 따라 화면 이동 또는 초기화 작업 수행
