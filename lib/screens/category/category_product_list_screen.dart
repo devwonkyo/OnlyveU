@@ -104,8 +104,7 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.shopping_bag_outlined,
-                size: 24.sp),
+            icon: Icon(Icons.shopping_bag_outlined, size: 24.sp),
             onPressed: () {
               sendNotification(
                   title: "알림", body: "테스트 푸시", pushToken: token ?? '');
@@ -158,11 +157,8 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                             isMainCategory = false;
                           }
                         },
-                        child: FilterItem(
-                          _filterOptions[index].name,
-                          _selectedFilterIndex == index,
-                          context
-                        ),
+                        child: FilterItem(_filterOptions[index].name,
+                            _selectedFilterIndex == index, context),
                       ),
                     ),
                   ),
@@ -189,8 +185,7 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                         onPressed: () {
                           _showSortOptions(context);
                         },
-                        icon: Icon(Icons.keyboard_arrow_down,
-                            size: 20.sp),
+                        icon: Icon(Icons.keyboard_arrow_down, size: 20.sp),
                         label: Text(
                           '인기순',
                           style: TextStyle(
@@ -259,7 +254,8 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                                         productModel: products[index],
                                         userId: userId ?? "",
                                         onTap: () => context.push(
-                                            "/product-detail", extra: products[index].productId));
+                                            "/product-detail",
+                                            extra: products[index].productId));
                                   },
                                   childCount: products.length,
                                 ),
