@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
@@ -50,55 +51,60 @@ class DeliveryOrderInfo extends StatelessWidget {
           color: isDarkMode ? Colors.grey[800] : Colors.grey[400],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (recipientName.isEmpty)
-                    Text(
-                      '배송지를 등록해주세요',
-                      style: AppStyles.headingStyle.copyWith(
-                        color: isDarkMode ? Colors.white : Colors.black,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (recipientName.isEmpty)
+                        Text(
+                          '배송지를 등록해주세요',
+                          style: AppStyles.headingStyle.copyWith(
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      if (recipientName.isNotEmpty)
+                        Text(
+                          '$displayText ($recipientName)',
+                          style: AppStyles.headingStyle.copyWith(
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      const SizedBox(height: 10),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          '$address $detailAddress',
+                          style: AppStyles.bodyTextStyle.copyWith(
+                            color: isDarkMode ? Colors.grey[300] : Colors.black,
+                          ),
+                          overflow: TextOverflow.visible,
+                        ),
                       ),
-                    ),
-                  if (recipientName.isNotEmpty)
-                    Text(
-                      '$displayText ($recipientName)',
-                      style: AppStyles.headingStyle.copyWith(
-                        color: isDarkMode ? Colors.white : Colors.black,
+                      const SizedBox(height: 10),
+                      Text(
+                        recipientPhoneNumber,
+                        style: AppStyles.bodyTextStyle.copyWith(
+                          color: isDarkMode ? Colors.grey[300] : Colors.black,
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '$address $detailAddress',
-                    style: AppStyles.bodyTextStyle.copyWith(
-                      color: isDarkMode ? Colors.grey[300] : Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    recipientPhoneNumber,
-                    style: AppStyles.bodyTextStyle.copyWith(
-                      color: isDarkMode ? Colors.grey[300] : Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-              TextButton(
-                onPressed: onAddressChange,
-                child: Text(
-                  '변경',
-                  style: AppStyles.bodyTextStyle.copyWith(
-                    color: isDarkMode ? Colors.white : Colors.black,
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                TextButton(
+                  onPressed: onAddressChange,
+                  child: Text(
+                    '변경',
+                    style: AppStyles.bodyTextStyle.copyWith(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            )),
         const SizedBox(height: 20),
         Divider(
           height: 1,
@@ -135,38 +141,42 @@ class DeliveryOrderInfo extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            DropdownButtonHideUnderline(
-              child: DropdownButton2<String>(
-                isExpanded: true,
-                items: deliveryMessages
-                    .map((message) => DropdownMenuItem<String>(
-                          value: message,
-                          child: Text(
-                            message,
-                            style: AppStyles.subHeadingStyle.copyWith(
-                              color:
-                                  isDarkMode ? Colors.grey[300] : Colors.black,
+            Padding(
+              padding: EdgeInsets.only(left: 13.w, right: 13.w),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton2<String>(
+                  isExpanded: true,
+                  items: deliveryMessages
+                      .map((message) => DropdownMenuItem<String>(
+                            value: message,
+                            child: Text(
+                              message,
+                              style: AppStyles.subHeadingStyle.copyWith(
+                                color: isDarkMode
+                                    ? Colors.grey[300]
+                                    : Colors.black,
+                              ),
                             ),
-                          ),
-                        ))
-                    .toList(),
-                value: selectedMessage,
-                onChanged: (value) {
-                  if (value != null) {
-                    onDeliveryMessageSelected?.call(value);
-                    context
-                        .read<PaymentBloc>()
-                        .add(SelectDeliveryMessage(value));
-                  }
-                },
-                buttonStyleData: ButtonStyleData(
-                  height: 50,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.grey[850] : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.grey,
+                          ))
+                      .toList(),
+                  value: selectedMessage,
+                  onChanged: (value) {
+                    if (value != null) {
+                      onDeliveryMessageSelected?.call(value);
+                      context
+                          .read<PaymentBloc>()
+                          .add(SelectDeliveryMessage(value));
+                    }
+                  },
+                  buttonStyleData: ButtonStyleData(
+                    height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey[850] : Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                 ),
