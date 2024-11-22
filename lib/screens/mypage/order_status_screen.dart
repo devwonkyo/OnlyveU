@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_event.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/utils/format_price.dart';
@@ -24,11 +27,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   @override
   void initState() {
     super.initState();
+
     context.read<OrderStatusBloc>().add(const FetchOrder());
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('주문/배송 조회'),
@@ -53,9 +58,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                         },
                         child: Text(
                           '전체',
-                          style: selectedOrderType == null
-                              ? AppStyles.headingStyle
-                              : AppStyles.bodyTextStyle,
+                          style: TextStyle(
+                            fontSize: selectedOrderType == null ? 20 : 15,
+                            fontWeight: selectedOrderType == null
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 15),
@@ -67,9 +76,15 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                         },
                         child: Text(
                           '배송',
-                          style: selectedOrderType == OrderType.delivery
-                              ? AppStyles.headingStyle
-                              : AppStyles.bodyTextStyle,
+                          style: TextStyle(
+                            fontSize: selectedOrderType == OrderType.delivery
+                                ? 20
+                                : 15,
+                            fontWeight: selectedOrderType == OrderType.delivery
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 15),
@@ -81,9 +96,14 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                         },
                         child: Text(
                           '매장픽업',
-                          style: selectedOrderType == OrderType.pickup
-                              ? AppStyles.headingStyle
-                              : AppStyles.bodyTextStyle,
+                          style: TextStyle(
+                            fontSize:
+                                selectedOrderType == OrderType.pickup ? 20 : 15,
+                            fontWeight: selectedOrderType == OrderType.pickup
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                     ],
@@ -148,7 +168,11 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                           children: [
                             Text(
                               date,
-                              style: AppStyles.headingStyle,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.black,
+                              ),
                             ),
                             const SizedBox(height: 10),
                             ...orders.map((order) {
@@ -158,7 +182,12 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                   Text(
                                     orderStatusToKorean[order.status] ??
                                         "알 수 없음",
-                                    style: AppStyles.bodyTextStyle,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                    ),
                                   ),
                                   const SizedBox(height: 10),
                                   ListView.builder(
@@ -204,19 +233,34 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                                         overflow: TextOverflow
                                                             .ellipsis,
                                                         style: AppStyles
-                                                            .subHeadingStyle,
+                                                            .subHeadingStyle
+                                                            .copyWith(
+                                                          color: isDarkMode
+                                                              ? Colors.white
+                                                              : Colors.black,
+                                                        ),
                                                       ),
                                                       const SizedBox(height: 5),
                                                       Text(
                                                         '수량: ${item.quantity}',
                                                         style: AppStyles
-                                                            .smallTextStyle,
+                                                            .smallTextStyle
+                                                            .copyWith(
+                                                          color: isDarkMode
+                                                              ? Colors.white
+                                                              : Colors.black,
+                                                        ),
                                                       ),
                                                       const SizedBox(height: 5),
                                                       Text(
                                                         '가격: ${intformatPrice(item.productPrice)}원',
                                                         style: AppStyles
-                                                            .priceTextStyle,
+                                                            .priceTextStyle
+                                                            .copyWith(
+                                                          color: isDarkMode
+                                                              ? Colors.white
+                                                              : Colors.black,
+                                                        ),
                                                       ),
                                                     ],
                                                   ),

@@ -1,30 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:onlyveyou/blocs/auth/auth_event.dart';
 import 'package:onlyveyou/blocs/auth/auth_state.dart';
+import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_event.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_state.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/order_status/order_status_event.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_state.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_event.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_state.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/utils/order_status_util.dart';
+import 'package:onlyveyou/utils/styles.dart';
 import 'package:onlyveyou/widgets/my_page_widget/build_icon_with_label.dart';
 import 'package:onlyveyou/widgets/my_page_widget/custom_section.dart';
 import 'package:onlyveyou/widgets/my_page_widget/order_status.dart';
 
-class MyPageScreen extends StatelessWidget {
+class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    context.read<NicknameEditBloc>().add(LoadCurrentNickname());
+  State<MyPageScreen> createState() => _MyPageScreenState();
+}
 
+class _MyPageScreenState extends State<MyPageScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    context.read<OrderStatusBloc>().add(const FetchOrder());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
+    context.read<NicknameEditBloc>().add(LoadCurrentNickname());
+    context.read<ProfileBloc>().add(LoadProfileImage());
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LogoutSuccess) {
@@ -83,11 +103,34 @@ class MyPageScreen extends StatelessWidget {
                                 if (state is NicknameLoading) {
                                   return const CircularProgressIndicator();
                                 } else if (state is NicknameLoaded) {
-                                  return Text(
-                                    state.nickname, // 사용자 이름으로 대체
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 5.0),
+                                    child: RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: '안녕하세요 ', // "안녕하세요" 텍스트
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                '${state.nickname}님', // state.nickname 텍스트
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 } else {
@@ -121,41 +164,69 @@ class MyPageScreen extends StatelessWidget {
                           ],
                         ),
                         Container(
-                          height: 50,
+                          width: 140.w,
+                          height: 60.h,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            color: isDarkMode
+                                ? const Color(0xFF1E1E1E) // 다크모드 배경 색상
+                                : Colors.white, // 라이트모드 배경 색상
+                            borderRadius: BorderRadius.circular(12), // 둥근 모서리
+                            border: Border.all(
+                              color: isDarkMode
+                                  ? Colors.white.withOpacity(0.6)
+                                  : Colors.black
+                                      .withOpacity(0.3), // 테두리 색상에 투명도 추가
+                              width: 1.5, // 테두리 두께
+                            ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  context.push('/profile_edit');
-                                },
-                                child: const Row(
-                                  children: [
-                                    Icon(
-                                      Icons.person_pin,
-                                      color: Color.fromARGB(255, 205, 202, 202),
-                                      size: 30,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(
+                                  12), // 클릭 시 모서리 애니메이션 적용
+                              onTap: () {
+                                context.push('/profile_edit');
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  BlocBuilder<ProfileBloc, ProfileState>(
+                                    builder: (context, state) {
+                                      if (state is ProfileImageUrlLoaded) {
+                                        return CircleAvatar(
+                                          radius: 20, // 프로필 이미지 크기 조정
+                                          backgroundImage:
+                                              NetworkImage(state.imageUrl),
+                                        );
+                                      }
+                                      return Icon(
+                                        Icons.person,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black, // 기본 아이콘 색상
+                                        size: 28, // 기본 아이콘 크기
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(width: 10), // 텍스트와 아이콘 간격
+                                  Text(
+                                    '프로필 변경',
+                                    style: TextStyle(
+                                      fontSize: 16.sp, // 텍스트 크기 조정
+                                      fontWeight: FontWeight.w500,
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black, // 텍스트 색상
                                     ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '프로필',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+
                     // const Row(
                     //   mainAxisAlignment: MainAxisAlignment.spaceAround,
                     //   children: [
@@ -193,7 +264,57 @@ class MyPageScreen extends StatelessWidget {
                     //     // ),
                     //   ],
                     // ),
-
+                    Container(
+                      decoration: const BoxDecoration(),
+                      child: Column(
+                        children: [
+                          SizedBox(height: 16.h),
+                          // AI 분석 요약 카드들 - BlocBuilder로 실시간 데이터 표시
+                          BlocBuilder<AIRecommendBloc, AIRecommendState>(
+                            builder: (context, state) {
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 10.0,
+                                  right: 10,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _buildAnalysisCard(
+                                      icon: Icons.remove_red_eye,
+                                      title: '최근 본 상품',
+                                      value:
+                                          '${state.activityCounts['viewCount']}개',
+                                    ),
+                                    _buildAnalysisCard(
+                                      icon: Icons.favorite,
+                                      title: '관심 상품',
+                                      value:
+                                          '${state.activityCounts['likeCount']}개',
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        context.push('/cart');
+                                      },
+                                      child: _buildAnalysisCard(
+                                        icon: Icons.shopping_cart,
+                                        title: '장바구니',
+                                        value:
+                                            '${state.activityCounts['cartCount']}개',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.9,
                       height: 50,
@@ -247,32 +368,21 @@ class MyPageScreen extends StatelessWidget {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {
-                            // 버튼 클릭 시 동작
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            foregroundColor: Colors.black,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: TextButton(
-                              onPressed: () {
-                                context.push('/order-status');
-                              },
-                              child: const Row(
-                                children: [
-                                  Text(
-                                    '전체보기',
-                                    style: TextStyle(fontSize: 15),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 15,
-                                  ),
-                                ],
-                              )),
-                        ),
+                            onPressed: () {
+                              context.push('/order-status');
+                            },
+                            child: const Row(
+                              children: [
+                                Text(
+                                  '전체보기',
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 15,
+                                ),
+                              ],
+                            )),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -343,49 +453,18 @@ class MyPageScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Column(
                 children: [
-                  // CustomSection(
-                  //   title: '쇼핑 활동',
-                  //   items: [
-                  //     buildListItem(Icons.receipt_long, '취소/반품/교환 내역'),
-                  //     buildListItem(Icons.account_balance_wallet, '선물함'),
-                  //     buildListItem(Icons.payment, '배송지 관리'),
-                  //     buildListItem(Icons.savings, '재입고 알림'),
-                  //     buildListItem(Icons.receipt_long, '올영매장'),
-                  //     buildListItem(Icons.account_balance_wallet, '티켓 예약 내역'),
-                  //   ],
-                  // ),
-                  // CustomSection(
-                  //   title: '마이 월렛',
-                  //   items: [
-                  //     buildListItem(Icons.receipt_long, '스마트 영수증'),
-                  //     buildListItem(Icons.account_balance_wallet, '환불계좌 관리'),
-                  //     buildListItem(Icons.payment, '빠른결제',
-                  //         subtitle: '토스(0216)'),
-                  //     buildListItem(Icons.savings, '예치금'),
-                  //   ],
-                  // ),
-                  // CustomSection(
-                  //   title: '이벤트·리서치',
-                  //   items: [
-                  //     buildListItem(Icons.event, '이벤트 참여 현황'),
-                  //     buildListItem(Icons.mic, '올리브 보이스', onTap: () {
-                  //       context.push('/admin');
-                  //     }),
-                  //   ],
-                  // ),
-                  // CustomSection(
-                  //   title: '문의',
-                  //   items: [
-                  //     buildListItem(Icons.headset_mic, '고객센터/공지사항'),
-                  //     buildListItem(Icons.help_outline, '상품 문의'),
-                  //     buildListItem(Icons.chat_bubble_outline, '1:1 문의'),
-                  //   ],
-                  // ),
                   buildListItem(
                     Icons.logout,
                     '로그아웃',
                     onTap: () {
                       context.read<AuthBloc>().add(LogoutRequested());
+                    },
+                  ),
+                  buildListItem(
+                    Icons.person_off,
+                    '회원탈퇴',
+                    onTap: () {
+                      _showDeleteConfirmationDialog(context);
                     },
                   ),
                   ListTile(
@@ -427,4 +506,142 @@ class MyPageScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildAnalysisCard({
+  required IconData icon,
+  required String title,
+  required String value,
+}) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(
+        icon,
+        size: 20.sp,
+      ),
+      SizedBox(width: 8.w),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12.sp,
+            ),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+void _showDeleteConfirmationDialog(BuildContext context) {
+  bool isAgreed = false;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '탈퇴하기',
+                    style: AppStyles.headingStyle,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '정말 탈퇴하시겠습니까?',
+                    textAlign: TextAlign.center,
+                    style: AppStyles.bodyTextStyle,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isAgreed,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isAgreed = value ?? false;
+                          });
+                        },
+                      ),
+                      const Text('동의합니다'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // 직사각형 모양으로 설정
+                            ),
+                          ),
+                          child: Text(
+                            '취소',
+                            style: AppStyles.bodyTextStyle,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.25,
+                        height: MediaQuery.of(context).size.height * 0.05,
+                        child: ElevatedButton(
+                          onPressed: isAgreed
+                              ? () {
+                                  // 회원 탈퇴 이벤트 추가
+                                  context
+                                      .read<AuthBloc>()
+                                      .add(DeleteAccountRequested());
+                                  context.go('/login');
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppsColor.pastelGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // 직사각형 모양으로 설정
+                            ),
+                          ),
+                          child: Text(
+                            '확인',
+                            style: AppStyles.bodyTextStyle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    },
+  );
 }

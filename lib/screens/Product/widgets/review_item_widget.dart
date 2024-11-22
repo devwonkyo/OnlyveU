@@ -34,8 +34,13 @@ class ReviewItemWidget extends StatelessWidget {
   Widget _buildReviewHeader() {
     return Row(
       children: [
+        review.userProfileImageUrl == "" ? const CircleAvatar(
+      backgroundColor: Colors.grey,
+      child: Icon(Icons.person, size: 30),
+    )
+    :
         CircleAvatar(
-          backgroundImage: NetworkImage('https://picsum.photos/id/237/100'),
+          backgroundImage: NetworkImage(review.userProfileImageUrl ?? ""),
         ),
         SizedBox(width: 8.w),
         Column(

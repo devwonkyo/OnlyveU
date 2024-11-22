@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/category/category_product_bloc.dart';
 import 'package:onlyveyou/blocs/product/cart/product_cart_bloc.dart';
+import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/models/category_model.dart';
 import 'package:onlyveyou/models/category_selection.dart';
 import 'package:onlyveyou/screens/category/category_product_list_skeleton_screen.dart';
@@ -79,33 +80,31 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: getBackgroundColor(context),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: getBackgroundColor(context),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black, size: 24.sp),
+          icon: Icon(Icons.arrow_back_ios, size: 24.sp),
           onPressed: () => context.pop(),
         ),
         title: Text(
           widget.categorySelection.category.name,
           style: TextStyle(
-            color: Colors.black,
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.search, color: Colors.black, size: 24.sp),
+            icon: Icon(Icons.search, size: 24.sp),
             onPressed: () {
               context.push('/search');
             },
           ),
           IconButton(
-            icon: Icon(Icons.shopping_bag_outlined,
-                color: Colors.black, size: 24.sp),
+            icon: Icon(Icons.shopping_bag_outlined, size: 24.sp),
             onPressed: () {
               sendNotification(
                   title: "알림", body: "테스트 푸시", pushToken: token ?? '');
@@ -158,10 +157,8 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                             isMainCategory = false;
                           }
                         },
-                        child: FilterItem(
-                          _filterOptions[index].name,
-                          _selectedFilterIndex == index,
-                        ),
+                        child: FilterItem(_filterOptions[index].name,
+                            _selectedFilterIndex == index, context),
                       ),
                     ),
                   ),
@@ -180,7 +177,6 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                             _filterOptions[_selectedFilterIndex].name,
                             style: TextStyle(
                               fontSize: 14.sp,
-                              color: Colors.black87,
                             ),
                           );
                         },
@@ -189,13 +185,11 @@ class _CategoryProductListScreenState extends State<CategoryProductListScreen> {
                         onPressed: () {
                           _showSortOptions(context);
                         },
-                        icon: Icon(Icons.keyboard_arrow_down,
-                            size: 20.sp, color: Colors.black87),
+                        icon: Icon(Icons.keyboard_arrow_down, size: 20.sp),
                         label: Text(
                           '인기순',
                           style: TextStyle(
                             fontSize: 14.sp,
-                            color: Colors.black87,
                           ),
                         ),
                       )
