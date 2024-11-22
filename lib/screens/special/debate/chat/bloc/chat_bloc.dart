@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:onlyveyou/screens/special/debate/chat/chat_model.dart';
-import 'package:onlyveyou/screens/special/debate/chat/chat_repository.dart';
+import 'package:onlyveyou/models/chat_model.dart';
+import 'package:onlyveyou/repositories/chat_repository.dart';
 
 part 'chat_event.dart';
 part 'chat_state.dart';

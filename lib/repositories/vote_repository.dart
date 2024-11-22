@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'vote_model.dart';
+import '../models/vote_model.dart';
 
 class VoteRepository {
   final CollectionReference voteCollection =
