@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/auth/auth_event.dart';
 import 'package:onlyveyou/blocs/auth/auth_state.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/screens/auth/widgets/shaking_icon.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
@@ -128,9 +129,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginWithKakao() async {
     try {
-      await kakao.UserApi.instance.loginWithKakaoTalk();
-    } catch (error) {
       await kakao.UserApi.instance.loginWithKakaoAccount();
+      // await kakao.UserApi.instance.loginWithKakaoTalk();
+      print("kakao login");
+    } catch (error) {
+
+      print("kakao login error ");
     }
 
     try {
@@ -250,35 +254,32 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),const Row(
+                        ),Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               '쇼핑공간',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 5,),
-                            Icon(
-                              Icons.spa,  // 원하는 아이콘 선택
-                              size: 24,  // 아이콘 크기
-                              color: AppsColor.pastelGreen,  // 아이콘 색상
-                            ),
-
                           ],
                         ),
                         const SizedBox(height: 20),
-                        const Center(
-                          child: Text(
-                            'OnlyveU',
-                            style: TextStyle(
-                              fontSize: 48,
-                              color: AppsColor.pastelGreen,
-                              fontWeight: FontWeight.bold,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Onlyve',
+                              style: TextStyle(
+                                fontSize: 48,
+                                color: AppsColor.pastelGreen,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                            ShakingIcon()
+                          ],
                         ),
                         const SizedBox(height: 50),
                         TextField(
@@ -287,6 +288,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: '이메일',
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: OutlineInputBorder( // 포커스 받았을 때 테두리
+                              borderSide: BorderSide(
+                                color: AppsColor.pastelGreen, // 원하는 색상으로 변경
+                                width: 2.0, // 테두리 두께
+                              ),
                             ),
                           ),
                         ),
@@ -298,6 +305,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintText: '비밀번호',
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: OutlineInputBorder( // 포커스 받았을 때 테두리
+                              borderSide: BorderSide(
+                                color: AppsColor.pastelGreen, // 원하는 색상으로 변경
+                                width: 2.0, // 테두리 두께
+                              ),
                             ),
                           ),
                         ),
@@ -316,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 40),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppStyles.mainColor,
@@ -328,10 +341,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   password: passwordController.text,
                                 ));
                           },
-                          child: const Text('로그인',
-                              style: TextStyle(color: Colors.black)),
+                          child: const Text('이메일 로그인',
+                              style: TextStyle(color: Colors.white)),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 60),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -371,26 +384,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             )
                           ],
                         ),
-                        // ElevatedButton(
-                        //   style: ElevatedButton.styleFrom(),
-                        //   onPressed: () {
-                        //     _loginWithKakao();
-                        //   },
-                        //   child:
-                        //       Image.asset('assets/image/kakaologin.png', height: 50, fit: BoxFit.fitWidth,),
-                        // ),
-                        // const SizedBox(height: 10),
-                        // ElevatedButton(
-                        //   style: ElevatedButton.styleFrom(),
-                        //   onPressed: () {
-                        //     _loginWithGoogle();
-                        //   },
-                        //   child: Image.asset(
-                        //     'assets/image/googlelogin.png',
-                        //     height: 50,
-                        //     fit: BoxFit.fitWidth,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),
