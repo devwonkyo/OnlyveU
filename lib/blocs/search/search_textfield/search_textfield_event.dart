@@ -1,4 +1,4 @@
-part of 'search_text_field_bloc.dart';
+part of 'search_textfield_bloc.dart';
 
 sealed class SearchTextFieldEvent extends Equatable {
   const SearchTextFieldEvent();

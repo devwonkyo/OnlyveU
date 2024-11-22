@@ -9,7 +9,7 @@ import '../../../blocs/home/home_bloc.dart';
 import '../../../models/product_model.dart';
 import '../../../utils/styles.dart';
 import '../../../blocs/search/recent_search/recent_search_bloc.dart';
-import '../../../blocs/search/search_text_field/search_text_field_bloc.dart';
+import '../../../blocs/search/search_textfield/search_textfield_bloc.dart';
 import '../../../blocs/search/search_result/search_result_bloc.dart';
 
 class SearchResultScreen extends StatelessWidget {
