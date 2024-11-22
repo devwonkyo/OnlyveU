@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/models/category_model.dart';
 
 class MainCategoryItem extends StatelessWidget {
@@ -21,11 +22,11 @@ class MainCategoryItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-        color: isSelected ? Colors.white : Colors.grey[100],
+        color: getBackgroundSelectedColor(context, isSelected),
         child: Text(
           category.name,
           style: TextStyle(
-            color: isSelected ? AppsColor.pastelGreen : Colors.black87,
+            color: getDarkModeSelectedTextColor(context, isSelected),
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             fontSize: 14,
           ),
