@@ -165,6 +165,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           await orderRepository.saveOrder(updatedOrder);
 
           emit(PaymentSuccess());
+          print("submit order에서 state: $state");
         } catch (e) {
           emit(const PaymentError('주문 제출 중 오류가 발생했습니다.'));
         }

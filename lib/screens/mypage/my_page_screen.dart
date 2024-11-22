@@ -394,7 +394,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                             "주문 대기": 0,
                             "상품 준비중": 0,
                             "배송중": 0,
-                            "배송완료": 0,
+                            "배송 완료": 0,
                           };
 
                           // 상태별 주문 수량 카운팅
@@ -419,7 +419,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                               OrderStatus('${statusCounts["배송중"]}', '배송중'),
                               const Icon(Icons.arrow_forward_ios,
                                   size: 14, color: Colors.grey),
-                              OrderStatus('${statusCounts["배송완료"]}', '배송완료'),
+                              OrderStatus('${statusCounts["배송 완료"]}', '배송 완료'),
                             ],
                           );
                         } else {
