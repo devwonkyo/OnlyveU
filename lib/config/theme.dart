@@ -53,3 +53,37 @@ ThemeData lightThemeData() {
     brightness: Brightness.light, // 라이트 모드 명시
   );
 }
+
+
+Color getBackgroundSelectedColor(BuildContext context, bool isSelected) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  if (isDark) {
+    return isSelected ? const Color(0xFF2C2C2C) : const Color(0xFF1C1C1C);
+  }
+  return isSelected ? Colors.white : Colors.grey[100]!;
+}
+
+Color getDarkModeSelectedTextColor(BuildContext context, bool isSelected) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  if (isDark) {
+    return isSelected ? AppsColor.pastelGreen : Colors.white70;
+  }
+  return isSelected ? AppsColor.pastelGreen : Colors.black87;
+}
+
+Color getDarkModeTextColor(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  if (isDark) {
+    return Colors.white70;
+  }
+  return Colors.black87;
+}
+
+Color getBackgroundColor(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  if (isDark) {
+    return const Color(0xFF1C1C1C);
+  }
+  return Colors.white;
+}
+
