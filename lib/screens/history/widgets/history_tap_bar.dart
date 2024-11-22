@@ -115,33 +115,34 @@ class HistoryFilterSection extends StatelessWidget {
                     ],
                   ),
                 ),
-          Row(
-            children: [
-              if (isEditing)
+          if (!isFavoriteTab) // 최근본 탭에서만 편집 관련 버튼들 표시
+            Row(
+              children: [
+                if (isEditing)
+                  TextButton(
+                    onPressed: onClearAll,
+                    style: TextButton.styleFrom(
+                      foregroundColor: mainColor,
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    child: Text(
+                      '전체삭제',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 TextButton(
-                  onPressed: onClearAll,
+                  onPressed: onEditToggle,
                   style: TextButton.styleFrom(
                     foregroundColor: mainColor,
                     padding: EdgeInsets.symmetric(horizontal: 8),
                   ),
                   child: Text(
-                    '전체삭제',
+                    isEditing ? '완료' : '편집',
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),
-              TextButton(
-                onPressed: onEditToggle,
-                style: TextButton.styleFrom(
-                  foregroundColor: mainColor,
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                ),
-                child: Text(
-                  isEditing ? '완료' : '편집',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );

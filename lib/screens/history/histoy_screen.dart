@@ -52,6 +52,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       builder: (context, state) {
         return Column(
           children: [
+            SizedBox(height: 16),
             HistoryFilterSection(
               itemCount: state.favoriteItems.length,
               isEditing: isEditing,
