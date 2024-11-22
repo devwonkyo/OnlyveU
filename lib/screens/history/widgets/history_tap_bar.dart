@@ -172,6 +172,7 @@ class HistoryListView extends StatelessWidget {
           isEditing: isEditing,
           onDelete: () => onDelete(items[index]),
           onToggleFavorite: () => onToggleFavorite(items[index]),
+          isLikedTab: true, // 여기서 true로 설정
         );
       },
     );
