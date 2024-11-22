@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
+import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/screens/home/ai_recommend/ai_recommend_screen.dart';
 import 'package:onlyveyou/screens/home/home/widgets/banner_widget.dart';
@@ -54,18 +55,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? AppsColor.darkGray : Colors.white,
       appBar: DefaultAppBar(mainColor: AppStyles.mainColor),
       body: SafeArea(
         child: Column(
           children: [
-            _buildTabBar(),
+            _buildTabBar(isDarkMode),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildHomeTab(),
+                  _buildHomeTab(isDarkMode),
                   _buildRankingTab(),
                   _buildTodaySaleTab(),
                   _buildMagazineTab(),
@@ -78,13 +81,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildTabBar(bool isDarkMode) {
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.only(left: 16.w),
       decoration: BoxDecoration(
+        color: isDarkMode ? AppsColor.darkGray : Colors.white,
         border: Border(
-          bottom: BorderSide(color: Colors.grey[300]!, width: 1.w),
+          bottom: BorderSide(
+              color: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+              width: 1.w),
         ),
       ),
       child: TabBar(
@@ -101,7 +107,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           Tab(text: 'AI추천'),
         ],
         labelColor: AppStyles.mainColor,
-        unselectedLabelColor: AppStyles.greyColor,
+        unselectedLabelColor:
+            isDarkMode ? Colors.grey[400] : AppStyles.greyColor,
         indicatorColor: AppStyles.mainColor,
         indicatorSize: TabBarIndicatorSize.label,
         labelStyle: AppStyles.subHeadingStyle,
@@ -110,8 +117,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  // 홈 탭 컨텐츠
-  Widget _buildHomeTab() {
+  Widget _buildHomeTab(bool isDarkMode) {
     return RefreshIndicator(
       onRefresh: () async {
         context.read<HomeBloc>().add(RefreshHomeData());
@@ -130,7 +136,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     current is HomeLoaded || current is HomeLoading,
                 builder: (context, state) {
                   if (state is HomeLoading) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: isDarkMode ? Colors.white : AppStyles.mainColor,
+                      ),
+                    );
                   } else if (state is HomeLoaded) {
                     return BannerWidget(
                       pageController: _pageController,
@@ -145,6 +155,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           SliverToBoxAdapter(
             child: _buildQuickMenu(
               MediaQuery.of(context).orientation == Orientation.portrait,
+              isDarkMode,
             ),
           ),
           _buildRecommendedProducts(),
@@ -161,13 +172,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             ),
           ),
           _buildPopularProducts(),
-          _buildLoadingIndicator(),
+          _buildLoadingIndicator(isDarkMode),
         ],
       ),
     );
   }
 
-  // 랭킹 탭 컨텐츠
   Widget _buildRankingTab() {
     return RankingTabScreen();
   }
@@ -176,44 +186,44 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return TodaySaleTabScreen();
   }
 
-  // 나중에 탭 컨텐츠
   Widget _buildMagazineTab() {
     return AIRecommendScreen();
   }
 
-  // 기존 위젯들...
-  Widget _buildQuickMenu(bool isPortrait) {
-    // 기존 코드 유지
-    return GridView.count(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      crossAxisCount: isPortrait ? 5 : 8,
-      mainAxisSpacing: 8.h,
-      crossAxisSpacing: 8.w,
-      childAspectRatio: isPortrait ? 1 : 1.2,
-      padding: AppStyles.defaultPadding,
-      children: [
-        _buildQuickMenuItem('AI원픽', Icons.favorite, () {
-          context.push('/ai-onepick'); // ResetChat 제거
-        }),
-        _buildQuickMenuItem('날씨추천', Icons.wb_sunny_sharp, () {
-          context.push('/weather');
-        }),
-        _buildQuickMenuItem('AR가상', Icons.live_tv, () {
-          context.push('/virtual');
-        }), // _uploadDummyData(context);
-        _buildQuickMenuItem('VS투표', Icons.balance_rounded, () {
-          context.push('/debate');
-        }),
-        _buildQuickMenuItem('MBTI', Icons.hail_outlined, () {
-          context.push('/mbti');
-        }),
-      ],
+  Widget _buildQuickMenu(bool isPortrait, bool isDarkMode) {
+    return Container(
+      color: isDarkMode ? AppsColor.darkGray : Colors.white,
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        crossAxisCount: isPortrait ? 5 : 8,
+        mainAxisSpacing: 8.h,
+        crossAxisSpacing: 8.w,
+        childAspectRatio: isPortrait ? 1 : 1.2,
+        padding: AppStyles.defaultPadding,
+        children: [
+          _buildQuickMenuItem('AI원픽', Icons.favorite, () {
+            context.push('/ai-onepick');
+          }, isDarkMode),
+          _buildQuickMenuItem('날씨추천', Icons.wb_sunny_sharp, () {
+            context.push('/weather');
+          }, isDarkMode),
+          _buildQuickMenuItem('AR가상', Icons.live_tv, () {
+            context.push('/virtual');
+          }, isDarkMode),
+          _buildQuickMenuItem('VS투표', Icons.balance_rounded, () {
+            context.push('/debate');
+          }, isDarkMode),
+          _buildQuickMenuItem('MBTI', Icons.hail_outlined, () {
+            context.push('/mbti');
+          }, isDarkMode),
+        ],
+      ),
     );
   }
 
-  Widget _buildQuickMenuItem(String label, IconData icon, VoidCallback onTap) {
-    // 기존 코드 유지
+  Widget _buildQuickMenuItem(
+      String label, IconData icon, VoidCallback onTap, bool isDarkMode) {
     bool isUploading = _isUploading && label == '뭐할까';
 
     return InkWell(
@@ -221,11 +231,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDarkMode ? Colors.grey[800] : Colors.white,
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: isDarkMode ? Colors.black12 : Colors.grey.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 2,
               offset: Offset(0, 1),
@@ -240,7 +250,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             SizedBox(height: 4.h),
             Text(
               label,
-              style: AppStyles.smallTextStyle,
+              style: AppStyles.smallTextStyle.copyWith(
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
               textAlign: TextAlign.center,
             ),
             if (isUploading)
@@ -263,7 +275,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _uploadDummyData(BuildContext context) async {
-    // 기존 코드 유지
     if (_isUploading) return;
 
     try {
@@ -354,7 +365,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildLoadingIndicator() {
+  Widget _buildLoadingIndicator(bool isDarkMode) {
     return BlocSelector<HomeBloc, HomeState, bool>(
       selector: (state) => state is HomeLoaded && state.isLoading,
       builder: (context, isLoading) {
@@ -363,7 +374,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ? Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.h),
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(
+                      color: isDarkMode ? Colors.white : AppStyles.mainColor,
+                    ),
                   ),
                 )
               : SizedBox.shrink(),

@@ -82,6 +82,7 @@ dependencies:
   webview_flutter: ^4.9.0
   tosspayments_widget_sdk_flutter: ^2.0.6
   flutter_dotenv: ^5.2.1
+  flutter_launcher_icons: ^0.14.1
 
 dev_dependencies:
   flutter_test:
@@ -96,7 +97,13 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/spa_icon.png"
+  adaptive_icon_background: "#FFFFFF" # 배경색 (흰색)
+  adaptive_icon_foreground: "assets/spa_icon.png" # 전경 이미지
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
@@ -116,6 +123,7 @@ flutter:
     - .env
     - assets/image/kakaologin.png
     - assets/image/googlelogin.png
+    - assets/spa_icon.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
