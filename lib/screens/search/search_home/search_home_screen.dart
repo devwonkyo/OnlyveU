@@ -5,7 +5,7 @@ import 'package:onlyveyou/screens/search/search_home/recent_search/recent_search
 import 'package:onlyveyou/screens/search/search_home/trend_search/trend_search_view.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../blocs/search/search_text_field/search_text_field_bloc.dart';
+import '../../../blocs/search/search_textfield/search_textfield_bloc.dart';
 import '../../../blocs/search/recent_search/recent_search_bloc.dart';
 import '../../../blocs/search/trend_search/trend_search_bloc.dart';
 
