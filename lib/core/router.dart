@@ -10,6 +10,7 @@ import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/post_model.dart';
 import 'package:onlyveyou/models/product_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
+import 'package:onlyveyou/models/store_with_inventory_model.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/repositories/order/payment_repository.dart';
 import 'package:onlyveyou/screens/auth/findid_screen.dart';
@@ -26,6 +27,7 @@ import 'package:onlyveyou/screens/home/home/widgets/banner1.dart';
 import 'package:onlyveyou/screens/home/home/widgets/banner2.dart';
 import 'package:onlyveyou/screens/home/home/widgets/banner3.dart';
 import 'package:onlyveyou/screens/home/ranking/ranking_tap_screen.dart';
+import 'package:onlyveyou/screens/map/store_map_screen.dart';
 import 'package:onlyveyou/screens/mypage/admin_page_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/email_edit_screen.dart';
 import 'package:onlyveyou/screens/mypage/edit/nickname_edit_screen.dart';
@@ -386,6 +388,13 @@ final GoRouter router = GoRouter(
         final productModel = state.extra as ProductModel;
         return StoreListScreen(productModel: productModel);
       },
+    ),
+    GoRoute(
+      path: '/store_map',
+      builder: (context, state) {
+        final storeModel = state.extra as StoreWithInventoryModel;
+        return StoreMapScreen(storeModel: storeModel);
+      }
     ),
   ],
 );

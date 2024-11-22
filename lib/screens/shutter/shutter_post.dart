@@ -45,7 +45,9 @@ class _PostScreenState extends State<PostScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<PostBloc, PostState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+
+      },
       child: BlocBuilder<PostBloc, PostState>(
         builder: (context, state) {
           return Stack(
