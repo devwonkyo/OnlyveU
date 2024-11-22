@@ -10,12 +10,14 @@ class HistoryItemCard extends StatelessWidget {
   final bool isEditing;
   final VoidCallback onDelete;
   final VoidCallback onToggleFavorite;
+  final bool isLikedTab; // 추가된 프로퍼티
 
   const HistoryItemCard({
     required this.product,
     required this.isEditing,
     required this.onDelete,
     required this.onToggleFavorite,
+    this.isLikedTab = false, // 기본값 false로 설정
   });
 
   @override
@@ -179,12 +181,18 @@ class HistoryItemCard extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: Icon(
-                              product.favoriteList.contains(userId)
+                              // 좋아요 탭이면 무조건 favorite 아이콘
+                              // 아니면 기존 로직대로 체크
+                              isLikedTab
                                   ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: product.favoriteList.contains(userId)
+                                  : product.favoriteList.contains(userId)
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                              color: isLikedTab
                                   ? Colors.red
-                                  : Colors.grey,
+                                  : product.favoriteList.contains(userId)
+                                      ? Colors.red
+                                      : Colors.grey,
                             ),
                             onPressed: onToggleFavorite,
                           ),
