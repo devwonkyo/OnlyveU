@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/config/theme.dart';
 
-Widget FilterItem(String text, bool isSelected) {
+Widget FilterItem(String text, bool isSelected,BuildContext context) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
     decoration: BoxDecoration(
@@ -17,7 +18,7 @@ Widget FilterItem(String text, bool isSelected) {
       style: TextStyle(
         fontSize: 14.sp,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        color: isSelected ? Colors.black : Colors.grey,
+        color: getDarkModeTextColor(context)
       ),
     ),
   );
