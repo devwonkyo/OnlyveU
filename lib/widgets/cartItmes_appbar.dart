@@ -30,6 +30,7 @@ class _CartItemsAppBarState extends State<CartItemsAppBar> {
         return AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
+          scrolledUnderElevation: 0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pop(context),

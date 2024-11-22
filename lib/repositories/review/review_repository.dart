@@ -70,6 +70,7 @@ class ReviewRepository{
           .doc(reviewModel.userId)
           .get();
       final userName = userDoc.data()?['nickname'] as String;
+      final userProfileImageUrl = userDoc.data()?['profileImageUrl'] as String;
 
       // 2. 리뷰 문서 생성하고 ID 받기
       final reviewRef = _firestore.collection('reviews').doc();
@@ -118,6 +119,7 @@ class ReviewRepository{
         reviewId: reviewId,
         imageUrls: imageUrls,
         userName: userName,
+        userProfileImageUrl: userProfileImageUrl
       );
 
       // 4. 리뷰 저장
