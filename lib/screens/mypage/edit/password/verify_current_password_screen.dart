@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_event.dart';
 import 'package:onlyveyou/blocs/mypage/password/password_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 
 class VerifyCurrentPasswordScreen extends StatelessWidget {
@@ -11,6 +13,7 @@ class VerifyCurrentPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -50,6 +53,7 @@ class VerifyCurrentPasswordScreen extends StatelessWidget {
                 builder: (context, state) {
                   return Container(
                     decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     width: double.infinity,
