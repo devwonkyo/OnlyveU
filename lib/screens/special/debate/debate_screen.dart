@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_event.dart';
 import 'package:onlyveyou/models/extensions/product_model_extension.dart';
-import 'package:onlyveyou/screens/special/debate/chat/chat_model.dart';
+import 'package:onlyveyou/models/chat_model.dart';
 
 import '../../../blocs/home/home_bloc.dart';
 import '../../../blocs/mypage/profile_edit/profile_edit_bloc.dart';

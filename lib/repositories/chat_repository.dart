@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:onlyveyou/screens/special/debate/chat/chat_model.dart';
+import 'package:onlyveyou/models/chat_model.dart';
 
 class ChatRepository {
   final CollectionReference chatCollection =
