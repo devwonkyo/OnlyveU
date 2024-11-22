@@ -5,26 +5,29 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
-
 import 'package:onlyveyou/utils/styles.dart';
 
 class DeliveryOrderInfo extends StatelessWidget {
   final DeliveryInfoModel? deliveryInfo;
   final List<String> deliveryMessages;
-  final VoidCallback? onAddressChange; // 콜백 추가
-  final ValueChanged<String>? onDeliveryMessageSelected; // 콜백 추가
+  final VoidCallback? onAddressChange;
+  final ValueChanged<String>? onDeliveryMessageSelected;
+
   const DeliveryOrderInfo({
     super.key,
     required this.deliveryInfo,
     required this.deliveryMessages,
-    this.onAddressChange, // 콜백 초기화
-    this.onDeliveryMessageSelected, // 콜백 초기화
+    this.onAddressChange,
+    this.onDeliveryMessageSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 배송지 정보 표시 부분
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
+
     String displayText = '';
     String address = '';
     String detailAddress = '';
@@ -44,7 +47,7 @@ class DeliveryOrderInfo extends StatelessWidget {
       children: [
         Divider(
           height: 1,
-          color: Colors.grey[400],
+          color: isDarkMode ? Colors.grey[800] : Colors.grey[400],
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
@@ -54,43 +57,43 @@ class DeliveryOrderInfo extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // recipientName이 null이거나 비어있을 때만 '배송지를 등록해주세요' 텍스트를 표시
                   if (recipientName.isEmpty)
                     Text(
                       '배송지를 등록해주세요',
-                      style: AppStyles.headingStyle,
+                      style: AppStyles.headingStyle.copyWith(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
-                  // recipientName이 있을 때는 배송지 정보를 표시
                   if (recipientName.isNotEmpty)
                     Text(
                       '$displayText ($recipientName)',
-                      style: AppStyles.headingStyle,
+                      style: AppStyles.headingStyle.copyWith(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                   const SizedBox(height: 10),
                   Text(
                     '$address $detailAddress',
-                    style: AppStyles.bodyTextStyle,
+                    style: AppStyles.bodyTextStyle.copyWith(
+                      color: isDarkMode ? Colors.grey[300] : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     recipientPhoneNumber,
-                    style: AppStyles.bodyTextStyle,
+                    style: AppStyles.bodyTextStyle.copyWith(
+                      color: isDarkMode ? Colors.grey[300] : Colors.black,
+                    ),
                   ),
                 ],
               ),
               TextButton(
-                onPressed: () {
-                  //_showModalBottomSheet(context);
-                  onAddressChange!(); // 콜백 함수 호출
-                  //원래는 modalbottomsheet를 띄웠지만 상태관리 문제가 있을 수 있다고 판단하여 주석처리
-                  //라우터에 문제가 있을 확률은?
-
-                  // 배송지
-                  // context.push('/new_delivery_address');
-                },
+                onPressed: onAddressChange,
                 child: Text(
                   '변경',
-                  style: AppStyles.bodyTextStyle,
+                  style: AppStyles.bodyTextStyle.copyWith(
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
                 ),
               ),
             ],
@@ -100,16 +103,14 @@ class DeliveryOrderInfo extends StatelessWidget {
         Divider(
           height: 1,
           thickness: 6,
-          color: Colors.grey[200],
+          color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
         ),
-        // 배송 요청사항 표시 부분
-        _buildDeliveryMessageSection(context),
+        _buildDeliveryMessageSection(context, isDarkMode),
       ],
     );
   }
 
-  // 배송 요청사항 섹션을 별도의 메서드로 분리
-  Widget _buildDeliveryMessageSection(BuildContext context) {
+  Widget _buildDeliveryMessageSection(BuildContext context, bool isDarkMode) {
     return BlocBuilder<PaymentBloc, PaymentState>(
       builder: (context, state) {
         String selectedMessage = '없음';
@@ -128,7 +129,9 @@ class DeliveryOrderInfo extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: Text(
                 '배송 요청사항',
-                style: AppStyles.headingStyle,
+                style: AppStyles.headingStyle.copyWith(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -140,7 +143,10 @@ class DeliveryOrderInfo extends StatelessWidget {
                           value: message,
                           child: Text(
                             message,
-                            style: AppStyles.subHeadingStyle,
+                            style: AppStyles.subHeadingStyle.copyWith(
+                              color:
+                                  isDarkMode ? Colors.grey[300] : Colors.black,
+                            ),
                           ),
                         ))
                     .toList(),
@@ -153,88 +159,20 @@ class DeliveryOrderInfo extends StatelessWidget {
                         .add(SelectDeliveryMessage(value));
                   }
                 },
-                buttonStyleData: const ButtonStyleData(
+                buttonStyleData: ButtonStyleData(
                   height: 50,
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                ),
-                dropdownStyleData: DropdownStyleData(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.grey[850] : Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: Colors.grey,
-                      width: 1.0,
                     ),
                   ),
                 ),
               ),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  // _showModalBottomSheet 함수도 위젯 내부로 이동
-  void _showModalBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        // 모달 바텀 시트 내용 구현
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.2,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-            ),
-          ),
-          child: Column(
-            children: [
-              // 모달 바텀 시트 헤더
-              Padding(
-                padding: const EdgeInsets.only(left: 20, right: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('배송지 변경', style: AppStyles.headingStyle),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 20),
-                      onPressed: () {
-                        context.pop();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(color: Colors.black12),
-              const SizedBox(height: 50),
-              // 새 배송지 추가 버튼
-              Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black26),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.pop();
-                    context.push('/new_delivery_address');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black54,
-                    padding: const EdgeInsets.all(10.0),
-                    textStyle: const TextStyle(fontSize: 12),
-                  ),
-                  child: Text(
-                    '새 배송지 추가',
-                    style: AppStyles.bodyTextStyle,
-                  ),
-                ),
-              ),
-            ],
-          ),
         );
       },
     );

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_event.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 
 class NicknameEditScreen extends StatelessWidget {
@@ -11,6 +13,7 @@ class NicknameEditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -60,6 +63,7 @@ class NicknameEditScreen extends StatelessWidget {
 
                   return Container(
                     decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey[800] : Colors.grey[200],
                       borderRadius: BorderRadius.circular(8),
                     ),
                     width: double.infinity,
@@ -71,9 +75,16 @@ class NicknameEditScreen extends StatelessWidget {
                       },
                       decoration: InputDecoration(
                         hintText: hintText,
+                        hintStyle: TextStyle(
+                          color:
+                              isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                        ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 14),
+                      ),
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                   );

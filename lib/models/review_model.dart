@@ -11,7 +11,11 @@ class ReviewModel {
   /// 작성자 ID
   final String userId;
 
+  /// 작성자 닉네임
   final String userName;
+
+  ///작성자 프로필이미지
+  final String? userProfileImageUrl;
 
   /// 평점
   final double rating;
@@ -45,6 +49,7 @@ class ReviewModel {
     required this.productId,
     required this.userId,
     required this.userName,
+    this.userProfileImageUrl = "",
     required this.rating,
     required this.content,
     this.imageUrls = const [],
@@ -62,6 +67,7 @@ class ReviewModel {
       'productId': productId,
       'userId': userId,
       'userName': userName,
+      'userProfileImageUrl': userProfileImageUrl ?? "",
       'rating': rating,
       'content': content,
       'imageUrls': imageUrls,
@@ -80,6 +86,7 @@ class ReviewModel {
       productId: map['productId'] as String,
       userId: map['userId'] as String,
       userName: map['userName'] as String,
+      userProfileImageUrl: map['userProfileImageUrl'] ?? "",
       rating: (map['rating'] as num).toDouble(),
       content: map['content'] as String,
       imageUrls: List<String>.from(map['imageUrls'] as List? ?? []),
@@ -99,6 +106,7 @@ class ReviewModel {
     String? productId,
     String? userId,
     String? userName,
+    String? userProfileImageUrl,
     double? rating,
     String? content,
     List<String>? imageUrls,
@@ -114,6 +122,7 @@ class ReviewModel {
       productId: productId ?? this.productId,
       userId: userId ?? this.userId,
       userName: userName ?? this.userName,
+      userProfileImageUrl: userProfileImageUrl ?? this.userProfileImageUrl,
       rating: rating ?? this.rating,
       content: content ?? this.content,
       imageUrls: imageUrls ?? this.imageUrls,
