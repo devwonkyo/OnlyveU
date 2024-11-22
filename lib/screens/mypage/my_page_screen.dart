@@ -12,6 +12,9 @@ import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_state.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_event.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_state.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_bloc.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_event.dart';
+import 'package:onlyveyou/blocs/mypage/profile_edit/profile_edit_state.dart';
 import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
 import 'package:onlyveyou/blocs/theme/theme_event.dart';
 import 'package:onlyveyou/blocs/theme/theme_state.dart';
@@ -33,13 +36,15 @@ class _MyPageScreenState extends State<MyPageScreen> {
   @override
   void initState() {
     super.initState();
+
     context.read<OrderStatusBloc>().add(const FetchOrder());
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     context.read<NicknameEditBloc>().add(LoadCurrentNickname());
-
+    context.read<ProfileBloc>().add(LoadProfileImage());
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LogoutSuccess) {
@@ -104,20 +109,24 @@ class _MyPageScreenState extends State<MyPageScreen> {
                                       textAlign: TextAlign.center,
                                       text: TextSpan(
                                         children: [
-                                          const TextSpan(
+                                          TextSpan(
                                             text: '안녕하세요 ', // "안녕하세요" 텍스트
                                             style: TextStyle(
                                               fontSize: 20,
-                                              color: Colors.black,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
                                             ),
                                           ),
                                           TextSpan(
                                             text:
                                                 '${state.nickname}님', // state.nickname 텍스트
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.black,
+                                              color: isDarkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
                                             ),
                                           ),
                                         ],
@@ -155,36 +164,64 @@ class _MyPageScreenState extends State<MyPageScreen> {
                           ],
                         ),
                         Container(
-                          height: 50,
+                          width: 140.w,
+                          height: 60.h,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                            color: isDarkMode
+                                ? const Color(0xFF1E1E1E) // 다크모드 배경 색상
+                                : Colors.white, // 라이트모드 배경 색상
+                            borderRadius: BorderRadius.circular(12), // 둥근 모서리
+                            border: Border.all(
+                              color: isDarkMode
+                                  ? Colors.white.withOpacity(0.6)
+                                  : Colors.black
+                                      .withOpacity(0.3), // 테두리 색상에 투명도 추가
+                              width: 1.5, // 테두리 두께
+                            ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  context.push('/profile_edit');
-                                },
-                                child: const Row(
-                                  children: [
-                                    Icon(
-                                      Icons.person_pin,
-                                      color: Color.fromARGB(255, 205, 202, 202),
-                                      size: 30,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(
+                                  12), // 클릭 시 모서리 애니메이션 적용
+                              onTap: () {
+                                context.push('/profile_edit');
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  BlocBuilder<ProfileBloc, ProfileState>(
+                                    builder: (context, state) {
+                                      if (state is ProfileImageUrlLoaded) {
+                                        return CircleAvatar(
+                                          radius: 20, // 프로필 이미지 크기 조정
+                                          backgroundImage:
+                                              NetworkImage(state.imageUrl),
+                                        );
+                                      }
+                                      return Icon(
+                                        Icons.person,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black, // 기본 아이콘 색상
+                                        size: 28, // 기본 아이콘 크기
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(width: 10), // 텍스트와 아이콘 간격
+                                  Text(
+                                    '프로필 변경',
+                                    style: TextStyle(
+                                      fontSize: 16.sp, // 텍스트 크기 조정
+                                      fontWeight: FontWeight.w500,
+                                      color: isDarkMode
+                                          ? Colors.white
+                                          : Colors.black, // 텍스트 색상
                                     ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '프로필',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],

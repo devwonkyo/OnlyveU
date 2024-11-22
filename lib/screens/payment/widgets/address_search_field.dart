@@ -1,11 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/utils/styles.dart';
 
 import 'package:kpostal/kpostal.dart';
 
 class AddressSearchField extends StatefulWidget {
-   final TextEditingController addressController; // 외부에서 전달받는 컨트롤러
+  final TextEditingController addressController; // 외부에서 전달받는 컨트롤러
   final TextEditingController detailedAddressController; // 외부에서 전달받는 컨트롤러
 
   const AddressSearchField({
@@ -19,20 +23,20 @@ class AddressSearchField extends StatefulWidget {
 }
 
 class _AddressSearchFieldState extends State<AddressSearchField> {
-
- 
-
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text(
-              '주소',
-              style: AppStyles.headingStyle,
-            ),
+            Text('주소',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                )),
             const Text(
               ' *',
               style: TextStyle(color: Colors.red),
@@ -85,16 +89,24 @@ class _AddressSearchFieldState extends State<AddressSearchField> {
                       .push(MaterialPageRoute(builder: (context) {
                     return KpostalView(
                       callback: (Kpostal result) {
-                     widget.addressController.text = result.address;
+                        widget.addressController.text = result.address;
                       },
                     );
                   }));
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
+                  side: BorderSide(
+                    color: context.watch<ThemeBloc>().state is ThemeDark
+                        ? Colors.white // 다크 모드 테두리 색상
+                        : Colors.black, // 라이트 모드 테두리 색상
+                    width: 1.5, // 테두리 두께
+                  ),
+                  backgroundColor: context.watch<ThemeBloc>().state is ThemeDark
+                      ? Colors.grey[800] // 다크 모드 배경색
+                      : Colors.black, // 라이트 모드 배경색
                 ),
                 child: const Text(
                   '주소검색',

@@ -63,7 +63,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           await ref.putFile(file, SettableMetadata(contentType: 'image/jpeg'));
           return await ref.getDownloadURL();
         }));
-
+        
         // 게시물 생성
         final docRef = _firestore.collection('posts').doc();
         final post = PostModel(
