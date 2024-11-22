@@ -46,7 +46,9 @@ class _PostScreenState extends State<PostScreen> {
   Widget build(BuildContext context) {
     return BlocListener<PostBloc, PostState>(
       listener: (context, state) {
-
+        if (state.shouldNavigate) {
+          context.go('/shutter'); // go_router를 사용한 navigation
+        }
       },
       child: BlocBuilder<PostBloc, PostState>(
         builder: (context, state) {

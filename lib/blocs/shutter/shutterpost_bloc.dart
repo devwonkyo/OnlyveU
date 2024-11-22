@@ -24,7 +24,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(state.copyWith(text: event.text));
     });
 
-    // UpdateTagsEvent 핸들러 추가
     on<UpdateTagsEvent>((event, emit) {
       emit(state.copyWith(tags: event.tags));
     });
@@ -42,7 +41,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       emit(state.copyWith(isLoading: true));
       try {
         if (state.images.isEmpty) return;
-
         final User? user = FirebaseAuth.instance.currentUser;
         final authorUid = user?.uid ?? '';
         if (authorUid.isEmpty) throw Exception('User not logged in.');
@@ -78,14 +76,14 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           likes: 0,
           likedBy: [],
         );
-
         await docRef.set(post.toMap());
-        emit(PostState.initial());
+
+        // 게시물 업로드 성공 후 navigation 상태 변경
+        emit(PostState.initial().copyWith(shouldNavigate: true));
       } catch (e) {
         print('Error: $e');
-        emit(state.copyWith(error: e.toString()));
+        emit(state.copyWith(error: e.toString(), isLoading: false));
       }
-      emit(state.copyWith(isLoading: false));
     });
   }
 }
