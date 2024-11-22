@@ -119,9 +119,7 @@ void main() async {
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
 
-
   DeepLinkService().initialize(router);
-
 
   //카카오톡
   kakaoSchemeStream.listen((url) {
@@ -133,12 +131,10 @@ void main() async {
     if (screen != null) {
       router.push(screen, extra: productId);
     }
-
   }, onError: (e) {
     // 에러 상황의 예외 처리 코드를 작성합니다.
     print("kakao listen error : $e");
   });
-
 
   // 위치 서비스 초기화 추가
   try {
@@ -147,7 +143,6 @@ void main() async {
   } catch (e) {
     debugPrint('Location service initialization error: $e');
   }
-
 
 // 모든 제품 로컬 저장 (검색용)
   try {
@@ -332,7 +327,10 @@ class MyApp extends StatelessWidget {
                 BlocProvider<EmailBloc>(
                   create: (context) => EmailBloc(),
                 ),
-<<<<<<< HEAD
+                BlocProvider<StoreMapBloc>(
+                  create: (context) =>
+                      StoreMapBloc(geocodingRepository: GeocodingRepository()),
+                ),
                 BlocProvider<ChatBloc>(
                   create: (context) => ChatBloc(
                     chatRepository: ChatRepository(),
@@ -342,10 +340,6 @@ class MyApp extends StatelessWidget {
                   create: (context) => VoteBloc(
                     voteRepository: VoteRepository(),
                   ),
-=======
-                BlocProvider<StoreMapBloc>(
-                  create: (context) => StoreMapBloc(geocodingRepository: GeocodingRepository()),
->>>>>>> d0bf1fa8b7ae630085a07fee5da8600828c9b361
                 ),
               ],
               child: BlocBuilder<ThemeBloc, ThemeState>(
