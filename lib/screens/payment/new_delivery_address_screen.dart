@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/screens/payment/widgets/address_search_field.dart';
 import 'package:onlyveyou/screens/payment/widgets/custom_text_field.dart';
@@ -39,15 +41,33 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
   }
 
   void _showWarningPopup(String message) {
+    final isDarkMode =
+        BlocProvider.of<ThemeBloc>(context, listen: false).state is ThemeDark;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('에러'),
-        content: Text(message),
+        backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
+        title: Text(
+          '에러',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: isDarkMode ? Colors.grey[300] : Colors.black,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('확인'),
+            child: Text(
+              '확인',
+              style: TextStyle(
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
+            ),
           ),
         ],
       ),
@@ -64,11 +84,17 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '새 배송지 추가',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
+        iconTheme:
+            IconThemeData(color: isDarkMode ? Colors.white : Colors.black),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -78,7 +104,7 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
             children: [
               Divider(
                 height: 1,
-                color: Colors.grey[400],
+                color: isDarkMode ? Colors.grey[800] : Colors.grey[400],
                 thickness: 2,
               ),
               const SizedBox(height: 20),
@@ -120,7 +146,9 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
                   ),
                   Text(
                     '기본 배송지로 설정',
-                    style: AppStyles.bodyTextStyle,
+                    style: AppStyles.bodyTextStyle.copyWith(
+                      color: isDarkMode ? Colors.grey[300] : Colors.black,
+                    ),
                   ),
                 ],
               ),
@@ -149,24 +177,22 @@ class _NewDeliveryAddressScreenState extends State<NewDeliveryAddressScreen> {
                                   recipientName: _recipientController.text,
                                   recipientPhone: _phoneController.text,
                                 ));
-                            // Pop과 함께 데이터를 전달
                             Navigator.pop(context, updatedDeliveryInfo);
-                            print("버튼 눌럿을 때 : $state");
-                            //a화면 blocbuilder생성-> b화면에서 에빈트 발생 시, a화면에서 b에서 발생시킨 emit state 값을 못 가져온다
                           } else {
                             _showWarningPopup('모두 입력해주세요');
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
+                          backgroundColor:
+                              isDarkMode ? Colors.grey[800] : Colors.black,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           '확인',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.white : Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
