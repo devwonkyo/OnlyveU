@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:onlyveyou/blocs/search/search_suggestion/search_suggestion_bloc.dart';
 
 import '../../../../models/search_models/search_models.dart';
-import '../../../../blocs/search/search_text_field/search_text_field_bloc.dart';
+import '../../../../blocs/search/search_textfield/search_textfield_bloc.dart';
 
 class TreandSearchView extends StatelessWidget {
   const TreandSearchView({

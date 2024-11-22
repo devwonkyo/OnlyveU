@@ -13,8 +13,8 @@ import '../../blocs/search/trend_search/trend_search_bloc.dart';
 import '../../blocs/search/search_result/search_result_bloc.dart';
 import '../../blocs/search/search_suggestion/search_suggestion_bloc.dart';
 import 'search_suggestion/search_suggestion_screen.dart';
-import '../../blocs/search/search_text_field/search_text_field_bloc.dart';
-import 'search_text_field/search_text_field.dart';
+import '../../blocs/search/search_textfield/search_textfield_bloc.dart';
+import 'search_textfield/search_textfield.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -53,64 +53,75 @@ class SearchPage extends StatelessWidget {
           FocusScope.of(context).unfocus();
         },
         child: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            toolbarHeight: 50.h,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.shopping_bag_outlined,
-                    color: Colors.black),
-                onPressed: () {
-                  context.push('/cart');
-                },
-              ),
-            ],
-          ),
+          appBar: _buildAppBar(context),
           body: Column(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey[200]!, width: 1.w),
-                  ),
-                ),
-                child: const SearchTextField(),
-              ),
-              Expanded(
-                child: BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
-                  listener: (context, state) {
-                    if (state is SearchTextFieldTyping) {
-                      context
-                          .read<SearchSuggestionBloc>()
-                          .add(FetchSearchSuggestions(state.text));
-                    } else if (state is SearchTextFieldSubmitted) {
-                      context
-                          .read<SearchResultBloc>()
-                          .add(FetchSearchResults(state.text));
-                    }
-                  },
-                  child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
-                    builder: (context, state) {
-                      debugPrint(state.toString());
-                      if (state is SearchTextFieldEmpty) {
-                        return const SearchHomeScreen();
-                      } else if (state is SearchTextFieldTyping) {
-                        return const SearchSuggestionScreen();
-                      } else if (state is SearchTextFieldSubmitted) {
-                        return const SearchResultScreen();
-                      } else {
-                        return const SizedBox();
-                      }
-                    },
-                  ),
-                ),
-              ),
+              _buildTextField(),
+              _buildScreen(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Expanded _buildScreen() {
+    return Expanded(
+      child: BlocListener<SearchTextFieldBloc, SearchTextFieldState>(
+        listener: (context, state) {
+          if (state is SearchTextFieldTyping) {
+            context
+                .read<SearchSuggestionBloc>()
+                .add(FetchSearchSuggestions(state.text));
+          } else if (state is SearchTextFieldSubmitted) {
+            context
+                .read<SearchResultBloc>()
+                .add(FetchSearchResults(state.text));
+          }
+        },
+        child: BlocBuilder<SearchTextFieldBloc, SearchTextFieldState>(
+          builder: (context, state) {
+            debugPrint(state.toString());
+            if (state is SearchTextFieldEmpty) {
+              return const SearchHomeScreen();
+            } else if (state is SearchTextFieldTyping) {
+              return const SearchSuggestionScreen();
+            } else if (state is SearchTextFieldSubmitted) {
+              return const SearchResultScreen();
+            } else {
+              return const SizedBox();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Container _buildTextField() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.grey[200]!, width: 1.w),
+        ),
+      ),
+      child: const SearchTextField(),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      toolbarHeight: 50.h,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
+          onPressed: () {
+            context.push('/cart');
+          },
+        ),
+      ],
     );
   }
 }
