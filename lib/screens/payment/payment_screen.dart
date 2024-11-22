@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/payment/payment_bloc.dart';
 import 'package:onlyveyou/blocs/payment/payment_event.dart';
 import 'package:onlyveyou/blocs/payment/payment_state.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/delivery_info_model.dart';
 import 'package:onlyveyou/models/order_model.dart';
@@ -123,11 +126,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           '주문/결제',
-          style: AppStyles.headingStyle,
+          style: AppStyles.headingStyle.copyWith(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -184,8 +190,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const SizedBox(height: 20),
             Divider(
               height: 1,
-              color: Colors.grey[200],
-              thickness: 10,
+              color: Colors.grey[400],
             ),
             Padding(
               padding:
@@ -193,10 +198,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '주문 상품',
-                    style: AppStyles.headingStyle,
-                  ),
+                  Text('주문 상품',
+                      style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.w)),
                   const SizedBox(height: 10),
                   // payment_screen.dart
                   // payment_screen.dart
@@ -229,7 +235,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ),
                             Text(
                               '${formatPrice((item.productPrice * item.quantity).toString())}원',
-                              style: AppStyles.priceTextStyle,
+                              style: AppStyles.priceTextStyle.copyWith(
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : Colors.black, // 다크모드에 따라 색상 변경
+                              ),
                             ),
                           ],
                         ),
@@ -242,8 +252,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
             Divider(
               height: 1,
-              thickness: 5,
-              color: Colors.grey[200],
+              color: Colors.grey[400],
             ),
             const SizedBox(height: 10),
             Padding(
@@ -261,11 +270,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     children: [
                       Text(
                         '최종 결제금액',
-                        style: AppStyles.headingStyle,
+                        style: AppStyles.headingStyle.copyWith(
+                          color: isDarkMode
+                              ? Colors.white
+                              : Colors.black, // 다크 모드에 따른 색상
+                        ),
                       ),
                       Text(
                         '${formatPrice(totalAmount.toString())}원', // formatPrice 메서드 적용
-                        style: AppStyles.headingStyle,
+                        style: AppStyles.headingStyle.copyWith(
+                          color: isDarkMode
+                              ? Colors.white
+                              : Colors.black, // 다크 모드에 따른 색상
+                        ),
                       ),
                     ],
                   );
@@ -275,20 +292,22 @@ class _PaymentScreenState extends State<PaymentScreen> {
             const SizedBox(height: 10),
             Divider(
               height: 1,
-              thickness: 5,
-              color: Colors.grey[200],
+              color: Colors.grey[400],
             ),
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
               child: Text(
                 '결제 수단',
-                style: AppStyles.headingStyle,
+                style: AppStyles.headingStyle.copyWith(
+                  color:
+                      isDarkMode ? Colors.white : Colors.black, // 다크 모드에 따른 색상
+                ),
               ),
             ),
             Divider(
               height: 1,
-              color: Colors.grey[200],
+              color: Colors.grey[400],
               thickness: 1,
             ),
             const SizedBox(height: 10),
@@ -305,7 +324,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('빠른결제', style: AppStyles.bodyTextStyle),
+                  Text(
+                    '빠른결제',
+                    style: AppStyles.bodyTextStyle.copyWith(
+                      color: isDarkMode
+                          ? Colors.white
+                          : Colors.black, // 다크 모드에 따른 색상
+                    ),
+                  ),
                   const Icon(Icons.info_outline, color: Colors.grey, size: 18),
                 ],
               ),
@@ -313,8 +339,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
 
             // Card Registration Button
-            Center(
-                child: Column(
+            Column(
               children: [
                 // 카드 등록 버튼을 Toss Payments 위젯으로 대체
                 // 결제 수단 위젯
@@ -328,18 +353,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 // 약관 동의 위젯
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.9,
-                  child: AgreementWidget(
-                    paymentWidget: paymentWidget,
-                    selector: '#agreement', // 필수 매개변수
-                    onChange: (status) {
-                      setState(() {
-                        agreementStatus = status;
-                      });
-                    },
+                  child: Container(
+                    color: Colors.white, // 부모 컨테이너 배경색
+                    child: AgreementWidget(
+                      paymentWidget: paymentWidget,
+                      selector: '#agreement',
+                      onChange: (status) {
+                        setState(() {
+                          agreementStatus = status;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ],
-            )),
+            ),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -348,11 +376,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 children: [
                   Text(
                     '• 빠른결제 이용 시 더블적립 혜택이나 KB알파원카드 혜택은 적용되지 않습니다.',
-                    style: AppStyles.smallTextStyle,
+                    style: AppStyles.smallTextStyle.copyWith(
+                      color: isDarkMode
+                          ? Colors.white
+                          : Colors.black, // 다크 모드에 따른 색상
+                    ),
                   ),
                   Text(
                     '• 등록하신 결제수단이나 원터치결제 관리는 마이페이지 > 마이월렛 > 빠른결제 관리에서 가능합니다.',
-                    style: AppStyles.smallTextStyle,
+                    style: AppStyles.smallTextStyle.copyWith(
+                      color: isDarkMode
+                          ? Colors.white
+                          : Colors.black, // 다크 모드에 따른 색상
+                    ),
                   ),
                 ],
               ),
@@ -369,7 +405,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   _selectedPaymentMethod = value.toString();
                 });
               },
-              title: Text('일반결제', style: AppStyles.bodyTextStyle),
+              title: Text(
+                '일반결제',
+                style: AppStyles.bodyTextStyle.copyWith(
+                  color:
+                      isDarkMode ? Colors.white : Colors.black, // 다크 모드에 따른 색상
+                ),
+              ),
               controlAffinity: ListTileControlAffinity.leading,
             ),
 
@@ -377,7 +419,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
             Divider(
               height: 1,
-              color: Colors.grey[200],
+              color: Colors.grey[400],
               thickness: 10,
             ),
 
@@ -398,7 +440,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   Expanded(
                     child: Text(
                       '지금 설정한 배송지와 결제정보를 기본으로 사용하기',
-                      style: AppStyles.bodyTextStyle,
+                      style: AppStyles.bodyTextStyle.copyWith(
+                        color: isDarkMode
+                            ? Colors.white
+                            : Colors.black, // 다크 모드에 따른 색상
+                      ),
                     ),
                   ),
                 ],
@@ -421,7 +467,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   Expanded(
                     child: Text(
                       '모두 동의합니다.',
-                      style: AppStyles.bodyTextStyle,
+                      style: AppStyles.bodyTextStyle.copyWith(
+                        color: isDarkMode
+                            ? Colors.white
+                            : Colors.black, // 다크 모드에 따른 색상
+                      ),
                     ),
                   ),
                 ],
