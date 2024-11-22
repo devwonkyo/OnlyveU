@@ -66,6 +66,10 @@ import 'blocs/shopping_cart/shopping_cart_bloc.dart';
 import 'core/router.dart';
 import 'firebase_options.dart';
 import 'repositories/search_repositories/suggestion_repository/suggestion_repository_impl.dart';
+import 'screens/special/debate/chat/bloc/chat_bloc.dart';
+import 'screens/special/debate/chat/chat_repository.dart';
+import 'screens/special/debate/vote/bloc/vote_bloc.dart';
+import 'screens/special/debate/vote/vote_repository.dart';
 
 void main() async {
   // Flutter 바인딩 초기화 (반드시 필요)
@@ -315,6 +319,16 @@ class MyApp extends StatelessWidget {
                 ),
                 BlocProvider<EmailBloc>(
                   create: (context) => EmailBloc(),
+                ),
+                BlocProvider<ChatBloc>(
+                  create: (context) => ChatBloc(
+                    chatRepository: ChatRepository(),
+                  ),
+                ),
+                BlocProvider<VoteBloc>(
+                  create: (context) => VoteBloc(
+                    voteRepository: VoteRepository(),
+                  ),
                 ),
               ],
               child: BlocBuilder<ThemeBloc, ThemeState>(
