@@ -47,7 +47,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       emit(LoadingAddReview());
       await repository.addReview(event.reviewModel, event.images, event.orderId, event.orderItemId);
       print('업로드 완료');
-      emit(SuccessAddReview("업로드 햇씁니당"));
+      emit(SuccessAddReview("리뷰가 등록되었습니다."));
     }catch(e){
       print('업로드 에러 : $e');
       emit(ErrorAddReview("error : $e"));
@@ -72,7 +72,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       emit(LoadingUpdateReview());
       await repository.updateReview(event.reviewModel, event.images);
       print('업데이트 완료');
-      emit(SuccessUpdateReview("업데이트 햇씁니당"));
+      emit(SuccessUpdateReview("리뷰가 수정되었습니다."));
     }catch(e){
       print('업로드 에러 : $e');
       emit(ErrorUpdateReview("error : $e"));

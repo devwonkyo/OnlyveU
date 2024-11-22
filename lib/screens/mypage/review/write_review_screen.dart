@@ -309,6 +309,7 @@ class _ReviewCreateScreenState extends State<WriteReviewScreen> {
         userId: availableOrderModel.orderUserId,
         purchaseDate: availableOrderModel.purchaseDate,
         userName: "",
+        userProfileImageUrl: "",
         orderType: availableOrderModel.orderType,
         rating: rating, content: _reviewController.text, createdAt: DateTime.now());
 

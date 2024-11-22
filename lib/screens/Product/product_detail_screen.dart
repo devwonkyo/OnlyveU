@@ -50,6 +50,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     context.read<ProductDetailBloc>().add(LoadProductDetail(widget.productId));
     context.read<ProductDetailBloc>().add(InputProductHistoryEvent(widget.productId));
     context.read<ReviewBloc>().add(LoadReviewListEvent(widget.productId));
+    print('productId : ${widget.productId}');
   }
 
   @override
