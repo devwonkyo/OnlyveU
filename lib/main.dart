@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,6 +14,7 @@ import 'package:onlyveyou/blocs/category/category_product_bloc.dart';
 import 'package:onlyveyou/blocs/home/ai_recommend_bloc.dart';
 import 'package:onlyveyou/blocs/home/home_bloc.dart';
 import 'package:onlyveyou/blocs/inventory/inventory_bloc.dart';
+import 'package:onlyveyou/blocs/map/store_map_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/email/email_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/nickname_edit/nickname_edit_bloc.dart';
 import 'package:onlyveyou/blocs/mypage/order_status/order_status_bloc.dart';
@@ -44,6 +44,7 @@ import 'package:onlyveyou/repositories/history_repository.dart';
 import 'package:onlyveyou/repositories/home/ai_recommend_repository.dart';
 import 'package:onlyveyou/repositories/home/home_repository.dart';
 import 'package:onlyveyou/repositories/inventory/inventory_repository.dart';
+import 'package:onlyveyou/repositories/map/goecoding_repository.dart';
 import 'package:onlyveyou/repositories/mypage/profile_image_repository.dart';
 import 'package:onlyveyou/repositories/order/order_repository.dart';
 import 'package:onlyveyou/repositories/order/payment_repository.dart';
@@ -74,6 +75,12 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
       name: "onlyveyou", options: DefaultFirebaseOptions.currentPlatform);
+
+  await NaverMapSdk.instance.initialize(
+      clientId: 'n78adqcywr',
+      onAuthFailed: (error) {
+        print('Auth failed: $error');
+      });
 
   //FCM Token 설정
   String? fcmToken = await FirebaseMessaging.instance.getToken();
@@ -108,7 +115,9 @@ void main() async {
   await prefs.checkCurrentUser();
   print("hash key ${await KakaoSdk.origin}");
 
+
   DeepLinkService().initialize(router);
+
 
   //카카오톡
   kakaoSchemeStream.listen((url) {
@@ -120,10 +129,12 @@ void main() async {
     if (screen != null) {
       router.push(screen, extra: productId);
     }
+
   }, onError: (e) {
     // 에러 상황의 예외 처리 코드를 작성합니다.
     print("kakao listen error : $e");
   });
+
 
   // 위치 서비스 초기화 추가
   try {
@@ -132,6 +143,7 @@ void main() async {
   } catch (e) {
     debugPrint('Location service initialization error: $e');
   }
+
 
 // 모든 제품 로컬 저장 (검색용)
   try {
@@ -315,6 +327,9 @@ class MyApp extends StatelessWidget {
                 ),
                 BlocProvider<EmailBloc>(
                   create: (context) => EmailBloc(),
+                ),
+                BlocProvider<StoreMapBloc>(
+                  create: (context) => StoreMapBloc(geocodingRepository: GeocodingRepository()),
                 ),
               ],
               child: BlocBuilder<ThemeBloc, ThemeState>(

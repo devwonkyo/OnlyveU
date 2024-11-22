@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/config/theme.dart';
 import 'package:onlyveyou/core/router.dart';
 import 'package:onlyveyou/cubit/category/category_cubit.dart';
 import 'package:onlyveyou/models/category_selection.dart';
@@ -49,7 +50,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 // 왼쪽 메인 카테고리 리스트
                 Container(
                   width: 100.w,
-                  color: Colors.grey[50],
+                  color: getBackgroundColor(context),
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
                     itemCount: state.categories.length,
@@ -94,7 +95,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             },
                             child: // 카테고리 헤더
                                 SubCategoryHeader(
-                              icon: category.icon ?? "", // 아이콘은 적절히 변경
+                              icon: category.icon ?? "",
                               title: category.name,
                               hasArrow: true,
                             ),
