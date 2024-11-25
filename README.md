@@ -12,7 +12,7 @@ only've you
 
 # 📝 Summary
 
-이 프로젝트는 Bloc 상태 관리, Firebase 기능 사용을 활용하여 다양한 기술적 경험을 쌓는 데 중점을 두었습니다.
+이 프로젝트는 **Bloc** 상태 관리, **Firebase** 기능 사용을 활용하여 다양한 기술적 경험을 쌓는 데 중점을 두었습니다.
 
 # ⭐️ Key Function
 
