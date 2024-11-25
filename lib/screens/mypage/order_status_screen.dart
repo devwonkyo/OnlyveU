@@ -27,13 +27,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   @override
   void initState() {
     super.initState();
-
     context.read<OrderStatusBloc>().add(const FetchOrder());
   }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
+    context.read<OrderStatusBloc>().add(const FetchOrder());
     return Scaffold(
       appBar: AppBar(
         title: const Text('주문/배송 조회'),
@@ -132,10 +132,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
               // 주문 리스트
               BlocBuilder<OrderStatusBloc, OrderStatusState>(
                 builder: (context, state) {
+                  print(state);
                   if (state is OrderStatusInitial) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is OrderFetch) {
                     // 필터링된 주문
+
+                    print("현재 state값: $state");
                     final filteredOrders = selectedOrderType == null
                         ? state.orders
                         : state.orders
@@ -201,7 +204,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                         children: [
                                           InkWell(
                                             onTap: () {
-                                              context.push("/product-detail",
+                                              context.go("/product-detail",
                                                   extra: item.productId);
                                             },
                                             child: Row(

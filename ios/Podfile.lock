@@ -1304,7 +1304,7 @@ PODS:
     - OrderedSet (~> 6.0.3)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - flutter_native_splash (2.4.3):
+  - flutter_native_splash (0.0.1):
     - Flutter
   - flutter_naver_map (1.3.0):
     - Flutter
@@ -1656,7 +1656,7 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
   flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
-  flutter_native_splash: e8a1e01082d97a8099d973f919f57904c925008a
+  flutter_native_splash: edf599c81f74d093a4daf8e17bd7a018854bc778
   flutter_naver_map: d31b1884517151e7b3121e3b24c18733ef4e4387
   geocoding_ios: d7460f56e80e118d57678efe5c2cdc888739ff18
   geolocator_apple: 9bcea1918ff7f0062d98345d238ae12718acfbc1
@@ -1689,6 +1689,6 @@ SPEC CHECKSUMS:
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
   webview_flutter_wkwebview: 0982481e3d9c78fd5c6f62a002fcd24fc791f1e4
 
-PODFILE CHECKSUM: 44207d91a6530daa2d3d9b0d170fb01b819039c3
+PODFILE CHECKSUM: 179b8dc972c939d0728f13d7a7e1e145a2197469
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

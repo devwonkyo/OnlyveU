@@ -6,6 +6,8 @@ import 'package:onlyveyou/blocs/auth/auth_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onlyveyou/blocs/auth/auth_event.dart';
 import 'package:onlyveyou/blocs/auth/auth_state.dart';
+import 'package:onlyveyou/config/color.dart';
+import 'package:onlyveyou/screens/auth/widgets/shaking_icon.dart';
 import 'package:onlyveyou/utils/shared_preference_util.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
@@ -127,9 +129,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginWithKakao() async {
     try {
-      await kakao.UserApi.instance.loginWithKakaoTalk();
-    } catch (error) {
       await kakao.UserApi.instance.loginWithKakaoAccount();
+      // await kakao.UserApi.instance.loginWithKakaoTalk();
+      print("kakao login");
+    } catch (error) {
+
+      print("kakao login error ");
     }
 
     try {
@@ -232,117 +237,182 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
-                  const Center(
-                    child: Text(
-                      'OnlyveU',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  TextField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      hintText: '이메일',
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      hintText: '비밀번호',
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const Text('자동 로그인'),
-                      Switch(
-                        value: autoLogin,
-                        onChanged: (bool value) {
-                          setState(() {
-                            autoLogin = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppStyles.mainColor,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    onPressed: () {
-                      context.read<AuthBloc>().add(LoginRequested(
-                            email: emailController.text,
-                            password: passwordController.text,
-                          ));
-                    },
-                    child: const Text('로그인',
-                        style: TextStyle(color: Colors.black)),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(),
-                    onPressed: () {
-                      _loginWithKakao();
-                    },
-                    child:
-                        Image.asset('assets/image/kakaologin.png', height: 50),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(),
-                    onPressed: () {
-                      _loginWithGoogle();
-                    },
-                    child: Image.asset(
-                      'assets/image/googlelogin.png',
-                      height: 50,
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 48.0, 16.0, 16.0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
-                          '계정이 없으신가요?',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            context.push('/signup');
-                          },
-                          child: const Text(
-                            '회원가입',
-                            style: TextStyle(color: Colors.black),
+                        const Center(
+                          child: Text(
+                            '당신만을 위한',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
+                        ),Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              '쇼핑공간',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Onlyve',
+                              style: TextStyle(
+                                fontSize: 48,
+                                color: AppsColor.pastelGreen,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            ShakingIcon()
+                          ],
+                        ),
+                        const SizedBox(height: 50),
+                        TextField(
+                          controller: emailController,
+                          decoration: const InputDecoration(
+                            hintText: '이메일',
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: OutlineInputBorder( // 포커스 받았을 때 테두리
+                              borderSide: BorderSide(
+                                color: AppsColor.pastelGreen, // 원하는 색상으로 변경
+                                width: 2.0, // 테두리 두께
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            hintText: '비밀번호',
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: OutlineInputBorder( // 포커스 받았을 때 테두리
+                              borderSide: BorderSide(
+                                color: AppsColor.pastelGreen, // 원하는 색상으로 변경
+                                width: 2.0, // 테두리 두께
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const Text('자동 로그인'),
+                            Switch(
+                              value: autoLogin,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  autoLogin = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppStyles.mainColor,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          onPressed: () {
+                            context.read<AuthBloc>().add(LoginRequested(
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                ));
+                          },
+                          child: const Text('이메일 로그인',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        const SizedBox(height: 40),
+                        Center(child: Text("SNS 계정으로 로그인", style: TextStyle(color: Colors.grey),)),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _loginWithKakao();
+                              },
+                              child: CircleAvatar(
+                                radius: 25,
+                                backgroundColor: AppsColor.kakaoYello,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Image.asset(
+                                    'assets/image/kakao_icon.png',
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            GestureDetector(
+                              onTap: () {
+                                _loginWithGoogle();
+                              },
+                              child: CircleAvatar(
+                                radius: 25,
+                                backgroundColor: AppsColor.googleBlue,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Image.asset(
+                                    'assets/image/google_icon.png',
+                                    fit: BoxFit.contain,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      '계정이 없으신가요?',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.push('/signup');
+                      },
+                      child: const Text(
+                        '회원가입',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

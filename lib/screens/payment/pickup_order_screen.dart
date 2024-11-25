@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onlyveyou/blocs/store/store_bloc.dart';
 import 'package:onlyveyou/blocs/store/store_event.dart';
 import 'package:onlyveyou/blocs/store/store_state.dart';
+import 'package:onlyveyou/blocs/theme/theme_bloc.dart';
+import 'package:onlyveyou/blocs/theme/theme_state.dart';
 import 'package:onlyveyou/config/color.dart';
 import 'package:onlyveyou/models/store_model.dart';
 
@@ -14,6 +17,7 @@ class PickupOrderInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = context.watch<ThemeBloc>().state is ThemeDark;
     return Padding(
       padding: const EdgeInsets.only(
         left: 10,
@@ -29,7 +33,9 @@ class PickupOrderInfo extends StatelessWidget {
             children: [
               Text(
                 '배송 방법',
-                style: AppStyles.headingStyle,
+                style: AppStyles.headingStyle.copyWith(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
               const SizedBox(
                 width: 15,
@@ -66,10 +72,9 @@ class PickupOrderInfo extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          Container(
+          SizedBox(
             width: MediaQuery.of(context).size.width * 0.95,
             height: MediaQuery.of(context).size.height * 0.05,
-            color: Colors.grey[200],
             child: Padding(
               padding: const EdgeInsets.only(
                 left: 10,
@@ -78,11 +83,14 @@ class PickupOrderInfo extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('픽업 매장',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      )),
+                  Text(
+                    '픽업 매장',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.22,
                     height: MediaQuery.of(context).size.height * 0.04,
@@ -94,11 +102,10 @@ class PickupOrderInfo extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(0))),
-                        child: const Text(
+                        child: Text(
                           '매장변경',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontWeight: FontWeight.bold, fontSize: 10.w),
                         )),
                   ),
                 ],
@@ -129,58 +136,79 @@ class PickupOrderInfo extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              selectedStore.storeName,
-                              style: AppStyles.headingStyle,
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              selectedStore.address,
-                              style: AppStyles.bodyTextStyle,
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.phone,
-                                ),
-                                Text(
-                                  selectedStore.phone,
-                                  style: AppStyles.bodyTextStyle,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            Text(
-                              "영업시간 ${selectedStore.businessHours}",
-                              style: AppStyles.bodyTextStyle,
-                            ),
-                          ],
-                        ),
-                        selectedStore.isActive
-                            ? const Text(
-                                '영업중',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 20,
-                                ),
-                              )
-                            : const Text(
-                                '영업종료',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 20,
+                        Flexible(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                selectedStore.storeName,
+                                style: AppStyles.headingStyle.copyWith(
+                                  color:
+                                      isDarkMode ? Colors.white : Colors.black,
                                 ),
                               ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                selectedStore.address,
+                                style: AppStyles.bodyTextStyle.copyWith(
+                                  color: isDarkMode
+                                      ? Colors.white70
+                                      : Colors.black,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(Icons.phone),
+                                  Flexible(
+                                    child: Text(
+                                      selectedStore.phone,
+                                      style: AppStyles.bodyTextStyle,
+                                      overflow: TextOverflow
+                                          .ellipsis, // Handle overflow
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                "영업시간 ${selectedStore.businessHours}",
+                                style: AppStyles.bodyTextStyle.copyWith(
+                                  color: isDarkMode
+                                      ? Colors.white70
+                                      : Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: selectedStore.isActive
+                              ? const Text(
+                                  '영업중',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 20,
+                                  ),
+                                )
+                              : const Text(
+                                  '영업종료',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                        ),
                       ],
                     ),
                   ],

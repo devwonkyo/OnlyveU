@@ -85,7 +85,7 @@ class _BannerWidgetState extends State<BannerWidget> {
                 onTap: () => _handleBannerTap(index),
                 child: Container(
                   color: Colors.white,
-                  child: Image.asset(
+                  child: Image.network(
                     widget.bannerItems[index].imageAsset,
                     width: double.infinity,
                     fit: index == 1 ? BoxFit.contain : BoxFit.cover,

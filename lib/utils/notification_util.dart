@@ -18,7 +18,7 @@ class NotificationUtil {
   NotificationUtil._internal();
 
   Future<void> initialize() async {
-    AndroidInitializationSettings android = const AndroidInitializationSettings("@mipmap/ic_launcher");
+    AndroidInitializationSettings android = const AndroidInitializationSettings("@mipmap/launcher_icon");
     DarwinInitializationSettings ios = const DarwinInitializationSettings(
       requestSoundPermission: false,
       requestBadgePermission: false,
