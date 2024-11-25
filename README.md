@@ -27,7 +27,7 @@ only've you
 
 # 🛠 Tech Stack
 
-`flutter`, `dart`, `firebase_auth`, `cloud_firestore`, `riverpod`, `go_router`, `image_picker`, `firebase_storage`, `riverpod_generator`, `freezed`, `build_runner`
+`flutter`, `dart`, `firebase_auth`, `bloc`, `go_router`, `image_picker`, `firebase_storage`, `riverpod_generator`, `build_runner`
 
 # 🧑🏻‍💻 Team
 
