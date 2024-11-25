@@ -77,9 +77,16 @@ class ProfileEditScreen extends StatelessWidget {
                         backgroundImage: FileImage(state.image),
                       );
                     } else if (state is ProfileImageUrlLoaded) {
-                      return CircleAvatar(
+                      if(state.imageUrl != ""){
+                        return CircleAvatar(
+                          radius: 45,
+                          backgroundImage: NetworkImage(state.imageUrl),
+                        );
+                      }
+                      return const CircleAvatar(
                         radius: 45,
-                        backgroundImage: NetworkImage(state.imageUrl),
+                        backgroundColor: Colors.grey,
+                        child: Icon(Icons.person, size: 70),
                       );
                     }
                     return const CircleAvatar(
