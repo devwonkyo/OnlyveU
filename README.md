@@ -79,16 +79,6 @@ only've you
 
 - flutter 개발자 5명
 
-# 🤚🏻 My Part
-
-- **팀장**으로서 프로젝트 개발 총괄
-- miro를 활용한 기획 주도 https://miro.com/app/board/uXjVKlx8Aoo=/
-- Riverpod 상태 관리를 통한 실시간 투표 결과 기능 구현
-- cloud function 배포 후 FCM 푸쉬알림 구현
-- Firestore database 연동으로 FCM 설정
-- facebook 소셜 로그인, 회원가입
-- 인앱 알림
-- 시연영상 제작과 발표
 
 # 🤔 Learned
 
