@@ -98,3 +98,5 @@ only've you
 - **Git을 활용한 협업**: Git 컨벤션을 지키며, 협업 시 발생하는 코드 충돌을 해결하고 효율적인 브랜치 관리를 배웠습니다.
 
 # 📷 Screenshot
+
+file:///C:/Users/pc/OneDrive/%EB%B0%94%ED%83%95%20%ED%99%94%EB%A9%B4/1.png
