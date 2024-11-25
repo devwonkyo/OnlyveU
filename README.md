@@ -87,8 +87,5 @@ only've you
 - 디양힌 **API**를 끌어오면서 많은 기능을 구현할 수 있었습니다.보내도록 하는 법을 배웠습니다.
 - **Git을 활용한 협업**: Git 컨벤션을 지키며, 협업 시 발생하는 코드 충돌을 해결하고 효율적인 브랜치 관리를 배웠습니다.
 
-# 📷 Screenshot
 
-[](- assets/image/banner/)
-[](assets/image/readme/KakaoTalk_20241125_114741827.jpg)
 
