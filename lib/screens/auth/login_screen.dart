@@ -266,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -344,7 +344,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: const Text('이메일 로그인',
                               style: TextStyle(color: Colors.white)),
                         ),
-                        const SizedBox(height: 60),
+                        const SizedBox(height: 40),
+                        Center(child: Text("SNS 계정으로 로그인", style: TextStyle(color: Colors.grey),)),
+                        const SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
