@@ -18,17 +18,17 @@ class _MainPromotionBannerState extends State<MainPromotionBanner> {
 
   final List<Map<String, String>> promotions = [
     {
-      'image': 'assets/image/skin2.webp',
+      'image': 'https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/thumbnails/550/10/0000/0020/A00000020246922ko.jpg?l=ko',
       'title': '고민별 기초케어로\n집중타켓',
       'subtitle': '#11월 올영픽',
     },
     {
-      'image': 'assets/image/skin2.webp',
+      'image': 'https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/thumbnails/550/10/0000/0016/A00000016203545ko.jpg?l=ko',
       'title': '고민별 기초케어로\n집중타켓',
       'subtitle': '#11월 올영픽',
     },
     {
-      'image': 'assets/image/skin2.webp',
+      'image': 'https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/thumbnails/400/10/0000/0019/A00000019917304ko.jpg?l=ko',
       'title': '고민별 기초케어로\n집중타켓',
       'subtitle': '#11월 올영픽',
     },
@@ -71,22 +71,25 @@ class _MainPromotionBannerState extends State<MainPromotionBanner> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        SizedBox(
-          height: 200.h,
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() => _currentPage = index);
-            },
-            itemCount: promotions.length,
-            itemBuilder: (context, index) {
-              return Container(
-                child: Image.asset(
+        AspectRatio(
+          aspectRatio: 1.2,  // 원하는 비율 설정 (16:9, 4:3, 2:1 등)
+          child: SizedBox(
+            width: double.infinity,  // 가로 꽉 채우기
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() => _currentPage = index);
+              },
+              itemCount: promotions.length,
+              itemBuilder: (context, index) {
+                return Image.network(
                   promotions[index]['image']!,
-                  fit: BoxFit.fill,
-                ),
-              );
-            },
+                  fit: BoxFit.cover,  // cover로 변경하여 영역 꽉 채우기
+                  width: double.infinity,
+                  height: double.infinity,
+                );
+              },
+            ),
           ),
         ),
         // 페이지 인디케이터와 컨트롤
