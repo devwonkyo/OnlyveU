@@ -43,9 +43,7 @@ class OrderStatusBloc extends Bloc<OrderStatusEvent, OrderStatusState> {
   }
 
   void _onFetchOrder(FetchOrder event, Emitter<OrderStatusState> emit) async {
-    emit(OrderStatusInitial());
     final orders = await orderRepository.fetchOrder();
-    //orders에서 status값은 한글로 바꿔서 주기
     emit(OrderFetch(orders));
   }
 }
