@@ -17,19 +17,19 @@ class HomeRepository {
   List<BannerItem> getBannerItems() {
     return [
       BannerItem(
-        imageAsset: 'assets/image/banner/b1.jpg',
+        imageAsset: 'https://firebasestorage.googleapis.com/v0/b/onlyveyou-c8f73.firebasestorage.app/o/1.png?alt=media&token=25967f1f-4ade-48fb-8248-95f628c38032',
         title: '', // 빈 문자열로 설정
         subtitle: '', // 빈 문자열로 설정
         backgroundColor: Colors.transparent, // 배경색 투명하게
       ),
       BannerItem(
-        imageAsset: 'assets/image/banner/c1.jpg',
+        imageAsset: 'https://firebasestorage.googleapis.com/v0/b/onlyveyou-c8f73.firebasestorage.app/o/2.png?alt=media&token=2cb9d353-274a-4022-8357-248cf00517d1',
         title: '',
         subtitle: '',
         backgroundColor: Colors.transparent,
       ),
       BannerItem(
-        imageAsset: 'assets/image/banner/d1.png',
+        imageAsset: 'https://firebasestorage.googleapis.com/v0/b/onlyveyou-c8f73.firebasestorage.app/o/b1.jpg?alt=media&token=200f601a-dfca-4501-b48e-b83fe54f4e0b',
         title: '',
         subtitle: '',
         backgroundColor: Colors.transparent,

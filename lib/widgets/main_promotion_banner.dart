@@ -18,12 +18,12 @@ class _MainPromotionBannerState extends State<MainPromotionBanner> {
 
   final List<Map<String, String>> promotions = [
     {
-      'image': 'https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/thumbnails/550/10/0000/0020/A00000020246922ko.jpg?l=ko',
+      'image': 'https://firebasestorage.googleapis.com/v0/b/onlyveyou-c8f73.firebasestorage.app/o/1.png?alt=media&token=25967f1f-4ade-48fb-8248-95f628c38032',
       'title': '고민별 기초케어로\n집중타켓',
       'subtitle': '#11월 올영픽',
     },
     {
-      'image': 'https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/thumbnails/550/10/0000/0016/A00000016203545ko.jpg?l=ko',
+      'image': 'https://firebasestorage.googleapis.com/v0/b/onlyveyou-c8f73.firebasestorage.app/o/2.png?alt=media&token=2cb9d353-274a-4022-8357-248cf00517d1',
       'title': '고민별 기초케어로\n집중타켓',
       'subtitle': '#11월 올영픽',
     },
