@@ -27,7 +27,6 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
   @override
   void initState() {
     super.initState();
-
     context.read<OrderStatusBloc>().add(const FetchOrder());
   }
 
@@ -205,7 +204,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                                         children: [
                                           InkWell(
                                             onTap: () {
-                                              context.push("/product-detail",
+                                              context.go("/product-detail",
                                                   extra: item.productId);
                                             },
                                             child: Row(

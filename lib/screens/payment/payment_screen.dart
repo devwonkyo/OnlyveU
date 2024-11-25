@@ -590,7 +590,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                       body: "주문이 정상적으로 처리됐습니다.",
                                       pushToken: fetchedUserToken,
                                       screen: '/order-status');
-                                  context.go('/order-status', extra: true);
+
+                    
+                                  context.go('/order-status');
+
                                 });
 
                                 // 필요에 따라 화면 이동 또는 초기화 작업 수행

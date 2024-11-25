@@ -289,6 +289,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                                     ),
                                     _buildAnalysisCard(
                                       icon: Icons.favorite,
+                                      
                                       title: '관심 상품',
                                       value:
                                           '${state.activityCounts['likeCount']}개',
