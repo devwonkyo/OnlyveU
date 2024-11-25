@@ -193,10 +193,17 @@ class _MyPageScreenState extends State<MyPageScreen> {
                                   BlocBuilder<ProfileBloc, ProfileState>(
                                     builder: (context, state) {
                                       if (state is ProfileImageUrlLoaded) {
-                                        return CircleAvatar(
-                                          radius: 20, // 프로필 이미지 크기 조정
-                                          backgroundImage:
-                                              NetworkImage(state.imageUrl),
+                                        if(state.imageUrl != ""){
+                                          return CircleAvatar(
+                                            radius: 20, // 프로필 이미지 크기 조정
+                                            backgroundImage:
+                                            NetworkImage(state.imageUrl),
+                                          );
+                                        }
+                                        return const CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.grey,
+                                          child: Icon(Icons.person, size: 20),
                                         );
                                       }
                                       return Icon(
@@ -289,6 +296,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                                     ),
                                     _buildAnalysisCard(
                                       icon: Icons.favorite,
+                                      
                                       title: '관심 상품',
                                       value:
                                           '${state.activityCounts['likeCount']}개',
@@ -394,7 +402,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                             "주문 대기": 0,
                             "상품 준비중": 0,
                             "배송중": 0,
-                            "배송완료": 0,
+                            "배송 완료": 0,
                           };
 
                           // 상태별 주문 수량 카운팅
@@ -419,7 +427,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                               OrderStatus('${statusCounts["배송중"]}', '배송중'),
                               const Icon(Icons.arrow_forward_ios,
                                   size: 14, color: Colors.grey),
-                              OrderStatus('${statusCounts["배송완료"]}', '배송완료'),
+                              OrderStatus('${statusCounts["배송 완료"]}', '배송 완료'),
                             ],
                           );
                         } else {
