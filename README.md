@@ -21,7 +21,7 @@
 | 정원교      | 국한        | 김성연      | 최지희      | 이영인      |
 |-------------|-------------|-------------|-------------|-------------|
 | ![정원교](이미지_링크) | ![국한](이미지_링크) | ![김성연](이미지_링크) | ![최지희](이미지_링크) | ![이영인](이미지_링크) |
-| [@devwonkyo](https://github.com/devwonkyo) | [@kook1488](https://github.com/kook1488) | [@tjddus5767](https://github.com/tjddus5767) | [GitHub 링크](https://github.com/) | [GitHub 링크](https://github.com/) |
+| [@devwonkyo](https://github.com/devwonkyo) | [@kook1488](https://github.com/kook1488) | [@tjddus5767](https://github.com/tjddus5767) | [@SweetFriedPotato](https://github.com/SweetFriedPotato) | [GitHub 링크](https://github.com/) |
 
 
 
