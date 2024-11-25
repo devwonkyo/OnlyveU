@@ -2,9 +2,11 @@
 
 only've you
 
+
 # 📝 Summary
 
 이 프로젝트는 riverpod 상태 관리, FCM 기능 사용, 실시간 데이터 반영 등의 다양한 기술적 경험을 쌓는 데 중점을 두었습니다.
+
 
 # 💡 Topic
 
@@ -14,6 +16,7 @@ only've you
 
 
 # ⭐️ Key Function
+
 
 ### 🍊정원교
 - 데이터 모델 설계
