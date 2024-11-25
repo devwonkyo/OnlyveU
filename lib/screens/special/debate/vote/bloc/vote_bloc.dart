@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import '../../../../../models/vote_model.dart';
+import '../../../../../repositories/vote_repository.dart';
 import '../../../../../utils/shared_preference_util.dart';
-import '../vote_model.dart';
-import '../vote_repository.dart';
 
 part 'vote_event.dart';
 part 'vote_state.dart';
