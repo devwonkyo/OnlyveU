@@ -17,7 +17,7 @@ class MoreRecommendedScreen extends StatelessWidget {
         elevation: 0,
         leading: Container(),
         title: Text(
-          '국한님을 위한 추천상품',
+          'Garden G님을 위한 추천상품',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w600,

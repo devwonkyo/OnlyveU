@@ -193,10 +193,17 @@ class _MyPageScreenState extends State<MyPageScreen> {
                                   BlocBuilder<ProfileBloc, ProfileState>(
                                     builder: (context, state) {
                                       if (state is ProfileImageUrlLoaded) {
-                                        return CircleAvatar(
-                                          radius: 20, // 프로필 이미지 크기 조정
-                                          backgroundImage:
-                                              NetworkImage(state.imageUrl),
+                                        if(state.imageUrl != ""){
+                                          return CircleAvatar(
+                                            radius: 20, // 프로필 이미지 크기 조정
+                                            backgroundImage:
+                                            NetworkImage(state.imageUrl),
+                                          );
+                                        }
+                                        return const CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.grey,
+                                          child: Icon(Icons.person, size: 20),
                                         );
                                       }
                                       return Icon(
