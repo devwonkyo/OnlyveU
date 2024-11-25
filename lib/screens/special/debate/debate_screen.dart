@@ -165,7 +165,7 @@ class _DebateScreenState extends State<DebateScreen> {
       selector: (state) => state is HomeLoaded ? state.popularProducts : [],
       builder: (context, products) {
         return Container(
-          height: 250.h, // Reduced from 280.h
+          height: 260.h, // Reduced from 280.h
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Row(
             children: [

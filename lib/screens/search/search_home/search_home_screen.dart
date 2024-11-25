@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../blocs/search/search_textfield/search_textfield_bloc.dart';
 import '../../../blocs/search/recent_search/recent_search_bloc.dart';
 import '../../../blocs/search/trend_search/trend_search_bloc.dart';
+import '../../../utils/search/suggestion/suggestion_button.dart';
 
 class SearchHomeScreen extends StatelessWidget {
   const SearchHomeScreen({
@@ -94,6 +95,12 @@ class SearchHomeScreen extends StatelessWidget {
                           ),
                           child: TreandSearchView(
                               trendSearches: state.trendSearches),
+                          //   Column(
+                          // children: [
+                          //   BrandSuggestionUpdateButton(),
+                          //   CategorySuggestionUpdateButton(),
+                          // ],
+                          // ),
                         ),
                       ],
                     );

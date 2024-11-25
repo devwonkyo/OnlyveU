@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:onlyveyou/models/order_model.dart';
 import 'package:onlyveyou/models/review_model.dart';
 
-class ReviewRepository{
+class ReviewRepository {
   final FirebaseFirestore _firestore;
 
   ReviewRepository({FirebaseFirestore? firestore})
@@ -25,7 +25,7 @@ class ReviewRepository{
         final data = doc.data();
         return ReviewModel.fromMap({
           ...data,
-          'reviewId': doc.id,  // doc.id를 추가
+          'reviewId': doc.id, // doc.id를 추가
         });
       }).toList();
 
@@ -39,13 +39,13 @@ class ReviewRepository{
   Future<void> addLikeReview(String reviewId, String userId) async {
     try {
       // 파이어베이스에서 해당 reviewId의 문서 가져오기
-      final reviewRef = FirebaseFirestore.instance
-          .collection('reviews')
-          .doc(reviewId);
+      final reviewRef =
+          FirebaseFirestore.instance.collection('reviews').doc(reviewId);
 
       // 현재 문서의 likedUserIds 확인
       final doc = await reviewRef.get();
-      List<String> likedUserIds = List<String>.from(doc.data()?['likedUserIds'] ?? []);
+      List<String> likedUserIds =
+          List<String>.from(doc.data()?['likedUserIds'] ?? []);
 
       // userId가 있으면 제거, 없으면 추가
       if (likedUserIds.contains(userId)) {
@@ -57,18 +57,17 @@ class ReviewRepository{
           'likedUserIds': FieldValue.arrayUnion([userId])
         });
       }
-    } catch(e) {
+    } catch (e) {
       print('리뷰 데이터 가져오기 실패: $e');
     }
   }
 
-  Future<void> addReview(ReviewModel reviewModel,List<File?> images, String orderId, String orderItemId) async {
+  Future<void> addReview(ReviewModel reviewModel, List<File?> images,
+      String orderId, String orderItemId) async {
     try {
       // 1. 사용자 이름 가져오기
-      final userDoc = await _firestore
-          .collection('users')
-          .doc(reviewModel.userId)
-          .get();
+      final userDoc =
+          await _firestore.collection('users').doc(reviewModel.userId).get();
       final userName = userDoc.data()?['nickname'] as String;
       final userProfileImageUrl = userDoc.data()?['profileImageUrl'] as String;
 
@@ -78,13 +77,15 @@ class ReviewRepository{
 
       // 3. 이미지 업로드 및 URL 수집
       List<String> imageUrls = [];
-      final validImages = images.where((image) => image != null).cast<File>().toList();
+      final validImages =
+          images.where((image) => image != null).cast<File>().toList();
 
       if (validImages.isNotEmpty) {
         for (var image in validImages) {
           try {
             // 파일명 생성: reviewId_timestamp_index.jpg
-            final fileName = '${reviewId}_${DateTime.now().millisecondsSinceEpoch}_${validImages.indexOf(image)}.jpg';
+            final fileName =
+                '${reviewId}_${DateTime.now().millisecondsSinceEpoch}_${validImages.indexOf(image)}.jpg';
             final storageRef = FirebaseStorage.instance
                 .ref()
                 .child('reviews')
@@ -116,20 +117,21 @@ class ReviewRepository{
 
       // 3. 최종 리뷰 모델 생성
       final finalReview = reviewModel.copyWith(
-        reviewId: reviewId,
-        imageUrls: imageUrls,
-        userName: userName,
-        userProfileImageUrl: userProfileImageUrl
-      );
+          reviewId: reviewId,
+          imageUrls: imageUrls,
+          userName: userName,
+          userProfileImageUrl: userProfileImageUrl);
 
       // 4. 리뷰 저장
       await reviewRef.set(finalReview.toMap());
 
       //오더 정보에 리뷰추가
-      updateOrderItemReviewId(orderId: orderId, orderItemId: orderItemId, reviewId: reviewId);
+      updateOrderItemReviewId(
+          orderId: orderId, orderItemId: orderItemId, reviewId: reviewId);
 
       //제품 정보에 리뷰추가
-      updateProductReviewListWithArrayUnion(productId: reviewModel.productId, reviewId:  reviewId);
+      updateProductReviewListWithArrayUnion(
+          productId: reviewModel.productId, reviewId: reviewId);
     } catch (e) {
       throw Exception('리뷰 생성 실패: $e');
     }
@@ -157,18 +159,16 @@ class ReviewRepository{
       final order = OrderModel.fromMap(orderData);
 
       // 3. items 배열에서 해당 orderItemId를 가진 아이템의 인덱스를 찾습니다
-      final itemIndex = order.items.indexWhere(
-              (item) => item.orderItemId == orderItemId
-      );
+      final itemIndex =
+          order.items.indexWhere((item) => item.orderItemId == orderItemId);
 
       if (itemIndex == -1) {
         throw Exception('Order item not found');
       }
 
       // 4. Firestore 업데이트를 위한 새로운 items 배열 생성
-      final updatedItems = List<Map<String, dynamic>>.from(
-          orderData['items'] as List<dynamic>
-      );
+      final updatedItems =
+          List<Map<String, dynamic>>.from(orderData['items'] as List<dynamic>);
 
       // 5. 해당 인덱스의 아이템에 reviewId 추가
       updatedItems[itemIndex]['reviewId'] = reviewId;
@@ -206,7 +206,6 @@ class ReviewRepository{
     }
   }
 
-
   Future<List<ReviewModel>> findMyReview(String userId) async {
     try {
       final querySnapshot = await _firestore
@@ -219,7 +218,7 @@ class ReviewRepository{
         final data = doc.data();
         return ReviewModel.fromMap({
           ...data,
-          'reviewId': doc.id,  // doc.id를 추가
+          'reviewId': doc.id, // doc.id를 추가
         });
       }).toList();
 
@@ -230,8 +229,8 @@ class ReviewRepository{
     }
   }
 
-
-  Future<void> updateReview(ReviewModel reviewModel, List<String?> images) async {
+  Future<void> updateReview(
+      ReviewModel reviewModel, List<String?> images) async {
     try {
       final firestore = FirebaseFirestore.instance;
       final storage = FirebaseStorage.instance;
@@ -306,11 +305,13 @@ class ReviewRepository{
       }
 
       // Firestore 업데이트
-      await firestore.collection('reviews').doc(reviewModel.reviewId).update(updateData);
+      await firestore
+          .collection('reviews')
+          .doc(reviewModel.reviewId)
+          .update(updateData);
 
       print('리뷰 업데이트 완료: ${reviewModel.reviewId}');
       print('업데이트된 이미지 URLs: $newImageUrls');
-
     } on FirebaseException catch (e) {
       print('Firebase 오류: ${e.message}');
       throw Exception('Firebase 오류: ${e.message}');
@@ -319,8 +320,4 @@ class ReviewRepository{
       throw Exception('업로드 에러: $e');
     }
   }
-
-
-
-
 }
