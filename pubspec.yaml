@@ -2,7 +2,7 @@ name: onlyveyou
 description: "only've you"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -33,17 +33,60 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
+
+  device_preview: ^1.2.0
+  cached_network_image: ^3.3.0
   cupertino_icons: ^1.0.8
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.4
   firebase_storage: ^12.3.4
   go_router: ^14.3.0
+  flutter_native_splash: ^2.4.2
+  flutter_bloc: ^8.1.6
+  bloc: ^8.1.2
+  meta: ^1.9.1
+  flutter_screenutil: ^5.9.3
+  equatable: ^2.0.5
+  image_picker: ^1.1.2
+  shimmer: ^3.0.0
+  kakao_flutter_sdk_user: ^1.9.5
+  kakao_flutter_sdk: ^1.9.6
+  shared_preferences: ^2.3.2
+  kakao_flutter_sdk_common: ^1.9.6
+  dropdown_button2: ^2.3.9
+  stream_transform: ^2.1.0
+  google_sign_in: ^6.2.1
+  sliver_tools: ^0.2.12
+  kakao_flutter_sdk_share: ^1.9.6
+  firebase_dynamic_links: ^6.0.10
+  carousel_slider: ^5.0.0
+  intl: ^0.19.0
+  firebase_messaging: ^15.1.5
+  flutter_local_notifications: ^18.0.1
+  permission_handler: ^11.3.1
+  flutter_naver_map: ^1.3.0
+
+  daum_postcode_search: ^0.0.3
+  kpostal: ^1.1.0
+  cloud_functions: ^5.1.3
+
+  http: ^1.2.2
+  dart_openai: ^5.1.0
+  firebase_remote_config: ^5.1.5
+  uuid: ^4.5.1
+  google_maps_flutter: ^2.10.0
+  geolocator: ^13.0.2
+  geocoding: ^3.0.0
+
+  webview_flutter: ^4.9.0
+  tosspayments_widget_sdk_flutter: ^2.0.6
+  flutter_dotenv: ^5.2.1
+  flutter_launcher_icons: ^0.14.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -52,21 +95,35 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/spa_icon.png"
+  adaptive_icon_background: "#FFFFFF" # 배경색 (흰색)
+  adaptive_icon_foreground: "assets/spa_icon.png" # 전경 이미지
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/image/
+    - assets/image/product/
+    - assets/image/mypage/
+    - assets/image/mypage/coupon_image.jpeg
+    - assets/image/shutter/
+    - assets/image/banner/
+    - assets/image/ar/
+    - .env
+    - assets/image/kakaologin.png
+    - assets/image/googlelogin.png
+    - assets/spa_icon.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -75,22 +132,27 @@ flutter:
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/to/asset-from-package
 
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Pretendard-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Pretendard-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Pretendard-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Pretendard-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Pretendard-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Pretendard-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Pretendard-Black.ttf
+          weight: 900
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

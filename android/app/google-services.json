@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "733176085534",
     "project_id": "onlyveyou-c8f73",
-    "storage_bucket": "onlyveyou-c8f73.appspot.com"
+    "storage_bucket": "onlyveyou-c8f73.firebasestorage.app"
   },
   "client": [
     {
@@ -12,7 +12,36 @@
           "package_name": "com.example.onlyveyou"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "733176085534-6bvbi6cofaum4qk54n8ha57sr5rllrne.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.onlyveyou",
+            "certificate_hash": "3d7aa6dd658b00cf92b515f0985e3e46eab99859"
+          }
+        },
+        {
+          "client_id": "733176085534-o3mi6hj36u8ts8un5br79ok18mfls37v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.onlyveyou",
+            "certificate_hash": "ca7ec192c9f34c848a1c9b608c9e573e5912bb34"
+          }
+        },
+        {
+          "client_id": "733176085534-qkm1mv63unbeb9coo4ie5dah5qp8seag.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.onlyveyou",
+            "certificate_hash": "a26ba1c9d54530b189d8adff9312ef1a1c07f64b"
+          }
+        },
+        {
+          "client_id": "733176085534-64kfktcv7hi4ba17fvm7qdkadfbt4b25.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyALbfpkhJUN9BjLse4j5OjZlff_TkRsAXc"
@@ -20,7 +49,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "733176085534-64kfktcv7hi4ba17fvm7qdkadfbt4b25.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "733176085534-kn090r897pa43s26gt6h1ooem24ru6lv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onlyveyou"
+              }
+            }
+          ]
         }
       }
     }
