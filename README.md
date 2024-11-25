@@ -8,7 +8,7 @@ only've you
 - 원하는 화장품을 언제 어디서든 찾을 수 있는 **검색**
 - 내가 사고 싶은 상품을 산 사람의 **생생 리뷰**
 - 나만의 뷰티 꿀팁을 주고받는 코덕들의 **커뮤니티**
-- 화장이 처음이라 뭘 검색할 지 몰라도 괜찮아!** AI추천**
+- 화장이 처음이라 뭘 검색할 지 몰라도 괜찮아! **AI추천**
 
 # 📝 Summary
 
@@ -33,16 +33,6 @@ only've you
 
 - flutter 개발자 4명
 
-# 🤚🏻 My Part
-
-- **팀장**으로서 프로젝트 개발 총괄
-- miro를 활용한 기획 주도 https://miro.com/app/board/uXjVKlx8Aoo=/
-- Riverpod 상태 관리를 통한 실시간 투표 결과 기능 구현
-- cloud function 배포 후 FCM 푸쉬알림 구현
-- Firestore database 연동으로 FCM 설정
-- facebook 소셜 로그인, 회원가입
-- 인앱 알림
-- 시연영상 제작과 발표
 
 # 🤔 Learned
 
